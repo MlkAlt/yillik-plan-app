@@ -1,0 +1,121 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { planOlustur, mevcutYillar } from '../lib/takvimUtils'
+import type { OlusturulmusPlan } from '../types/takvim'
+
+const SINIF_SEVIYELERI = [
+    '1. Sınıf', '2. Sınıf', '3. Sınıf', '4. Sınıf',
+    '5. Sınıf', '6. Sınıf', '7. Sınıf', '8. Sınıf',
+    '9. Sınıf', '10. Sınıf', '11. Sınıf', '12. Sınıf',
+]
+
+interface PlanOlusturPageProps {
+    onPlanOlustur: (plan: OlusturulmusPlan, ders: string, sinif: string) => void
+}
+
+export function PlanOlusturPage({ onPlanOlustur }: PlanOlusturPageProps) {
+    const navigate = useNavigate()
+    const yillar = mevcutYillar()
+
+    const [seciliYil, setSeciliYil] = useState(yillar[yillar.length - 1])
+    const [ders, setDers] = useState('')
+    const [sinif, setSinif] = useState(SINIF_SEVIYELERI[0])
+    const [hata, setHata] = useState('')
+
+    function handleSubmit() {
+        if (!ders.trim()) {
+            setHata('Lütfen ders adını girin.')
+            return
+        }
+        setHata('')
+
+        try {
+            const plan = planOlustur(seciliYil)
+            onPlanOlustur(plan, ders.trim(), sinif)
+            navigate('/plan')
+        } catch (err) {
+            setHata('Plan oluşturulamadı. Lütfen tekrar deneyin.')
+        }
+    }
+
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
+
+                <h1 className="text-2xl font-bold text-gray-800 mb-2">
+                    Yıllık Plan Oluştur
+                </h1>
+                <p className="text-gray-500 text-sm mb-8">
+                    Bilgileri doldurun, MEB takvimine göre planınız otomatik oluşsun.
+                </p>
+
+                {/* Akademik Yıl */}
+                <div className="mb-5">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Akademik Yıl
+                    </label>
+                    <select
+                        value={seciliYil}
+                        onChange={(e) => setSeciliYil(e.target.value)}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                    >
+                        {yillar.map((y) => (
+                            <option key={y} value={y}>{y}</option>
+                        ))}
+                    </select>
+                </div>
+
+                {/* Ders Adı */}
+                <div className="mb-5">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Ders Adı
+                    </label>
+                    <input
+                        type="text"
+                        placeholder="örn. Matematik, Türkçe, Fen Bilimleri"
+                        value={ders}
+                        onChange={(e) => setDers(e.target.value)}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                    />
+                </div>
+
+                {/* Sınıf Seviyesi */}
+                <div className="mb-8">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Sınıf Seviyesi
+                    </label>
+                    <select
+                        value={sinif}
+                        onChange={(e) => setSinif(e.target.value)}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                    >
+                        {SINIF_SEVIYELERI.map((s) => (
+                            <option key={s} value={s}>{s}</option>
+                        ))}
+                    </select>
+                </div>
+
+                {/* Hata mesajı */}
+                {hata && (
+                    <p className="text-red-500 text-sm mb-4">{hata}</p>
+                )}
+
+                {/* Buton */}
+                <button
+                    onClick={handleSubmit}
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition-colors"
+                >
+                    Plan Oluştur →
+                </button>
+
+                <button
+                    onClick={() => navigate('/')}
+                    className="w-full mt-3 text-gray-500 hover:text-gray-700 text-sm py-2 transition-colors"
+                >
+                    ← Ana sayfaya dön
+                </button>
+
+            </div>
+        </div>
+    )
+}
