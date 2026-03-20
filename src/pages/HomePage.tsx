@@ -8,19 +8,19 @@ const features = [
     desc: 'Sınıf ve dersinizi seçin, yıllık planınız saniyeler içinde hazır olsun.',
   },
   {
-    emoji: '✅',
+    emoji: '🗓️',
     title: 'Günlük Kazanım Takibi',
-    desc: 'Her günün kazanımlarını görüntüleyin, tamamlananları işaretleyin.',
+    desc: 'Her günün kazanımlarını görüntüleyin, deftere yazmayı unutmayın.',
   },
   {
     emoji: '📱',
-    title: 'Mobil Öncelikli Tasarım',
+    title: 'Mobil Öncelikli',
     desc: 'Telefonunuzdan kolayca erişin, sınıf defteri yazarken anında başvurun.',
   },
   {
-    emoji: '📤',
-    title: 'Excel / PDF Yükleme',
-    desc: 'Mevcut planınızı sisteme aktarın, dijital ortamda kullanmaya devam edin.',
+    emoji: '✅',
+    title: 'Excel & Word Yükleme',
+    desc: 'Mevcut planınızı sisteme aktarın, dijital ortamda takip edin.',
   },
 ]
 
@@ -28,111 +28,73 @@ export function HomePage() {
   const navigate = useNavigate()
 
   return (
-    <div className="min-h-screen bg-white font-sans">
-      <nav className="bg-white border-b border-blue-100 sticky top-0 z-50">
+    <div className="min-h-screen bg-slate-50 font-sans text-[#1e3a5f]">
+      
+      {/* NAV */}
+      <nav className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <span className="font-bold text-gray-900 text-sm sm:text-base">📋 Yıllık Plan</span>
-          <a href="#form" className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition">
+          <span className="font-black text-[#1e3a5f] text-lg sm:text-xl tracking-tight">
+            📋 Yıllık Plan
+          </span>
+          <a
+            href="#form"
+            className="text-sm font-semibold text-[#1e3a5f] bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-lg transition"
+          >
             Erken Erişim
           </a>
         </div>
       </nav>
 
       {/* HERO */}
-      <section className="bg-gradient-to-b from-blue-50 to-white pt-16 pb-20 px-4">
-        <div className="max-w-3xl mx-auto text-center">
-          <span className="inline-block bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full mb-5 tracking-wide uppercase">
+      <section className="bg-white pt-16 pb-20 px-4">
+        <div className="max-w-3xl mx-auto text-center flex flex-col items-center">
+          <span className="inline-block bg-[#1e3a5f]/10 text-[#1e3a5f] text-xs font-bold px-4 py-1.5 rounded-full mb-6 tracking-widest uppercase">
             Öğretmenler için ücretsiz
           </span>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight mb-5">
-            Yıllık Plan Hazırlamak
-            <br />
-            <span className="text-blue-600">Artık Çok Kolay</span>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-[#1e3a5f] leading-tight mb-6">
+            Yıllık Planınızı<br className="hidden sm:block" /> Dakikalar İçinde Oluşturun
           </h1>
-          <p className="text-gray-500 text-base sm:text-lg max-w-xl mx-auto mb-8">
-            MEB takvimine göre otomatik plan oluşturun, kazanımlarınızı takip edin.
-            Sınıf defteri yazarken telefonunuzdan anında başvurun.
+          <p className="text-slate-600 text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
+            MEB takvimine göre otomatik plan oluşturun. Sınıf defteri yazarken telefonunuzdan anında başvurun.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          
+          <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-4 justify-center">
             <button
               onClick={() => navigate('/olustur')}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl text-sm transition shadow-md shadow-blue-200"
+              className="w-full sm:w-auto bg-[#f97316] hover:bg-[#ea580c] text-white font-bold text-lg px-8 py-4 rounded-xl transition shadow-lg shadow-[#f97316]/30"
             >
-              Hemen Plan Oluştur — Ücretsiz
+              Hemen Başla
             </button>
             <button
               onClick={() => navigate('/yukle')}
-              className="border border-indigo-300 hover:bg-indigo-50 text-indigo-700 font-medium px-6 py-3 rounded-xl text-sm transition"
+              className="w-full sm:w-auto border-2 border-[#1e3a5f] text-[#1e3a5f] hover:bg-[#1e3a5f] hover:text-white font-bold text-lg px-8 py-4 rounded-xl transition"
             >
               Dosyadan Yükle
             </button>
-            <a href="#form" className="border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium px-6 py-3 rounded-xl text-sm transition">
-              Erken Erişime Kaydol
-            </a>
           </div>
-        </div>
-      </section>
-
-      {/* STATS */}
-      <section className="bg-blue-600 py-10 px-4">
-        <div className="max-w-4xl mx-auto grid grid-cols-3 gap-4 text-center text-white">
-          {[
-            { value: '%100', label: 'Ücretsiz' },
-            { value: '5 sn', label: 'Plan Oluşturma' },
-            { value: '12 ay', label: 'Yıllık Görünüm' },
-          ].map(({ value, label }) => (
-            <div key={label}>
-              <div className="text-2xl sm:text-3xl font-bold">{value}</div>
-              <div className="text-blue-200 text-xs sm:text-sm mt-1">{label}</div>
-            </div>
-          ))}
         </div>
       </section>
 
       {/* FEATURES */}
-      <section id="features" className="py-16 px-4 bg-white">
+      <section id="features" className="py-20 px-4 bg-slate-50">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-black text-[#1e3a5f] mb-4">
               Neden Yıllık Plan Uygulaması?
             </h2>
-            <p className="text-gray-400 text-sm sm:text-base">
-              Öğretmenlerin günlük iş yükünü azaltmak için tasarlandı
+            <p className="text-slate-500 text-base sm:text-lg max-w-2xl mx-auto">
+              Öğretmenlerin günlük iş yükünü azaltmak ve plan takibini kolaylaştırmak için tasarlandı.
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map(({ emoji, title, desc }) => (
               <div
                 key={title}
-                className="rounded-2xl border border-gray-100 p-6 hover:shadow-md hover:border-blue-100 transition"
+                className="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm hover:shadow-md hover:border-[#f97316]/30 transition"
               >
-                <div className="text-3xl mb-4">{emoji}</div>
-                <h3 className="text-gray-900 font-semibold text-sm sm:text-base mb-1">{title}</h3>
-                <p className="text-gray-400 text-sm leading-relaxed">{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* HOW IT WORKS */}
-      <section className="py-16 px-4 bg-blue-50">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-10">
-            Nasıl Çalışır?
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            {[
-              { step: '1', title: 'Kaydol', desc: 'Ücretsiz hesabını oluştur, bilgilerini gir.' },
-              { step: '2', title: 'Planı Oluştur', desc: 'Sınıf ve dersini seç, MEB takvimine göre plan hazırla.' },
-              { step: '3', title: 'Takip Et', desc: 'Her gün kazanımlarını gör, sınıf defterine yaz.' },
-            ].map(({ step, title, desc }) => (
-              <div key={step} className="flex flex-col items-center">
-                <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg mb-3 shadow-md shadow-blue-200">
-                  {step}
-                </div>
-                <div className="font-semibold text-gray-900 mb-1">{title}</div>
-                <div className="text-gray-400 text-sm">{desc}</div>
+                <div className="text-4xl mb-6">{emoji}</div>
+                <h3 className="text-[#1e3a5f] font-black text-lg mb-3">{title}</h3>
+                <p className="text-slate-600 text-sm leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
@@ -140,22 +102,28 @@ export function HomePage() {
       </section>
 
       {/* LEAD FORM */}
-      <section id="form" className="py-16 px-4 bg-white">
-        <div className="max-w-md mx-auto text-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Erken Erişime Kaydol
-          </h2>
-          <p className="text-gray-400 text-sm">
-            Uygulama yayına girdiğinde sizi ilk haberdar edeceğiz.
-          </p>
+      <section id="form" className="py-20 px-4 bg-white">
+        <div className="max-w-3xl mx-auto bg-[#1e3a5f] rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 -mr-16 -mt-16 text-9xl opacity-10">✨</div>
+          <div className="text-center mb-10 relative z-10">
+            <h2 className="text-3xl font-black text-white mb-3">
+              Erken Erişime Kaydol
+            </h2>
+            <p className="text-blue-100 text-sm sm:text-base">
+              Uygulama tam sürümle yayına girdiğinde sizi ilk haberdar edeceğiz.
+            </p>
+          </div>
+          <div className="bg-white rounded-2xl p-6 sm:p-8 relative z-10 w-full max-w-md mx-auto">
+            <LeadForm embedded />
+          </div>
         </div>
-        <LeadForm embedded />
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-gray-100 py-8 px-4 text-center text-gray-400 text-xs">
-        <p>© {new Date().getFullYear()} Yıllık Plan Uygulaması. Tüm hakları saklıdır.</p>
-        <p className="mt-1">Türk öğretmenler için, ücretsiz.</p>
+      <footer className="border-t border-slate-200 py-10 px-4 text-center items-center flex flex-col gap-2 bg-slate-50">
+        <div className="font-black text-[#1e3a5f]">📋 Yıllık Plan</div>
+        <p className="text-slate-500 text-sm">© {new Date().getFullYear()} Tüm hakları saklıdır.</p>
+        <p className="text-slate-400 text-xs text-center">Türk öğretmenler için, <span className="text-[#f97316] font-bold">ücretsiz</span>.</p>
       </footer>
     </div>
   )
