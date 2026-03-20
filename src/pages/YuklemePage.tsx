@@ -34,7 +34,7 @@ export function YuklemePage({ onYukle }: YuklemePageProps) {
                 return
             }
             onYukle(rows, ders.trim(), sinif)
-            navigate('/plan')
+            navigate('/app/plan')
         } catch (err) {
             setHata(err instanceof Error ? err.message : 'Dosya okunamadı.')
         } finally {

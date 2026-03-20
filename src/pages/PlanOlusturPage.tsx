@@ -32,7 +32,7 @@ export function PlanOlusturPage({ onPlanOlustur }: PlanOlusturPageProps) {
         try {
             const plan = planOlustur(seciliYil)
             onPlanOlustur(plan, ders.trim(), sinif)
-            navigate('/plan')
+            navigate('/app/plan')
         } catch (err) {
             setHata('Plan oluşturulamadı. Lütfen tekrar deneyin.')
         }
