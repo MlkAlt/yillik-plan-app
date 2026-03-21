@@ -150,45 +150,45 @@ export function AppSettingsScreen({ onPlanEkle }: AppSettingsScreenProps) {
   return (
     <div className="max-w-lg mx-auto p-4 w-full">
       <div className="mb-6 mt-2">
-        <h1 className="text-3xl font-bold text-[#1e3a5f]">⚙️ Ayarlar</h1>
+        <h1 className="text-3xl font-bold text-[#2D5BE3]">⚙️ Ayarlar</h1>
         <p className="text-gray-500 mt-2 text-sm">
           Bilgilerini güncelle, yeni sınıflar için plan ekle.
         </p>
       </div>
 
-      <div className="flex flex-col gap-5 bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+      <div className="flex flex-col gap-5 bg-[#FAFAF9] p-5 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4]">
 
         {/* Ad Soyad */}
         <div className="flex flex-col gap-2">
-          <label className="font-medium text-[#1e3a5f] text-sm">Ad Soyad</label>
+          <label className="font-medium text-[#2D5BE3] text-sm">Ad Soyad</label>
           <input
             type="text"
             placeholder="Adınız Soyadınız"
             value={adSoyad}
             onChange={(e) => setAdSoyad(e.target.value)}
-            className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#f97316]/20 focus:border-[#f97316] transition-all text-gray-800 text-sm"
+            className="w-full p-3 rounded-xl border border-[#E7E5E4] bg-[#FAFAF9] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/20 focus:border-[#F59E0B] transition-all text-[#1C1917] text-sm"
           />
         </div>
 
         {/* Okul Adı */}
         <div className="flex flex-col gap-2">
-          <label className="font-medium text-[#1e3a5f] text-sm">Okul Adı</label>
+          <label className="font-medium text-[#2D5BE3] text-sm">Okul Adı</label>
           <input
             type="text"
             placeholder="Görev yaptığınız okul"
             value={okulAdi}
             onChange={(e) => setOkulAdi(e.target.value)}
-            className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#f97316]/20 focus:border-[#f97316] transition-all text-gray-800 text-sm"
+            className="w-full p-3 rounded-xl border border-[#E7E5E4] bg-[#FAFAF9] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/20 focus:border-[#F59E0B] transition-all text-[#1C1917] text-sm"
           />
         </div>
 
         {/* Şehir */}
         <div className="flex flex-col gap-2">
-          <label className="font-medium text-[#1e3a5f] text-sm">Şehir</label>
+          <label className="font-medium text-[#2D5BE3] text-sm">Şehir</label>
           <select
             value={sehir}
             onChange={(e) => setSehir(e.target.value)}
-            className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#f97316]/20 focus:border-[#f97316] transition-all text-gray-800 text-sm"
+            className="w-full p-3 rounded-xl border border-[#E7E5E4] bg-[#FAFAF9] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/20 focus:border-[#F59E0B] transition-all text-[#1C1917] text-sm"
           >
             <option value="" disabled>Lütfen şehrinizi seçin</option>
             {SEHIRLER.map(s => <option key={s} value={s}>{s}</option>)}
@@ -197,11 +197,11 @@ export function AppSettingsScreen({ onPlanEkle }: AppSettingsScreenProps) {
 
         {/* Ders */}
         <div className="flex flex-col gap-2">
-          <label className="font-medium text-[#1e3a5f] text-sm">Branş / Ders</label>
+          <label className="font-medium text-[#2D5BE3] text-sm">Branş / Ders</label>
           <select
             value={ders}
             onChange={(e) => handleDersChange(e.target.value)}
-            className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#f97316]/20 focus:border-[#f97316] transition-all text-gray-800 text-sm"
+            className="w-full p-3 rounded-xl border border-[#E7E5E4] bg-[#FAFAF9] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/20 focus:border-[#F59E0B] transition-all text-[#1C1917] text-sm"
           >
             {DERS_SECENEKLERI.map(d => <option key={d} value={d}>{d}</option>)}
           </select>
@@ -209,7 +209,7 @@ export function AppSettingsScreen({ onPlanEkle }: AppSettingsScreenProps) {
 
         {/* Sınıflar — multi-select */}
         <div className="flex flex-col gap-2">
-          <label className="font-medium text-[#1e3a5f] text-sm">
+          <label className="font-medium text-[#2D5BE3] text-sm">
             Sınıf Seviyeleri
             <span className="text-gray-400 font-normal text-xs ml-1">(birden fazla seçilebilir)</span>
           </label>
@@ -221,8 +221,8 @@ export function AppSettingsScreen({ onPlanEkle }: AppSettingsScreenProps) {
                 onClick={() => toggleSinif(s)}
                 className={`px-3.5 py-1.5 rounded-full text-sm font-bold border transition-all ${
                   siniflar.includes(s)
-                    ? 'bg-[#1e3a5f] text-white border-[#1e3a5f]'
-                    : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
+                    ? 'bg-[#2D5BE3] text-white border-[#2D5BE3]'
+                    : 'bg-[#FAFAF9] text-gray-500 border-[#E7E5E4] hover:border-gray-300'
                 }`}
               >
                 {s}
@@ -233,11 +233,11 @@ export function AppSettingsScreen({ onPlanEkle }: AppSettingsScreenProps) {
 
         {/* Akademik Yıl */}
         <div className="flex flex-col gap-2">
-          <label className="font-medium text-[#1e3a5f] text-sm">Akademik Yıl</label>
+          <label className="font-medium text-[#2D5BE3] text-sm">Akademik Yıl</label>
           <select
             value={yil}
             onChange={(e) => setYil(e.target.value)}
-            className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#f97316]/20 focus:border-[#f97316] transition-all text-gray-800 text-sm"
+            className="w-full p-3 rounded-xl border border-[#E7E5E4] bg-[#FAFAF9] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/20 focus:border-[#F59E0B] transition-all text-[#1C1917] text-sm"
           >
             {YIL_SECENEKLERI.map(y => <option key={y} value={y}>{y}</option>)}
           </select>
@@ -245,7 +245,7 @@ export function AppSettingsScreen({ onPlanEkle }: AppSettingsScreenProps) {
 
         {/* Yeni sınıf uyarısı */}
         {yeniSinifSayisi > 0 && (
-          <div className="bg-blue-50 border border-blue-200 rounded-xl px-3.5 py-2.5 text-blue-700 text-xs font-semibold">
+          <div className="bg-[#2D5BE3]/10 border border-[#2D5BE3]/20 rounded-xl px-3.5 py-2.5 text-[#2D5BE3] text-xs font-semibold">
             ✨ Kaydet'e basınca {yeniSinifSayisi} yeni sınıf için plan oluşturulacak.
           </div>
         )}
@@ -253,13 +253,13 @@ export function AppSettingsScreen({ onPlanEkle }: AppSettingsScreenProps) {
         {/* Kaydet */}
         <button
           onClick={handleSave}
-          className="w-full bg-[#f97316] text-white py-3.5 rounded-xl font-bold shadow-sm hover:opacity-90 active:scale-[0.98] transition-all"
+          className="w-full bg-[#F59E0B] text-white py-3.5 rounded-xl font-bold shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:opacity-90 active:scale-[0.98] transition-all"
         >
           Kaydet
         </button>
 
         {basariMesaji && (
-          <p className="text-center text-green-600 font-medium text-sm">
+          <p className="text-center text-[#059669] font-medium text-sm">
             ✅ Ayarlar kaydedildi!
           </p>
         )}

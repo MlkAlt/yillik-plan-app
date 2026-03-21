@@ -38,7 +38,7 @@ export function WeekView({ hafta = ORENEK_HAFTA, initialKazanimlar = ORNEK_KAZAN
 
   const handleToggle = async (kazanim: Kazanim) => {
     if (loadingId) return
-    
+
     const yeniDurum = !kazanim.tamamlandi
     setLoadingId(kazanim.id)
 
@@ -47,9 +47,9 @@ export function WeekView({ hafta = ORENEK_HAFTA, initialKazanimlar = ORNEK_KAZAN
       if (onToggleKazanim) {
         await onToggleKazanim(kazanim.id, yeniDurum)
       }
-      
+
       // State'i güncelle
-      setKazanimlar(prev => 
+      setKazanimlar(prev =>
         prev.map(k => k.id === kazanim.id ? { ...k, tamamlandi: yeniDurum } : k)
       )
     } catch (error) {
@@ -68,12 +68,12 @@ export function WeekView({ hafta = ORENEK_HAFTA, initialKazanimlar = ORNEK_KAZAN
   return (
     <div className="w-full bg-slate-50 min-h-screen p-4 sm:p-6 lg:p-8 font-sans">
       <div className="max-w-7xl mx-auto">
-        
+
         {/* Başlık Alanı */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="bg-[#FAFAF9] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-5 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="text-indigo-600 font-semibold text-sm mb-1">Haftalık Plan</div>
-            <h2 className="text-xl md:text-2xl font-bold text-slate-800">
+            <div className="text-[#2D5BE3] font-semibold text-sm mb-1">Haftalık Plan</div>
+            <h2 className="text-xl md:text-2xl font-bold text-[#1C1917]">
               {hafta.hafta_no}. Hafta
             </h2>
             <div className="text-slate-500 text-sm mt-1 flex items-center gap-2">
@@ -83,7 +83,7 @@ export function WeekView({ hafta = ORENEK_HAFTA, initialKazanimlar = ORNEK_KAZAN
               {formatTarih(hafta.baslangic_tarihi)} - {formatTarih(hafta.bitis_tarihi)}
             </div>
           </div>
-          
+
           <div className="flex gap-2">
             <button className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-xl text-sm font-medium hover:bg-slate-50 transition">
               Önceki
@@ -99,35 +99,35 @@ export function WeekView({ hafta = ORENEK_HAFTA, initialKazanimlar = ORNEK_KAZAN
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:gap-6">
           {GUNLER.map(gun => {
             const gununKazanimlari = kazanimlar.filter(k => k.gun === gun.id).sort((a, b) => a.sira_no - b.sira_no)
-            
+
             return (
-              <div key={gun.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-full">
+              <div key={gun.id} className="bg-[#FAFAF9] rounded-2xl border border-[#E7E5E4] shadow-[0_1px_3px_rgba(0,0,0,0.06)] overflow-hidden flex flex-col h-full">
                 {/* Gün Başlığı */}
                 <div className="bg-slate-100 border-b border-slate-200 px-4 py-3 text-center">
                   <h3 className="font-bold text-slate-700">{gun.ad}</h3>
                 </div>
-                
+
                 {/* Kazanım Listesi */}
                 <div className="p-4 flex-1 flex flex-col gap-3 bg-slate-50/50">
                   {gununKazanimlari.length > 0 ? (
                     gununKazanimlari.map(kazanim => (
-                      <div 
-                        key={kazanim.id} 
+                      <div
+                        key={kazanim.id}
                         className={`group relative p-3 rounded-xl border transition-all duration-200 ${
-                          kazanim.tamamlandi 
-                            ? 'bg-emerald-50 border-emerald-200' 
-                            : 'bg-white border-slate-200 hover:border-indigo-300 hover:shadow-sm'
+                          kazanim.tamamlandi
+                            ? 'bg-[#059669]/10 border-[#059669]/30'
+                            : 'bg-white border-[#E7E5E4] hover:border-[#2D5BE3]/30 hover:shadow-[0_1px_3px_rgba(0,0,0,0.06)]'
                         }`}
                       >
                         <div className="flex items-start gap-3">
                           {/* Checkbox Butonu */}
-                          <button 
+                          <button
                             onClick={() => handleToggle(kazanim)}
                             disabled={loadingId === kazanim.id}
                             className={`flex-shrink-0 mt-0.5 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
-                              kazanim.tamamlandi 
-                                ? 'bg-emerald-500 border-emerald-500 text-white' 
-                                : 'bg-white border-slate-300 text-transparent hover:border-indigo-500'
+                              kazanim.tamamlandi
+                                ? 'bg-[#059669] border-[#059669] text-white'
+                                : 'bg-white border-slate-300 text-transparent hover:border-[#2D5BE3]'
                             } ${loadingId === kazanim.id ? 'opacity-50 cursor-wait' : 'cursor-pointer'}`}
                             title={kazanim.tamamlandi ? "Tamamlanmadı olarak işaretle" : "Tamamlandı olarak işaretle"}
                           >
@@ -142,10 +142,10 @@ export function WeekView({ hafta = ORENEK_HAFTA, initialKazanimlar = ORNEK_KAZAN
                               </svg>
                             )}
                           </button>
-                          
+
                           {/* Kazanım Metni */}
                           <p className={`text-sm leading-snug flex-1 transition-all ${
-                            kazanim.tamamlandi ? 'text-emerald-800 line-through opacity-70' : 'text-slate-700'
+                            kazanim.tamamlandi ? 'text-[#059669] line-through opacity-70' : 'text-[#1C1917]'
                           }`}>
                             {kazanim.kazanim_metni}
                           </p>

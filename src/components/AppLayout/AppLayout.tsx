@@ -38,14 +38,14 @@ export function AppLayout({ children }: AppLayoutProps) {
   return (
     <div className="min-h-screen bg-slate-100 font-sans flex justify-center">
       {/* Container simulating a mobile device width on large screens */}
-      <div className="w-full max-w-lg bg-slate-50 min-h-screen relative shadow-sm flex flex-col">
-        
+      <div className="w-full max-w-lg bg-slate-50 min-h-screen relative shadow-[0_1px_3px_rgba(0,0,0,0.06)] flex flex-col">
+
         {/* HEADER */}
-        <header className="sticky top-0 z-40 bg-white border-b border-slate-200 h-14 px-5 flex items-center justify-between shadow-sm">
-          <span className="font-black text-[#1e3a5f] text-lg tracking-tight">📋 Yıllık Plan</span>
+        <header className="sticky top-0 z-40 bg-white border-b border-slate-200 h-14 px-5 flex items-center justify-between shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <span className="font-black text-[#2D5BE3] text-lg tracking-tight">📋 Yıllık Plan</span>
           <div className="flex items-center gap-3">
             <button className="text-xl hover:opacity-80 transition-opacity">🔔</button>
-            <div className="w-8 h-8 rounded-full bg-[#f97316] text-white flex items-center justify-center font-bold text-sm shadow-sm ring-2 ring-orange-50 cursor-pointer">
+            <div className="w-8 h-8 rounded-full bg-[#F59E0B] text-white flex items-center justify-center font-bold text-sm shadow-[0_1px_3px_rgba(0,0,0,0.06)] ring-2 ring-amber-50 cursor-pointer">
               {basharf ? basharf : '👤'}
             </div>
           </div>
@@ -73,9 +73,9 @@ export function AppLayout({ children }: AppLayoutProps) {
                   <span className={`text-[22px] transition-transform ${isActive ? 'scale-110' : 'opacity-70 group-hover:opacity-100'}`}>
                     {tab.icon}
                   </span>
-                  <span 
+                  <span
                     className={`text-[10px] font-bold transition-colors ${
-                      isActive ? 'text-[#f97316]' : 'text-slate-400 group-hover:text-slate-600'
+                      isActive ? 'text-[#F59E0B]' : 'text-slate-400 group-hover:text-slate-600'
                     }`}
                   >
                     {tab.name}

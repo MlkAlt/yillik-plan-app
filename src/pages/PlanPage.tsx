@@ -68,15 +68,15 @@ export function PlanPage({ entry }: PlanPageProps) {
   return (
     <div className="p-4 pb-24 w-full max-w-lg mx-auto">
       {/* Üst Bilgi Kartı */}
-      <div className="mb-4 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+      <div className="mb-4 bg-[#FAFAF9] p-4 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4]">
         <div className="flex items-start justify-between mb-3">
           <div>
-            <h1 className="text-xl font-black text-[#1e3a5f] tracking-tight uppercase">
+            <h1 className="text-xl font-black text-[#2D5BE3] tracking-tight uppercase">
               {ders || 'Ders Seçilmedi'}
             </h1>
             <p className="text-sm text-gray-400 font-medium mt-0.5">{sinif}</p>
           </div>
-          <div className="bg-orange-100 border border-orange-200 text-[#f97316] px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">
+          <div className="bg-amber-100 border border-amber-200 text-[#F59E0B] px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">
             {dataLength} hafta
           </div>
         </div>
@@ -88,7 +88,7 @@ export function PlanPage({ entry }: PlanPageProps) {
         </div>
         <div className="w-full bg-gray-100 rounded-full h-2">
           <div
-            className="bg-[#f97316] h-2 rounded-full transition-all duration-500"
+            className="bg-[#F59E0B] h-2 rounded-full transition-all duration-500"
             style={{ width: `${yuzde}%` }}
           />
         </div>
@@ -103,27 +103,27 @@ export function PlanPage({ entry }: PlanPageProps) {
             <div
               key={`meb-${h.haftaNo}-${i}`}
               onClick={() => navigate(`/app/hafta/${h.haftaNo}`)}
-              className={`rounded-2xl shadow-sm p-4 border transition-colors cursor-pointer ${
-                isTamamlandi ? 'bg-green-50 border-green-200' :
-                isTatil ? 'bg-orange-50 border-orange-200' :
-                'bg-white border-gray-100 hover:shadow-md'
+              className={`rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] p-4 border transition-colors cursor-pointer ${
+                isTamamlandi ? 'bg-[#059669]/10 border-[#059669]/30' :
+                isTatil ? 'bg-amber-50 border-amber-200' :
+                'bg-[#FAFAF9] border-[#E7E5E4] hover:shadow-md'
               }`}
             >
               <div className="flex justify-between items-start mb-3">
                 <span className={`font-extrabold text-lg ${
-                  isTamamlandi ? 'text-green-700' :
-                  isTatil ? 'text-orange-700' :
-                  'text-[#1e3a5f]'
+                  isTamamlandi ? 'text-[#059669]' :
+                  isTatil ? 'text-amber-700' :
+                  'text-[#2D5BE3]'
                 }`}>
                   {h.haftaNo}. Hafta
                 </span>
                 <div className="flex items-center gap-2">
                   {isTamamlandi && (
-                    <span className="text-xs font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded-full border border-green-200">
+                    <span className="text-xs font-bold text-[#059669] bg-[#059669]/10 px-2 py-0.5 rounded-full border border-[#059669]/30">
                       ✅ Tamam
                     </span>
                   )}
-                  <span className="text-[11px] text-gray-500 font-semibold bg-gray-50 px-2.5 py-1 rounded-md border border-gray-100/50">
+                  <span className="text-[11px] text-gray-500 font-semibold bg-[#FAFAF9] px-2.5 py-1 rounded-md border border-[#E7E5E4]/50">
                     {formatTarih(h.baslangicTarihi)} – {formatTarih(h.bitisTarihi)}
                   </span>
                 </div>
@@ -132,11 +132,11 @@ export function PlanPage({ entry }: PlanPageProps) {
               {h.kazanim && (
                 <div className="mb-3">
                   {h.uniteAdi && (
-                    <span className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full mb-2">
+                    <span className="inline-block bg-[#2D5BE3]/10 text-[#2D5BE3] text-xs font-semibold px-2.5 py-0.5 rounded-full mb-2">
                       {h.uniteAdi}
                     </span>
                   )}
-                  <p className="font-bold text-gray-800 text-sm mb-1">{h.kazanim}</p>
+                  <p className="font-bold text-[#1C1917] text-sm mb-1">{h.kazanim}</p>
                   {h.kazanimDetay && (
                     <p className="text-gray-500 text-xs">{h.kazanimDetay}</p>
                   )}
@@ -148,7 +148,7 @@ export function PlanPage({ entry }: PlanPageProps) {
                   {h.donem}. Dönem
                 </span>
                 {isTatil && (
-                  <span className="text-sm font-bold text-[#f97316] flex items-center gap-1.5">
+                  <span className="text-sm font-bold text-[#F59E0B] flex items-center gap-1.5">
                     <span className="text-lg">{getEmoji(h.tatilAdi)}</span> {h.tatilAdi}
                   </span>
                 )}
@@ -163,22 +163,22 @@ export function PlanPage({ entry }: PlanPageProps) {
             <div
               key={`row-${i}`}
               onClick={() => navigate(`/app/hafta/${r.haftaNo}`)}
-              className={`rounded-2xl shadow-sm p-4 border cursor-pointer transition-colors ${
-                isTamamlandi ? 'bg-green-50 border-green-200' : 'bg-white border-gray-100 hover:shadow-md'
+              className={`rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] p-4 border cursor-pointer transition-colors ${
+                isTamamlandi ? 'bg-[#059669]/10 border-[#059669]/30' : 'bg-[#FAFAF9] border-[#E7E5E4] hover:shadow-md'
               }`}
             >
               <div className="flex justify-between items-start mb-3">
-                <span className={`font-extrabold text-lg ${isTamamlandi ? 'text-green-700' : 'text-[#1e3a5f]'}`}>
+                <span className={`font-extrabold text-lg ${isTamamlandi ? 'text-[#059669]' : 'text-[#2D5BE3]'}`}>
                   {r.haftaNo ? `${r.haftaNo}. Hafta` : 'Ekstra'}
                 </span>
                 <div className="flex items-center gap-2">
                   {isTamamlandi && (
-                    <span className="text-xs font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded-full border border-green-200">
+                    <span className="text-xs font-bold text-[#059669] bg-[#059669]/10 px-2 py-0.5 rounded-full border border-[#059669]/30">
                       ✅ Tamam
                     </span>
                   )}
                   {r.tarihAraligi && (
-                    <span className="text-[11px] text-gray-400 font-semibold bg-gray-50 px-2.5 py-1 rounded-md border border-gray-100/50">
+                    <span className="text-[11px] text-gray-400 font-semibold bg-[#FAFAF9] px-2.5 py-1 rounded-md border border-[#E7E5E4]/50">
                       {r.tarihAraligi}
                     </span>
                   )}
@@ -189,7 +189,7 @@ export function PlanPage({ entry }: PlanPageProps) {
                   {r.donem}
                 </span>
               )}
-              <div className="mt-3 text-[13px] text-gray-600 border-t border-gray-100 pt-3 leading-relaxed font-medium">
+              <div className="mt-3 text-[13px] text-gray-600 border-t border-[#E7E5E4] pt-3 leading-relaxed font-medium">
                 {r.kazanim}
               </div>
             </div>

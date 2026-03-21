@@ -80,7 +80,7 @@ function ProgressRing({ yuzde, selected = false, size = 20 }: { yuzde: number; s
       <circle cx={size / 2} cy={size / 2} r={r} fill="none"
         stroke={selected ? 'rgba(255,255,255,0.2)' : '#e5e7eb'} strokeWidth="2.5" />
       <circle cx={size / 2} cy={size / 2} r={r} fill="none"
-        stroke={selected ? 'rgba(255,255,255,0.85)' : '#f97316'} strokeWidth="2.5"
+        stroke={selected ? 'rgba(255,255,255,0.85)' : '#F59E0B'} strokeWidth="2.5"
         strokeDasharray={cevre} strokeDashoffset={offset} strokeLinecap="round" />
     </svg>
   )
@@ -120,7 +120,7 @@ function BuHaftaKarti({
     : 'Bu Hafta'
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-5">
+    <div className="bg-[#FAFAF9] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-5 mb-5">
       {/* Başlık */}
       <div className="flex items-center justify-between mb-4">
         <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">📅 Bu Hafta</span>
@@ -139,18 +139,18 @@ function BuHaftaKarti({
 
         {/* Tatil */}
         {aktifHafta?.tatilMi && (
-          <p className="font-black text-[#f97316] text-base">🎉 {aktifHafta.tatilAdi}</p>
+          <p className="font-black text-[#F59E0B] text-base">🎉 {aktifHafta.tatilAdi}</p>
         )}
 
         {/* Normal hafta */}
         {aktifHafta && !aktifHafta.tatilMi && (
           <>
             {aktifHafta.uniteAdi && (
-              <p className="text-[11px] font-bold text-[#f97316] uppercase tracking-wider mb-1.5">
+              <p className="text-[11px] font-bold text-[#F59E0B] uppercase tracking-wider mb-1.5">
                 {aktifHafta.uniteAdi}
               </p>
             )}
-            <p className="text-[#1e3a5f] font-bold text-[15px] leading-snug group-active:opacity-70 transition-opacity">
+            <p className="text-[#2D5BE3] font-bold text-[15px] leading-snug group-active:opacity-70 transition-opacity">
               {aktifHafta.kazanim || 'Bu hafta için kazanım girilmemiş.'}
             </p>
             {aktifHafta.kazanimDetay && (
@@ -175,7 +175,7 @@ function BuHaftaKarti({
 
       {/* Sınıf seçici — birden fazla sınıf varsa */}
       {planlar.length > 1 && (
-        <div className="flex gap-2 pt-3 border-t border-gray-100">
+        <div className="flex gap-2 pt-3 border-t border-[#E7E5E4]">
           {planlar.map(entry => {
             const total = entry.plan?.haftalar.filter(h => !h.tatilMi).length || 0
             const done = tamamlananlar[entry.sinif]?.length || 0
@@ -187,8 +187,8 @@ function BuHaftaKarti({
                 onClick={() => setSeciliSinif(entry.sinif)}
                 className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border font-bold text-sm transition-all ${
                   isSelected
-                    ? 'bg-[#1e3a5f] border-[#1e3a5f] text-white'
-                    : 'bg-gray-50 border-gray-200 text-gray-500 hover:border-gray-300'
+                    ? 'bg-[#2D5BE3] border-[#2D5BE3] text-white'
+                    : 'bg-[#FAFAF9] border-[#E7E5E4] text-gray-500 hover:border-gray-300'
                 }`}
               >
                 <ProgressRing yuzde={yuzde} selected={isSelected} size={20} />
@@ -206,7 +206,7 @@ function BuHaftaKarti({
         const done = tamamlananlar[entry.sinif]?.length || 0
         const yuzde = total > 0 ? Math.round((done / total) * 100) : 0
         return (
-          <div className="flex items-center gap-3 pt-3 border-t border-gray-100">
+          <div className="flex items-center gap-3 pt-3 border-t border-[#E7E5E4]">
             <ProgressRing yuzde={yuzde} size={28} />
             <span className="text-xs text-gray-400 font-medium">{done}/{total} hafta tamamlandı</span>
           </div>
@@ -302,15 +302,15 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
     <div className="p-4 pb-24 w-full max-w-lg mx-auto">
       {/* KARSILAMA */}
       <div className="mb-6 mt-2">
-        <h1 className="text-3xl font-bold text-[#1e3a5f]">{karsilama}</h1>
+        <h1 className="text-3xl font-bold text-[#2D5BE3]">{karsilama}</h1>
         <p className="text-gray-500 mt-1.5 text-sm font-medium">Bu haftanın kazanımları</p>
       </div>
 
       {/* ONBOARDING */}
       {!onboardingTamamlandi && planlar.length === 0 && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-5">
+        <div className="bg-[#FAFAF9] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-5 mb-5">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Başlayalım</p>
-          <h2 className="text-base font-bold text-[#1e3a5f] mb-4">
+          <h2 className="text-base font-bold text-[#2D5BE3] mb-4">
             Branşını ve sınıflarını seç, planların hazır olsun.
           </h2>
 
@@ -321,7 +321,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
             <select
               value={onbDers}
               onChange={(e) => handleOnbDersChange(e.target.value)}
-              className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-800 font-medium focus:outline-none focus:ring-2 focus:ring-[#f97316]/30 focus:border-[#f97316] transition-all text-sm"
+              className="w-full p-3 rounded-xl border border-[#E7E5E4] bg-[#FAFAF9] text-[#1C1917] font-medium focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/30 focus:border-[#F59E0B] transition-all text-sm"
             >
               {DERS_SECENEKLERI.map(d => <option key={d} value={d}>{d}</option>)}
             </select>
@@ -339,8 +339,8 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
                   onClick={() => toggleOnbSinif(s)}
                   className={`px-3.5 py-1.5 rounded-full text-sm font-bold border transition-all ${
                     onbSiniflar.includes(s)
-                      ? 'bg-[#1e3a5f] text-white border-[#1e3a5f]'
-                      : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
+                      ? 'bg-[#2D5BE3] text-white border-[#2D5BE3]'
+                      : 'bg-[#FAFAF9] text-gray-500 border-[#E7E5E4] hover:border-gray-300'
                   }`}
                 >
                   {s}
@@ -352,7 +352,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
           <button
             onClick={handleOnboardingTamamla}
             disabled={olusturuluyor || onbSiniflar.length === 0}
-            className="w-full bg-[#f97316] text-white py-3 rounded-xl font-bold shadow-sm active:scale-95 transition-all hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2"
+            className="w-full bg-[#F59E0B] text-white py-3 rounded-xl font-bold shadow-[0_1px_3px_rgba(0,0,0,0.06)] active:scale-95 transition-all hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2"
           >
             {olusturuluyor
               ? <span className="animate-pulse">Oluşturuluyor...</span>
@@ -381,17 +381,17 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => navigate('/olustur')}
-              className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 active:scale-95 transition-transform flex flex-col items-center justify-center gap-2 hover:shadow-md"
+              className="bg-[#FAFAF9] rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-4 active:scale-95 transition-transform flex flex-col items-center justify-center gap-2 hover:shadow-md"
             >
               <span className="text-2xl">📅</span>
-              <span className="text-sm font-bold text-[#1e3a5f]">Plan Oluştur</span>
+              <span className="text-sm font-bold text-[#2D5BE3]">Plan Oluştur</span>
             </button>
             <button
               onClick={() => navigate('/yukle')}
-              className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 active:scale-95 transition-transform flex flex-col items-center justify-center gap-2 hover:shadow-md"
+              className="bg-[#FAFAF9] rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-4 active:scale-95 transition-transform flex flex-col items-center justify-center gap-2 hover:shadow-md"
             >
               <span className="text-2xl">📤</span>
-              <span className="text-sm font-bold text-[#1e3a5f]">Dosya Yükle</span>
+              <span className="text-sm font-bold text-[#2D5BE3]">Dosya Yükle</span>
             </button>
           </div>
         </div>

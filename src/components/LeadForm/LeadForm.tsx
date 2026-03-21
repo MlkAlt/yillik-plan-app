@@ -58,16 +58,16 @@ export function LeadForm({ embedded = false }: LeadFormProps) {
 
   const successCard = (
     <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center mx-auto">
-      <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-        <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="w-16 h-16 bg-[#059669]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg className="w-8 h-8 text-[#059669]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
         </svg>
       </div>
-      <h2 className="text-2xl font-bold text-gray-800 mb-2">Teşekkürler!</h2>
+      <h2 className="text-2xl font-bold text-[#1C1917] mb-2">Teşekkürler!</h2>
       <p className="text-gray-500 mb-6">Bilgileriniz başarıyla iletildi. En kısa sürede sizinle iletişime geçeceğiz.</p>
       <button
         onClick={() => setStatus('idle')}
-        className="text-blue-600 font-medium hover:underline text-sm"
+        className="text-[#2D5BE3] font-medium hover:underline text-sm"
       >
         Tekrar gönder
       </button>
@@ -88,13 +88,13 @@ export function LeadForm({ embedded = false }: LeadFormProps) {
         {/* İç içerik — header yalnızca standalone modda göster */}
         {!embedded && (
           <div className="mb-6 text-center">
-            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-12 h-12 bg-[#2D5BE3]/10 rounded-xl flex items-center justify-center mx-auto mb-3">
+              <svg className="w-6 h-6 text-[#2D5BE3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                   d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <h1 className="text-xl font-bold text-gray-800">Yıllık Plan Uygulaması</h1>
+            <h1 className="text-xl font-bold text-[#1C1917]">Yıllık Plan Uygulaması</h1>
             <p className="text-sm text-gray-500 mt-1">
               Ücretsiz erken erişim için bilgilerinizi bırakın
             </p>
@@ -105,7 +105,7 @@ export function LeadForm({ embedded = false }: LeadFormProps) {
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           {fields.map(({ name, label, type, placeholder }) => (
             <div key={name}>
-              <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor={name} className="block text-sm font-medium text-[#1C1917] mb-1">
                 {label}
               </label>
               <input
@@ -116,8 +116,8 @@ export function LeadForm({ embedded = false }: LeadFormProps) {
                 onChange={handleChange}
                 placeholder={placeholder}
                 required
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder-gray-400
-                  focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent
+                className="w-full px-4 py-2.5 rounded-xl border border-[#E7E5E4] text-sm text-[#1C1917] placeholder-gray-400
+                  focus:outline-none focus:ring-2 focus:ring-[#2D5BE3]/40 focus:border-transparent
                   transition duration-150"
               />
             </div>
@@ -134,7 +134,7 @@ export function LeadForm({ embedded = false }: LeadFormProps) {
           <button
             type="submit"
             disabled={status === 'loading'}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300
+            className="w-full bg-[#2D5BE3] hover:bg-[#2D5BE3]/90 disabled:bg-[#2D5BE3]/40
               text-white font-semibold py-3 rounded-xl text-sm
               transition duration-150 flex items-center justify-center gap-2 mt-2"
           >

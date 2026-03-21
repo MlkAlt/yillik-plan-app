@@ -77,9 +77,9 @@ export function PlanOlusturPage({ onPlanOlustur }: PlanOlusturPageProps) {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
+            <div className="bg-[#FAFAF9] rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.10)] w-full max-w-md p-8">
 
-                <h1 className="text-2xl font-bold text-gray-800 mb-2">
+                <h1 className="text-2xl font-bold text-[#1C1917] mb-2">
                     Yıllık Plan Oluştur
                 </h1>
                 <p className="text-gray-500 text-sm mb-8">
@@ -88,13 +88,13 @@ export function PlanOlusturPage({ onPlanOlustur }: PlanOlusturPageProps) {
 
                 {/* Akademik Yıl */}
                 <div className="mb-5">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-[#1C1917] mb-1">
                         Akademik Yıl
                     </label>
                     <select
                         value={seciliYil}
                         onChange={(e) => setSeciliYil(e.target.value)}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                        className="w-full border border-[#E7E5E4] rounded-lg px-3 py-2.5 text-[#1C1917] focus:outline-none focus:ring-2 focus:ring-[#2D5BE3]/40"
                     >
                         {yillar.map((y) => (
                             <option key={y} value={y}>{y}</option>
@@ -104,7 +104,7 @@ export function PlanOlusturPage({ onPlanOlustur }: PlanOlusturPageProps) {
 
                 {/* Ders Adı */}
                 <div className="mb-5">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-[#1C1917] mb-1">
                         Ders Adı
                     </label>
                     <select
@@ -115,7 +115,7 @@ export function PlanOlusturPage({ onPlanOlustur }: PlanOlusturPageProps) {
                             const yeniSiniflar = DERS_SINIF_MAP[yDers] || SINIF_SEVIYELERI;
                             setSinif(yeniSiniflar[0]);
                         }}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                        className="w-full border border-[#E7E5E4] rounded-lg px-3 py-2.5 text-[#1C1917] focus:outline-none focus:ring-2 focus:ring-[#2D5BE3]/40"
                     >
                         <option value="Fen Bilimleri">Fen Bilimleri</option>
                     </select>
@@ -123,13 +123,13 @@ export function PlanOlusturPage({ onPlanOlustur }: PlanOlusturPageProps) {
 
                 {/* Sınıf Seviyesi */}
                 <div className="mb-8">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-[#1C1917] mb-1">
                         Sınıf Seviyesi
                     </label>
                     <select
                         value={sinif}
                         onChange={(e) => setSinif(e.target.value)}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                        className="w-full border border-[#E7E5E4] rounded-lg px-3 py-2.5 text-[#1C1917] focus:outline-none focus:ring-2 focus:ring-[#2D5BE3]/40"
                     >
                         {(DERS_SINIF_MAP[ders] || SINIF_SEVIYELERI).map((s) => (
                             <option key={s} value={s}>{s}</option>
@@ -145,7 +145,7 @@ export function PlanOlusturPage({ onPlanOlustur }: PlanOlusturPageProps) {
                 {/* Buton */}
                 <button
                     onClick={handleSubmit}
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition-colors"
+                    className="w-full bg-[#2D5BE3] hover:bg-[#2D5BE3]/90 text-white font-semibold py-3 rounded-lg transition-colors"
                 >
                     Plan Oluştur →
                 </button>

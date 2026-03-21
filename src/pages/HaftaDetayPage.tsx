@@ -121,11 +121,11 @@ export function HaftaDetayPage() {
           ←
         </button>
         <div>
-          <h1 className="text-2xl font-black text-[#1e3a5f]">{no}. Hafta</h1>
+          <h1 className="text-2xl font-black text-[#2D5BE3]">{no}. Hafta</h1>
           {ders && <p className="text-sm text-gray-400 font-medium">{ders} · {sinif}</p>}
         </div>
         {tamamlandi && (
-          <span className="ml-auto bg-green-100 text-green-700 text-xs font-bold px-3 py-1.5 rounded-full border border-green-200">
+          <span className="ml-auto bg-[#059669]/10 text-[#059669] text-xs font-bold px-3 py-1.5 rounded-full border border-[#059669]/30">
             ✅ Tamamlandı
           </span>
         )}
@@ -133,16 +133,16 @@ export function HaftaDetayPage() {
 
       {/* Tatil haftası */}
       {hafta?.tatilMi && (
-        <div className="bg-orange-50 border border-orange-200 rounded-2xl p-5 mb-4 text-center">
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-4 text-center">
           <p className="text-3xl mb-2">🎉</p>
-          <p className="text-orange-700 font-bold text-lg">{hafta.tatilAdi}</p>
-          <p className="text-orange-500 text-sm mt-1">Tatil Haftası</p>
+          <p className="text-amber-700 font-bold text-lg">{hafta.tatilAdi}</p>
+          <p className="text-amber-500 text-sm mt-1">Tatil Haftası</p>
         </div>
       )}
 
       {/* Kazanım kartı — MEB planı */}
       {hafta && !hafta.tatilMi && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-4">
+        <div className="bg-[#FAFAF9] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-5 mb-4">
           <div className="flex items-center justify-between mb-3">
             <span className="text-[10px] font-bold uppercase tracking-widest bg-slate-100 text-slate-500 px-3 py-1.5 rounded-full">
               {hafta.donem}. Dönem
@@ -153,14 +153,14 @@ export function HaftaDetayPage() {
           </div>
 
           {hafta.uniteAdi && (
-            <span className="inline-block bg-blue-100 text-blue-700 text-xs font-semibold px-2.5 py-1 rounded-full mb-3">
+            <span className="inline-block bg-[#2D5BE3]/10 text-[#2D5BE3] text-xs font-semibold px-2.5 py-1 rounded-full mb-3">
               {hafta.uniteAdi}
             </span>
           )}
 
           {hafta.kazanim ? (
             <>
-              <p className="font-bold text-[#1e3a5f] text-base leading-snug mb-2">
+              <p className="font-bold text-[#2D5BE3] text-base leading-snug mb-2">
                 {hafta.kazanim}
               </p>
               {hafta.kazanimDetay && (
@@ -177,7 +177,7 @@ export function HaftaDetayPage() {
 
       {/* Kazanım kartı — yüklenen plan */}
       {uploadedRow && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-4">
+        <div className="bg-[#FAFAF9] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-5 mb-4">
           {uploadedRow.donem && (
             <span className="inline-block text-[10px] font-bold uppercase tracking-widest bg-slate-100 text-slate-500 px-3 py-1.5 rounded-full mb-3">
               {uploadedRow.donem}
@@ -186,7 +186,7 @@ export function HaftaDetayPage() {
           {uploadedRow.tarihAraligi && (
             <p className="text-xs text-gray-400 font-medium mb-3">{uploadedRow.tarihAraligi}</p>
           )}
-          <p className="font-bold text-[#1e3a5f] text-base leading-snug">
+          <p className="font-bold text-[#2D5BE3] text-base leading-snug">
             {uploadedRow.kazanim}
           </p>
         </div>
@@ -194,7 +194,7 @@ export function HaftaDetayPage() {
 
       {/* Plan yoksa */}
       {!hafta && !uploadedRow && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-4 text-center">
+        <div className="bg-[#FAFAF9] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-5 mb-4 text-center">
           <p className="text-gray-400 text-sm">Bu hafta için plan bilgisi bulunamadı.</p>
         </div>
       )}
@@ -204,15 +204,15 @@ export function HaftaDetayPage() {
         onClick={handleTamamlaToggle}
         className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all active:scale-95 mb-4 flex items-center justify-center gap-2 ${
           tamamlandi
-            ? 'bg-green-50 text-green-700 border-2 border-green-300 hover:bg-green-100'
-            : 'bg-[#f97316] text-white shadow-sm hover:opacity-90'
+            ? 'bg-[#059669]/10 text-[#059669] border-2 border-[#059669]/30 hover:bg-[#059669]/20'
+            : 'bg-[#F59E0B] text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:opacity-90'
         }`}
       >
         {tamamlandi ? <>✅ Tamamlandı — geri al</> : <>Haftayı Tamamladım ✓</>}
       </button>
 
       {/* Öğretmen notu */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+      <div className="bg-[#FAFAF9] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-5">
         <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
           Notlarım
         </label>
@@ -221,7 +221,7 @@ export function HaftaDetayPage() {
           onChange={(e) => handleNotChange(e.target.value)}
           rows={4}
           placeholder="Bu haftayla ilgili not ekle..."
-          className="w-full border border-gray-200 rounded-xl p-3 text-sm text-gray-700 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#f97316]/20 focus:border-[#f97316] transition-all resize-none"
+          className="w-full border border-[#E7E5E4] rounded-xl p-3 text-sm text-[#1C1917] bg-[#FAFAF9] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/20 focus:border-[#F59E0B] transition-all resize-none"
         />
       </div>
     </div>
