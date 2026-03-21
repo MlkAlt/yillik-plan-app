@@ -1,4 +1,5 @@
 
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { OlusturulmusPlan, Hafta } from '../types/takvim';
 import type { ParsedRow } from '../lib/fileParser';
@@ -23,6 +24,17 @@ export function PlanPage({ plan, rows, ders, sinif }: PlanPageProps) {
     const isMeb = plan !== null && plan.haftalar && plan.haftalar.length > 0;
     const isUploaded = rows !== null && rows.length > 0;
     const dataLength = isMeb ? plan!.haftalar.length : (isUploaded ? rows!.length : 0);
+
+    const [tamamlananlar, setTamamlananlar] = useState<number[]>([]);
+
+    useEffect(() => {
+        try {
+            const item = localStorage.getItem('tamamlanan-haftalar');
+            if (item) setTamamlananlar(JSON.parse(item) as number[]);
+        } catch {
+            // localStorage okunamadı
+        }
+    }, []);
 
     const getEmoji = (ad: string = '') => {
         const lower = ad.toLowerCase();
@@ -64,20 +76,35 @@ export function PlanPage({ plan, rows, ders, sinif }: PlanPageProps) {
                 {/* Otomatik Oluşturulan (MEB) Plan Gösterimi */}
                 {isMeb && plan!.haftalar.map((h: Hafta, i: number) => {
                     const isTatil = h.tatilMi;
+                    const isTamamlandi = tamamlananlar.includes(h.haftaNo);
                     return (
                         <div
                             key={`meb-${h.haftaNo}-${i}`}
                             onClick={() => navigate(`/app/hafta/${h.haftaNo}`)}
-                            className={`rounded-2xl shadow-sm p-4 border transition-colors cursor-pointer ${isTatil ? 'bg-orange-50 border-orange-200' : 'bg-white border-gray-100'
-                                }`}
+                            className={`rounded-2xl shadow-sm p-4 border transition-colors cursor-pointer ${
+                                isTamamlandi ? 'bg-green-50 border-green-200' :
+                                isTatil ? 'bg-orange-50 border-orange-200' :
+                                'bg-white border-gray-100'
+                            }`}
                         >
                             <div className="flex justify-between items-start mb-3">
-                                <span className={`font-extrabold text-lg ${isTatil ? 'text-orange-700' : 'text-[#1e3a5f]'}`}>
+                                <span className={`font-extrabold text-lg ${
+                                    isTamamlandi ? 'text-green-700' :
+                                    isTatil ? 'text-orange-700' :
+                                    'text-[#1e3a5f]'
+                                }`}>
                                     {h.haftaNo}. Hafta
                                 </span>
-                                <span className="text-[11px] text-gray-500 font-semibold bg-gray-50 px-2.5 py-1 rounded-md border border-gray-100/50">
-                                    {formatTarih(h.baslangicTarihi)} – {formatTarih(h.bitisTarihi)}
-                                </span>
+                                <div className="flex items-center gap-2">
+                                    {isTamamlandi && (
+                                        <span className="text-xs font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded-full border border-green-200">
+                                            ✅ Tamam
+                                        </span>
+                                    )}
+                                    <span className="text-[11px] text-gray-500 font-semibold bg-gray-50 px-2.5 py-1 rounded-md border border-gray-100/50">
+                                        {formatTarih(h.baslangicTarihi)} – {formatTarih(h.bitisTarihi)}
+                                    </span>
+                                </div>
                             </div>
 
                             {h.kazanim && (
@@ -110,21 +137,32 @@ export function PlanPage({ plan, rows, ders, sinif }: PlanPageProps) {
                 })}
 
                 {/* Dosyadan Yüklenen Excel/Word Gösterimi */}
-                {isUploaded && rows!.map((r: ParsedRow, i: number) => (
+                {isUploaded && rows!.map((r: ParsedRow, i: number) => {
+                    const isTamamlandi = r.haftaNo ? tamamlananlar.includes(r.haftaNo) : false;
+                    return (
                     <div
                         key={`row-${i}`}
                         onClick={() => navigate(`/app/hafta/${r.haftaNo}`)}
-                        className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100 transition-colors hover:shadow-md cursor-pointer"
+                        className={`rounded-2xl shadow-sm p-4 border transition-colors cursor-pointer ${
+                            isTamamlandi ? 'bg-green-50 border-green-200' : 'bg-white border-gray-100 hover:shadow-md'
+                        }`}
                     >
                         <div className="flex justify-between items-start mb-3">
-                            <span className="font-extrabold text-[#1e3a5f] text-lg">
+                            <span className={`font-extrabold text-lg ${isTamamlandi ? 'text-green-700' : 'text-[#1e3a5f]'}`}>
                                 {r.haftaNo ? `${r.haftaNo}. Hafta` : 'Ekstra'}
                             </span>
-                            {r.tarihAraligi && (
-                                <span className="text-[11px] text-gray-400 font-semibold bg-gray-50 px-2.5 py-1 rounded-md border border-gray-100/50">
-                                    {r.tarihAraligi}
-                                </span>
-                            )}
+                            <div className="flex items-center gap-2">
+                                {isTamamlandi && (
+                                    <span className="text-xs font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded-full border border-green-200">
+                                        ✅ Tamam
+                                    </span>
+                                )}
+                                {r.tarihAraligi && (
+                                    <span className="text-[11px] text-gray-400 font-semibold bg-gray-50 px-2.5 py-1 rounded-md border border-gray-100/50">
+                                        {r.tarihAraligi}
+                                    </span>
+                                )}
+                            </div>
                         </div>
 
                         {r.donem && (
@@ -139,7 +177,8 @@ export function PlanPage({ plan, rows, ders, sinif }: PlanPageProps) {
                             {r.kazanim}
                         </div>
                     </div>
-                ))}
+                    )
+                })}
             </div>
         </div>
     );
