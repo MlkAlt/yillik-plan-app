@@ -79,7 +79,7 @@ function App() {
               : <Navigate to="/olustur" replace />
           }
         />
-        <Route path="/app" element={<AppLayout><AppHomeScreen /></AppLayout>} />
+        <Route path="/app" element={<AppLayout><AppHomeScreen onPlanOlustur={handlePlanOlustur} /></AppLayout>} />
         <Route
           path="/app/plan"
           element={

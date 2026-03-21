@@ -2,6 +2,11 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { OlusturulmusPlan, Hafta } from '../types/takvim';
 import type { ParsedRow } from '../lib/fileParser';
+import { planOlustur, mufredatliPlanOlustur, type MufredatJson } from '../lib/takvimUtils';
+import fen5Mufredat from '../data/mufredat/fen-bilimleri-5.json';
+import fen6Mufredat from '../data/mufredat/fen-bilimleri-6.json';
+import fen7Mufredat from '../data/mufredat/fen-bilimleri-7.json';
+import fen8Mufredat from '../data/mufredat/fen-bilimleri-8.json';
 
 function formatTarih(isoTarih: string): string {
   const aylar = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara']
@@ -11,7 +16,11 @@ function formatTarih(isoTarih: string): string {
   return `${gun} ${ay}`
 }
 
-export function AppHomeScreen() {
+interface AppHomeScreenProps {
+  onPlanOlustur?: (plan: OlusturulmusPlan, ders: string, sinif: string) => void;
+}
+
+export function AppHomeScreen({ onPlanOlustur }: AppHomeScreenProps) {
   const navigate = useNavigate();
 
   const [aktifPlan, setAktifPlan] = useState<{
@@ -24,6 +33,8 @@ export function AppHomeScreen() {
 
   const [ogretmenAd, setOgretmenAd] = useState('');
   const [kazanimlar, setKazanimlar] = useState<Record<string, string>>({});
+  const [ayarlar, setAyarlar] = useState<{ ders: string; sinif: string; yil: string } | null>(null);
+  const [planOlusturuluyor, setPlanOlusturuluyor] = useState(false);
 
   useEffect(() => {
     try {
@@ -35,16 +46,44 @@ export function AppHomeScreen() {
 
       const ayarlarItem = localStorage.getItem('ogretmen-ayarlari');
       if (ayarlarItem) {
-        const ayarlar = JSON.parse(ayarlarItem);
-        if (ayarlar.adSoyad) {
-          const ad = ayarlar.adSoyad.trim().split(' ')[0];
+        const parsed = JSON.parse(ayarlarItem);
+        if (parsed.adSoyad) {
+          const ad = parsed.adSoyad.trim().split(' ')[0];
           setOgretmenAd(ad);
+        }
+        if (parsed.ders && parsed.sinif) {
+          setAyarlar({ ders: parsed.ders, sinif: parsed.sinif, yil: parsed.yil || '2024-2025' });
         }
       }
     } catch (e) {
       console.error('Veri okunurken hata', e);
     }
   }, []);
+
+  function handleHizliPlanOlustur() {
+    if (!ayarlar || !onPlanOlustur) return;
+    setPlanOlusturuluyor(true);
+    try {
+      const { ders, sinif, yil } = ayarlar;
+      let plan: OlusturulmusPlan;
+
+      if (ders === 'Fen Bilimleri') {
+        let mufredatData: MufredatJson | null = null;
+        if (sinif === '5. Sınıf') mufredatData = fen5Mufredat as MufredatJson;
+        else if (sinif === '6. Sınıf') mufredatData = fen6Mufredat as MufredatJson;
+        else if (sinif === '7. Sınıf') mufredatData = fen7Mufredat as MufredatJson;
+        else if (sinif === '8. Sınıf') mufredatData = fen8Mufredat as MufredatJson;
+        plan = mufredatData ? mufredatliPlanOlustur(yil, mufredatData) : planOlustur(yil);
+      } else {
+        plan = planOlustur(yil);
+      }
+
+      onPlanOlustur(plan, ders, sinif);
+      navigate('/app/plan');
+    } catch {
+      setPlanOlusturuluyor(false);
+    }
+  }
 
   const saat = new Date().getHours();
   let mesaj = "İyi geceler";
@@ -88,7 +127,37 @@ export function AppHomeScreen() {
         </p>
       </div>
 
-      {/* 2. AKTİF PLAN KARTI */}
+      {/* 2. PLAN OLUŞTUR KARTI — aktif plan yokken, ayarlar doluyken göster */}
+      {!aktifPlan && ayarlar && onPlanOlustur && (
+        <div className="bg-gradient-to-br from-[#1e3a5f] to-[#2d5a8e] rounded-2xl shadow-md p-5 mb-5 text-white">
+          <div className="text-xs font-semibold tracking-wider text-blue-200 uppercase mb-3 flex items-center gap-1.5">
+            ✨ Hazır Müfredat
+          </div>
+          <h2 className="text-2xl font-black tracking-tight uppercase">{ayarlar.ders}</h2>
+          <p className="text-blue-200 text-sm font-medium mt-0.5">{ayarlar.sinif} · {ayarlar.yil}</p>
+
+          {ayarlar.ders === 'Fen Bilimleri' &&
+            ['5. Sınıf', '6. Sınıf', '7. Sınıf', '8. Sınıf'].includes(ayarlar.sinif) && (
+              <span className="inline-block mt-3 bg-orange-400/20 border border-orange-300/30 text-orange-200 text-[11px] font-bold px-2.5 py-1 rounded-full">
+                📚 Kazanım müfredatı mevcut
+              </span>
+          )}
+
+          <button
+            onClick={handleHizliPlanOlustur}
+            disabled={planOlusturuluyor}
+            className="mt-5 w-full bg-[#f97316] text-white py-3 rounded-xl font-bold shadow-sm active:scale-95 transition-all hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2"
+          >
+            {planOlusturuluyor ? (
+              <span className="animate-pulse">Oluşturuluyor...</span>
+            ) : (
+              <><span>📅</span> Planımı Oluştur</>
+            )}
+          </button>
+        </div>
+      )}
+
+      {/* 3. AKTİF PLAN KARTI */}
       {aktifPlan && (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-5 transition-shadow hover:shadow-md">
           <div className="text-xs font-semibold tracking-wider text-gray-400 uppercase mb-3 flex items-center gap-1.5">
