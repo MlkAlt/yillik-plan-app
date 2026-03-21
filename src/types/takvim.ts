@@ -19,6 +19,9 @@ export interface Hafta {
     bitisTarihi: string
     tatilMi: boolean
     tatilAdi?: string
+    kazanim?: string
+    kazanimDetay?: string
+    uniteAdi?: string
 }
 
 export interface OlusturulmusPlan {

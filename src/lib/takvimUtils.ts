@@ -74,3 +74,40 @@ export function aktifYilBul(): string {
 export function mevcutYillar(): string[] {
     return (takvimData.yillar as MebYilTakvim[]).map((y) => y.yil)
 }
+
+export interface MufredatHafta {
+  haftaNo: number
+  unite: number
+  uniteAdi: string
+  kazanim: string
+  kazanimDetay: string
+}
+
+export interface MufredatJson {
+  ders: string
+  sinif: string
+  toplamHafta: number
+  haftalar: MufredatHafta[]
+}
+
+export function mufredatliPlanOlustur(
+  yil: string,
+  mufredat: MufredatJson
+): OlusturulmusPlan {
+  const takvimPlan = planOlustur(yil)
+  
+  return {
+    yil: takvimPlan.yil,
+    haftalar: takvimPlan.haftalar.map((hafta) => {
+      const mufredatHafta = mufredat.haftalar.find(
+        (m) => m.haftaNo === hafta.haftaNo
+      )
+      return {
+        ...hafta,
+        kazanim: mufredatHafta?.kazanim,
+        kazanimDetay: mufredatHafta?.kazanimDetay,
+        uniteAdi: mufredatHafta?.uniteAdi,
+      }
+    }),
+  }
+}

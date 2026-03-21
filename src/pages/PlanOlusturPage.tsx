@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { planOlustur, mevcutYillar } from '../lib/takvimUtils'
+import { planOlustur, mevcutYillar, mufredatliPlanOlustur, type MufredatJson } from '../lib/takvimUtils'
 import type { OlusturulmusPlan } from '../types/takvim'
+import fen6Mufredat from '../data/mufredat/fen-bilimleri-6.json'
 
 const SINIF_SEVIYELERI = [
     '1. Sınıf', '2. Sınıf', '3. Sınıf', '4. Sınıf',
@@ -18,7 +19,7 @@ export function PlanOlusturPage({ onPlanOlustur }: PlanOlusturPageProps) {
     const yillar = mevcutYillar()
 
     const [seciliYil, setSeciliYil] = useState(yillar[yillar.length - 1])
-    const [ders, setDers] = useState('')
+    const [ders, setDers] = useState('Fen Bilimleri')
     const [sinif, setSinif] = useState(SINIF_SEVIYELERI[0])
     const [hata, setHata] = useState('')
 
@@ -44,7 +45,12 @@ export function PlanOlusturPage({ onPlanOlustur }: PlanOlusturPageProps) {
         setHata('')
 
         try {
-            const plan = planOlustur(seciliYil)
+            let plan: OlusturulmusPlan;
+            if (ders.trim() === 'Fen Bilimleri' && sinif === '6. Sınıf') {
+                plan = mufredatliPlanOlustur(seciliYil, fen6Mufredat as MufredatJson)
+            } else {
+                plan = planOlustur(seciliYil)
+            }
             onPlanOlustur(plan, ders.trim(), sinif)
             navigate('/app/plan')
         } catch (err) {
@@ -84,13 +90,13 @@ export function PlanOlusturPage({ onPlanOlustur }: PlanOlusturPageProps) {
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                         Ders Adı
                     </label>
-                    <input
-                        type="text"
-                        placeholder="örn. Matematik, Türkçe, Fen Bilimleri"
+                    <select
                         value={ders}
                         onChange={(e) => setDers(e.target.value)}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    />
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                    >
+                        <option value="Fen Bilimleri">Fen Bilimleri</option>
+                    </select>
                 </div>
 
                 {/* Sınıf Seviyesi */}

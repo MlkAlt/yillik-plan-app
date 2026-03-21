@@ -80,6 +80,20 @@ export function PlanPage({ plan, rows, ders, sinif }: PlanPageProps) {
                                 </span>
                             </div>
 
+                            {h.kazanim && (
+                                <div className="mb-4">
+                                    {h.uniteAdi && (
+                                        <span className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full mb-2">
+                                            {h.uniteAdi}
+                                        </span>
+                                    )}
+                                    <p className="font-bold text-gray-800 text-sm mb-1">{h.kazanim}</p>
+                                    {h.kazanimDetay && (
+                                        <p className="text-gray-500 text-xs">{h.kazanimDetay}</p>
+                                    )}
+                                </div>
+                            )}
+
                             <div className="flex items-center justify-between">
                                 <span className="text-[10px] font-bold uppercase tracking-widest bg-slate-100 text-slate-500 px-3 py-1.5 rounded-full inline-block">
                                     {h.donem}. Dönem
