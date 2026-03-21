@@ -71,157 +71,132 @@ interface AppHomeScreenProps {
   onSinifSec: (sinif: string) => void;
 }
 
-// Her plan için haftalık kazanım kartı
-function KazanimKarti({
-  entry,
-  tamamlananSayi,
+// Tüm sınıfların bu haftaki kazanımlarını tek kartta gösteren component
+function BuHaftaKarti({
+  planlar,
+  tamamlananlar,
   onSinifSec,
   navigate,
 }: {
-  entry: PlanEntry;
-  tamamlananSayi: number;
+  planlar: PlanEntry[];
+  tamamlananlar: Record<string, number[]>;
   onSinifSec: (sinif: string) => void;
   navigate: ReturnType<typeof useNavigate>;
 }) {
-  const { plan, ders, sinif, tip, rows } = entry;
-
-  const totalHafta = tip === 'meb'
-    ? (plan?.haftalar.filter(h => !h.tatilMi).length || 0)
-    : (rows?.length || 0);
-  const yuzde = totalHafta > 0 ? Math.round((tamamlananSayi / totalHafta) * 100) : 0;
-
-  // MEB planı için bu haftanın verisini al
-  let hafta: Hafta | null = null
-  let sonrakiHafta: Hafta | null = null
-  if (plan) {
-    hafta = bugunHaftasiniAl(plan)
-    if (!hafta) sonrakiHafta = sonrakiHaftayiAl(plan)
-  }
-
   const bugunGun = new Date().getDay()
   const haftaSonu = bugunGun === 0 || bugunGun === 6
 
-  function handleKartTikla() {
-    onSinifSec(sinif)
-    navigate('/app/plan')
-  }
+  // İlk MEB planından hafta bilgisini al (tüm sınıflar aynı takvimde)
+  const referansPlan = planlar.find(p => p.tip === 'meb' && p.plan)
+  const aktifHafta = referansPlan?.plan ? bugunHaftasiniAl(referansPlan.plan) : null
+  const sonrakiHafta = !aktifHafta && referansPlan?.plan ? sonrakiHaftayiAl(referansPlan.plan) : null
+
+  const haftaBaslik = aktifHafta
+    ? `${aktifHafta.haftaNo}. Hafta · ${formatTarihKısa(aktifHafta.baslangicTarihi)}–${formatTarihKısa(aktifHafta.bitisTarihi)}`
+    : sonrakiHafta
+    ? `Sonraki: ${sonrakiHafta.haftaNo}. Hafta · ${formatTarihKısa(sonrakiHafta.baslangicTarihi)}`
+    : 'Bu Hafta'
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-4">
-      {/* Üst başlık şeridi */}
-      <div className="bg-[#1e3a5f] px-5 py-3.5 flex items-center justify-between">
-        <div>
-          <span className="text-white font-black text-base tracking-tight">{sinif}</span>
-          <span className="text-blue-300 text-sm font-medium ml-2">{ders}</span>
-        </div>
-        {hafta && (
-          <span className="text-blue-200 text-xs font-semibold">
-            {hafta.haftaNo}. Hafta
-          </span>
-        )}
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-5">
+      {/* Başlık */}
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">📅 Bu Hafta</span>
+        <span className="text-xs text-gray-400 font-medium">{haftaBaslik}</span>
       </div>
 
-      {/* Kazanım içeriği */}
-      <div className="px-5 py-4">
-
-        {/* Tatil haftası */}
-        {hafta?.tatilMi && (
-          <div className="text-center py-2">
-            <p className="text-2xl mb-1">🎉</p>
-            <p className="font-black text-[#f97316] text-lg">{hafta.tatilAdi}</p>
-            <p className="text-gray-400 text-sm mt-0.5">Bu hafta tatil</p>
-          </div>
-        )}
-
-        {/* Hafta sonu */}
-        {!hafta && haftaSonu && (
-          <div className="text-center py-2">
-            <p className="text-2xl mb-1">☕</p>
-            <p className="font-bold text-gray-500">Hafta sonu</p>
-            {sonrakiHafta && (
-              <p className="text-gray-400 text-xs mt-1.5">
-                Pazartesi {sonrakiHafta.haftaNo}. hafta başlıyor —{' '}
-                {formatTarihKısa(sonrakiHafta.baslangicTarihi)}
-              </p>
-            )}
-          </div>
-        )}
-
-        {/* Normal hafta — kazanım var */}
-        {hafta && !hafta.tatilMi && hafta.kazanim && (
-          <>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs text-gray-400 font-semibold">
-                {formatTarihKısa(hafta.baslangicTarihi)} – {formatTarihKısa(hafta.bitisTarihi)}
-              </span>
-              <span className="text-[10px] font-bold uppercase tracking-widest bg-slate-100 text-slate-500 px-2.5 py-1 rounded-full">
-                {hafta.donem}. Dönem
-              </span>
-            </div>
-
-            {hafta.uniteAdi && (
-              <p className="text-xs font-bold text-[#f97316] uppercase tracking-wider mb-2">
-                {hafta.uniteAdi}
-              </p>
-            )}
-
-            <p className="text-[#1e3a5f] font-bold text-base leading-snug mb-1">
-              {hafta.kazanim}
+      {/* Hafta sonu */}
+      {haftaSonu && !aktifHafta && (
+        <div className="text-center py-3">
+          <p className="font-bold text-gray-400">Hafta sonu ☕</p>
+          {sonrakiHafta?.kazanim && (
+            <p className="text-gray-400 text-xs mt-1.5">
+              Pazartesi: {sonrakiHafta.kazanim}
             </p>
-            {hafta.kazanimDetay && (
-              <p className="text-gray-500 text-sm leading-relaxed mt-1.5">
-                {hafta.kazanimDetay}
-              </p>
-            )}
-          </>
-        )}
-
-        {/* Normal hafta — kazanım yok */}
-        {hafta && !hafta.tatilMi && !hafta.kazanim && (
-          <div className="py-1">
-            <p className="text-gray-400 text-sm text-center">Bu hafta için kazanım girilmemiş.</p>
-          </div>
-        )}
-
-        {/* Plan dönemi dışında, sonraki hafta var */}
-        {!hafta && !haftaSonu && sonrakiHafta && (
-          <div className="py-1">
-            <p className="text-xs text-gray-400 font-semibold mb-2">Sonraki ders haftası:</p>
-            <p className="text-[#1e3a5f] font-bold text-sm">
-              {sonrakiHafta.haftaNo}. Hafta · {formatTarihKısa(sonrakiHafta.baslangicTarihi)}
-            </p>
-            {sonrakiHafta.kazanim && (
-              <p className="text-gray-500 text-sm mt-1 leading-relaxed">{sonrakiHafta.kazanim}</p>
-            )}
-          </div>
-        )}
-
-        {/* Yüklenen plan (rows) */}
-        {tip === 'yukle' && rows && rows.length > 0 && (
-          <p className="text-gray-400 text-sm text-center py-1">
-            {rows.length} haftalık plan yüklendi.
-          </p>
-        )}
-      </div>
-
-      {/* Alt bölüm — progress + link */}
-      <div className="px-5 pb-4 border-t border-gray-50 pt-3">
-        <div className="flex justify-between items-center mb-1.5">
-          <span className="text-xs text-gray-400">{tamamlananSayi}/{totalHafta} hafta tamamlandı</span>
-          <span className="text-xs font-bold text-gray-400">%{yuzde}</span>
+          )}
         </div>
-        <div className="w-full bg-gray-100 rounded-full h-1.5 mb-3">
-          <div
-            className="bg-[#f97316] h-1.5 rounded-full transition-all duration-500"
-            style={{ width: `${yuzde}%` }}
-          />
+      )}
+
+      {/* Tatil */}
+      {aktifHafta?.tatilMi && (
+        <div className="text-center py-2">
+          <p className="font-black text-[#f97316] text-base">🎉 {aktifHafta.tatilAdi}</p>
         </div>
-        <button
-          onClick={handleKartTikla}
-          className="text-xs text-gray-400 font-semibold hover:text-[#1e3a5f] transition-colors flex items-center gap-1"
-        >
-          Tüm plana git →
-        </button>
+      )}
+
+      {/* Her sınıf için kazanım satırı */}
+      {!haftaSonu && aktifHafta && !aktifHafta.tatilMi && (
+        <div className="flex flex-col gap-3">
+          {planlar.map((entry, i) => {
+            const hafta = entry.plan ? bugunHaftasiniAl(entry.plan) : null
+            const kazanim = hafta?.kazanim
+            const unite = hafta?.uniteAdi
+
+            return (
+              <div
+                key={entry.sinif}
+                className={`${i < planlar.length - 1 ? 'pb-3 border-b border-gray-100' : ''}`}
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-black text-white bg-[#1e3a5f] px-2.5 py-0.5 rounded-full">
+                    {entry.sinif}
+                  </span>
+                  {unite && (
+                    <span className="text-xs text-[#f97316] font-semibold">{unite}</span>
+                  )}
+                </div>
+                {kazanim ? (
+                  <p className="text-sm font-semibold text-gray-700 leading-snug">{kazanim}</p>
+                ) : (
+                  <p className="text-sm text-gray-400 italic">Kazanım girilmemiş</p>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Plan dönemi dışı + sonraki hafta */}
+      {!haftaSonu && !aktifHafta && sonrakiHafta && (
+        <div className="flex flex-col gap-2">
+          {planlar.map(entry => {
+            const hafta = entry.plan ? sonrakiHaftayiAl(entry.plan) : null
+            return (
+              <div key={entry.sinif}>
+                <span className="text-xs font-black text-white bg-[#1e3a5f] px-2.5 py-0.5 rounded-full mr-2">
+                  {entry.sinif}
+                </span>
+                <span className="text-sm text-gray-500">{hafta?.kazanim || '—'}</span>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Alt: progress özeti + link */}
+      <div className="mt-4 pt-3 border-t border-gray-50 flex items-center justify-between">
+        <div className="flex gap-3">
+          {planlar.map(entry => {
+            const total = entry.plan?.haftalar.filter(h => !h.tatilMi).length || 0
+            const done = tamamlananlar[entry.sinif]?.length || 0
+            const yuzde = total > 0 ? Math.round((done / total) * 100) : 0
+            return (
+              <button
+                key={entry.sinif}
+                onClick={() => { onSinifSec(entry.sinif); navigate('/app/plan') }}
+                className="flex items-center gap-1.5 group"
+              >
+                <span className="text-xs font-bold text-gray-400 group-hover:text-[#1e3a5f] transition-colors">
+                  {entry.sinif}
+                </span>
+                <span className="text-xs text-gray-300 font-medium">%{yuzde}</span>
+              </button>
+            )
+          })}
+        </div>
+        <span className="text-xs text-gray-300 font-medium">
+          {planlar.map(e => tamamlananlar[e.sinif]?.length || 0).reduce((a, b) => a + b, 0)} hafta ✓
+        </span>
       </div>
     </div>
   )
@@ -373,16 +348,15 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
         </div>
       )}
 
-      {/* KAZANIM KARTLARI — her sınıf için */}
-      {planlar.map(entry => (
-        <KazanimKarti
-          key={entry.sinif}
-          entry={entry}
-          tamamlananSayi={tamamlananlar[entry.sinif]?.length || 0}
+      {/* BU HAFTA KARTI — tüm sınıflar tek kartta */}
+      {planlar.length > 0 && (
+        <BuHaftaKarti
+          planlar={planlar}
+          tamamlananlar={tamamlananlar}
           onSinifSec={onSinifSec}
           navigate={navigate}
         />
-      ))}
+      )}
 
       {/* HIZLI ERİŞİM */}
       {planlar.length > 0 && (
