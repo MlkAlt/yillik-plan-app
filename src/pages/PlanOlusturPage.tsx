@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { planOlustur, mevcutYillar } from '../lib/takvimUtils'
 import type { OlusturulmusPlan } from '../types/takvim'
@@ -21,6 +21,20 @@ export function PlanOlusturPage({ onPlanOlustur }: PlanOlusturPageProps) {
     const [ders, setDers] = useState('')
     const [sinif, setSinif] = useState(SINIF_SEVIYELERI[0])
     const [hata, setHata] = useState('')
+
+    useEffect(() => {
+        try {
+            const kayitli = localStorage.getItem('ogretmen-ayarlari')
+            if (kayitli) {
+                const ayarlar = JSON.parse(kayitli) as { ders?: string; sinif?: string; yil?: string }
+                if (ayarlar.ders) setDers(ayarlar.ders)
+                if (ayarlar.sinif) setSinif(ayarlar.sinif)
+                if (ayarlar.yil) setSeciliYil(ayarlar.yil)
+            }
+        } catch (error) {
+            console.error('Ayarlar okunamadı:', error)
+        }
+    }, [])
 
     function handleSubmit() {
         if (!ders.trim()) {
