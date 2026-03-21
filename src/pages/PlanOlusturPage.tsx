@@ -2,13 +2,20 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { planOlustur, mevcutYillar, mufredatliPlanOlustur, type MufredatJson } from '../lib/takvimUtils'
 import type { OlusturulmusPlan } from '../types/takvim'
+import fen5Mufredat from '../data/mufredat/fen-bilimleri-5.json'
 import fen6Mufredat from '../data/mufredat/fen-bilimleri-6.json'
+import fen7Mufredat from '../data/mufredat/fen-bilimleri-7.json'
+import fen8Mufredat from '../data/mufredat/fen-bilimleri-8.json'
 
 const SINIF_SEVIYELERI = [
     '1. Sınıf', '2. Sınıf', '3. Sınıf', '4. Sınıf',
     '5. Sınıf', '6. Sınıf', '7. Sınıf', '8. Sınıf',
     '9. Sınıf', '10. Sınıf', '11. Sınıf', '12. Sınıf',
 ]
+
+const DERS_SINIF_MAP: Record<string, string[]> = {
+    'Fen Bilimleri': ['5. Sınıf', '6. Sınıf', '7. Sınıf', '8. Sınıf'],
+}
 
 interface PlanOlusturPageProps {
     onPlanOlustur: (plan: OlusturulmusPlan, ders: string, sinif: string) => void
@@ -20,7 +27,7 @@ export function PlanOlusturPage({ onPlanOlustur }: PlanOlusturPageProps) {
 
     const [seciliYil, setSeciliYil] = useState(yillar[yillar.length - 1])
     const [ders, setDers] = useState('Fen Bilimleri')
-    const [sinif, setSinif] = useState(SINIF_SEVIYELERI[0])
+    const [sinif, setSinif] = useState(DERS_SINIF_MAP['Fen Bilimleri'][0])
     const [hata, setHata] = useState('')
 
     useEffect(() => {
@@ -46,8 +53,18 @@ export function PlanOlusturPage({ onPlanOlustur }: PlanOlusturPageProps) {
 
         try {
             let plan: OlusturulmusPlan;
-            if (ders.trim() === 'Fen Bilimleri' && sinif === '6. Sınıf') {
-                plan = mufredatliPlanOlustur(seciliYil, fen6Mufredat as MufredatJson)
+            if (ders.trim() === 'Fen Bilimleri') {
+                let mufredatData = null;
+                if (sinif === '5. Sınıf') mufredatData = fen5Mufredat;
+                else if (sinif === '6. Sınıf') mufredatData = fen6Mufredat;
+                else if (sinif === '7. Sınıf') mufredatData = fen7Mufredat;
+                else if (sinif === '8. Sınıf') mufredatData = fen8Mufredat;
+
+                if (mufredatData) {
+                    plan = mufredatliPlanOlustur(seciliYil, mufredatData as MufredatJson);
+                } else {
+                    plan = planOlustur(seciliYil);
+                }
             } else {
                 plan = planOlustur(seciliYil)
             }
@@ -92,7 +109,12 @@ export function PlanOlusturPage({ onPlanOlustur }: PlanOlusturPageProps) {
                     </label>
                     <select
                         value={ders}
-                        onChange={(e) => setDers(e.target.value)}
+                        onChange={(e) => {
+                            const yDers = e.target.value;
+                            setDers(yDers);
+                            const yeniSiniflar = DERS_SINIF_MAP[yDers] || SINIF_SEVIYELERI;
+                            setSinif(yeniSiniflar[0]);
+                        }}
                         className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                     >
                         <option value="Fen Bilimleri">Fen Bilimleri</option>
@@ -109,7 +131,7 @@ export function PlanOlusturPage({ onPlanOlustur }: PlanOlusturPageProps) {
                         onChange={(e) => setSinif(e.target.value)}
                         className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                     >
-                        {SINIF_SEVIYELERI.map((s) => (
+                        {(DERS_SINIF_MAP[ders] || SINIF_SEVIYELERI).map((s) => (
                             <option key={s} value={s}>{s}</option>
                         ))}
                     </select>
