@@ -8,7 +8,6 @@ import { AppHomeScreen } from './pages/AppHomeScreen'
 import { AppSettingsScreen } from './pages/AppSettingsScreen'
 import { AppLayout } from './components/AppLayout'
 import { HaftaDetayPage } from './pages/HaftaDetayPage'
-import { OnboardingPage } from './pages/OnboardingPage'
 import type { OlusturulmusPlan } from './types/takvim'
 import type { ParsedRow } from './lib/fileParser'
 
@@ -18,7 +17,6 @@ function App() {
   const [aktifDers, setAktifDers] = useState('')
   const [aktifSinif, setAktifSinif] = useState('')
   const [yuklendi, setYuklendi] = useState(false)
-  const [onboardingTamamlandi, setOnboardingTamamlandi] = useState(false)
 
   useEffect(() => {
     try {
@@ -35,9 +33,6 @@ function App() {
         setAktifDers(parsed.ders || '')
         setAktifSinif(parsed.sinif || '')
       }
-      if (localStorage.getItem('onboarding-tamamlandi')) {
-        setOnboardingTamamlandi(true)
-      }
     } catch (err) {
       // localStorage okunamadı
     } finally {
@@ -50,7 +45,6 @@ function App() {
     setYuklenenRows(null)
     setAktifDers(ders)
     setAktifSinif(sinif)
-    setOnboardingTamamlandi(true)
     try {
       localStorage.setItem('aktif-plan', JSON.stringify({ tip: 'meb', plan, rows: null, ders, sinif }))
     } catch (err) { }
@@ -75,7 +69,6 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/onboarding" element={<OnboardingPage onPlanOlustur={handlePlanOlustur} />} />
         <Route path="/olustur" element={<PlanOlusturPage onPlanOlustur={handlePlanOlustur} />} />
         <Route path="/yukle" element={<YuklemePage onYukle={handleYukle} />} />
         <Route
@@ -86,40 +79,17 @@ function App() {
               : <Navigate to="/olustur" replace />
           }
         />
-        <Route
-          path="/app"
-          element={
-            onboardingTamamlandi
-              ? <AppLayout><AppHomeScreen onPlanOlustur={handlePlanOlustur} /></AppLayout>
-              : <Navigate to="/onboarding" replace />
-          }
-        />
+        <Route path="/app" element={<AppLayout><AppHomeScreen onPlanOlustur={handlePlanOlustur} /></AppLayout>} />
         <Route
           path="/app/plan"
           element={
-            !onboardingTamamlandi
-              ? <Navigate to="/onboarding" replace />
-              : planHazir
-                ? <AppLayout><PlanPage plan={aktifPlan} rows={yuklenenRows} ders={aktifDers} sinif={aktifSinif} /></AppLayout>
-                : <AppLayout><AppHomeScreen onPlanOlustur={handlePlanOlustur} /></AppLayout>
+            planHazir
+              ? <AppLayout><PlanPage plan={aktifPlan} rows={yuklenenRows} ders={aktifDers} sinif={aktifSinif} /></AppLayout>
+              : <AppLayout><AppHomeScreen onPlanOlustur={handlePlanOlustur} /></AppLayout>
           }
         />
-        <Route
-          path="/app/ayarlar"
-          element={
-            onboardingTamamlandi
-              ? <AppLayout><AppSettingsScreen /></AppLayout>
-              : <Navigate to="/onboarding" replace />
-          }
-        />
-        <Route
-          path="/app/hafta/:haftaNo"
-          element={
-            onboardingTamamlandi
-              ? <AppLayout><HaftaDetayPage /></AppLayout>
-              : <Navigate to="/onboarding" replace />
-          }
-        />
+        <Route path="/app/ayarlar" element={<AppLayout><AppSettingsScreen /></AppLayout>} />
+        <Route path="/app/hafta/:haftaNo" element={<AppLayout><HaftaDetayPage /></AppLayout>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
