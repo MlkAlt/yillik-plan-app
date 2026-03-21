@@ -98,7 +98,7 @@ export function YuklemePage({ onYukle }: YuklemePageProps) {
                 </button>
 
                 <button
-                    onClick={() => navigate('/')}
+                    onClick={() => navigate('/app')}
                     className="w-full mt-3 text-gray-500 hover:text-gray-700 text-sm py-2 transition-colors"
                 >
                     ← Ana sayfaya dön
