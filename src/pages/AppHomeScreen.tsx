@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { Hafta } from '../types/takvim';
+import type { Hafta, OlusturulmusPlan } from '../types/takvim';
 import type { PlanEntry } from '../types/planEntry';
 import { planOlustur, mufredatliPlanOlustur, type MufredatJson } from '../lib/takvimUtils';
 import fen5Mufredat from '../data/mufredat/fen-bilimleri-5.json';
@@ -37,7 +37,7 @@ const DERS_SINIF_MAP: Record<string, string[]> = {
   'Biyoloji': ['9. Sınıf', '10. Sınıf', '11. Sınıf', '12. Sınıf'],
 }
 
-function buildPlan(ders: string, sinif: string, yil: string) {
+function buildPlan(ders: string, sinif: string, yil: string): OlusturulmusPlan {
   if (ders === 'Fen Bilimleri') {
     let mufredatData: MufredatJson | null = null
     if (sinif === '5. Sınıf') mufredatData = fen5Mufredat as MufredatJson
@@ -49,16 +49,182 @@ function buildPlan(ders: string, sinif: string, yil: string) {
   return planOlustur(yil)
 }
 
-function formatTarih(isoTarih: string): string {
+function formatTarihKısa(isoTarih: string): string {
   const aylar = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara']
   const d = new Date(isoTarih)
-  return `${String(d.getDate()).padStart(2, '0')} ${aylar[d.getMonth()]}`
+  return `${d.getDate()} ${aylar[d.getMonth()]}`
+}
+
+function bugunHaftasiniAl(plan: OlusturulmusPlan): Hafta | null {
+  const bugunStr = new Date().toISOString().split('T')[0]
+  return plan.haftalar.find(h => bugunStr >= h.baslangicTarihi && bugunStr <= h.bitisTarihi) || null
+}
+
+function sonrakiHaftayiAl(plan: OlusturulmusPlan): Hafta | null {
+  const bugunStr = new Date().toISOString().split('T')[0]
+  return plan.haftalar.find(h => h.baslangicTarihi > bugunStr) || null
 }
 
 interface AppHomeScreenProps {
   planlar: PlanEntry[];
   onPlanEkle: (entries: PlanEntry[]) => void;
   onSinifSec: (sinif: string) => void;
+}
+
+// Her plan için haftalık kazanım kartı
+function KazanimKarti({
+  entry,
+  tamamlananSayi,
+  onSinifSec,
+  navigate,
+}: {
+  entry: PlanEntry;
+  tamamlananSayi: number;
+  onSinifSec: (sinif: string) => void;
+  navigate: ReturnType<typeof useNavigate>;
+}) {
+  const { plan, ders, sinif, tip, rows } = entry;
+
+  const totalHafta = tip === 'meb'
+    ? (plan?.haftalar.filter(h => !h.tatilMi).length || 0)
+    : (rows?.length || 0);
+  const yuzde = totalHafta > 0 ? Math.round((tamamlananSayi / totalHafta) * 100) : 0;
+
+  // MEB planı için bu haftanın verisini al
+  let hafta: Hafta | null = null
+  let sonrakiHafta: Hafta | null = null
+  if (plan) {
+    hafta = bugunHaftasiniAl(plan)
+    if (!hafta) sonrakiHafta = sonrakiHaftayiAl(plan)
+  }
+
+  const bugunGun = new Date().getDay()
+  const haftaSonu = bugunGun === 0 || bugunGun === 6
+
+  function handleKartTikla() {
+    onSinifSec(sinif)
+    navigate('/app/plan')
+  }
+
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-4">
+      {/* Üst başlık şeridi */}
+      <div className="bg-[#1e3a5f] px-5 py-3.5 flex items-center justify-between">
+        <div>
+          <span className="text-white font-black text-base tracking-tight">{sinif}</span>
+          <span className="text-blue-300 text-sm font-medium ml-2">{ders}</span>
+        </div>
+        {hafta && (
+          <span className="text-blue-200 text-xs font-semibold">
+            {hafta.haftaNo}. Hafta
+          </span>
+        )}
+      </div>
+
+      {/* Kazanım içeriği */}
+      <div className="px-5 py-4">
+
+        {/* Tatil haftası */}
+        {hafta?.tatilMi && (
+          <div className="text-center py-2">
+            <p className="text-2xl mb-1">🎉</p>
+            <p className="font-black text-[#f97316] text-lg">{hafta.tatilAdi}</p>
+            <p className="text-gray-400 text-sm mt-0.5">Bu hafta tatil</p>
+          </div>
+        )}
+
+        {/* Hafta sonu */}
+        {!hafta && haftaSonu && (
+          <div className="text-center py-2">
+            <p className="text-2xl mb-1">☕</p>
+            <p className="font-bold text-gray-500">Hafta sonu</p>
+            {sonrakiHafta && (
+              <p className="text-gray-400 text-xs mt-1.5">
+                Pazartesi {sonrakiHafta.haftaNo}. hafta başlıyor —{' '}
+                {formatTarihKısa(sonrakiHafta.baslangicTarihi)}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Normal hafta — kazanım var */}
+        {hafta && !hafta.tatilMi && hafta.kazanim && (
+          <>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs text-gray-400 font-semibold">
+                {formatTarihKısa(hafta.baslangicTarihi)} – {formatTarihKısa(hafta.bitisTarihi)}
+              </span>
+              <span className="text-[10px] font-bold uppercase tracking-widest bg-slate-100 text-slate-500 px-2.5 py-1 rounded-full">
+                {hafta.donem}. Dönem
+              </span>
+            </div>
+
+            {hafta.uniteAdi && (
+              <p className="text-xs font-bold text-[#f97316] uppercase tracking-wider mb-2">
+                {hafta.uniteAdi}
+              </p>
+            )}
+
+            <p className="text-[#1e3a5f] font-bold text-base leading-snug mb-1">
+              {hafta.kazanim}
+            </p>
+            {hafta.kazanimDetay && (
+              <p className="text-gray-500 text-sm leading-relaxed mt-1.5">
+                {hafta.kazanimDetay}
+              </p>
+            )}
+          </>
+        )}
+
+        {/* Normal hafta — kazanım yok */}
+        {hafta && !hafta.tatilMi && !hafta.kazanim && (
+          <div className="py-1">
+            <p className="text-gray-400 text-sm text-center">Bu hafta için kazanım girilmemiş.</p>
+          </div>
+        )}
+
+        {/* Plan dönemi dışında, sonraki hafta var */}
+        {!hafta && !haftaSonu && sonrakiHafta && (
+          <div className="py-1">
+            <p className="text-xs text-gray-400 font-semibold mb-2">Sonraki ders haftası:</p>
+            <p className="text-[#1e3a5f] font-bold text-sm">
+              {sonrakiHafta.haftaNo}. Hafta · {formatTarihKısa(sonrakiHafta.baslangicTarihi)}
+            </p>
+            {sonrakiHafta.kazanim && (
+              <p className="text-gray-500 text-sm mt-1 leading-relaxed">{sonrakiHafta.kazanim}</p>
+            )}
+          </div>
+        )}
+
+        {/* Yüklenen plan (rows) */}
+        {tip === 'yukle' && rows && rows.length > 0 && (
+          <p className="text-gray-400 text-sm text-center py-1">
+            {rows.length} haftalık plan yüklendi.
+          </p>
+        )}
+      </div>
+
+      {/* Alt bölüm — progress + link */}
+      <div className="px-5 pb-4 border-t border-gray-50 pt-3">
+        <div className="flex justify-between items-center mb-1.5">
+          <span className="text-xs text-gray-400">{tamamlananSayi}/{totalHafta} hafta tamamlandı</span>
+          <span className="text-xs font-bold text-gray-400">%{yuzde}</span>
+        </div>
+        <div className="w-full bg-gray-100 rounded-full h-1.5 mb-3">
+          <div
+            className="bg-[#f97316] h-1.5 rounded-full transition-all duration-500"
+            style={{ width: `${yuzde}%` }}
+          />
+        </div>
+        <button
+          onClick={handleKartTikla}
+          className="text-xs text-gray-400 font-semibold hover:text-[#1e3a5f] transition-colors flex items-center gap-1"
+        >
+          Tüm plana git →
+        </button>
+      </div>
+    </div>
+  )
 }
 
 export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreenProps) {
@@ -69,7 +235,6 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
   const [tamamlananlar, setTamamlananlar] = useState<Record<string, number[]>>({});
   const [olusturuluyor, setOlusturuluyor] = useState(false);
 
-  // Onboarding state
   const [onbDers, setOnbDers] = useState('Fen Bilimleri');
   const [onbSiniflar, setOnbSiniflar] = useState<string[]>(['5. Sınıf']);
 
@@ -83,13 +248,11 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
         if (parsed.siniflar?.length) setOnbSiniflar(parsed.siniflar);
         else if (parsed.sinif) setOnbSiniflar([parsed.sinif]);
       }
-
       if (localStorage.getItem('onboarding-tamamlandi')) setOnboardingTamamlandi(true);
 
       const tItem = localStorage.getItem('tamamlanan-haftalar');
       if (tItem) {
         const parsed = JSON.parse(tItem);
-        // Eski format (number[]) → yeni format migration
         if (Array.isArray(parsed)) {
           const sinif = planlar[0]?.sinif || '';
           if (sinif) setTamamlananlar({ [sinif]: parsed });
@@ -111,7 +274,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
   function toggleOnbSinif(sinif: string) {
     setOnbSiniflar(prev =>
       prev.includes(sinif)
-        ? prev.length > 1 ? prev.filter(s => s !== sinif) : prev // en az 1 seçili kalmalı
+        ? prev.length > 1 ? prev.filter(s => s !== sinif) : prev
         : [...prev, sinif]
     );
   }
@@ -121,24 +284,17 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
     setOlusturuluyor(true);
     try {
       const yil = '2025-2026';
-      localStorage.setItem('ogretmen-ayarlari', JSON.stringify({
-        ders: onbDers, siniflar: onbSiniflar, yil
-      }));
+      localStorage.setItem('ogretmen-ayarlari', JSON.stringify({ ders: onbDers, siniflar: onbSiniflar, yil }));
       localStorage.setItem('onboarding-tamamlandi', '1');
       setOnboardingTamamlandi(true);
 
       const entries: PlanEntry[] = onbSiniflar.map(sinif => ({
-        sinif,
-        ders: onbDers,
-        yil,
-        tip: 'meb' as const,
-        plan: buildPlan(onbDers, sinif, yil),
-        rows: null,
+        sinif, ders: onbDers, yil, tip: 'meb' as const,
+        plan: buildPlan(onbDers, sinif, yil), rows: null,
       }));
 
       onPlanEkle(entries);
       onSinifSec(entries[0].sinif);
-      navigate('/app/plan');
     } catch {
       setOlusturuluyor(false);
     }
@@ -151,34 +307,17 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
   else if (saat >= 17 && saat < 21) mesaj = 'İyi akşamlar';
   const karsilama = ogretmenAd ? `${mesaj}, ${ogretmenAd}!` : `${mesaj}!`;
 
-  const bugunGun = new Date().getDay();
-  const gunAdlari = ['', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', '', ''];
-  const bugunAdi = gunAdlari[bugunGun] || '';
-  const bugunStr = new Date().toISOString().split('T')[0];
-
   const aktifSiniflar = DERS_SINIF_MAP[onbDers] || SINIF_SEVIYELERI;
-
-  // İlk MEB planında bugünün haftasını bul (today card için)
-  const mebPlan = planlar.find(p => p.tip === 'meb' && p.plan);
-  let aktifHafta: Hafta | null = null;
-  if (mebPlan?.plan) {
-    for (const hafta of mebPlan.plan.haftalar) {
-      if (bugunStr >= hafta.baslangicTarihi && bugunStr <= hafta.bitisTarihi) {
-        aktifHafta = hafta;
-        break;
-      }
-    }
-  }
 
   return (
     <div className="p-4 pb-24 w-full max-w-lg mx-auto">
       {/* KARSILAMA */}
       <div className="mb-6 mt-2">
         <h1 className="text-3xl font-bold text-[#1e3a5f]">{karsilama}</h1>
-        <p className="text-gray-500 mt-1.5 text-sm font-medium">Bugün ne öğretiyorsunuz?</p>
+        <p className="text-gray-500 mt-1.5 text-sm font-medium">Bu haftanın kazanımları</p>
       </div>
 
-      {/* ONBOARDING — planı olmayan ilk kullanıcı */}
+      {/* ONBOARDING */}
       {!onboardingTamamlandi && planlar.length === 0 && (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-5">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Başlayalım</p>
@@ -186,7 +325,6 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
             Branşını ve sınıflarını seç, planların hazır olsun.
           </h2>
 
-          {/* Ders seçimi */}
           <div className="mb-4">
             <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">
               Branş / Ders
@@ -196,14 +334,14 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
               onChange={(e) => handleOnbDersChange(e.target.value)}
               className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-800 font-medium focus:outline-none focus:ring-2 focus:ring-[#f97316]/30 focus:border-[#f97316] transition-all text-sm"
             >
-              {DERS_SECENEKLERI.map((d) => <option key={d} value={d}>{d}</option>)}
+              {DERS_SECENEKLERI.map(d => <option key={d} value={d}>{d}</option>)}
             </select>
           </div>
 
-          {/* Sınıf çoklu seçim */}
           <div className="mb-4">
             <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-              Sınıf Seviyeleri <span className="text-gray-300 font-normal">(birden fazla seçebilirsin)</span>
+              Sınıf Seviyeleri
+              <span className="text-gray-300 font-normal ml-1">(birden fazla seçebilirsin)</span>
             </label>
             <div className="flex flex-wrap gap-2">
               {aktifSiniflar.map(s => (
@@ -235,115 +373,41 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
         </div>
       )}
 
-      {/* PLAN KARTLARI — her sınıf için ayrı */}
-      {planlar.map(entry => {
-        const totalHafta = entry.tip === 'meb'
-          ? (entry.plan?.haftalar.filter(h => !h.tatilMi).length || 0)
-          : (entry.rows?.length || 0);
-        const tamamlanan = tamamlananlar[entry.sinif]?.length || 0;
-        const yuzde = totalHafta > 0 ? Math.round((tamamlanan / totalHafta) * 100) : 0;
-
-        return (
-          <div key={entry.sinif} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-4">
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <h2 className="text-lg font-black text-[#1e3a5f] tracking-tight">{entry.ders}</h2>
-                <p className="text-sm font-medium text-gray-400 mt-0.5">{entry.sinif} · {entry.yil}</p>
-              </div>
-              <span className="bg-orange-50 text-[#f97316] text-xs font-bold px-2.5 py-1 rounded-full border border-orange-200 whitespace-nowrap">
-                {totalHafta} hafta
-              </span>
-            </div>
-
-            {/* Progress */}
-            <div className="mb-4">
-              <div className="flex justify-between items-center mb-1.5">
-                <span className="text-xs text-gray-400 font-medium">İlerleme</span>
-                <span className="text-xs font-bold text-gray-500">{tamamlanan}/{totalHafta} hafta</span>
-              </div>
-              <div className="w-full bg-gray-100 rounded-full h-2">
-                <div
-                  className="bg-[#f97316] h-2 rounded-full transition-all duration-500"
-                  style={{ width: `${yuzde}%` }}
-                />
-              </div>
-              {tamamlanan > 0 && (
-                <p className="text-xs text-gray-400 mt-1">{yuzde}% tamamlandı</p>
-              )}
-            </div>
-
-            <button
-              onClick={() => { onSinifSec(entry.sinif); navigate('/app/plan'); }}
-              className="w-full bg-[#1e3a5f] text-white py-2.5 rounded-xl text-sm font-bold shadow-sm active:scale-95 transition-all hover:opacity-90 flex items-center justify-center gap-1.5"
-            >
-              Planı Görüntüle →
-            </button>
-          </div>
-        );
-      })}
-
-      {/* BUGÜN KARTI */}
-      {planlar.length > 0 && (
-        bugunGun === 0 || bugunGun === 6 || !aktifHafta ? (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-5 text-center">
-            <p className="text-[#1e3a5f] font-bold mb-1">📅 Bugün ders yok</p>
-            <p className="text-gray-400 text-xs">
-              {bugunGun === 0 || bugunGun === 6 ? 'Hafta sonu' : 'Aktif hafta bulunamadı'}
-            </p>
-          </div>
-        ) : (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-5">
-            <div className="flex justify-between items-center mb-3">
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                📅 Bugün — {bugunAdi}
-              </span>
-              <span className="text-[11px] text-gray-400 font-semibold bg-gray-50 px-2.5 py-1 rounded-md border border-gray-100">
-                {formatTarih(aktifHafta.baslangicTarihi)} – {formatTarih(aktifHafta.bitisTarihi)}
-              </span>
-            </div>
-
-            <span className="text-[10px] font-bold uppercase tracking-widest bg-slate-100 text-slate-500 px-3 py-1.5 rounded-full inline-block mb-3">
-              {aktifHafta.donem}. Dönem · {aktifHafta.haftaNo}. Hafta
-            </span>
-
-            {aktifHafta.tatilMi ? (
-              <p className="text-[#f97316] font-bold">🎉 {aktifHafta.tatilAdi}</p>
-            ) : aktifHafta.kazanim ? (
-              <>
-                <p className="font-bold text-[#1e3a5f] text-sm leading-snug">{aktifHafta.kazanim}</p>
-                {aktifHafta.kazanimDetay && (
-                  <p className="text-gray-400 text-xs mt-1 leading-relaxed">{aktifHafta.kazanimDetay}</p>
-                )}
-              </>
-            ) : (
-              <p className="text-gray-400 text-sm">Bu hafta için kazanım girilmemiş.</p>
-            )}
-          </div>
-        )
-      )}
+      {/* KAZANIM KARTLARI — her sınıf için */}
+      {planlar.map(entry => (
+        <KazanimKarti
+          key={entry.sinif}
+          entry={entry}
+          tamamlananSayi={tamamlananlar[entry.sinif]?.length || 0}
+          onSinifSec={onSinifSec}
+          navigate={navigate}
+        />
+      ))}
 
       {/* HIZLI ERİŞİM */}
-      <div>
-        <div className="text-xs font-semibold tracking-wider text-gray-400 uppercase mb-3 pl-1">
-          Hızlı Erişim
+      {planlar.length > 0 && (
+        <div className="mt-2">
+          <div className="text-xs font-semibold tracking-wider text-gray-400 uppercase mb-3 pl-1">
+            Hızlı Erişim
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => navigate('/olustur')}
+              className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 active:scale-95 transition-transform flex flex-col items-center justify-center gap-2 hover:shadow-md"
+            >
+              <span className="text-2xl">📅</span>
+              <span className="text-sm font-bold text-[#1e3a5f]">Plan Oluştur</span>
+            </button>
+            <button
+              onClick={() => navigate('/yukle')}
+              className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 active:scale-95 transition-transform flex flex-col items-center justify-center gap-2 hover:shadow-md"
+            >
+              <span className="text-2xl">📤</span>
+              <span className="text-sm font-bold text-[#1e3a5f]">Dosya Yükle</span>
+            </button>
+          </div>
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            onClick={() => navigate('/olustur')}
-            className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 active:scale-95 transition-transform flex flex-col items-center justify-center gap-2 hover:shadow-md"
-          >
-            <span className="text-2xl">📅</span>
-            <span className="text-sm font-bold text-[#1e3a5f]">Plan Oluştur</span>
-          </button>
-          <button
-            onClick={() => navigate('/yukle')}
-            className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 active:scale-95 transition-transform flex flex-col items-center justify-center gap-2 hover:shadow-md"
-          >
-            <span className="text-2xl">📤</span>
-            <span className="text-sm font-bold text-[#1e3a5f]">Dosya Yükle</span>
-          </button>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
