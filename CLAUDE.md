@@ -24,29 +24,47 @@
 
 ## Temel Özellikler
 
-### MVP (İlk Sürüm)
-- [ ] MEB takvimine göre otomatik yıllık plan oluşturma
-- [ ] Excel/PDF yükleme ile plan import
-- [ ] Haftalık ve günlük kazanım görünümü
-- [ ] Sınıf / ders seçimi
-- [ ] Basit kullanıcı kaydı (Supabase Auth)
-- [ ] Lead toplama formu (ad, soyad, okul, email)
+### Tamamlanan
+- [x] MEB takvimine göre otomatik yıllık plan oluşturma
+- [x] Excel/Word yükleme ile plan import
+- [x] Haftalık kazanım görünümü (hafta bazlı — günlük değil, ders programı gerekmez)
+- [x] Çoklu sınıf desteği (aynı öğretmen 6. ve 7. sınıfa girebilir)
+- [x] Onboarding (ana ekranda kart — ayrı sayfa değil)
+- [x] Hafta tamamlandı işaretleme + öğretmen notu
+- [x] Sınıf başına bağımsız ilerleme takibi
+- [x] Ana ekranda bu haftanın kazanım özeti (sınıf sekmeli, SVG halka)
+- [x] Fen Bilimleri 5–8. sınıf müfredatı (kazanım + ünite + detay)
 
-### Sonraki Sürümler
-- [ ] Kazanımları işaretleme (tamamlandı / yapılmadı)
-- [ ] Notlar ekleme
+### Yapılacaklar
+- [ ] Tüm branşlar için müfredat tamamlanması
+- [ ] Arayüz geçiş animasyonları
+- [ ] Lead toplama formu (ad, soyad, okul, email)
+- [ ] Kullanıcı kaydı (Supabase Auth)
 - [ ] Yazdırma / PDF export
-- [ ] Push bildirim (günlük kazanım hatırlatması)
+- [ ] Push bildirim (haftalık kazanım hatırlatması)
 - [ ] Google AdSense entegrasyonu
 
-## Veri Yapısı (Supabase Tabloları)
+## localStorage Veri Modeli (Supabase öncesi)
+
+Supabase entegre edilene kadar tüm veri localStorage'da tutuluyor.
 
 ```
-users           → id, email, ad, soyad, okul, sinif, ders, created_at
-yillik_planlar  → id, user_id, yil, ders, sinif_seviyesi, kaynak (meb|yukle), created_at
-haftalar        → id, plan_id, hafta_no, baslangic_tarihi, bitis_tarihi
-kazanimlar      → id, hafta_id, gun, kazanim_metni, tamamlandi, sira_no
-leads           → id, ad, soyad, email, okul, telefon, created_at
+ogretmen-ayarlari   → { ders, siniflar: string[], yil, adSoyad?, okulAdi?, sehir? }
+tum-planlar         → PlanEntry[]  (her sınıf için ayrı obje)
+aktif-sinif         → string  (şu an görüntülenen sınıf)
+onboarding-tamamlandi → "1"
+tamamlanan-haftalar → Record<sinif, number[]>  — örn: { "6. Sınıf": [1,2,3] }
+hafta-notlari       → Record<sinif, Record<string, string>>
+```
+
+`PlanEntry` tipi (`src/types/planEntry.ts`):
+```
+{ sinif, ders, yil, tip: 'meb'|'yukle', plan: OlusturulmusPlan|null, rows: ParsedRow[]|null }
+```
+
+### Supabase Tabloları (ileride)
+```
+users, yillik_planlar, haftalar, kazanimlar, leads
 ```
 
 ## Klasör Yapısı
@@ -96,3 +114,10 @@ npm run lint       # ESLint kontrol
 - Mobil öncelikli tasarım (öğretmenler telefonda kullanacak)
 - MEB takvim verisi src/data/ altında JSON olarak tutulacak (API'ye gerek yok)
 - Supabase Row Level Security (RLS) mutlaka aktif olacak
+
+## Alınan Tasarım Kararları
+- **Hafta bazlı takip** — günlük değil. Ders programı girmek gerekmez, kazanımlar haftaya bağlı.
+- **Onboarding ana ekranda kart** — ayrı /onboarding sayfası değil, uygulama görünür kalır.
+- **Çoklu sınıf** — `sinif` (tek) yerine `siniflar: string[]`. Her sınıf ayrı `PlanEntry`.
+- **Ana ekran kazanım kartı** — sınıf sekmeli, tek kart. Kazanıma tıklanınca yıllık plana gider.
+- **Renk paleti** — koyu mavi `#1e3a5f`, turuncu `#f97316`. Değiştirme.
