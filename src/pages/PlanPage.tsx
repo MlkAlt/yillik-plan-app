@@ -1,4 +1,5 @@
 
+import { useNavigate } from 'react-router-dom';
 import type { OlusturulmusPlan, Hafta } from '../types/takvim';
 import type { ParsedRow } from '../lib/fileParser';
 
@@ -18,6 +19,7 @@ function formatTarih(isoTarih: string): string {
 }
 
 export function PlanPage({ plan, rows, ders, sinif }: PlanPageProps) {
+    const navigate = useNavigate();
     const isMeb = plan !== null && plan.haftalar && plan.haftalar.length > 0;
     const isUploaded = rows !== null && rows.length > 0;
     const dataLength = isMeb ? plan!.haftalar.length : (isUploaded ? rows!.length : 0);
@@ -65,7 +67,8 @@ export function PlanPage({ plan, rows, ders, sinif }: PlanPageProps) {
                     return (
                         <div
                             key={`meb-${h.haftaNo}-${i}`}
-                            className={`rounded-2xl shadow-sm p-4 border transition-colors ${isTatil ? 'bg-orange-50 border-orange-200' : 'bg-white border-gray-100'
+                            onClick={() => navigate(`/app/hafta/${h.haftaNo}`)}
+                            className={`rounded-2xl shadow-sm p-4 border transition-colors cursor-pointer ${isTatil ? 'bg-orange-50 border-orange-200' : 'bg-white border-gray-100'
                                 }`}
                         >
                             <div className="flex justify-between items-start mb-3">
@@ -96,7 +99,8 @@ export function PlanPage({ plan, rows, ders, sinif }: PlanPageProps) {
                 {isUploaded && rows!.map((r: ParsedRow, i: number) => (
                     <div
                         key={`row-${i}`}
-                        className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100 transition-colors hover:shadow-md"
+                        onClick={() => navigate(`/app/hafta/${r.haftaNo}`)}
+                        className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100 transition-colors hover:shadow-md cursor-pointer"
                     >
                         <div className="flex justify-between items-start mb-3">
                             <span className="font-extrabold text-[#1e3a5f] text-lg">

@@ -7,6 +7,7 @@ import { YuklemePage } from './pages/YuklemePage'
 import { AppHomeScreen } from './pages/AppHomeScreen'
 import { AppSettingsScreen } from './pages/AppSettingsScreen'
 import { AppLayout } from './components/AppLayout'
+import { HaftaDetayPage } from './pages/HaftaDetayPage'
 import type { OlusturulmusPlan } from './types/takvim'
 import type { ParsedRow } from './lib/fileParser'
 
@@ -88,6 +89,7 @@ function App() {
           }
         />
         <Route path="/app/ayarlar" element={<AppLayout><AppSettingsScreen /></AppLayout>} />
+        <Route path="/app/hafta/:haftaNo" element={<AppLayout><HaftaDetayPage /></AppLayout>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
