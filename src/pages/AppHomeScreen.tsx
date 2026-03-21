@@ -23,11 +23,15 @@ export function AppHomeScreen() {
   } | null>(null);
 
   const [ogretmenAd, setOgretmenAd] = useState('');
+  const [kazanimlar, setKazanimlar] = useState<Record<string, string>>({});
 
   useEffect(() => {
     try {
       const planItem = localStorage.getItem('aktif-plan');
       if (planItem) setAktifPlan(JSON.parse(planItem));
+
+      const kazanimItem = localStorage.getItem('kazanimlar');
+      if (kazanimItem) setKazanimlar(JSON.parse(kazanimItem));
 
       const ayarlarItem = localStorage.getItem('ogretmen-ayarlari');
       if (ayarlarItem) {
@@ -50,6 +54,10 @@ export function AppHomeScreen() {
   else if (saat >= 17 && saat < 21) { mesaj = "İyi akşamlar"; emoji = "🌆"; }
 
   const karsilama = ogretmenAd ? `${mesaj}, ${ogretmenAd}! ${emoji}` : `${mesaj} ${emoji}`;
+
+  const bugunGun = new Date().getDay();
+  const gunAdlari = ['', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
+  const bugunAdi = gunAdlari[bugunGun] || '';
 
   // Aktif haftayı bulma
   let aktifHafta: Hafta | null = null;
@@ -105,29 +113,64 @@ export function AppHomeScreen() {
         </div>
       )}
 
-      {/* 3. BU HAFTA KARTI */}
-      {aktifPlan?.tip === 'meb' && aktifHafta && (
+      {/* 3. BUGÜN KARTI */}
+      {(!aktifPlan || aktifPlan.tip !== 'meb' || !aktifHafta || bugunGun === 0 || bugunGun === 6) ? (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-5 text-center transition-shadow hover:shadow-md">
+          <p className="text-[#1e3a5f] font-bold mb-4">📅 Bugün ders yok</p>
+          <button
+            onClick={() => navigate('/app/plan')}
+            className="bg-[#1e3a5f] text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm active:scale-95 transition-all hover:opacity-90 inline-flex items-center gap-1.5"
+          >
+            Planımı Görüntüle <span>→</span>
+          </button>
+        </div>
+      ) : (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-5 transition-shadow hover:shadow-md">
           <div className="text-xs font-semibold tracking-wider text-gray-400 uppercase mb-3 flex items-center gap-1.5">
-            📅 Bu Hafta
+            📅 BUGÜN — {bugunAdi}
           </div>
           <div className="flex justify-between items-start mb-3">
-            <span className="font-extrabold text-lg text-[#1e3a5f]">
+            <span className="text-sm font-medium text-gray-400">
               {aktifHafta.haftaNo}. Hafta
             </span>
-            <span className="text-[11px] text-gray-500 font-semibold bg-gray-50 px-2.5 py-1 rounded-md border border-gray-100/50">
+            <span className="text-[11px] text-gray-400 font-semibold bg-gray-50 px-2.5 py-1 rounded-md border border-gray-100/50">
               {formatTarih(aktifHafta.baslangicTarihi)} – {formatTarih(aktifHafta.bitisTarihi)}
             </span>
           </div>
 
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-widest bg-slate-100 text-slate-500 px-3 py-1.5 rounded-full inline-block">
+          <div className="mb-2">
+            <span className="text-[10px] font-bold uppercase tracking-widest bg-slate-100 text-slate-500 px-3 py-1.5 rounded-full inline-block mb-3">
               {aktifHafta.donem}. Dönem
             </span>
-            {aktifHafta.tatilMi && (
-              <span className="text-sm font-bold text-[#f97316] flex items-center gap-1.5">
-                🎉 Tatil haftası!
-              </span>
+            
+            {aktifHafta.tatilMi ? (
+              <div className="text-xl font-black text-[#f97316] mt-1 mb-2">
+                🎉 Tatil Haftası
+              </div>
+            ) : (
+              <div className="mt-1">
+                {aktifHafta.kazanim ? (
+                  <>
+                    <p className="font-bold text-[#1e3a5f] text-base mb-1.5 leading-snug">{aktifHafta.kazanim}</p>
+                    {aktifHafta.kazanimDetay && (
+                      <p className="text-gray-500 text-[13px] mt-1 mb-4 leading-relaxed">{aktifHafta.kazanimDetay}</p>
+                    )}
+                  </>
+                ) : null}
+
+                {kazanimlar[`${aktifHafta.haftaNo}_${bugunAdi}`] ? (
+                  <div className="bg-green-50 border border-green-200 text-green-700 px-3.5 py-3 rounded-xl text-sm mt-3">
+                    <span className="font-bold">📝 Notunuz:</span> {kazanimlar[`${aktifHafta.haftaNo}_${bugunAdi}`]}
+                  </div>
+                ) : (
+                  <button 
+                    onClick={() => navigate(`/app/hafta/${aktifHafta.haftaNo}`)} 
+                    className="w-full text-left text-gray-500 text-xs font-medium mt-3 flex items-center gap-2 p-2.5 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 hover:text-gray-700 border border-gray-100 transition-all"
+                  >
+                    <span>✏️</span> Not eklemek için hafta detayına gidin
+                  </button>
+                )}
+              </div>
             )}
           </div>
         </div>
