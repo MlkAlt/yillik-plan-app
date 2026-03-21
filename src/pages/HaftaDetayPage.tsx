@@ -24,40 +24,52 @@ export function HaftaDetayPage() {
 
   useEffect(() => {
     try {
-      // Plan verisini oku
-      const planItem = localStorage.getItem('aktif-plan')
-      if (planItem) {
-        const parsed = JSON.parse(planItem) as {
+      // Aktif sınıfı oku
+      const aktifSinifStr = localStorage.getItem('aktif-sinif') || ''
+
+      // Plan verisini tum-planlar'dan oku
+      const planlarItem = localStorage.getItem('tum-planlar')
+      if (planlarItem) {
+        const planlar = JSON.parse(planlarItem) as Array<{
           tip: 'meb' | 'yukle'
           plan: OlusturulmusPlan | null
           rows: ParsedRow[] | null
           ders: string
           sinif: string
-        }
-        setDers(parsed.ders || '')
-        setSinif(parsed.sinif || '')
-
-        if (parsed.tip === 'meb' && parsed.plan) {
-          const bulunan = parsed.plan.haftalar.find((h) => h.haftaNo === no)
-          if (bulunan) setHafta(bulunan)
-        } else if (parsed.tip === 'yukle' && parsed.rows) {
-          const bulunan = parsed.rows.find((r) => r.haftaNo === no)
-          if (bulunan) setUploadedRow(bulunan)
+        }>
+        const entry = planlar.find(p => p.sinif === aktifSinifStr) || planlar[0]
+        if (entry) {
+          setDers(entry.ders || '')
+          setSinif(entry.sinif || '')
+          if (entry.tip === 'meb' && entry.plan) {
+            const bulunan = entry.plan.haftalar.find((h) => h.haftaNo === no)
+            if (bulunan) setHafta(bulunan)
+          } else if (entry.tip === 'yukle' && entry.rows) {
+            const bulunan = entry.rows.find((r) => r.haftaNo === no)
+            if (bulunan) setUploadedRow(bulunan)
+          }
         }
       }
 
-      // Tamamlanma durumunu oku
+      // Tamamlanma durumunu sınıf bazlı oku
       const tamamlananItem = localStorage.getItem('tamamlanan-haftalar')
       if (tamamlananItem) {
-        const liste: number[] = JSON.parse(tamamlananItem)
+        const parsed = JSON.parse(tamamlananItem)
+        const liste: number[] = Array.isArray(parsed)
+          ? parsed
+          : (parsed[aktifSinifStr] || [])
         setTamamlandi(liste.includes(no))
       }
 
-      // Notu oku
+      // Notu sınıf bazlı oku
       const notlarItem = localStorage.getItem('hafta-notlari')
       if (notlarItem) {
-        const notlar: Record<number, string> = JSON.parse(notlarItem)
-        setNot(notlar[no] || '')
+        const parsed = JSON.parse(notlarItem)
+        // Yeni format: { "6. Sınıf": { "1": "not" } } veya eski format { "1": "not" }
+        const notlar = aktifSinifStr && parsed[aktifSinifStr]
+          ? parsed[aktifSinifStr]
+          : parsed
+        setNot(notlar[String(no)] || '')
       }
     } catch {
       // localStorage okunamadı
@@ -66,15 +78,17 @@ export function HaftaDetayPage() {
 
   function handleTamamlaToggle() {
     try {
+      const aktifSinifStr = localStorage.getItem('aktif-sinif') || sinif
       const tamamlananItem = localStorage.getItem('tamamlanan-haftalar')
-      const liste: number[] = tamamlananItem ? JSON.parse(tamamlananItem) : []
-      let yeniListe: number[]
-      if (tamamlandi) {
-        yeniListe = liste.filter((n) => n !== no)
-      } else {
-        yeniListe = [...liste, no]
-      }
-      localStorage.setItem('tamamlanan-haftalar', JSON.stringify(yeniListe))
+      const parsed = tamamlananItem ? JSON.parse(tamamlananItem) : {}
+      const eskiListe: number[] = Array.isArray(parsed) ? parsed : (parsed[aktifSinifStr] || [])
+      const yeniListe = tamamlandi
+        ? eskiListe.filter((n) => n !== no)
+        : [...eskiListe, no]
+      const yeniParsed = Array.isArray(parsed)
+        ? { [aktifSinifStr]: yeniListe }
+        : { ...parsed, [aktifSinifStr]: yeniListe }
+      localStorage.setItem('tamamlanan-haftalar', JSON.stringify(yeniParsed))
       setTamamlandi(!tamamlandi)
     } catch {
       // kayıt başarısız
@@ -84,10 +98,13 @@ export function HaftaDetayPage() {
   function handleNotChange(deger: string) {
     setNot(deger)
     try {
+      const aktifSinifStr = localStorage.getItem('aktif-sinif') || sinif
       const notlarItem = localStorage.getItem('hafta-notlari')
-      const notlar: Record<number, string> = notlarItem ? JSON.parse(notlarItem) : {}
-      notlar[no] = deger
-      localStorage.setItem('hafta-notlari', JSON.stringify(notlar))
+      const parsed = notlarItem ? JSON.parse(notlarItem) : {}
+      const sinifNotlar = parsed[aktifSinifStr] || {}
+      sinifNotlar[String(no)] = deger
+      parsed[aktifSinifStr] = sinifNotlar
+      localStorage.setItem('hafta-notlari', JSON.stringify(parsed))
     } catch {
       // kayıt başarısız
     }
