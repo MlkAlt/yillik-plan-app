@@ -71,6 +71,21 @@ interface AppHomeScreenProps {
   onSinifSec: (sinif: string) => void;
 }
 
+function ProgressRing({ yuzde, selected = false, size = 20 }: { yuzde: number; selected?: boolean; size?: number }) {
+  const r = (size - 5) / 2
+  const cevre = 2 * Math.PI * r
+  const offset = cevre - (yuzde / 100) * cevre
+  return (
+    <svg width={size} height={size} style={{ transform: 'rotate(-90deg)', flexShrink: 0 }}>
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none"
+        stroke={selected ? 'rgba(255,255,255,0.2)' : '#e5e7eb'} strokeWidth="2.5" />
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none"
+        stroke={selected ? 'rgba(255,255,255,0.85)' : '#f97316'} strokeWidth="2.5"
+        strokeDasharray={cevre} strokeDashoffset={offset} strokeLinecap="round" />
+    </svg>
+  )
+}
+
 // Tüm sınıfların bu haftaki kazanımlarını tek kartta gösteren component
 function BuHaftaKarti({
   planlar,
@@ -83,15 +98,22 @@ function BuHaftaKarti({
   onSinifSec: (sinif: string) => void;
   navigate: ReturnType<typeof useNavigate>;
 }) {
+  const [seciliSinif, setSeciliSinif] = useState(planlar[0]?.sinif || '')
+
   const bugunGun = new Date().getDay()
   const haftaSonu = bugunGun === 0 || bugunGun === 6
 
-  // İlk MEB planından hafta bilgisini al (tüm sınıflar aynı takvimde)
-  const referansPlan = planlar.find(p => p.tip === 'meb' && p.plan)
-  const aktifHafta = referansPlan?.plan ? bugunHaftasiniAl(referansPlan.plan) : null
-  const sonrakiHafta = !aktifHafta && referansPlan?.plan ? sonrakiHaftayiAl(referansPlan.plan) : null
+  const aktifEntry = planlar.find(p => p.sinif === seciliSinif) || planlar[0]
+  const aktifHafta = aktifEntry?.plan ? bugunHaftasiniAl(aktifEntry.plan) : null
+  const sonrakiHafta = !aktifHafta && aktifEntry?.plan ? sonrakiHaftayiAl(aktifEntry.plan) : null
 
-  const haftaBaslik = aktifHafta
+  function handleKazanimTikla() {
+    if (!aktifEntry) return
+    onSinifSec(aktifEntry.sinif)
+    navigate('/app/plan')
+  }
+
+  const haftaBilgi = aktifHafta
     ? `${aktifHafta.haftaNo}. Hafta · ${formatTarihKısa(aktifHafta.baslangicTarihi)}–${formatTarihKısa(aktifHafta.bitisTarihi)}`
     : sonrakiHafta
     ? `Sonraki: ${sonrakiHafta.haftaNo}. Hafta · ${formatTarihKısa(sonrakiHafta.baslangicTarihi)}`
@@ -102,102 +124,94 @@ function BuHaftaKarti({
       {/* Başlık */}
       <div className="flex items-center justify-between mb-4">
         <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">📅 Bu Hafta</span>
-        <span className="text-xs text-gray-400 font-medium">{haftaBaslik}</span>
+        <span className="text-xs text-gray-400 font-medium">{haftaBilgi}</span>
       </div>
 
-      {/* Hafta sonu */}
-      {haftaSonu && !aktifHafta && (
-        <div className="text-center py-3">
+      {/* Kazanım içeriği — tıklanabilir */}
+      <button
+        onClick={handleKazanimTikla}
+        className="w-full text-left mb-4 group min-h-[56px]"
+      >
+        {/* Hafta sonu */}
+        {haftaSonu && !aktifHafta && (
           <p className="font-bold text-gray-400">Hafta sonu ☕</p>
-          {sonrakiHafta?.kazanim && (
-            <p className="text-gray-400 text-xs mt-1.5">
-              Pazartesi: {sonrakiHafta.kazanim}
-            </p>
-          )}
-        </div>
-      )}
+        )}
 
-      {/* Tatil */}
-      {aktifHafta?.tatilMi && (
-        <div className="text-center py-2">
+        {/* Tatil */}
+        {aktifHafta?.tatilMi && (
           <p className="font-black text-[#f97316] text-base">🎉 {aktifHafta.tatilAdi}</p>
-        </div>
-      )}
+        )}
 
-      {/* Her sınıf için kazanım satırı */}
-      {!haftaSonu && aktifHafta && !aktifHafta.tatilMi && (
-        <div className="flex flex-col gap-3">
-          {planlar.map((entry, i) => {
-            const hafta = entry.plan ? bugunHaftasiniAl(entry.plan) : null
-            const kazanim = hafta?.kazanim
-            const unite = hafta?.uniteAdi
+        {/* Normal hafta */}
+        {aktifHafta && !aktifHafta.tatilMi && (
+          <>
+            {aktifHafta.uniteAdi && (
+              <p className="text-[11px] font-bold text-[#f97316] uppercase tracking-wider mb-1.5">
+                {aktifHafta.uniteAdi}
+              </p>
+            )}
+            <p className="text-[#1e3a5f] font-bold text-[15px] leading-snug group-active:opacity-70 transition-opacity">
+              {aktifHafta.kazanim || 'Bu hafta için kazanım girilmemiş.'}
+            </p>
+            {aktifHafta.kazanimDetay && (
+              <p className="text-gray-500 text-sm mt-1.5 leading-relaxed line-clamp-2">
+                {aktifHafta.kazanimDetay}
+              </p>
+            )}
+          </>
+        )}
 
-            return (
-              <div
-                key={entry.sinif}
-                className={`${i < planlar.length - 1 ? 'pb-3 border-b border-gray-100' : ''}`}
-              >
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-black text-white bg-[#1e3a5f] px-2.5 py-0.5 rounded-full">
-                    {entry.sinif}
-                  </span>
-                  {unite && (
-                    <span className="text-xs text-[#f97316] font-semibold">{unite}</span>
-                  )}
-                </div>
-                {kazanim ? (
-                  <p className="text-sm font-semibold text-gray-700 leading-snug">{kazanim}</p>
-                ) : (
-                  <p className="text-sm text-gray-400 italic">Kazanım girilmemiş</p>
-                )}
-              </div>
-            )
-          })}
-        </div>
-      )}
+        {/* Plan dönemi dışı */}
+        {!aktifHafta && !haftaSonu && (
+          <p className="text-gray-400 text-sm">
+            {sonrakiHafta ? `Pazartesi başlıyor: ${sonrakiHafta.kazanim || sonrakiHafta.haftaNo + '. hafta'}` : 'Plan dönemi dışı'}
+          </p>
+        )}
 
-      {/* Plan dönemi dışı + sonraki hafta */}
-      {!haftaSonu && !aktifHafta && sonrakiHafta && (
-        <div className="flex flex-col gap-2">
-          {planlar.map(entry => {
-            const hafta = entry.plan ? sonrakiHaftayiAl(entry.plan) : null
-            return (
-              <div key={entry.sinif}>
-                <span className="text-xs font-black text-white bg-[#1e3a5f] px-2.5 py-0.5 rounded-full mr-2">
-                  {entry.sinif}
-                </span>
-                <span className="text-sm text-gray-500">{hafta?.kazanim || '—'}</span>
-              </div>
-            )
-          })}
-        </div>
-      )}
+        <p className="text-[11px] text-gray-300 mt-2 font-medium group-hover:text-gray-400 transition-colors">
+          Yıllık plana git →
+        </p>
+      </button>
 
-      {/* Alt: progress özeti + link */}
-      <div className="mt-4 pt-3 border-t border-gray-50 flex items-center justify-between">
-        <div className="flex gap-3">
+      {/* Sınıf seçici — birden fazla sınıf varsa */}
+      {planlar.length > 1 && (
+        <div className="flex gap-2 pt-3 border-t border-gray-100">
           {planlar.map(entry => {
             const total = entry.plan?.haftalar.filter(h => !h.tatilMi).length || 0
             const done = tamamlananlar[entry.sinif]?.length || 0
             const yuzde = total > 0 ? Math.round((done / total) * 100) : 0
+            const isSelected = entry.sinif === seciliSinif
             return (
               <button
                 key={entry.sinif}
-                onClick={() => { onSinifSec(entry.sinif); navigate('/app/plan') }}
-                className="flex items-center gap-1.5 group"
+                onClick={() => setSeciliSinif(entry.sinif)}
+                className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border font-bold text-sm transition-all ${
+                  isSelected
+                    ? 'bg-[#1e3a5f] border-[#1e3a5f] text-white'
+                    : 'bg-gray-50 border-gray-200 text-gray-500 hover:border-gray-300'
+                }`}
               >
-                <span className="text-xs font-bold text-gray-400 group-hover:text-[#1e3a5f] transition-colors">
-                  {entry.sinif}
-                </span>
-                <span className="text-xs text-gray-300 font-medium">%{yuzde}</span>
+                <ProgressRing yuzde={yuzde} selected={isSelected} size={20} />
+                {entry.sinif}
               </button>
             )
           })}
         </div>
-        <span className="text-xs text-gray-300 font-medium">
-          {planlar.map(e => tamamlananlar[e.sinif]?.length || 0).reduce((a, b) => a + b, 0)} hafta ✓
-        </span>
-      </div>
+      )}
+
+      {/* Tek sınıf — alt progress */}
+      {planlar.length === 1 && (() => {
+        const entry = planlar[0]
+        const total = entry.plan?.haftalar.filter(h => !h.tatilMi).length || 0
+        const done = tamamlananlar[entry.sinif]?.length || 0
+        const yuzde = total > 0 ? Math.round((done / total) * 100) : 0
+        return (
+          <div className="flex items-center gap-3 pt-3 border-t border-gray-100">
+            <ProgressRing yuzde={yuzde} size={28} />
+            <span className="text-xs text-gray-400 font-medium">{done}/{total} hafta tamamlandı</span>
+          </div>
+        )
+      })()}
     </div>
   )
 }
