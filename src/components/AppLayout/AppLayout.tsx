@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 
 interface AppLayoutProps {
@@ -8,6 +9,25 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   const navigate = useNavigate()
   const location = useLocation()
+
+  const [basharf, setBasharf] = useState<string | null>(null)
+
+  useEffect(() => {
+    try {
+      const ayarlarItem = localStorage.getItem('ogretmen-ayarlari')
+      if (ayarlarItem) {
+        const ayarlar = JSON.parse(ayarlarItem)
+        if (ayarlar.adSoyad) {
+          const ad = ayarlar.adSoyad.trim()
+          if (ad) {
+            setBasharf(ad.charAt(0).toUpperCase())
+          }
+        }
+      }
+    } catch (e) {
+      console.error(e)
+    }
+  }, [])
 
   const tabs = [
     { name: 'Ana', path: '/app', icon: '🏠' },
@@ -23,7 +43,12 @@ export function AppLayout({ children }: AppLayoutProps) {
         {/* HEADER */}
         <header className="sticky top-0 z-40 bg-white border-b border-slate-200 h-14 px-5 flex items-center justify-between shadow-sm">
           <span className="font-black text-[#1e3a5f] text-lg tracking-tight">📋 Yıllık Plan</span>
-          <button className="text-xl hover:opacity-80 transition-opacity">🔔</button>
+          <div className="flex items-center gap-3">
+            <button className="text-xl hover:opacity-80 transition-opacity">🔔</button>
+            <div className="w-8 h-8 rounded-full bg-[#f97316] text-white flex items-center justify-center font-bold text-sm shadow-sm ring-2 ring-orange-50 cursor-pointer">
+              {basharf ? basharf : '👤'}
+            </div>
+          </div>
         </header>
 
         {/* MAIN CONTENT AREA */}

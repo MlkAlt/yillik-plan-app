@@ -11,7 +11,7 @@ interface PlanPageProps {
 }
 
 function formatTarih(isoTarih: string): string {
-    const aylar = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara']
+    const aylar = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara']
     const d = new Date(isoTarih)
     const gun = String(d.getDate()).padStart(2, '0')
     const ay = aylar[d.getMonth()]

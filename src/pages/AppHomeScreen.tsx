@@ -22,23 +22,34 @@ export function AppHomeScreen() {
     sinif: string;
   } | null>(null);
 
+  const [ogretmenAd, setOgretmenAd] = useState('');
 
   useEffect(() => {
     try {
       const planItem = localStorage.getItem('aktif-plan');
       if (planItem) setAktifPlan(JSON.parse(planItem));
 
-
+      const ayarlarItem = localStorage.getItem('ogretmen-ayarlari');
+      if (ayarlarItem) {
+        const ayarlar = JSON.parse(ayarlarItem);
+        if (ayarlar.adSoyad) {
+          const ad = ayarlar.adSoyad.trim().split(' ')[0];
+          setOgretmenAd(ad);
+        }
+      }
     } catch (e) {
       console.error('Veri okunurken hata', e);
     }
   }, []);
 
   const saat = new Date().getHours();
-  let karsilama = "İyi geceler 🌙";
-  if (saat >= 6 && saat < 12) karsilama = "Günaydın 🌅";
-  else if (saat >= 12 && saat < 17) karsilama = "İyi günler ☀️";
-  else if (saat >= 17 && saat < 21) karsilama = "İyi akşamlar 🌆";
+  let mesaj = "İyi geceler";
+  let emoji = "🌙";
+  if (saat >= 6 && saat < 12) { mesaj = "Günaydın"; emoji = "🌅"; }
+  else if (saat >= 12 && saat < 17) { mesaj = "İyi günler"; emoji = "☀️"; }
+  else if (saat >= 17 && saat < 21) { mesaj = "İyi akşamlar"; emoji = "🌆"; }
+
+  const karsilama = ogretmenAd ? `${mesaj}, ${ogretmenAd}! ${emoji}` : `${mesaj} ${emoji}`;
 
   // Aktif haftayı bulma
   let aktifHafta: Hafta | null = null;

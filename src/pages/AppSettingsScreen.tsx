@@ -12,7 +12,14 @@ const SINIF_SECENEKLERI = Array.from({ length: 12 }, (_, i) => `${i + 1}. Sını
 
 const YIL_SECENEKLERI = ['2024-2025', '2025-2026'];
 
+const SEHIRLER = [
+  "Adana", "Adıyaman", "Afyonkarahisar", "Ağrı", "Amasya", "Ankara", "Antalya", "Artvin", "Aydın", "Balıkesir", "Bilecik", "Bingöl", "Bitlis", "Bolu", "Burdur", "Bursa", "Çanakkale", "Çankırı", "Çorum", "Denizli", "Diyarbakır", "Edirne", "Elazığ", "Erzincan", "Erzurum", "Eskişehir", "Gaziantep", "Giresun", "Gümüşhane", "Hakkari", "Hatay", "Isparta", "Mersin", "İstanbul", "İzmir", "Kars", "Kastamonu", "Kayseri", "Kırklareli", "Kırşehir", "Kocaeli", "Konya", "Kütahya", "Malatya", "Manisa", "Kahramanmaraş", "Mardin", "Muğla", "Muş", "Nevşehir", "Niğde", "Ordu", "Rize", "Sakarya", "Samsun", "Siirt", "Sinop", "Sivas", "Tekirdağ", "Tokat", "Trabzon", "Tunceli", "Şanlıurfa", "Uşak", "Van", "Yozgat", "Zonguldak", "Aksaray", "Bayburt", "Karaman", "Kırıkkale", "Batman", "Şırnak", "Bartın", "Ardahan", "Iğdır", "Yalova", "Karabük", "Kilis", "Osmaniye", "Düzce"
+];
+
 interface AyarlarState {
+  adSoyad: string;
+  okulAdi: string;
+  sehir: string;
   ders: string;
   sinif: string;
   yil: string;
@@ -22,6 +29,9 @@ const STORAGE_KEY = 'ogretmen-ayarlari';
 
 export function AppSettingsScreen() {
   const [ayarlar, setAyarlar] = useState<AyarlarState>({
+    adSoyad: '',
+    okulAdi: '',
+    sehir: '',
     ders: '',
     sinif: '',
     yil: '2024-2025'
@@ -41,7 +51,7 @@ export function AppSettingsScreen() {
     }
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
     const { name, value } = e.target;
     setAyarlar(prev => ({ ...prev, [name]: value }));
   };
@@ -71,6 +81,57 @@ export function AppSettingsScreen() {
       {/* Form Content */}
       <div className="flex flex-col gap-5 bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
         
+        {/* Ad Soyad */}
+        <div className="flex flex-col gap-2">
+          <label htmlFor="adSoyad" className="font-medium text-[#1e3a5f] text-sm">
+            Ad Soyad
+          </label>
+          <input
+            type="text"
+            id="adSoyad"
+            name="adSoyad"
+            placeholder="Adınız Soyadınız"
+            value={ayarlar.adSoyad || ''}
+            onChange={handleChange}
+            className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#f97316]/20 focus:border-[#f97316] transition-all text-gray-800"
+          />
+        </div>
+
+        {/* Okul Adı */}
+        <div className="flex flex-col gap-2">
+          <label htmlFor="okulAdi" className="font-medium text-[#1e3a5f] text-sm">
+            Okul Adı
+          </label>
+          <input
+            type="text"
+            id="okulAdi"
+            name="okulAdi"
+            placeholder="Görev yaptığınız okul"
+            value={ayarlar.okulAdi || ''}
+            onChange={handleChange}
+            className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#f97316]/20 focus:border-[#f97316] transition-all text-gray-800"
+          />
+        </div>
+
+        {/* Şehir Seçimi */}
+        <div className="flex flex-col gap-2">
+          <label htmlFor="sehir" className="font-medium text-[#1e3a5f] text-sm">
+            Şehir Seç
+          </label>
+          <select
+            id="sehir"
+            name="sehir"
+            value={ayarlar.sehir || ''}
+            onChange={handleChange}
+            className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#f97316]/20 focus:border-[#f97316] transition-all text-gray-800"
+          >
+            <option value="" disabled>Lütfen şehrinizi seçin</option>
+            {SEHIRLER.map(sehir => (
+              <option key={sehir} value={sehir}>{sehir}</option>
+            ))}
+          </select>
+        </div>
+
         {/* Ders Seçimi */}
         <div className="flex flex-col gap-2">
           <label htmlFor="ders" className="font-medium text-[#1e3a5f] text-sm">
