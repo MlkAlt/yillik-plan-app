@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import type { Hafta } from '../types/takvim'
 import type { ParsedRow } from '../lib/fileParser'
@@ -22,6 +22,8 @@ export function HaftaDetayPage() {
   const [sinif, setSinif] = useState('')
   const [tamamlandi, setTamamlandi] = useState(false)
   const [not, setNot] = useState('')
+  const [notKaydedildi, setNotKaydedildi] = useState(false)
+  const notTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     try {
@@ -101,6 +103,10 @@ export function HaftaDetayPage() {
       sinifNotlar[String(no)] = deger
       parsed[aktifSinifStr] = sinifNotlar
       localStorage.setItem('hafta-notlari', JSON.stringify(parsed))
+      // Kaydedildi göstergesi — debounced
+      if (notTimerRef.current) clearTimeout(notTimerRef.current)
+      setNotKaydedildi(true)
+      notTimerRef.current = setTimeout(() => setNotKaydedildi(false), 1500)
     } catch {
       // kayıt başarısız
     }
@@ -211,9 +217,14 @@ export function HaftaDetayPage() {
 
       {/* Öğretmen notu */}
       <div className="bg-[#FAFAF9] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-5">
-        <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-          Notlarım
-        </label>
+        <div className="flex items-center justify-between mb-2">
+          <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider">
+            Notlarım
+          </label>
+          {notKaydedildi && (
+            <span className="text-xs font-bold text-[#059669] transition-opacity">✓ Kaydedildi</span>
+          )}
+        </div>
         <textarea
           value={not}
           onChange={(e) => handleNotChange(e.target.value)}

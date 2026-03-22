@@ -81,7 +81,11 @@ function BuHaftaKarti({
   onSinifSec: (sinif: string) => void;
   navigate: ReturnType<typeof useNavigate>;
 }) {
-  const [seciliSinif, setSeciliSinif] = useState(planlar[0]?.sinif || '')
+  const [seciliSinif, setSeciliSinif] = useState(() => {
+    const aktif = localStorage.getItem('aktif-sinif')
+    if (aktif && planlar.find(p => p.sinif === aktif)) return aktif
+    return planlar[0]?.sinif || ''
+  })
 
   const bugunGun = new Date().getDay()
   const haftaSonu = bugunGun === 0 || bugunGun === 6
@@ -230,6 +234,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
     return {};
   });
   const [olusturuluyor, setOlusturuluyor] = useState(false);
+  const [olusturmaHata, setOlusturmaHata] = useState('');
 
   const [onbDers, setOnbDers] = useState(() => {
     try {
@@ -300,6 +305,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
 
   function handleOnboardingTamamla() {
     setOlusturuluyor(true);
+    setOlusturmaHata('');
     try {
       const yil = '2025-2026';
       const isSinifOgretmeni = onbDers === 'Sınıf Öğretmeni';
@@ -322,6 +328,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
         }));
         onPlanEkle(entries);
         onSinifSec(entries[0].sinif);
+        navigate('/app/plan');
       } else {
         if (onbSiniflar.length === 0) { setOlusturuluyor(false); return; }
         localStorage.setItem('ogretmen-ayarlari', JSON.stringify({ ders: onbDers, siniflar: onbSiniflar, yil }));
@@ -333,9 +340,11 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
         }));
         onPlanEkle(entries);
         onSinifSec(entries[0].sinif);
+        navigate('/app/plan');
       }
     } catch {
       setOlusturuluyor(false);
+      setOlusturmaHata('Plan oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.');
     }
   }
 
@@ -448,6 +457,9 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
             </div>
           )}
 
+          {olusturmaHata && (
+            <p className="text-red-500 text-sm mb-3 font-medium">{olusturmaHata}</p>
+          )}
           <button
             onClick={handleOnboardingTamamla}
             disabled={olusturuluyor || (isSinifOgretmeni ? onbSinifOgrDersler.length === 0 : onbSiniflar.length === 0)}

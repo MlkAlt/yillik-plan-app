@@ -57,8 +57,10 @@ export function AppLayout({ children }: AppLayoutProps) {
         <nav className="fixed bottom-0 w-full max-w-lg bg-white border-t border-[#E7E5E4] z-50">
           <div className="flex justify-around items-center px-4 py-2">
             {tabs.map((tab) => {
-              // Exact match or active logic
-              const isActive = location.pathname === tab.path
+              // /app/hafta/:no → "Planım" aktif; diğerleri exact match
+              const isActive = tab.path === '/app/plan'
+                ? location.pathname.startsWith('/app/plan') || location.pathname.startsWith('/app/hafta')
+                : location.pathname === tab.path
 
               return (
                 <button

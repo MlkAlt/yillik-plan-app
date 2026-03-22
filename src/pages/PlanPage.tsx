@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Hafta } from '../types/takvim';
 import type { ParsedRow } from '../lib/fileParser';
@@ -31,6 +31,13 @@ export function PlanPage({ entry }: PlanPageProps) {
 
   const [tamamlananlar, setTamamlananlar] = useState<number[]>([]);
   const [exporting, setExporting] = useState(false);
+  const [exportingWord, setExportingWord] = useState(false);
+  const bugunRef = useRef<HTMLDivElement>(null);
+
+  const bugunStr = new Date().toISOString().split('T')[0]
+  const bugunHaftaNo = entry?.plan?.haftalar.find(
+    h => bugunStr >= h.baslangicTarihi && bugunStr <= h.bitisTarihi
+  )?.haftaNo ?? null
 
   async function handleExcelIndir() {
     if (!entry) return;
@@ -46,9 +53,14 @@ export function PlanPage({ entry }: PlanPageProps) {
 
   function handleWordIndir() {
     if (!entry) return;
-    const ayarlar = localStorage.getItem('ogretmen-ayarlari');
-    const meta = ayarlar ? JSON.parse(ayarlar) : {};
-    exportPlanToWord(entry, { okulAdi: meta.okulAdi, ogretmenAdi: meta.adSoyad });
+    setExportingWord(true);
+    try {
+      const ayarlar = localStorage.getItem('ogretmen-ayarlari');
+      const meta = ayarlar ? JSON.parse(ayarlar) : {};
+      exportPlanToWord(entry, { okulAdi: meta.okulAdi, ogretmenAdi: meta.adSoyad });
+    } finally {
+      setExportingWord(false);
+    }
   }
 
   function handleYazdir() {
@@ -57,6 +69,12 @@ export function PlanPage({ entry }: PlanPageProps) {
     const meta = ayarlar ? JSON.parse(ayarlar) : {};
     exportPlanToPrint(entry, { okulAdi: meta.okulAdi, ogretmenAdi: meta.adSoyad });
   }
+
+  useEffect(() => {
+    if (bugunRef.current) {
+      bugunRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }, [entry?.sinif])
 
   useEffect(() => {
     if (!entry) return;
@@ -147,9 +165,10 @@ export function PlanPage({ entry }: PlanPageProps) {
         </button>
         <button
           onClick={handleWordIndir}
-          className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-[#E7E5E4] bg-[#FAFAF9] text-sm font-bold text-[#2D5BE3] hover:border-[#2D5BE3] active:scale-95 transition-all"
+          disabled={exportingWord}
+          className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-[#E7E5E4] bg-[#FAFAF9] text-sm font-bold text-[#2D5BE3] hover:border-[#2D5BE3] active:scale-95 transition-all disabled:opacity-60"
         >
-          📄 Word
+          {exportingWord ? <span className="animate-pulse text-xs">Hazırlanıyor...</span> : <>📄 Word</>}
         </button>
         <button
           onClick={handleYazdir}
@@ -166,24 +185,35 @@ export function PlanPage({ entry }: PlanPageProps) {
         {isMeb && plan!.haftalar.map((h: Hafta, i: number) => {
           const isTatil = h.tatilMi;
           const isTamamlandi = tamamlananlar.includes(h.haftaNo);
+          const isBuHafta = h.haftaNo === bugunHaftaNo;
           return (
             <div
               key={`meb-${h.haftaNo}-${i}`}
+              ref={isBuHafta ? bugunRef : undefined}
               onClick={() => navigate(`/app/hafta/${h.haftaNo}`)}
               className={`rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] p-4 border transition-all cursor-pointer ${
+                isBuHafta ? 'bg-[#2D5BE3]/5 border-[#2D5BE3] ring-1 ring-[#2D5BE3]/30' :
                 isTamamlandi ? 'bg-[#059669]/10 border-[#059669]/30' :
                 isTatil ? 'bg-amber-50 border-amber-200' :
                 'bg-[#FAFAF9] border-[#E7E5E4] hover:shadow-md active:scale-[0.99]'
               }`}
             >
               <div className="flex justify-between items-start mb-3">
-                <span className={`font-bold text-lg ${
-                  isTamamlandi ? 'text-[#059669]' :
-                  isTatil ? 'text-amber-700' :
-                  'text-[#2D5BE3]'
-                }`}>
-                  {h.haftaNo}. Hafta
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className={`font-bold text-lg ${
+                    isBuHafta ? 'text-[#2D5BE3]' :
+                    isTamamlandi ? 'text-[#059669]' :
+                    isTatil ? 'text-amber-700' :
+                    'text-[#2D5BE3]'
+                  }`}>
+                    {h.haftaNo}. Hafta
+                  </span>
+                  {isBuHafta && (
+                    <span className="text-[10px] font-bold text-white bg-[#2D5BE3] px-2 py-0.5 rounded-full">
+                      Bu Hafta
+                    </span>
+                  )}
+                </div>
                 <div className="flex items-center gap-2">
                   {isTamamlandi && (
                     <span className="text-xs font-bold text-[#059669] bg-[#059669]/10 px-2 py-0.5 rounded-full border border-[#059669]/30">
