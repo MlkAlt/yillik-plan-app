@@ -187,7 +187,11 @@ hafta-notlari       → Record<sinif, Record<string, string>>
 ```
 VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
+VITE_ADSENSE_CLIENT=ca-pub-XXXXXXXXXXXXXXXX   # AdSense yayıncı ID
+VITE_ADSENSE_SLOT=XXXXXXXXXX                  # Reklam birimi ID
 ```
+
+`VITE_ADSENSE_CLIENT` boşsa `AdBanner` bileşeni hiçbir şey render etmez (`null` döner). `loadAdSense()` script'i de yüklenmez.
 
 ## Özellik Durumu
 
@@ -206,10 +210,10 @@ VITE_SUPABASE_ANON_KEY=
 - [x] Fen Bilimleri 3–4 müfredatı entegrasyonu (`ilkokulMufredatiniDonustur()` converter ile)
 - [x] Tüm ana branşlar için müfredat (Matematik 3–12, Türkçe 3–8, Hayat Bilgisi 1–3, Sosyal Bilgiler 4–7, İngilizce 5–12, Fizik/Kimya/Biyoloji/Tarih/Coğrafya/TDE 9–12)
 - [x] Merkezi müfredat registry (`mufredatRegistry.ts`)
+- [x] Yazdırma / PDF export (browser print API, `exportPlanToPrint()`)
+- [x] Kullanıcı kaydı (Supabase Auth — email/şifre, `AuthModal`)
+- [x] Push bildirim (Notification API + SW, `src/lib/notifications.ts`)
+- [x] Google AdSense entegrasyonu (`AdBanner` bileşeni, env var ile yapılandırılır)
 
 ### Yapılacaklar
 - [ ] Arayüz geçiş animasyonları
-- [ ] Kullanıcı kaydı (Supabase Auth)
-- [ ] Yazdırma / PDF export
-- [ ] Push bildirim
-- [ ] Google AdSense entegrasyonu

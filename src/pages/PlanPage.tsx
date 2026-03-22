@@ -4,6 +4,7 @@ import type { Hafta } from '../types/takvim';
 import type { ParsedRow } from '../lib/fileParser';
 import type { PlanEntry } from '../types/planEntry';
 import { exportPlanToExcel, exportPlanToWord, exportPlanToPrint } from '../lib/exportUtils';
+import { AdBanner } from '../components/AdBanner';
 
 interface PlanPageProps {
   entry: PlanEntry | null;
@@ -156,6 +157,8 @@ export function PlanPage({ entry }: PlanPageProps) {
           🖨️ Yazdır/PDF
         </button>
       </div>
+
+      <AdBanner className="mb-4 rounded-xl" />
 
       {/* Hafta Listesi */}
       <div className="flex flex-col gap-3">
