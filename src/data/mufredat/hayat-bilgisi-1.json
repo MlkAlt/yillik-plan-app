@@ -1,0 +1,47 @@
+{
+  "ders": "Hayat Bilgisi",
+  "sinif": "1. Sınıf",
+  "uniteler": [
+    {
+      "no": 1,
+      "ad": "Okul Heyecanım",
+      "kazanimlar": [
+        { "kod": "HB.1.1.1", "baslik": "Okulu tanıma", "adimlar": ["Okulun bölümlerini ve görevlilerini tanır.", "Okul kurallarını açıklar ve uygular."] },
+        { "kod": "HB.1.1.2", "baslik": "Öğrencinin hakları ve sorumlulukları", "adimlar": ["Okuldaki haklarını ve sorumluluklarını söyler."] },
+        { "kod": "HB.1.1.3", "baslik": "Kendini tanıtma", "adimlar": ["Adını, soyadını, yaşını ve sınıfını söyler.", "Yakın çevresini tanıtır."] }
+      ]
+    },
+    {
+      "no": 2,
+      "ad": "Benim Eşsiz Yuvam",
+      "kazanimlar": [
+        { "kod": "HB.1.2.1", "baslik": "Aile üyeleri", "adimlar": ["Aile bireylerini tanıtır.", "Aile içindeki görev ve sorumluluklarını açıklar."] },
+        { "kod": "HB.1.2.2", "baslik": "Konut ve çevre", "adimlar": ["Yaşadığı yeri ve çevreyi tanıtır.", "Komşuluk ilişkilerini açıklar."] }
+      ]
+    },
+    {
+      "no": 3,
+      "ad": "Dün, Bugün, Yarın",
+      "kazanimlar": [
+        { "kod": "HB.1.3.1", "baslik": "Zamanı anlama: dün-bugün-yarın", "adimlar": ["Dün, bugün ve yarın kavramlarını doğru kullanır.", "Günlük programını açıklar."] },
+        { "kod": "HB.1.3.2", "baslik": "Günler ve aylar", "adimlar": ["Haftanın günlerini ve ayların adlarını sıralar."] }
+      ]
+    },
+    {
+      "no": 4,
+      "ad": "Sağlığım Pınarı",
+      "kazanimlar": [
+        { "kod": "HB.1.4.1", "baslik": "Beden sağlığı ve temizliği", "adimlar": ["Kişisel temizliğin önemi hakkında konuşur.", "Düzenli diş fırçalama ve el yıkama alışkanlıklarını açıklar."] },
+        { "kod": "HB.1.4.2", "baslik": "Beslenme", "adimlar": ["Sağlıklı besinleri tanır; düzenli beslenmenin önemini açıklar."] }
+      ]
+    },
+    {
+      "no": 5,
+      "ad": "Çevremizi Tanıyalım",
+      "kazanimlar": [
+        { "kod": "HB.1.5.1", "baslik": "Yakın çevre ve doğa", "adimlar": ["Çevresindeki doğal unsurları (bitki, hayvan, hava) tanır.", "Mevsim değişikliklerini açıklar."] },
+        { "kod": "HB.1.5.2", "baslik": "Doğayı koruma", "adimlar": ["Çevreye zarar veren davranışları söyler.", "Doğa koruma konusunda öneriler üretir."] }
+      ]
+    }
+  ]
+}

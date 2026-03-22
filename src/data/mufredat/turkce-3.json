@@ -1,0 +1,55 @@
+{
+  "ders": "Türkçe",
+  "sinif": "3. Sınıf",
+  "uniteler": [
+    {
+      "no": 1,
+      "ad": "Okuma Becerileri",
+      "kazanimlar": [
+        { "kod": "TK.3.1.1", "baslik": "Akıcı okuma", "adimlar": ["Metni doğru, akıcı ve anlamlı okur.", "Noktalama işaretlerine dikkat ederek okur."] },
+        { "kod": "TK.3.1.2", "baslik": "Anlayarak okuma", "adimlar": ["Okuduğu metni kendi cümleleriyle anlatır.", "Ana ve yardımcı düşünceyi belirler."] }
+      ]
+    },
+    {
+      "no": 2,
+      "ad": "Dinleme ve Konuşma",
+      "kazanimlar": [
+        { "kod": "TK.3.2.1", "baslik": "Dinleme stratejileri", "adimlar": ["Dinlediği metni özetler.", "Soruları doğru yanıtlar."] },
+        { "kod": "TK.3.2.2", "baslik": "Konuşma becerileri", "adimlar": ["Konuşurken ses tonunu ve vurguyu doğru kullanır.", "Sözlü açıklama yapar."] }
+      ]
+    },
+    {
+      "no": 3,
+      "ad": "Yazma",
+      "kazanimlar": [
+        { "kod": "TK.3.3.1", "baslik": "Anlatı yazımı", "adimlar": ["Giriş-gelişme-sonuç bölümlerini içeren kısa bir hikâye yazar."] },
+        { "kod": "TK.3.3.2", "baslik": "Yazım kuralları", "adimlar": ["Büyük harfleri, noktalama işaretlerini ve imla kurallarını doğru kullanır."] }
+      ]
+    },
+    {
+      "no": 4,
+      "ad": "Dil Bilgisi",
+      "kazanimlar": [
+        { "kod": "TK.3.4.1", "baslik": "İsimler ve zamirler", "adimlar": ["İsimleri türlerine göre sınıflandırır.", "Kişi zamirlerini tanımlar ve kullanır."] },
+        { "kod": "TK.3.4.2", "baslik": "Fiiller ve zaman", "adimlar": ["Fiillerin geniş, geçmiş ve gelecek zaman çekimlerini yapar."] },
+        { "kod": "TK.3.4.3", "baslik": "Sıfatlar", "adimlar": ["Niteleme ve belirtme sıfatlarını örneklerle açıklar."] }
+      ]
+    },
+    {
+      "no": 5,
+      "ad": "Sözcük Bilgisi",
+      "kazanimlar": [
+        { "kod": "TK.3.5.1", "baslik": "Eş anlamlı ve zıt anlamlı sözcükler", "adimlar": ["Eş anlamlı ve zıt anlamlı sözcükleri bağlamdan bulur."] },
+        { "kod": "TK.3.5.2", "baslik": "Çok anlamlı sözcükler", "adimlar": ["Çok anlamlı sözcükleri cümle içinde anlamlandırır."] }
+      ]
+    },
+    {
+      "no": 6,
+      "ad": "Metin Türleri",
+      "kazanimlar": [
+        { "kod": "TK.3.6.1", "baslik": "Şiir", "adimlar": ["Şiiri sesli ve doğru okur; konusunu belirler."] },
+        { "kod": "TK.3.6.2", "baslik": "Masal", "adimlar": ["Masalın özelliklerini açıklar; kahramanları ve olayları anlatır."] }
+      ]
+    }
+  ]
+}

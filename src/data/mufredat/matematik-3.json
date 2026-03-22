@@ -1,0 +1,73 @@
+{
+  "ders": "Matematik",
+  "sinif": "3. Sınıf",
+  "uniteler": [
+    {
+      "no": 1,
+      "ad": "Doğal Sayılar",
+      "kazanimlar": [
+        { "kod": "M.3.1.1", "baslik": "1000'e kadar sayma", "adimlar": ["1000'e kadar sayıları okur ve yazar.", "1000'e kadar sayıların basamak değerlerini açıklar."] },
+        { "kod": "M.3.1.2", "baslik": "Büyük-küçük karşılaştırma", "adimlar": ["1000'e kadar sayıları karşılaştırır.", "Sayıları küçükten büyüğe ve büyükten küçüğe sıralar."] },
+        { "kod": "M.3.1.3", "baslik": "Çift-tek sayılar", "adimlar": ["Çift ve tek sayıları tanımlar.", "Verilen sayıların çift mi tek mi olduğunu belirler."] }
+      ]
+    },
+    {
+      "no": 2,
+      "ad": "Toplama ve Çıkarma",
+      "kazanimlar": [
+        { "kod": "M.3.2.1", "baslik": "Üç basamaklı sayılarla toplama", "adimlar": ["Üç basamaklı sayılarla eldesiz ve eldeli toplama işlemi yapar.", "Toplamı 1000'i aşmayan sayıları toplar."] },
+        { "kod": "M.3.2.2", "baslik": "Üç basamaklı sayılarla çıkarma", "adimlar": ["Üç basamaklı sayılarla ödünçsüz ve ödünçlü çıkarma işlemi yapar."] },
+        { "kod": "M.3.2.3", "baslik": "Problem çözme", "adimlar": ["Toplama ve çıkarma gerektiren problemleri çözer.", "Çözüm sürecini açıklar."] }
+      ]
+    },
+    {
+      "no": 3,
+      "ad": "Çarpma",
+      "kazanimlar": [
+        { "kod": "M.3.3.1", "baslik": "Çarpma tablosu", "adimlar": ["2'den 9'a kadar çarpma tablolarını öğrenir.", "Çarpma tablolarını ezbere bilir."] },
+        { "kod": "M.3.3.2", "baslik": "Çarpma işlemi", "adimlar": ["İki basamaklı sayıyı tek basamaklıyla çarpar.", "Çarpma işlemini problemlerde kullanır."] }
+      ]
+    },
+    {
+      "no": 4,
+      "ad": "Bölme",
+      "kazanimlar": [
+        { "kod": "M.3.4.1", "baslik": "Bölme kavramı", "adimlar": ["Paylaştırma ve gruplama olarak bölme modelini açıklar."] },
+        { "kod": "M.3.4.2", "baslik": "Bölme işlemi", "adimlar": ["Tek basamaklı sayıya bölme işlemi yapar.", "Bölme işlemini problemlerde kullanır."] }
+      ]
+    },
+    {
+      "no": 5,
+      "ad": "Geometri",
+      "kazanimlar": [
+        { "kod": "M.3.5.1", "baslik": "Şekiller", "adimlar": ["Üçgen, dörtgen, beşgen ve altıgenin özelliklerini açıklar."] },
+        { "kod": "M.3.5.2", "baslik": "Çevre", "adimlar": ["Çokgenlerin çevre uzunluklarını hesaplar."] }
+      ]
+    },
+    {
+      "no": 6,
+      "ad": "Ölçme",
+      "kazanimlar": [
+        { "kod": "M.3.6.1", "baslik": "Uzunluk ölçme", "adimlar": ["Metre ve santimetreyi kullanır; dönüşümleri yapar."] },
+        { "kod": "M.3.6.2", "baslik": "Kütle ölçme", "adimlar": ["Kilogram ve gramı kullanır; tartı problemleri çözer."] },
+        { "kod": "M.3.6.3", "baslik": "Sıvı ölçme", "adimlar": ["Litre ve yarım litreyi kullanır; sıvı ölçme problemleri çözer."] }
+      ]
+    },
+    {
+      "no": 7,
+      "ad": "Zaman",
+      "kazanimlar": [
+        { "kod": "M.3.7.1", "baslik": "Saat okuma", "adimlar": ["Saati dakika hassasiyetiyle okur.", "Dijital ve analog saat gösterimlerini dönüştürür."] },
+        { "kod": "M.3.7.2", "baslik": "Takvim", "adimlar": ["Ayları ve günleri kavrar; takvimde tarih belirler."] }
+      ]
+    },
+    {
+      "no": 8,
+      "ad": "Veri",
+      "kazanimlar": [
+        { "kod": "M.3.8.1", "baslik": "Veri toplama ve düzenleme", "adimlar": ["Veri toplar; tablo ve sütun grafik oluşturur."] },
+        { "kod": "M.3.8.2", "baslik": "Grafik yorumlama", "adimlar": ["Sütun ve resim grafiklerdeki verileri yorumlar."] }
+      ]
+    }
+  ]
+}

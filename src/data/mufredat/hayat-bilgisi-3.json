@@ -1,0 +1,46 @@
+{
+  "ders": "Hayat Bilgisi",
+  "sinif": "3. Sınıf",
+  "uniteler": [
+    {
+      "no": 1,
+      "ad": "Okul Heyecanım",
+      "kazanimlar": [
+        { "kod": "HB.3.1.1", "baslik": "Okulda sorumluluk", "adimlar": ["Okul kurallarına uymanın önemini açıklar.", "Okuldaki sorumluluklarını sıralar ve uygular."] },
+        { "kod": "HB.3.1.2", "baslik": "Okul yaşamına katılım", "adimlar": ["Sınıf ve okul etkinliklerine etkin biçimde katılır.", "Okul içinde güvenli davranışları açıklar."] }
+      ]
+    },
+    {
+      "no": 2,
+      "ad": "Benim Eşsiz Yuvam",
+      "kazanimlar": [
+        { "kod": "HB.3.2.1", "baslik": "Aile ve akrabalık ilişkileri", "adimlar": ["Akrabalık ilişkilerini ve kavramlarını açıklar.", "Aile içindeki iletişimin önemine örnekler verir."] },
+        { "kod": "HB.3.2.2", "baslik": "Toplumsal çevre", "adimlar": ["Yaşadığı çevredeki kurumları (okul, sağlık ocağı, belediye) tanıtır.", "Bu kurumların topluma katkılarını açıklar."] }
+      ]
+    },
+    {
+      "no": 3,
+      "ad": "Dün, Bugün, Yarın",
+      "kazanimlar": [
+        { "kod": "HB.3.3.1", "baslik": "Tarihe yolculuk", "adimlar": ["Yakın çevresindeki tarihi mekânları ve eserleri tanır.", "Geçmişteki yaşam koşullarıyla günümüzü karşılaştırır."] },
+        { "kod": "HB.3.3.2", "baslik": "Değişim ve gelişim", "adimlar": ["Toplumsal değişimlere örnekler verir.", "Teknolojinin insan yaşamına etkilerini açıklar."] }
+      ]
+    },
+    {
+      "no": 4,
+      "ad": "Sağlıklı Hayat",
+      "kazanimlar": [
+        { "kod": "HB.3.4.1", "baslik": "Sağlığımı koruyorum", "adimlar": ["Bulaşıcı hastalıklardan korunma yollarını açıklar.", "Sağlık kuruluşlarını tanır; doğru kullanımını açıklar."] },
+        { "kod": "HB.3.4.2", "baslik": "Duygusal sağlık", "adimlar": ["Duygularını tanır ve ifade eder.", "Stresle başa çıkma yöntemlerine örnekler verir."] }
+      ]
+    },
+    {
+      "no": 5,
+      "ad": "Güvenli Hayat",
+      "kazanimlar": [
+        { "kod": "HB.3.5.1", "baslik": "Trafik ve güvenlik", "adimlar": ["Trafik işaretlerini ve kurallarını açıklar.", "Trafik güvenliğine ilişkin doğru davranışları sergiler."] },
+        { "kod": "HB.3.5.2", "baslik": "Afetlere hazırlık", "adimlar": ["Deprem, yangın gibi afet durumlarında yapılması gerekenleri açıklar.", "Afet çantasının içeriğini listeler."] }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "ders": "Matematik",
+  "sinif": "4. Sınıf",
+  "uniteler": [
+    {
+      "no": 1,
+      "ad": "Doğal Sayılar",
+      "kazanimlar": [
+        { "kod": "M.4.1.1", "baslik": "Beş basamaklı sayılar", "adimlar": ["10000'e kadar sayıları okur, yazar ve karşılaştırır.", "Basamak değerlerini ve sayı değerlerini açıklar."] },
+        { "kod": "M.4.1.2", "baslik": "Yuvarlama", "adimlar": ["Sayıları 10'a, 100'e ve 1000'e yuvarlama yapar."] },
+        { "kod": "M.4.1.3", "baslik": "Kesirler", "adimlar": ["Birim kesri ve basit kesirleri modeller üzerinde açıklar.", "Payı ve paydayı tanımlar; kesirleri karşılaştırır."] }
+      ]
+    },
+    {
+      "no": 2,
+      "ad": "Çarpma",
+      "kazanimlar": [
+        { "kod": "M.4.2.1", "baslik": "İki basamaklı çarpma", "adimlar": ["İki basamaklı sayıları iki basamaklı sayıyla çarpar.", "Tahmin stratejilerini kullanır."] },
+        { "kod": "M.4.2.2", "baslik": "Çarpma özellikleri", "adimlar": ["Dağılma, birleşme ve değişme özelliklerini uygular."] }
+      ]
+    },
+    {
+      "no": 3,
+      "ad": "Bölme",
+      "kazanimlar": [
+        { "kod": "M.4.3.1", "baslik": "İki veya üç basamaklı bölme", "adimlar": ["İki ya da üç basamaklı sayıları tek basamaklıya böler.", "Bölme ile çarpma arasındaki ilişkiyi kullanır."] },
+        { "kod": "M.4.3.2", "baslik": "Kalan", "adimlar": ["Kalanlı bölme işlemi yapar; kalanı yorumlar."] }
+      ]
+    },
+    {
+      "no": 4,
+      "ad": "Geometri",
+      "kazanimlar": [
+        { "kod": "M.4.4.1", "baslik": "Açılar", "adimlar": ["Dar, geniş ve dik açıları tanımlar ve çizer."] },
+        { "kod": "M.4.4.2", "baslik": "Dörtgenler", "adimlar": ["Kare, dikdörtgen, eşkenar dörtgen ve yamukun özelliklerini açıklar."] },
+        { "kod": "M.4.4.3", "baslik": "Alan", "adimlar": ["Kare ve dikdörtgenin alanını formülle hesaplar."] }
+      ]
+    },
+    {
+      "no": 5,
+      "ad": "Kesirler",
+      "kazanimlar": [
+        { "kod": "M.4.5.1", "baslik": "Denk kesirler", "adimlar": ["Denk kesirleri model ve sembolle gösterir."] },
+        { "kod": "M.4.5.2", "baslik": "Kesirleri karşılaştırma", "adimlar": ["Aynı paydaya sahip kesirleri karşılaştırır ve sıralar."] }
+      ]
+    },
+    {
+      "no": 6,
+      "ad": "Ölçme",
+      "kazanimlar": [
+        { "kod": "M.4.6.1", "baslik": "Uzunluk ve çevre", "adimlar": ["Milimetre, santimetre, metre ve kilometre dönüşümleri yapar.", "Şekillerin çevresini hesaplar."] },
+        { "kod": "M.4.6.2", "baslik": "Kütle ve sıvı dönüşümleri", "adimlar": ["Kilogram-gram ve litre-mililitre dönüşümlerini yapar."] }
+      ]
+    },
+    {
+      "no": 7,
+      "ad": "Veri ve Grafik",
+      "kazanimlar": [
+        { "kod": "M.4.7.1", "baslik": "Çizgi grafiği", "adimlar": ["Çizgi grafiği okur ve yorumlar; değişimi açıklar."] },
+        { "kod": "M.4.7.2", "baslik": "Ortalama", "adimlar": ["Bir veri kümesinin aritmetik ortalamasını hesaplar ve yorumlar."] }
+      ]
+    }
+  ]
+}

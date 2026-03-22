@@ -1,0 +1,56 @@
+{
+  "ders": "Türkçe",
+  "sinif": "4. Sınıf",
+  "uniteler": [
+    {
+      "no": 1,
+      "ad": "Okuma Becerileri",
+      "kazanimlar": [
+        { "kod": "TK.4.1.1", "baslik": "Okuduğunu anlama ve sorgulama", "adimlar": ["Okuduğu metindeki ana ve yardımcı düşünceleri belirler.", "Metinden çıkarım yapar; sorular sorar."] },
+        { "kod": "TK.4.1.2", "baslik": "Bilgilendirici metin okuma", "adimlar": ["Bilgilendirici metinlerdeki anahtar kavramları belirler.", "Metin yapısını analiz eder."] }
+      ]
+    },
+    {
+      "no": 2,
+      "ad": "Dinleme ve Konuşma",
+      "kazanimlar": [
+        { "kod": "TK.4.2.1", "baslik": "Eleştirel dinleme", "adimlar": ["Dinlediği konuşmayı değerlendirerek neden-sonuç ilişkisi kurar."] },
+        { "kod": "TK.4.2.2", "baslik": "Planlı konuşma", "adimlar": ["Bir konuyu planlayarak, belli bir sıra içinde sunar."] }
+      ]
+    },
+    {
+      "no": 3,
+      "ad": "Yazma",
+      "kazanimlar": [
+        { "kod": "TK.4.3.1", "baslik": "Bilgilendirici yazı", "adimlar": ["Bir konuyu açıklayan paragraf yazar; başlık belirler."] },
+        { "kod": "TK.4.3.2", "baslik": "Hikâye yazımı", "adimlar": ["Kuruluş, gelişme ve çözüm bölümlerini içeren hikâye yazar."] },
+        { "kod": "TK.4.3.3", "baslik": "İmla ve noktalama", "adimlar": ["Yazım kurallarını ve noktalama işaretlerini doğru kullanır."] }
+      ]
+    },
+    {
+      "no": 4,
+      "ad": "Dil Bilgisi",
+      "kazanimlar": [
+        { "kod": "TK.4.4.1", "baslik": "Sözcük türleri", "adimlar": ["İsim, sıfat, zarf, zamir ve fiil türlerini tanımlar; örnekler verir."] },
+        { "kod": "TK.4.4.2", "baslik": "Cümle ögeleri", "adimlar": ["Cümlenin öznesi ve yüklemini belirler."] },
+        { "kod": "TK.4.4.3", "baslik": "Fiilimsi: isim-fiil", "adimlar": ["İsim-fiil kavramını tanımlar; cümlelerde kullanır."] }
+      ]
+    },
+    {
+      "no": 5,
+      "ad": "Sözcük Bilgisi",
+      "kazanimlar": [
+        { "kod": "TK.4.5.1", "baslik": "Sözcüklerin yapısı: kök ve ek", "adimlar": ["Sözcüklerin kök ve eklerini ayırt eder.", "Yapım ve çekim eklerini tanır."] },
+        { "kod": "TK.4.5.2", "baslik": "Mecaz ve deyimler", "adimlar": ["Basit deyimlerin anlamlarını bağlamdan çıkarır."] }
+      ]
+    },
+    {
+      "no": 6,
+      "ad": "Metin Türleri",
+      "kazanimlar": [
+        { "kod": "TK.4.6.1", "baslik": "Anı ve gezi yazısı", "adimlar": ["Anı ve gezi yazısının özelliklerini açıklar; örnek metinler okur."] },
+        { "kod": "TK.4.6.2", "baslik": "Mektup", "adimlar": ["Mektubun biçimsel özelliklerini tanır; kısa bir mektup yazar."] }
+      ]
+    }
+  ]
+}

@@ -1,19 +1,15 @@
 import { useState, useEffect } from 'react';
 import type { PlanEntry } from '../types/planEntry';
-import { planOlustur, mufredatliPlanOlustur, ilkokulMufredatiniDonustur, type MufredatJson, type IlkokulMufredatJson } from '../lib/takvimUtils';
-import fen3Mufredat from '../data/mufredat/fen-bilimleri-3.json';
-import fen4Mufredat from '../data/mufredat/fen-bilimleri-4.json';
-import fen5Mufredat from '../data/mufredat/fen-bilimleri-5.json';
-import fen6Mufredat from '../data/mufredat/fen-bilimleri-6.json';
-import fen7Mufredat from '../data/mufredat/fen-bilimleri-7.json';
-import fen8Mufredat from '../data/mufredat/fen-bilimleri-8.json';
+import { planOlustur, mufredatliPlanOlustur } from '../lib/takvimUtils';
+import { getMufredat } from '../lib/mufredatRegistry';
 
 const DERS_SECENEKLERI = [
-  'Fen Bilimleri', 'Matematik', 'Türkçe', 'Sosyal Bilgiler',
-  'İngilizce', 'Din Kültürü ve Ahlak Bilgisi', 'Almanca', 'Fransızca',
-  'Beden Eğitimi', 'Müzik', 'Görsel Sanatlar', 'Tarih', 'Coğrafya',
-  'Fizik', 'Kimya', 'Biyoloji', 'Felsefe', 'Psikoloji', 'Sosyoloji',
-  'Mantık', 'Türk Dili ve Edebiyatı', 'Matematik Uygulamaları',
+  'Fen Bilimleri', 'Matematik', 'Türkçe', 'Hayat Bilgisi', 'Sosyal Bilgiler',
+  'İngilizce', 'Türk Dili ve Edebiyatı', 'Tarih', 'Coğrafya',
+  'Fizik', 'Kimya', 'Biyoloji',
+  'Din Kültürü ve Ahlak Bilgisi', 'Almanca', 'Fransızca',
+  'Beden Eğitimi', 'Müzik', 'Görsel Sanatlar', 'Felsefe', 'Psikoloji', 'Sosyoloji',
+  'Mantık', 'Matematik Uygulamaları',
   'Bilişim Teknolojileri', 'Trafik ve İlk Yardım', 'Sağlık Bilgisi',
   'DKAB', 'Meslek Dersi', 'Diğer',
 ]
@@ -21,6 +17,7 @@ const DERS_SECENEKLERI = [
 const SINIF_SEVIYELERI = Array.from({ length: 12 }, (_, i) => `${i + 1}. Sınıf`)
 
 const DERS_SINIF_MAP: Record<string, string[]> = {
+  'Hayat Bilgisi': ['1. Sınıf', '2. Sınıf', '3. Sınıf'],
   'Fen Bilimleri': ['3. Sınıf', '4. Sınıf', '5. Sınıf', '6. Sınıf', '7. Sınıf', '8. Sınıf'],
   'Sosyal Bilgiler': ['4. Sınıf', '5. Sınıf', '6. Sınıf', '7. Sınıf'],
   'Türkçe': Array.from({ length: 8 }, (_, i) => `${i + 1}. Sınıf`),
@@ -30,6 +27,7 @@ const DERS_SINIF_MAP: Record<string, string[]> = {
   'Görsel Sanatlar': Array.from({ length: 8 }, (_, i) => `${i + 1}. Sınıf`),
   'İngilizce': SINIF_SEVIYELERI,
   'Din Kültürü ve Ahlak Bilgisi': SINIF_SEVIYELERI,
+  'Türk Dili ve Edebiyatı': ['9. Sınıf', '10. Sınıf', '11. Sınıf', '12. Sınıf'],
   'Tarih': ['9. Sınıf', '10. Sınıf', '11. Sınıf', '12. Sınıf'],
   'Coğrafya': ['9. Sınıf', '10. Sınıf', '11. Sınıf', '12. Sınıf'],
   'Fizik': ['9. Sınıf', '10. Sınıf', '11. Sınıf', '12. Sınıf'],
@@ -53,18 +51,8 @@ const SEHIRLER = [
 ]
 
 function buildPlan(ders: string, sinif: string, yil: string) {
-  if (ders === 'Fen Bilimleri') {
-    if (sinif === '3. Sınıf' || sinif === '4. Sınıf') {
-      const raw = sinif === '3. Sınıf' ? fen3Mufredat : fen4Mufredat
-      return mufredatliPlanOlustur(yil, ilkokulMufredatiniDonustur(raw as IlkokulMufredatJson))
-    }
-    let mufredatData: MufredatJson | null = null
-    if (sinif === '5. Sınıf') mufredatData = fen5Mufredat as MufredatJson
-    else if (sinif === '6. Sınıf') mufredatData = fen6Mufredat as MufredatJson
-    else if (sinif === '7. Sınıf') mufredatData = fen7Mufredat as MufredatJson
-    else if (sinif === '8. Sınıf') mufredatData = fen8Mufredat as MufredatJson
-    if (mufredatData) return mufredatliPlanOlustur(yil, mufredatData)
-  }
+  const mufredat = getMufredat(ders, sinif)
+  if (mufredat) return mufredatliPlanOlustur(yil, mufredat)
   return planOlustur(yil)
 }
 

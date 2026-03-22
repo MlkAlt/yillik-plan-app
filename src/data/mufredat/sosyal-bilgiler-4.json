@@ -1,0 +1,52 @@
+{
+  "ders": "Sosyal Bilgiler",
+  "sinif": "4. Sınıf",
+  "uniteler": [
+    {
+      "no": 1,
+      "ad": "BİREY VE TOPLUM",
+      "kazanimlar": [
+        { "kod": "SB.4.1.1", "baslik": "Kişisel özelliklerini fark etme", "adimlar": ["Kendine özgü niteliklerini belirler.", "Kendini ve başkalarını olumlu bir dille tanıtır.", "Kişisel özelliklerin bireyi eşsiz kıldığını fark eder."] },
+        { "kod": "SB.4.1.2", "baslik": "Aile içindeki rolleri ve sorumlulukları kavrama", "adimlar": ["Aile içindeki rolleri listeler.", "Her bireyin sorumluluklarını açıklar.", "Ailede iş birliğinin önemine örnekler verir."] }
+      ]
+    },
+    {
+      "no": 2,
+      "ad": "KÜLTÜR VE MİRAS",
+      "kazanimlar": [
+        { "kod": "SB.4.2.1", "baslik": "Yaşadığı çevredeki kültürel mirası tanıma", "adimlar": ["Yakın çevresindeki tarihi ve kültürel mekânları belirler.", "Bu mekânların önemini açıklar.", "Kültürel mirasın korunması gerektiğini fark eder."] },
+        { "kod": "SB.4.2.2", "baslik": "Millî bayram ve özel günlerin önemini kavrama", "adimlar": ["Millî bayramları ve özel günleri sıralar.", "Her birinin tarihsel ve kültürel önemini açıklar.", "Bu günleri kutlama etkinlikleri tasarlar."] }
+      ]
+    },
+    {
+      "no": 3,
+      "ad": "İNSANLAR, YERLER VE ÇEVRELER",
+      "kazanimlar": [
+        { "kod": "SB.4.3.1", "baslik": "Yaşadığı yeri tanıma ve harita okuma", "adimlar": ["Yaşadığı ilin haritasını okur.", "Temel harita sembollerini kullanır.", "Coğrafi konumunu açıklar."] },
+        { "kod": "SB.4.3.2", "baslik": "Doğal çevreyi tanıma ve koruma", "adimlar": ["Yakın çevresindeki doğal ortamları tanımlar.", "Doğal çevrenin korunmasının önemini açıklar.", "Çevre koruma etkinliklerine katılır."] }
+      ]
+    },
+    {
+      "no": 4,
+      "ad": "ÜRETİM, DAĞITIM VE TÜKETİM",
+      "kazanimlar": [
+        { "kod": "SB.4.4.1", "baslik": "Üretim, dağıtım ve tüketim kavramlarını anlama", "adimlar": ["Üretim, dağıtım ve tüketim kavramlarını tanımlar.", "Bu süreçler arasındaki ilişkiyi açıklar.", "Gündelik yaşamdan örnekler verir."] },
+        { "kod": "SB.4.4.2", "baslik": "Bilinçli tüketici olmayı kavrama", "adimlar": ["Bilinçli tüketicinin özelliklerini belirler.", "Tasarrufun önemini açıklar.", "Tüketici haklarını listeler."] }
+      ]
+    },
+    {
+      "no": 5,
+      "ad": "BİLİM, TEKNOLOJİ VE TOPLUM",
+      "kazanimlar": [
+        { "kod": "SB.4.5.1", "baslik": "Teknolojinin günlük hayata etkisini kavrama", "adimlar": ["Günlük yaşamda kullanılan teknolojik araçları belirler.", "Bu araçların hayatı nasıl kolaylaştırdığını açıklar.", "Teknolojinin sorumluluklu kullanımına örnekler verir."] }
+      ]
+    },
+    {
+      "no": 6,
+      "ad": "KÜRESEL BAĞLANTILAR",
+      "kazanimlar": [
+        { "kod": "SB.4.6.1", "baslik": "Ülkemiz ve dünya arasındaki bağlantıları kavrama", "adimlar": ["Türkiye'nin dünya ile ilişkilerini açıklar.", "Farklı ülkelerden gelen ürünlere örnekler verir.", "Küresel bağlantıların önemine örnekler verir."] }
+      ]
+    }
+  ]
+}

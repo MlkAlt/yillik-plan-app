@@ -1,0 +1,46 @@
+{
+  "ders": "Hayat Bilgisi",
+  "sinif": "2. Sınıf",
+  "uniteler": [
+    {
+      "no": 1,
+      "ad": "Okulumuzda Hayat",
+      "kazanimlar": [
+        { "kod": "HB.2.1.1", "baslik": "Okul yaşamına katılım", "adimlar": ["Sınıf ve okul etkinliklerine sorumlu biçimde katılır.", "Grup çalışmalarında iş birliği yapar."] },
+        { "kod": "HB.2.1.2", "baslik": "Haklarımız ve sorumluluklarımız", "adimlar": ["Günlük yaşamda karşılaştığı hak ihlallerini fark eder ve çözüm önerileri geliştirir."] }
+      ]
+    },
+    {
+      "no": 2,
+      "ad": "Ailemizle Birlikte",
+      "kazanimlar": [
+        { "kod": "HB.2.2.1", "baslik": "Aile tarihi ve geçmişe bakış", "adimlar": ["Ailesinin geçmişine ait bilgileri öğrenerek kültürel miras kavramını fark eder."] },
+        { "kod": "HB.2.2.2", "baslik": "Gelenekler ve bayramlar", "adimlar": ["Ailesiyle kutladığı özel günleri ve gelenekleri tanıtır."] }
+      ]
+    },
+    {
+      "no": 3,
+      "ad": "Dün, Bugün, Yarın",
+      "kazanimlar": [
+        { "kod": "HB.2.3.1", "baslik": "Zaman çizelgesi", "adimlar": ["Kişisel yaşam olaylarını zaman çizelgesinde gösterir."] },
+        { "kod": "HB.2.3.2", "baslik": "Teknolojinin değişimi", "adimlar": ["Teknolojik araçların geçmişte ve günümüzdeki değişimini karşılaştırır."] }
+      ]
+    },
+    {
+      "no": 4,
+      "ad": "Sağlıklı Hayat",
+      "kazanimlar": [
+        { "kod": "HB.2.4.1", "baslik": "Hastalık ve korunma", "adimlar": ["Yaygın hastalıkların nedenleri ve korunma yollarını açıklar."] },
+        { "kod": "HB.2.4.2", "baslik": "Egzersiz ve uyku", "adimlar": ["Düzenli egzersiz ve yeterli uykunun sağlık üzerindeki etkilerini açıklar."] }
+      ]
+    },
+    {
+      "no": 5,
+      "ad": "Doğada Hayat",
+      "kazanimlar": [
+        { "kod": "HB.2.5.1", "baslik": "Hava durumu ve mevsimler", "adimlar": ["Hava durumu gözlemlerini kaydeder; mevsim özelliklerini açıklar."] },
+        { "kod": "HB.2.5.2", "baslik": "Çevre duyarlılığı", "adimlar": ["Geri dönüşümün önemini açıklar; çevre dostu davranışları listeler."] }
+      ]
+    }
+  ]
+}
