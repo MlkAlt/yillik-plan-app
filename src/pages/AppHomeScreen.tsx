@@ -9,6 +9,7 @@ import fen7Mufredat from '../data/mufredat/fen-bilimleri-7.json';
 import fen8Mufredat from '../data/mufredat/fen-bilimleri-8.json';
 
 const DERS_SECENEKLERI = [
+  'Sınıf Öğretmeni',
   'Fen Bilimleri', 'Matematik', 'Türkçe', 'Sosyal Bilgiler',
   'İngilizce', 'Din Kültürü ve Ahlak Bilgisi', 'Almanca', 'Fransızca',
   'Beden Eğitimi', 'Müzik', 'Görsel Sanatlar', 'Tarih', 'Coğrafya',
@@ -232,7 +233,6 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
   const [tamamlananlar, setTamamlananlar] = useState<Record<string, number[]>>({});
   const [olusturuluyor, setOlusturuluyor] = useState(false);
 
-  const [ogretmenTuru, setOgretmenTuru] = useState<'brans' | 'sinif'>('brans');
   const [onbDers, setOnbDers] = useState('Fen Bilimleri');
   const [onbSiniflar, setOnbSiniflar] = useState<string[]>(['5. Sınıf']);
   const [onbSinifOgrSinif, setOnbSinifOgrSinif] = useState('3. Sınıf');
@@ -291,8 +291,9 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
     setOlusturuluyor(true);
     try {
       const yil = '2025-2026';
+      const isSinifOgretmeni = onbDers === 'Sınıf Öğretmeni';
 
-      if (ogretmenTuru === 'sinif') {
+      if (isSinifOgretmeni) {
         if (onbSinifOgrDersler.length === 0) { setOlusturuluyor(false); return; }
         localStorage.setItem('ogretmen-ayarlari', JSON.stringify({
           ders: onbSinifOgrDersler[0], siniflar: onbSinifOgrDersler, yil,
@@ -334,6 +335,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
   else if (saat >= 17 && saat < 21) mesaj = 'İyi akşamlar';
   const karsilama = ogretmenAd ? `${mesaj}, ${ogretmenAd}!` : `${mesaj}!`;
 
+  const isSinifOgretmeni = onbDers === 'Sınıf Öğretmeni';
   const aktifSiniflar = DERS_SINIF_MAP[onbDers] || SINIF_SEVIYELERI;
 
   return (
@@ -349,30 +351,25 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
         <div className="bg-[#FAFAF9] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-5 mb-5">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Başlayalım</p>
           <h2 className="text-base font-bold text-[#2D5BE3] mb-4">
-            Öğretmen türünü seç, planların hazır olsun.
+            Branşını seç, planın hazır olsun.
           </h2>
 
-          {/* Öğretmen türü toggle */}
-          <div className="flex rounded-xl border border-[#E7E5E4] overflow-hidden mb-4">
-            <button
-              onClick={() => setOgretmenTuru('brans')}
-              className={`flex-1 py-2.5 text-sm font-bold transition-colors ${
-                ogretmenTuru === 'brans' ? 'bg-[#2D5BE3] text-white' : 'bg-[#FAFAF9] text-gray-500'
-              }`}
+          {/* Ders / Branş seçimi */}
+          <div className="mb-4">
+            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">
+              Branş / Ders
+            </label>
+            <select
+              value={onbDers}
+              onChange={(e) => handleOnbDersChange(e.target.value)}
+              className="w-full p-3 rounded-xl border border-[#E7E5E4] bg-[#FAFAF9] text-[#1C1917] font-medium focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/30 focus:border-[#F59E0B] transition-all text-sm"
             >
-              Branş Öğretmeni
-            </button>
-            <button
-              onClick={() => setOgretmenTuru('sinif')}
-              className={`flex-1 py-2.5 text-sm font-bold transition-colors ${
-                ogretmenTuru === 'sinif' ? 'bg-[#2D5BE3] text-white' : 'bg-[#FAFAF9] text-gray-500'
-              }`}
-            >
-              Sınıf Öğretmeni
-            </button>
+              {DERS_SECENEKLERI.map(d => <option key={d} value={d}>{d}</option>)}
+            </select>
           </div>
 
-          {ogretmenTuru === 'sinif' ? (
+          {/* Sınıf Öğretmeni seçilince */}
+          {isSinifOgretmeni ? (
             <>
               <div className="mb-4">
                 <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
@@ -396,7 +393,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
               </div>
               <div className="mb-4">
                 <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-                  Planlamak istediğin dersler
+                  Dersler
                   <span className="text-gray-300 font-normal ml-1">(birden fazla seçebilirsin)</span>
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -417,46 +414,32 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
               </div>
             </>
           ) : (
-            <>
-              <div className="mb-4">
-                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">
-                  Branş / Ders
-                </label>
-                <select
-                  value={onbDers}
-                  onChange={(e) => handleOnbDersChange(e.target.value)}
-                  className="w-full p-3 rounded-xl border border-[#E7E5E4] bg-[#FAFAF9] text-[#1C1917] font-medium focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/30 focus:border-[#F59E0B] transition-all text-sm"
-                >
-                  {DERS_SECENEKLERI.map(d => <option key={d} value={d}>{d}</option>)}
-                </select>
+            <div className="mb-4">
+              <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                Sınıf Seviyeleri
+                <span className="text-gray-300 font-normal ml-1">(birden fazla seçebilirsin)</span>
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {aktifSiniflar.map(s => (
+                  <button
+                    key={s}
+                    onClick={() => toggleOnbSinif(s)}
+                    className={`px-3.5 py-1.5 rounded-full text-sm font-bold border transition-all active:scale-95 ${
+                      onbSiniflar.includes(s)
+                        ? 'bg-[#2D5BE3] text-white border-[#2D5BE3]'
+                        : 'bg-[#FAFAF9] text-gray-500 border-[#E7E5E4] hover:border-gray-300'
+                    }`}
+                  >
+                    {s}
+                  </button>
+                ))}
               </div>
-              <div className="mb-4">
-                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-                  Sınıf Seviyeleri
-                  <span className="text-gray-300 font-normal ml-1">(birden fazla seçebilirsin)</span>
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {aktifSiniflar.map(s => (
-                    <button
-                      key={s}
-                      onClick={() => toggleOnbSinif(s)}
-                      className={`px-3.5 py-1.5 rounded-full text-sm font-bold border transition-all active:scale-95 ${
-                        onbSiniflar.includes(s)
-                          ? 'bg-[#2D5BE3] text-white border-[#2D5BE3]'
-                          : 'bg-[#FAFAF9] text-gray-500 border-[#E7E5E4] hover:border-gray-300'
-                      }`}
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </>
+            </div>
           )}
 
           <button
             onClick={handleOnboardingTamamla}
-            disabled={olusturuluyor || onbSiniflar.length === 0}
+            disabled={olusturuluyor || (isSinifOgretmeni ? onbSinifOgrDersler.length === 0 : onbSiniflar.length === 0)}
             className="w-full bg-[#F59E0B] text-white py-3 rounded-xl font-bold shadow-[0_1px_3px_rgba(0,0,0,0.06)] active:scale-95 transition-all hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2"
           >
             {olusturuluyor
