@@ -12,6 +12,7 @@ import type { PlanEntry } from './types/planEntry'
 import type { OlusturulmusPlan } from './types/takvim'
 import type { ParsedRow } from './lib/fileParser'
 import { onAuthStateChange, type User } from './lib/auth'
+import { syncPlansToSupabase, fetchPlansFromSupabase } from './lib/planSync'
 
 function App() {
   const [planlar, setPlanlar] = useState<PlanEntry[]>([])
@@ -20,7 +21,36 @@ function App() {
   const [user, setUser] = useState<User | null>(null)
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChange(setUser)
+    const unsubscribe = onAuthStateChange(async (newUser) => {
+      setUser(newUser)
+      if (newUser) {
+        // Login olunca Supabase'den planları çek, localStorage ile birleştir
+        try {
+          const bulutPlanlar = await fetchPlansFromSupabase(newUser.id)
+          if (bulutPlanlar.length > 0) {
+            setPlanlar(prev => {
+              // Buluttaki planlar mevcut yerelde olmayan planları ekler,
+              // çakışmalarda bulut önceliklidir
+              const yereldeSiniflar = prev.map(p => p.sinif)
+              const yeniPlanlar = [
+                ...prev.filter(p => !bulutPlanlar.find(b => b.sinif === p.sinif)),
+                ...bulutPlanlar,
+              ]
+              // Aktif sınıf hâlâ geçerliyse koru, değilse ilkini seç
+              const aktifGecerli = yeniPlanlar.find(p => p.sinif === yereldeSiniflar[0])
+              if (!aktifGecerli && yeniPlanlar.length > 0) {
+                setAktifSinif(yeniPlanlar[0].sinif)
+                localStorage.setItem('aktif-sinif', yeniPlanlar[0].sinif)
+              }
+              localStorage.setItem('tum-planlar', JSON.stringify(yeniPlanlar))
+              return yeniPlanlar
+            })
+          }
+        } catch {
+          // Supabase erişilemiyorsa localStorage'a devam et
+        }
+      }
+    })
     return unsubscribe
   }, [])
 
@@ -66,6 +96,10 @@ function App() {
       const korunanlar = prev.filter(p => !gelenSiniflar.includes(p.sinif))
       const sonuc = [...korunanlar, ...entries]
       localStorage.setItem('tum-planlar', JSON.stringify(sonuc))
+      // Kullanıcı login ise Supabase'e de kaydet
+      if (user) {
+        syncPlansToSupabase(user.id, entries).catch(() => { /* sessiz hata */ })
+      }
       return sonuc
     })
     if (entries.length > 0) {
