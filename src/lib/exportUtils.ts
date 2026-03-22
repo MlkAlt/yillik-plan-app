@@ -262,6 +262,151 @@ export async function exportPlanToExcel(entry: PlanEntry, meta: ExportMeta = {})
   URL.revokeObjectURL(url)
 }
 
+// ─── PDF / YAZDIR ────────────────────────────────────────────────────────────
+
+export function exportPlanToPrint(entry: PlanEntry, meta: ExportMeta = {}) {
+  const { ders, sinifGercek, sinif, yil } = entry
+  const sinifGoster = sinifGercek || sinif
+  const okulAdi = meta.okulAdi || ''
+  const ogretmenAdi = meta.ogretmenAdi || ''
+
+  const rows = buildWordRows(entry)
+
+  const css = `
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Calibri', 'Arial', sans-serif;
+      font-size: 8pt;
+      margin: 0;
+      padding: 0.8cm;
+      color: #111;
+    }
+    h1, h2 {
+      text-align: center;
+      margin: 2px 0;
+      font-size: 10pt;
+      color: #1e3a5f;
+    }
+    h1 { font-size: 11pt; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      page-break-inside: auto;
+    }
+    tr { page-break-inside: avoid; page-break-after: auto; }
+    th {
+      background-color: #2D5BE3;
+      color: white;
+      font-weight: bold;
+      font-size: 7.5pt;
+      padding: 5px 3px;
+      border: 1px solid #6B7280;
+      text-align: center;
+      vertical-align: middle;
+    }
+    td {
+      border: 1px solid #9CA3AF;
+      padding: 3px 4px;
+      vertical-align: middle;
+      font-size: 7.5pt;
+    }
+    .ay {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      text-align: center;
+      font-weight: bold;
+      background: #F0F4FF;
+      font-size: 7pt;
+      width: 22px;
+    }
+    .center { text-align: center; }
+    .tatil {
+      background: #FFFDE7;
+      color: #92400E;
+      font-weight: bold;
+      text-align: center;
+    }
+    .hedef {
+      font-weight: bold;
+      text-align: center;
+      background: #F9FAFB;
+      font-size: 7pt;
+    }
+    .footer {
+      margin-top: 16px;
+      font-size: 8pt;
+      display: flex;
+      justify-content: space-between;
+    }
+    @media print {
+      @page {
+        size: A4 landscape;
+        margin: 0.8cm;
+      }
+      body { padding: 0; }
+    }
+  `
+
+  const tableRows = rows.map(r => {
+    if (r.type === 'tatil') {
+      return `<tr>
+        ${r.isFirstInMonth ? `<td rowspan="${r.monthRowspan}" class="ay">${r.month}</td>` : ''}
+        <td class="center">${r.weekInMonth}</td>
+        <td class="center"></td>
+        <td colspan="5" class="tatil">${r.konular}</td>
+      </tr>`
+    }
+    return `<tr>
+      ${r.isFirstInMonth ? `<td rowspan="${r.monthRowspan}" class="ay">${r.month}</td>` : ''}
+      <td class="center">${r.weekInMonth}</td>
+      <td class="center">1</td>
+      ${r.isFirstInUnite ? `<td rowspan="${r.uniteRowspan}" class="hedef">${r.hedef}</td>` : ''}
+      <td>${r.konular}</td>
+      <td></td>
+      <td></td>
+      <td class="center"></td>
+    </tr>`
+  }).join('\n')
+
+  const html = `<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>${ders} ${sinifGoster} Yıllık Plan</title>
+  <style>${css}</style>
+</head>
+<body>
+  <h1>${okulAdi ? `${okulAdi} — ` : ''}${yil} EĞİTİM ÖĞRETİM YILI</h1>
+  <h2>${sinifGoster} — ${ders.toUpperCase()} DERSİ ÜNİTELENDİRİLMİŞ YILLIK PLANI</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>AY</th><th>HAFTA</th><th>SAAT</th>
+        <th>HEDEF VE KAZANIMLAR</th><th>KONULAR</th>
+        <th>ÖĞRENME ÖĞRETME<br>YÖNTEM VE TEKNİKLERİ</th>
+        <th>KULLANILAN EĞİTİM<br>TEKNOLOJİLERİ, ARAÇ VE GEREÇLER</th>
+        <th>DEĞERLENDİRME</th>
+      </tr>
+    </thead>
+    <tbody>${tableRows}</tbody>
+  </table>
+  <div class="footer">
+    ${ogretmenAdi ? `<span><strong>Öğretmen:</strong> ${ogretmenAdi}</span>` : '<span></span>'}
+    <span>Müdür: ____________________</span>
+  </div>
+  <script>
+    window.onload = function() { window.print(); }
+  </script>
+</body>
+</html>`
+
+  const win = window.open('', '_blank')
+  if (!win) return
+  win.document.write(html)
+  win.document.close()
+}
+
 // ─── WORD (HTML-to-doc) ───────────────────────────────────────────────────────
 
 export function exportPlanToWord(entry: PlanEntry, meta: ExportMeta = {}) {

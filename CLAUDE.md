@@ -57,10 +57,13 @@ App.tsx
 
 ```
 Kullanıcı ders+sınıf seçer
-  → buildPlan(ders, sinif, yil)        [AppHomeScreen.tsx]
-    → mufredatliPlanOlustur(yil, json) [takvimUtils.ts]  ← Fen Bilimleri 5-8
-    veya planOlustur(yil)              [takvimUtils.ts]  ← diğer dersler
-      → meb-takvim.json               [src/data/]
+  → buildPlan(ders, sinif, yil)         [AppHomeScreen.tsx / AppSettingsScreen.tsx]
+    → getMufredat(ders, sinif)          [mufredatRegistry.ts]
+        → ilkokulMufredatiniDonustur()  ← ilkokul formatı (1-4. sınıf)
+        veya doğrudan MufredatJson      ← ortaokul/lise formatı (5-12. sınıf)
+      → mufredatliPlanOlustur(yil, json)[takvimUtils.ts]
+    veya planOlustur(yil)               [takvimUtils.ts] ← müfredat yoksa
+      → meb-takvim.json                [src/data/]
 → PlanEntry olarak tum-planlar'a kaydedilir
 ```
 
@@ -71,7 +74,7 @@ Kullanıcı ders+sınıf seçer
 
 Sınıf öğretmeni seçildiğinde her ders için ayrı `PlanEntry` oluşturulur. `PlanEntry.sinif` alanı composite key olarak kullanılır: `"3. Sınıf—Türkçe"`. Görüntüleme için `label` (ders adı) ve `sinifGercek` (gerçek sınıf adı, örn. "3. Sınıf") alanları kullanılır.
 
-**Dikkat — isimlendirme tutarsızlığı:** `SINIF_OGRETMENI_DERSLER` listesinde ders adı `'İlkokul Fen Bilimleri'` olarak geçer, ancak `buildPlan()` `'Fen Bilimleri'` string'i kontrol eder. Bu yüzden sınıf öğretmeni modunda Fen Bilimleri müfredat eşleşmesi olmadan `planOlustur()` ile oluşturulur. Yeni branş eklerken bu isim farkına dikkat et.
+**Sınıf öğretmeni dersleri:** `SINIF_OGRETMENI_DERSLER` = `['Türkçe', 'Matematik', 'Hayat Bilgisi', 'Fen Bilimleri', 'Sosyal Bilgiler', 'İngilizce', 'Müzik', 'Görsel Sanatlar', 'Beden Eğitimi']`. Bu listeye yeni ders eklenince aynı adın `mufredatRegistry.ts` içinde de kayıtlı olduğundan emin ol.
 
 ### Dosya Yükleme
 
@@ -90,30 +93,39 @@ Excel beklenen format: `[Ay, HaftaNo, Dönem, TarihAralığı, Kazanım]` sütun
 
 ### Müfredat Verisi
 
-`src/data/mufredat/fen-bilimleri-{3..8}.json` — İki farklı JSON formatı vardır:
+`src/data/mufredat/` altında 55+ JSON dosyası bulunur. **İki farklı format** vardır:
 
-**5–8 formatı** (`MufredatJson`): hafta bazlı, `haftaNo` içerir.
+**Ortaokul/Lise formatı** (`MufredatJson`): hafta bazlı, `haftaNo` içerir.
 ```ts
 { ders, sinif, toplamHafta, haftalar: MufredatHafta[] }
 // MufredatHafta: { haftaNo, unite, uniteAdi, kazanim, kazanimDetay }
 ```
 
-**3–4 formatı** (`IlkokulMufredatJson`): ünite/kazanım bazlı, `haftaNo` içermez.
+**İlkokul formatı** (`IlkokulMufredatJson`): ünite/kazanım bazlı, `haftaNo` içermez.
 ```ts
 { ders, sinif, uniteler: IlkokulUnite[] }
 // IlkokulUnite: { no, ad, kazanimlar: IlkokulKazanim[] }
 // IlkokulKazanim: { kod, baslik, adimlar: string[] }
 ```
-`ilkokulMufredatiniDonustur()` (`takvimUtils.ts`) bu formatı `MufredatJson`'a çevirir: her kazanım sıralı `haftaNo` alır (1, 2, 3…). **5–8'den farkı:** 5–8'de `haftaNo` takvim haftalarıyla önceden hizalanmış; 3–4'te ise hafta sayısı kazanım sayısına göre belirlenir ve tatil/boş haftalar göz ardı edilebilir. Sonuç `mufredatliPlanOlustur()` ile işlenir.
+`ilkokulMufredatiniDonustur()` (`takvimUtils.ts`) bu formatı `MufredatJson`'a çevirir: her kazanım sıralı `haftaNo` alır (1, 2, 3…). **Lise formatından farkı:** Lisede `haftaNo` takvim haftalarıyla önceden hizalanmış; ilkokulda hafta sayısı kazanım sayısına göre belirlenir, tatil/boş haftalar göz ardı edilebilir.
+
+**Mevcut müfredat kapsamı:**
+- Hayat Bilgisi: 1–3 (ilkokul format)
+- Fen Bilimleri: 3–4 (ilkokul), 5–8 (lise format)
+- Matematik: 3–4 (ilkokul), 5–12 (lise format)
+- Türkçe: 3–4 (ilkokul), 5–8 (lise format)
+- Sosyal Bilgiler: 4 (ilkokul), 5–7 (lise format)
+- İngilizce: 5–12 (lise format)
+- Fizik, Kimya, Biyoloji, Tarih, Coğrafya, Türk Dili ve Edebiyatı: 9–12 (lise format)
+
+**Merkezi kayıt:** `src/lib/mufredatRegistry.ts` — tüm JSON dosyaları buraya import edilir. `getMufredat(ders, sinif)` fonksiyonu `MufredatJson | null` döner (ilkokul dönüşümü dahil). `buildPlan()` bu fonksiyonu kullanır; `null` döndüğünde `planOlustur()` ile müfredat olmadan plan oluşturulur.
 
 Müfredat `haftaNo` ile takvim haftaları eşleştirilir → `Hafta.kazanim/kazanimDetay/uniteAdi` alanlarına atanır.
 
-`DERS_SINIF_MAP` yalnızca sınıf aralığı kısıtlaması olan dersler için tanımlanmıştır; bu map'te yer almayan dersler tüm sınıf seviyelerine açılır ve `planOlustur()` ile müfredat eşleşmesi olmadan plan oluşturur.
-
 Yeni branş eklerken:
-1. `src/data/mufredat/` altına JSON ekle
-2. `AppHomeScreen.tsx`'teki `buildPlan()` fonksiyonuna koşul ekle
-3. Gerekiyorsa `DERS_SINIF_MAP` içinde sınıf aralığı tanımla
+1. `src/data/mufredat/` altına JSON ekle (formatı seç: ilkokul veya lise)
+2. `src/lib/mufredatRegistry.ts`'e import et ve ilgili map'e (`ILKOKUL_MAP` veya `MUFREDAT_MAP`) ekle
+3. Gerekiyorsa `DERS_SINIF_MAP` içinde sınıf aralığı tanımla (her iki ekran dosyasında)
 
 ### Lead Toplama
 
@@ -141,6 +153,7 @@ hafta-notlari       → Record<sinif, Record<string, string>>
 `src/types/planEntry.ts` — `PlanEntry` (localStorage'da saklanan birim; `label?` ve `sinifGercek?` opsiyonel)
 `src/types/lead.ts` — `Lead`, `LeadFormData`
 `src/lib/takvimUtils.ts` — `MufredatJson`, `MufredatHafta`, `IlkokulMufredatJson`, `IlkokulUnite`, `IlkokulKazanim`, `planOlustur()`, `mufredatliPlanOlustur()`, `ilkokulMufredatiniDonustur()`
+`src/lib/mufredatRegistry.ts` — `getMufredat(ders, sinif)`: tüm müfredat JSON'larını import edip döndürür
 
 **Dikkat — eski/kullanılmayan dosyalar:**
 - `src/types/plan.ts` — eski Supabase şema tipi (`id`, `plan_id` vb. içerir); mevcut veri modeli ile karıştırılmamalı. Sadece `WeekView` bileşeni kullanır.
@@ -151,7 +164,7 @@ hafta-notlari       → Record<sinif, Record<string, string>>
 
 - **Hardcoded yıl:** `yil: '2025-2026'` değeri `App.tsx` (legacy handler'lar) ve `AppHomeScreen.tsx` içinde sabitlenmiştir. Yeni öğretim yılına geçişte bu değerlerin güncellenmesi gerekir.
 - **Sınıf öğretmeni composite key:** `PlanEntry.sinif` alanında `"3. Sınıf—Türkçe"` formatı kullanılır (em dash `—`). Bu anahtarı ayrıştırırken veya oluştururken em dash karakterine dikkat et.
-- **AppSettingsScreen buildPlan() eskidir:** `AppSettingsScreen.tsx` içindeki `buildPlan()` ve `DERS_SINIF_MAP` yalnızca Fen Bilimleri 5–8'i destekler; 3–4 desteği eklenmemiştir. Plan yeniden oluşturulurken bu sayfa da tetiklenebileceğinden (`onPlanEkle` prop'u), Fen Bilimleri 3–4 seçilmişse yeniden oluşturma müfredat olmadan yapılır.
+- **İki ekran, iki DERS_SINIF_MAP:** `AppHomeScreen.tsx` ve `AppSettingsScreen.tsx` her ikisi de `buildPlan()` ve `DERS_SINIF_MAP` tanımlar. Yeni branş veya sınıf aralığı eklenince **her iki dosyada** güncelleme gerekir.
 
 ## Kodlama Kuralları
 
@@ -191,9 +204,10 @@ VITE_SUPABASE_ANON_KEY=
 - [x] Sınıf öğretmeni desteği (composite key, çoklu ders)
 - [x] Lead toplama formu (Supabase `leads` tablosu)
 - [x] Fen Bilimleri 3–4 müfredatı entegrasyonu (`ilkokulMufredatiniDonustur()` converter ile)
+- [x] Tüm ana branşlar için müfredat (Matematik 3–12, Türkçe 3–8, Hayat Bilgisi 1–3, Sosyal Bilgiler 4–7, İngilizce 5–12, Fizik/Kimya/Biyoloji/Tarih/Coğrafya/TDE 9–12)
+- [x] Merkezi müfredat registry (`mufredatRegistry.ts`)
 
 ### Yapılacaklar
-- [ ] Tüm branşlar için müfredat
 - [ ] Arayüz geçiş animasyonları
 - [ ] Kullanıcı kaydı (Supabase Auth)
 - [ ] Yazdırma / PDF export

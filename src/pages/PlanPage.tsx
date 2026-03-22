@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import type { Hafta } from '../types/takvim';
 import type { ParsedRow } from '../lib/fileParser';
 import type { PlanEntry } from '../types/planEntry';
-import { exportPlanToExcel, exportPlanToWord } from '../lib/exportUtils';
+import { exportPlanToExcel, exportPlanToWord, exportPlanToPrint } from '../lib/exportUtils';
 
 interface PlanPageProps {
   entry: PlanEntry | null;
@@ -48,6 +48,13 @@ export function PlanPage({ entry }: PlanPageProps) {
     const ayarlar = localStorage.getItem('ogretmen-ayarlari');
     const meta = ayarlar ? JSON.parse(ayarlar) : {};
     exportPlanToWord(entry, { okulAdi: meta.okulAdi, ogretmenAdi: meta.adSoyad });
+  }
+
+  function handleYazdir() {
+    if (!entry) return;
+    const ayarlar = localStorage.getItem('ogretmen-ayarlari');
+    const meta = ayarlar ? JSON.parse(ayarlar) : {};
+    exportPlanToPrint(entry, { okulAdi: meta.okulAdi, ogretmenAdi: meta.adSoyad });
   }
 
   useEffect(() => {
@@ -134,13 +141,19 @@ export function PlanPage({ entry }: PlanPageProps) {
           disabled={exporting}
           className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-[#E7E5E4] bg-[#FAFAF9] text-sm font-bold text-[#2D5BE3] hover:border-[#2D5BE3] active:scale-95 transition-all disabled:opacity-60"
         >
-          {exporting ? <span className="animate-pulse text-xs">Hazırlanıyor...</span> : <>📥 Excel İndir</>}
+          {exporting ? <span className="animate-pulse text-xs">Hazırlanıyor...</span> : <>📥 Excel</>}
         </button>
         <button
           onClick={handleWordIndir}
           className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-[#E7E5E4] bg-[#FAFAF9] text-sm font-bold text-[#2D5BE3] hover:border-[#2D5BE3] active:scale-95 transition-all"
         >
-          📄 Word İndir
+          📄 Word
+        </button>
+        <button
+          onClick={handleYazdir}
+          className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-[#E7E5E4] bg-[#FAFAF9] text-sm font-bold text-[#2D5BE3] hover:border-[#2D5BE3] active:scale-95 transition-all"
+        >
+          🖨️ Yazdır/PDF
         </button>
       </div>
 
