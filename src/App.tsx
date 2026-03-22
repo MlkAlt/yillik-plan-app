@@ -52,7 +52,7 @@ function App() {
       const savedSinif = localStorage.getItem('aktif-sinif')
       if (savedSinif) setAktifSinif(savedSinif)
 
-    } catch (err) {
+    } catch {
       // localStorage okunamadı
     } finally {
       setYuklendi(true)

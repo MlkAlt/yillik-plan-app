@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { planOlustur, mevcutYillar, mufredatliPlanOlustur, type MufredatJson } from '../lib/takvimUtils'
 import type { OlusturulmusPlan } from '../types/takvim'
@@ -25,24 +25,37 @@ export function PlanOlusturPage({ onPlanOlustur }: PlanOlusturPageProps) {
     const navigate = useNavigate()
     const yillar = mevcutYillar()
 
-    const [seciliYil, setSeciliYil] = useState(yillar[yillar.length - 1])
-    const [ders, setDers] = useState('Fen Bilimleri')
-    const [sinif, setSinif] = useState(DERS_SINIF_MAP['Fen Bilimleri'][0])
-    const [hata, setHata] = useState('')
-
-    useEffect(() => {
+    const [seciliYil, setSeciliYil] = useState(() => {
         try {
             const kayitli = localStorage.getItem('ogretmen-ayarlari')
             if (kayitli) {
                 const ayarlar = JSON.parse(kayitli) as { ders?: string; sinif?: string; yil?: string }
-                if (ayarlar.ders) setDers(ayarlar.ders)
-                if (ayarlar.sinif) setSinif(ayarlar.sinif)
-                if (ayarlar.yil) setSeciliYil(ayarlar.yil)
+                if (ayarlar.yil) return ayarlar.yil
             }
-        } catch (error) {
-            console.error('Ayarlar okunamadı:', error)
-        }
-    }, [])
+        } catch { /* okunamadı */ }
+        return yillar[yillar.length - 1]
+    })
+    const [ders, setDers] = useState(() => {
+        try {
+            const kayitli = localStorage.getItem('ogretmen-ayarlari')
+            if (kayitli) {
+                const ayarlar = JSON.parse(kayitli) as { ders?: string }
+                if (ayarlar.ders) return ayarlar.ders
+            }
+        } catch { /* okunamadı */ }
+        return 'Fen Bilimleri'
+    })
+    const [sinif, setSinif] = useState(() => {
+        try {
+            const kayitli = localStorage.getItem('ogretmen-ayarlari')
+            if (kayitli) {
+                const ayarlar = JSON.parse(kayitli) as { sinif?: string }
+                if (ayarlar.sinif) return ayarlar.sinif
+            }
+        } catch { /* okunamadı */ }
+        return DERS_SINIF_MAP['Fen Bilimleri'][0]
+    })
+    const [hata, setHata] = useState('')
 
     function handleSubmit() {
         if (!ders.trim()) {
@@ -70,7 +83,7 @@ export function PlanOlusturPage({ onPlanOlustur }: PlanOlusturPageProps) {
             }
             onPlanOlustur(plan, ders.trim(), sinif)
             navigate('/app/plan')
-        } catch (err) {
+        } catch {
             setHata('Plan oluşturulamadı. Lütfen tekrar deneyin.')
         }
     }

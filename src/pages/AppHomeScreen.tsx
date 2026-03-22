@@ -222,13 +222,56 @@ function BuHaftaKarti({
 export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreenProps) {
   const navigate = useNavigate();
 
-  const [ogretmenAd, setOgretmenAd] = useState('');
-  const [onboardingTamamlandi, setOnboardingTamamlandi] = useState(false);
-  const [tamamlananlar, setTamamlananlar] = useState<Record<string, number[]>>({});
+  const [ogretmenAd] = useState(() => {
+    try {
+      const item = localStorage.getItem('ogretmen-ayarlari');
+      if (item) {
+        const parsed = JSON.parse(item);
+        if (parsed.adSoyad) return parsed.adSoyad.trim().split(' ')[0] as string;
+      }
+    } catch { /* localStorage okunamadı */ }
+    return '';
+  });
+  const [onboardingTamamlandi, setOnboardingTamamlandi] = useState(
+    () => !!localStorage.getItem('onboarding-tamamlandi')
+  );
+  const [tamamlananlar] = useState<Record<string, number[]>>(() => {
+    try {
+      const tItem = localStorage.getItem('tamamlanan-haftalar');
+      if (tItem) {
+        const parsed = JSON.parse(tItem);
+        if (Array.isArray(parsed)) {
+          const sinif = planlar[0]?.sinif || '';
+          return sinif ? { [sinif]: parsed } : {};
+        }
+        return parsed;
+      }
+    } catch { /* localStorage okunamadı */ }
+    return {};
+  });
   const [olusturuluyor, setOlusturuluyor] = useState(false);
 
-  const [onbDers, setOnbDers] = useState('Fen Bilimleri');
-  const [onbSiniflar, setOnbSiniflar] = useState<string[]>(['5. Sınıf']);
+  const [onbDers, setOnbDers] = useState(() => {
+    try {
+      const item = localStorage.getItem('ogretmen-ayarlari');
+      if (item) {
+        const parsed = JSON.parse(item);
+        if (parsed.ders) return parsed.ders as string;
+      }
+    } catch { /* localStorage okunamadı */ }
+    return 'Fen Bilimleri';
+  });
+  const [onbSiniflar, setOnbSiniflar] = useState<string[]>(() => {
+    try {
+      const item = localStorage.getItem('ogretmen-ayarlari');
+      if (item) {
+        const parsed = JSON.parse(item);
+        if (parsed.siniflar?.length) return parsed.siniflar;
+        if (parsed.sinif) return [parsed.sinif];
+      }
+    } catch { /* localStorage okunamadı */ }
+    return ['5. Sınıf'];
+  });
   const [onbSinifOgrSinif, setOnbSinifOgrSinif] = useState('3. Sınıf');
   const [onbSinifOgrDersler, setOnbSinifOgrDersler] = useState<string[]>(['Türkçe']);
 
@@ -246,34 +289,8 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
         }
       }
     }
-  }, [planlar])
-
-  useEffect(() => {
-    try {
-      const ayarlarItem = localStorage.getItem('ogretmen-ayarlari');
-      if (ayarlarItem) {
-        const parsed = JSON.parse(ayarlarItem);
-        if (parsed.adSoyad) setOgretmenAd(parsed.adSoyad.trim().split(' ')[0]);
-        if (parsed.ders) setOnbDers(parsed.ders);
-        if (parsed.siniflar?.length) setOnbSiniflar(parsed.siniflar);
-        else if (parsed.sinif) setOnbSiniflar([parsed.sinif]);
-      }
-      if (localStorage.getItem('onboarding-tamamlandi')) setOnboardingTamamlandi(true);
-
-      const tItem = localStorage.getItem('tamamlanan-haftalar');
-      if (tItem) {
-        const parsed = JSON.parse(tItem);
-        if (Array.isArray(parsed)) {
-          const sinif = planlar[0]?.sinif || '';
-          if (sinif) setTamamlananlar({ [sinif]: parsed });
-        } else {
-          setTamamlananlar(parsed);
-        }
-      }
-    } catch {
-      // localStorage okunamadı
-    }
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [planlar.length]);
 
   function handleOnbDersChange(ders: string) {
     setOnbDers(ders);

@@ -211,7 +211,7 @@ export async function exportPlanToExcel(entry: PlanEntry, meta: ExportMeta = {})
   } else if (entry.tip === 'yukle' && entry.rows) {
     // Yüklenen planlar için hafta verilerini dönüştür
     const converted = entry.rows.map((r: ParsedRow) => ({
-      baslangicTarihi: guessDate(r.ay, r.haftaNo),
+      baslangicTarihi: guessDate(r.ay),
       tatilMi: false,
       kazanim: r.kazanim,
     }))
@@ -513,7 +513,7 @@ function buildWordRows(entry: PlanEntry): WordRow[] {
   }> = entry.tip === 'meb' && entry.plan
     ? entry.plan.haftalar
     : (entry.rows || []).map((r: ParsedRow) => ({
-        baslangicTarihi: guessDate(r.ay, r.haftaNo),
+        baslangicTarihi: guessDate(r.ay),
         tatilMi: false,
         kazanim: r.kazanim,
       }))
@@ -570,7 +570,7 @@ function buildWordRows(entry: PlanEntry): WordRow[] {
 
 // ─── Yardımcı: Yüklenen planlar için tahmini tarih ───────────────────────────
 
-function guessDate(ay: string, _haftaNo: number): string {
+function guessDate(ay: string): string {
   const ayMap: Record<string, number> = {
     'eylül': 9, 'ekim': 10, 'kasım': 11, 'aralık': 12,
     'ocak': 1, 'şubat': 2, 'mart': 3, 'nisan': 4,

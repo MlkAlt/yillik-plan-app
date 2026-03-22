@@ -73,6 +73,7 @@ export function PlanPage({ entry }: PlanPageProps) {
     } catch {
       // localStorage okunamadı
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entry?.sinif]);
 
   if (!entry) {

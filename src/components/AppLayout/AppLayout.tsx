@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import type { ReactNode } from 'react'
 
 interface AppLayoutProps {
@@ -10,24 +10,21 @@ export function AppLayout({ children }: AppLayoutProps) {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const [basharf, setBasharf] = useState<string | null>(null)
-
-  useEffect(() => {
+  const [basharf] = useState<string | null>(() => {
     try {
       const ayarlarItem = localStorage.getItem('ogretmen-ayarlari')
       if (ayarlarItem) {
         const ayarlar = JSON.parse(ayarlarItem)
         if (ayarlar.adSoyad) {
           const ad = ayarlar.adSoyad.trim()
-          if (ad) {
-            setBasharf(ad.charAt(0).toUpperCase())
-          }
+          if (ad) return ad.charAt(0).toUpperCase()
         }
       }
     } catch {
       // localStorage okunamadı
     }
-  }, [])
+    return null
+  })
 
   const tabs = [
     { name: 'Ana', path: '/app', icon: '🏠' },

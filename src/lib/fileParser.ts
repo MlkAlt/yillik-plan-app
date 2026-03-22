@@ -55,7 +55,7 @@ export async function parseWord(file: File): Promise<ParsedRow[]> {
     const lines = text.split('\n').map((l) => l.trim()).filter(Boolean)
 
     for (const line of lines) {
-        const match = line.match(/^(\d+)[\.\s]+(.+)/)
+        const match = line.match(/^(\d+)[.\s]+(.+)/)
         if (match) {
             result.push({
                 haftaNo: parseInt(match[1], 10),

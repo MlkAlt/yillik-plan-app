@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { PlanEntry } from '../types/planEntry';
 import { planOlustur, mufredatliPlanOlustur } from '../lib/takvimUtils';
 import { getMufredat } from '../lib/mufredatRegistry';
@@ -67,35 +67,30 @@ interface AppSettingsScreenProps {
   user?: User | null;
 }
 
+function readAyarlar() {
+  try {
+    const kayitli = localStorage.getItem('ogretmen-ayarlari');
+    if (kayitli) return JSON.parse(kayitli);
+  } catch { /* okunamadı */ }
+  return {};
+}
+
 export function AppSettingsScreen({ onPlanEkle, user }: AppSettingsScreenProps) {
-  const [adSoyad, setAdSoyad] = useState('');
-  const [okulAdi, setOkulAdi] = useState('');
-  const [sehir, setSehir] = useState('');
-  const [ders, setDers] = useState('Fen Bilimleri');
-  const [siniflar, setSiniflar] = useState<string[]>(['5. Sınıf']);
-  const [yil, setYil] = useState('2025-2026');
+  const [adSoyad, setAdSoyad] = useState(() => readAyarlar().adSoyad || '');
+  const [okulAdi, setOkulAdi] = useState(() => readAyarlar().okulAdi || '');
+  const [sehir, setSehir] = useState(() => readAyarlar().sehir || '');
+  const [ders, setDers] = useState(() => readAyarlar().ders || 'Fen Bilimleri');
+  const [siniflar, setSiniflar] = useState<string[]>(() => {
+    const a = readAyarlar();
+    if (a.siniflar?.length) return a.siniflar;
+    if (a.sinif) return [a.sinif];
+    return ['5. Sınıf'];
+  });
+  const [yil, setYil] = useState(() => readAyarlar().yil || '2025-2026');
   const [basariMesaji, setBasariMesaji] = useState(false);
   const [authModalAcik, setAuthModalAcik] = useState(false);
   const [bildirimAktif, setBildirimAktifState] = useState(isBildirimAktif);
   const [bildirimIzni, setBildirimIzniState] = useState(getBildirimIzni);
-
-  useEffect(() => {
-    try {
-      const kayitli = localStorage.getItem('ogretmen-ayarlari');
-      if (kayitli) {
-        const parsed = JSON.parse(kayitli);
-        if (parsed.adSoyad) setAdSoyad(parsed.adSoyad);
-        if (parsed.okulAdi) setOkulAdi(parsed.okulAdi);
-        if (parsed.sehir) setSehir(parsed.sehir);
-        if (parsed.ders) setDers(parsed.ders);
-        if (parsed.siniflar?.length) setSiniflar(parsed.siniflar);
-        else if (parsed.sinif) setSiniflar([parsed.sinif]);
-        if (parsed.yil) setYil(parsed.yil);
-      }
-    } catch {
-      // okunamadı
-    }
-  }, []);
 
   function handleDersChange(yeniDers: string) {
     setDers(yeniDers);

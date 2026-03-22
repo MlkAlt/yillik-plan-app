@@ -34,6 +34,7 @@ export function HaftaDetayPage() {
         const planlar = JSON.parse(planlarItem) as PlanEntry[]
         const entry = planlar.find(p => p.sinif === aktifSinifStr) || planlar[0]
         if (entry) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
           setDers(entry.ders || '')
           setSinif(entry.sinifGercek || entry.sinif || '')
           if (entry.tip === 'meb' && entry.plan) {
