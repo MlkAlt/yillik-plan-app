@@ -4,6 +4,7 @@ import type { Hafta, OlusturulmusPlan } from '../types/takvim';
 import type { PlanEntry } from '../types/planEntry';
 import { planOlustur, mufredatliPlanOlustur } from '../lib/takvimUtils';
 import { getMufredat } from '../lib/mufredatRegistry';
+import { showKazanimBildirimi } from '../lib/notifications';
 
 const DERS_SECENEKLERI = [
   'Sınıf Öğretmeni',
@@ -230,6 +231,22 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
   const [onbSiniflar, setOnbSiniflar] = useState<string[]>(['5. Sınıf']);
   const [onbSinifOgrSinif, setOnbSinifOgrSinif] = useState('3. Sınıf');
   const [onbSinifOgrDersler, setOnbSinifOgrDersler] = useState<string[]>(['Türkçe']);
+
+  useEffect(() => {
+    // Haftanın kazanımını bildirim olarak göster (yeni hafta ise)
+    if (planlar.length > 0) {
+      const aktifEntry = planlar[0]
+      if (aktifEntry.plan) {
+        const bugunStr = new Date().toISOString().split('T')[0]
+        const bugunHafta = aktifEntry.plan.haftalar.find(
+          h => bugunStr >= h.baslangicTarihi && bugunStr <= h.bitisTarihi
+        )
+        if (bugunHafta && !bugunHafta.tatilMi && bugunHafta.kazanim) {
+          showKazanimBildirimi(bugunHafta.haftaNo, bugunHafta.kazanim, aktifEntry.ders)
+        }
+      }
+    }
+  }, [planlar])
 
   useEffect(() => {
     try {

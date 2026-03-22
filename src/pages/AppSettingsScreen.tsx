@@ -4,6 +4,10 @@ import { planOlustur, mufredatliPlanOlustur } from '../lib/takvimUtils';
 import { getMufredat } from '../lib/mufredatRegistry';
 import { signOut, type User } from '../lib/auth';
 import { AuthModal } from '../components/AuthModal';
+import {
+  isBildirimDestekleniyor, getBildirimIzni, isBildirimAktif,
+  setBildirimAktif, requestBildirimIzni,
+} from '../lib/notifications';
 
 const DERS_SECENEKLERI = [
   'Fen Bilimleri', 'Matematik', 'Türkçe', 'Hayat Bilgisi', 'Sosyal Bilgiler',
@@ -72,6 +76,8 @@ export function AppSettingsScreen({ onPlanEkle, user }: AppSettingsScreenProps) 
   const [yil, setYil] = useState('2025-2026');
   const [basariMesaji, setBasariMesaji] = useState(false);
   const [authModalAcik, setAuthModalAcik] = useState(false);
+  const [bildirimAktif, setBildirimAktifState] = useState(isBildirimAktif);
+  const [bildirimIzni, setBildirimIzniState] = useState(getBildirimIzni);
 
   useEffect(() => {
     try {
@@ -136,6 +142,20 @@ export function AppSettingsScreen({ onPlanEkle, user }: AppSettingsScreenProps) 
     setTimeout(() => setBasariMesaji(false), 2500);
   }
 
+  async function handleBildirimToggle() {
+    if (!bildirimAktif) {
+      const izin = await requestBildirimIzni()
+      setBildirimIzniState(Notification.permission)
+      if (izin) {
+        setBildirimAktif(true)
+        setBildirimAktifState(true)
+      }
+    } else {
+      setBildirimAktif(false)
+      setBildirimAktifState(false)
+    }
+  }
+
   const aktifSiniflar = DERS_SINIF_MAP[ders] || SINIF_SEVIYELERI;
   const yeniSinifSayisi = (() => {
     try {
@@ -187,6 +207,36 @@ export function AppSettingsScreen({ onPlanEkle, user }: AppSettingsScreenProps) 
       </div>
 
       {authModalAcik && <AuthModal onClose={() => setAuthModalAcik(false)} />}
+
+      {/* Bildirim Bölümü */}
+      {isBildirimDestekleniyor() && (
+        <div className="bg-[#FAFAF9] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-5 mb-4">
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Bildirimler</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-[#1C1917]">Haftalık kazanım hatırlatıcı</p>
+              <p className="text-xs text-gray-400 mt-0.5">
+                {bildirimIzni === 'denied'
+                  ? 'Tarayıcı ayarlarından izin ver'
+                  : 'Yeni haftada kazanımı bildir'}
+              </p>
+            </div>
+            <button
+              onClick={handleBildirimToggle}
+              disabled={bildirimIzni === 'denied'}
+              className={`relative w-12 h-6 rounded-full transition-all duration-200 focus:outline-none disabled:opacity-40 ${
+                bildirimAktif && bildirimIzni === 'granted'
+                  ? 'bg-[#2D5BE3]'
+                  : 'bg-gray-200'
+              }`}
+            >
+              <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${
+                bildirimAktif && bildirimIzni === 'granted' ? 'translate-x-6' : 'translate-x-0'
+              }`} />
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-col gap-5 bg-[#FAFAF9] p-5 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4]">
 
