@@ -1,107 +1,25 @@
-# Yıllık Plan Uygulaması — CLAUDE.md
+# CLAUDE.md
 
-## Proje Özeti
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+# Yıllık Plan Uygulaması
+
 Öğretmenler için yıllık ders planı oluşturma ve görüntüleme uygulaması.
-- Kullanıcılar kendi planlarını yükleyebilir VEYA MEB takvimine göre otomatik oluşturabilir
-- Haftalık / günlük kazanım görünümü (sınıf defteri yazarken referans olarak kullanılır)
-- Hedef: Öğretmenler için ücretsiz, lead toplama için de kullanılacak
-
-## Hedef Kitle
-- Türk öğretmenler (ilk hedef: lead formu dolduranlar)
-- Uygulama sahibi: Melik (kendi kullanımı + lead toplama)
+Hedef: Ücretsiz, lead toplama için de kullanılacak.
 
 ## Tech Stack (Sabit — Değiştirme)
 
-| Katman | Teknoloji | Neden |
-|--------|-----------|-------|
-| Frontend | React + Vite | Hızlı, PWA desteği, geniş ekosistem |
-| Stil | Tailwind CSS | Hızlı geliştirme, mobil öncelikli |
-| Backend / DB | Supabase (free tier) | PostgreSQL + Auth + Storage + Edge Functions |
-| Hosting | Vercel (free tier) | CI/CD dahil, sıfır maliyet |
-| Reklam | Google AdSense | İleride eklenecek |
+| Katman | Teknoloji |
+|--------|-----------|
+| Frontend | React + Vite + TypeScript |
+| Stil | Tailwind CSS |
+| Backend / DB | Supabase (free tier) |
+| Hosting | Vercel (free tier) |
 
-**Maliyet hedefi: $0/ay** — Tüm servisler free tier sınırları içinde kalacak.
-
-## Temel Özellikler
-
-### Tamamlanan
-- [x] MEB takvimine göre otomatik yıllık plan oluşturma
-- [x] Excel/Word yükleme ile plan import
-- [x] Haftalık kazanım görünümü (hafta bazlı — günlük değil, ders programı gerekmez)
-- [x] Çoklu sınıf desteği (aynı öğretmen 6. ve 7. sınıfa girebilir)
-- [x] Onboarding (ana ekranda kart — ayrı sayfa değil)
-- [x] Hafta tamamlandı işaretleme + öğretmen notu
-- [x] Sınıf başına bağımsız ilerleme takibi
-- [x] Ana ekranda bu haftanın kazanım özeti (sınıf sekmeli, SVG halka)
-- [x] Fen Bilimleri 5–8. sınıf müfredatı (kazanım + ünite + detay)
-
-### Yapılacaklar
-- [ ] Tüm branşlar için müfredat tamamlanması
-- [ ] Arayüz geçiş animasyonları
-- [ ] Lead toplama formu (ad, soyad, okul, email)
-- [ ] Kullanıcı kaydı (Supabase Auth)
-- [ ] Yazdırma / PDF export
-- [ ] Push bildirim (haftalık kazanım hatırlatması)
-- [ ] Google AdSense entegrasyonu
-
-## localStorage Veri Modeli (Supabase öncesi)
-
-Supabase entegre edilene kadar tüm veri localStorage'da tutuluyor.
-
-```
-ogretmen-ayarlari   → { ders, siniflar: string[], yil, adSoyad?, okulAdi?, sehir? }
-tum-planlar         → PlanEntry[]  (her sınıf için ayrı obje)
-aktif-sinif         → string  (şu an görüntülenen sınıf)
-onboarding-tamamlandi → "1"
-tamamlanan-haftalar → Record<sinif, number[]>  — örn: { "6. Sınıf": [1,2,3] }
-hafta-notlari       → Record<sinif, Record<string, string>>
-```
-
-`PlanEntry` tipi (`src/types/planEntry.ts`):
-```
-{ sinif, ders, yil, tip: 'meb'|'yukle', plan: OlusturulmusPlan|null, rows: ParsedRow[]|null }
-```
-
-### Supabase Tabloları (ileride)
-```
-users, yillik_planlar, haftalar, kazanimlar, leads
-```
-
-## Klasör Yapısı
-```
-src/
-  components/     → Tekrar kullanılabilir UI bileşenleri
-  pages/          → Sayfa bileşenleri (router'a bağlı)
-  hooks/          → Custom React hooks
-  lib/            → Supabase client, yardımcı fonksiyonlar
-  data/           → MEB takvimi JSON dosyaları, statik veri
-  types/          → TypeScript tip tanımları
-```
-
-## Kodlama Kuralları
-
-- **Dil:** Türkçe değişken/fonksiyon isimleri YASAK — İngilizce kullan (evrensel)
-- **Yorumlar:** Türkçe yorum satırları kabul edilebilir
-- **Componentler:** Her bileşen kendi klasöründe (Component/index.tsx + Component.tsx)
-- **TypeScript:** Zorunlu — `any` kullanma
-- **Async:** async/await kullan, .then() zinciri yapma
-- **Error handling:** Her Supabase çağrısında try/catch
-- **Stil:** Tailwind class'ları, custom CSS sadece zorunluluk halinde
-
-## Yapılmaması Gerekenler
-- ❌ Ücretli API veya servis ekleme (free tier dışına çıkma)
-- ❌ Karmaşık state management (Redux vs) — Zustand yeterli olursa o, yoksa React Context
-- ❌ SSR (Server Side Rendering) — Static + client-side yeterli
-- ❌ Birden fazla dil desteği — Sadece Türkçe UI
-- ❌ `console.log` bırakma production'da
-
-## Ortam Değişkenleri (.env.local)
-```
-VITE_SUPABASE_URL=
-VITE_SUPABASE_ANON_KEY=
-```
+**Maliyet hedefi: $0/ay**
 
 ## Komutlar
+
 ```bash
 npm run dev        # Geliştirme sunucusu
 npm run build      # Production build
@@ -109,15 +27,141 @@ npm run preview    # Build önizleme
 npm run lint       # ESLint kontrol
 ```
 
-## Önemli Notlar
-- Uygulama PWA olacak → Öğretmenler ana ekrana ekleyebilsin
-- Mobil öncelikli tasarım (öğretmenler telefonda kullanacak)
-- MEB takvim verisi src/data/ altında JSON olarak tutulacak (API'ye gerek yok)
-- Supabase Row Level Security (RLS) mutlaka aktif olacak
+## Uygulama Mimarisi
 
-## Alınan Tasarım Kararları
-- **Hafta bazlı takip** — günlük değil. Ders programı girmek gerekmez, kazanımlar haftaya bağlı.
-- **Onboarding ana ekranda kart** — ayrı /onboarding sayfası değil, uygulama görünür kalır.
-- **Çoklu sınıf** — `sinif` (tek) yerine `siniflar: string[]`. Her sınıf ayrı `PlanEntry`.
-- **Ana ekran kazanım kartı** — sınıf sekmeli, tek kart. Kazanıma tıklanınca yıllık plana gider.
-- **Renk paleti** — koyu mavi `#1e3a5f`, turuncu `#f97316`. Değiştirme.
+### İki Ayrı UI Katmanı
+
+**Landing katmanı** (`/`, `/olustur`, `/yukle`, `/plan`) — AppLayout olmadan çalışır.
+
+**App katmanı** (`/app/*`) — `AppLayout` wrapper ile, mobil-öncelikli bottom-nav içerir:
+- `/app` → `AppHomeScreen` (bu haftaki kazanım + onboarding)
+- `/app/plan` → `PlanPage` (tüm haftalar listesi)
+- `/app/ayarlar` → `AppSettingsScreen`
+- `/app/hafta/:haftaNo` → `HaftaDetayPage` (hafta tamamlama + not)
+
+### State Yönetimi
+
+Tüm global state **`App.tsx`**'te tutulur ve prop olarak iletilir — Zustand veya Context kullanılmıyor.
+
+```
+App.tsx
+  planlar: PlanEntry[]          ← tum-planlar (localStorage)
+  aktifSinif: string            ← aktif-sinif (localStorage)
+```
+
+`HaftaDetayPage` ve `PlanPage` aktif sınıfı ve plan verisini localStorage'dan doğrudan okur (prop almaz).
+
+### Veri Akışı: Plan Oluşturma
+
+```
+Kullanıcı ders+sınıf seçer
+  → buildPlan(ders, sinif, yil)        [AppHomeScreen.tsx]
+    → mufredatliPlanOlustur(yil, json) [takvimUtils.ts]  ← Fen Bilimleri 5-8
+    veya planOlustur(yil)              [takvimUtils.ts]  ← diğer dersler
+      → meb-takvim.json               [src/data/]
+→ PlanEntry olarak tum-planlar'a kaydedilir
+```
+
+`PlanEntry.tip === 'meb'` → `plan: OlusturulmusPlan` (hafta bazlı, takvim + müfredat)
+`PlanEntry.tip === 'yukle'` → `rows: ParsedRow[]` (Excel/Word'den parse edilmiş)
+
+### Sınıf Öğretmeni Desteği
+
+Sınıf öğretmeni seçildiğinde her ders için ayrı `PlanEntry` oluşturulur. `PlanEntry.sinif` alanı composite key olarak kullanılır: `"3. Sınıf—Türkçe"`. Görüntüleme için `label` (ders adı) ve `sinifGercek` (gerçek sınıf adı, örn. "3. Sınıf") alanları kullanılır.
+
+### Dosya Yükleme
+
+`src/lib/fileParser.ts` — `.xlsx/.xls` için `xlsx` paketi, `.docx` için `mammoth` kullanır.
+Excel beklenen format: `[Ay, HaftaNo, Dönem, TarihAralığı, Kazanım]` sütunları.
+
+`src/lib/templateGenerator.ts` — `sablonIndir()` ile boş Excel şablonu indirme.
+
+### Müfredat Verisi
+
+`src/data/mufredat/fen-bilimleri-{3..8}.json` — Her dosya `MufredatJson` tipinde:
+```ts
+{ ders, sinif, toplamHafta, haftalar: MufredatHafta[] }
+// MufredatHafta: { haftaNo, unite, uniteAdi, kazanim, kazanimDetay }
+```
+Müfredat `haftaNo` ile takvim haftaları eşleştirilir → `Hafta.kazanim/kazanimDetay/uniteAdi` alanlarına atanır.
+
+**Dikkat:** `fen-bilimleri-3.json` ve `fen-bilimleri-4.json` dosyaları mevcut ama `buildPlan()` içinde henüz entegre edilmedi — `planOlustur()` fallback'i kullanıyor.
+
+Yeni branş eklerken:
+1. `src/data/mufredat/` altına JSON ekle
+2. `AppHomeScreen.tsx`'teki `buildPlan()` fonksiyonuna koşul ekle
+3. `DERS_SINIF_MAP` içinde sınıf aralığı tanımla
+
+### Lead Toplama
+
+`src/components/LeadForm/LeadForm.tsx` — Supabase `leads` tablosuna veri gönderir.
+- `embedded` prop: `true` → standalone sayfa olmadan sadece form kartını render eder.
+- `src/types/lead.ts` — `Lead` ve `LeadFormData` tipleri.
+- `src/lib/supabase.ts` — `createClient` ile başlatılmış Supabase istemcisi; env değişkenleri dolu olmalı.
+
+## localStorage Veri Modeli
+
+```
+tum-planlar         → PlanEntry[]
+aktif-sinif         → string
+ogretmen-ayarlari   → { ders, siniflar: string[], yil, adSoyad?, okulAdi?, sehir?, ogretmenTuru?, sinifGercek? }
+onboarding-tamamlandi → "1"
+tamamlanan-haftalar → Record<sinif, number[]>
+hafta-notlari       → Record<sinif, Record<string, string>>
+```
+
+**Migration:** `App.tsx` başlangıçta eski `aktif-plan` key'ini yeni `tum-planlar` formatına otomatik çevirir.
+
+## Önemli Tipler
+
+`src/types/takvim.ts` — `OlusturulmusPlan`, `Hafta`, `MebYilTakvim`
+`src/types/planEntry.ts` — `PlanEntry` (localStorage'da saklanan birim; `label?` ve `sinifGercek?` opsiyonel)
+`src/types/lead.ts` — `Lead`, `LeadFormData`
+`src/lib/takvimUtils.ts` — `MufredatJson`, `MufredatHafta`, `planOlustur()`, `mufredatliPlanOlustur()`
+
+## Kodlama Kuralları
+
+- **Değişken/fonksiyon isimleri:** İngilizce — Türkçe YASAK
+- **Yorumlar:** Türkçe kabul edilebilir
+- **TypeScript:** Zorunlu — `any` kullanma
+- **Async:** async/await, `.then()` zinciri değil
+- **Stil:** Tailwind class'ları; renk paleti: `#2D5BE3` (mavi), `#F59E0B` (turuncu), `#1e3a5f` (koyu mavi). Değiştirme.
+- **Componentler:** `Component/index.tsx + Component.tsx` pattern
+- `console.log` bırakma
+
+## Yapılmaması Gerekenler
+- ❌ Ücretli API veya servis (free tier dışına çıkma)
+- ❌ Redux / karmaşık state management
+- ❌ SSR
+- ❌ Çoklu dil desteği
+
+## Ortam Değişkenleri (.env.local)
+
+```
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
+```
+
+## Özellik Durumu
+
+### Tamamlanan
+- [x] MEB takvimine göre otomatik yıllık plan oluşturma
+- [x] Excel/Word yükleme ile plan import
+- [x] Excel şablonu indirme (`sablonIndir`)
+- [x] Hafta bazlı kazanım görünümü (ders programı gerekmez)
+- [x] Çoklu sınıf desteği — her sınıf ayrı `PlanEntry`
+- [x] Onboarding (ana ekranda kart)
+- [x] Hafta tamamlandı işaretleme + öğretmen notu
+- [x] Sınıf başına bağımsız ilerleme takibi (SVG halka)
+- [x] Fen Bilimleri 5–8 müfredatı
+- [x] Sınıf öğretmeni desteği (composite key, çoklu ders)
+- [x] Lead toplama formu (Supabase `leads` tablosu)
+
+### Yapılacaklar
+- [ ] Fen Bilimleri 3–4 müfredatı entegrasyonu (JSON hazır, `buildPlan()` güncellenmeli)
+- [ ] Tüm branşlar için müfredat
+- [ ] Arayüz geçiş animasyonları
+- [ ] Kullanıcı kaydı (Supabase Auth)
+- [ ] Yazdırma / PDF export
+- [ ] Push bildirim
+- [ ] Google AdSense entegrasyonu

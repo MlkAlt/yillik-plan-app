@@ -131,7 +131,7 @@ function BuHaftaKarti({
     <div className="bg-[#FAFAF9] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-5 mb-5">
       {/* Başlık */}
       <div className="flex items-center justify-between mb-4">
-        <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">📅 Bu Hafta</span>
+        <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Bu Hafta</span>
         <span className="text-xs text-gray-400 font-medium">{haftaBilgi}</span>
       </div>
 
@@ -147,7 +147,7 @@ function BuHaftaKarti({
 
         {/* Tatil */}
         {aktifHafta?.tatilMi && (
-          <p className="font-black text-[#F59E0B] text-base">🎉 {aktifHafta.tatilAdi}</p>
+          <p className="font-bold text-[#F59E0B] text-base">🎉 {aktifHafta.tatilAdi}</p>
         )}
 
         {/* Normal hafta */}
@@ -193,7 +193,7 @@ function BuHaftaKarti({
               <button
                 key={entry.sinif}
                 onClick={() => setSeciliSinif(entry.sinif)}
-                className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border font-bold text-sm transition-all ${
+                className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border font-bold text-sm transition-all active:scale-95 ${
                   isSelected
                     ? 'bg-[#2D5BE3] border-[#2D5BE3] text-white'
                     : 'bg-[#FAFAF9] border-[#E7E5E4] text-gray-500 hover:border-gray-300'
@@ -383,7 +383,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
                     <button
                       key={s}
                       onClick={() => setOnbSinifOgrSinif(s)}
-                      className={`px-3.5 py-1.5 rounded-full text-sm font-bold border transition-all ${
+                      className={`px-3.5 py-1.5 rounded-full text-sm font-bold border transition-all active:scale-95 ${
                         onbSinifOgrSinif === s
                           ? 'bg-[#2D5BE3] text-white border-[#2D5BE3]'
                           : 'bg-[#FAFAF9] text-gray-500 border-[#E7E5E4] hover:border-gray-300'
@@ -404,7 +404,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
                     <button
                       key={d}
                       onClick={() => toggleSinifOgrDers(d)}
-                      className={`px-3.5 py-1.5 rounded-full text-sm font-bold border transition-all ${
+                      className={`px-3.5 py-1.5 rounded-full text-sm font-bold border transition-all active:scale-95 ${
                         onbSinifOgrDersler.includes(d)
                           ? 'bg-[#2D5BE3] text-white border-[#2D5BE3]'
                           : 'bg-[#FAFAF9] text-gray-500 border-[#E7E5E4] hover:border-gray-300'
@@ -440,7 +440,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
                     <button
                       key={s}
                       onClick={() => toggleOnbSinif(s)}
-                      className={`px-3.5 py-1.5 rounded-full text-sm font-bold border transition-all ${
+                      className={`px-3.5 py-1.5 rounded-full text-sm font-bold border transition-all active:scale-95 ${
                         onbSiniflar.includes(s)
                           ? 'bg-[#2D5BE3] text-white border-[#2D5BE3]'
                           : 'bg-[#FAFAF9] text-gray-500 border-[#E7E5E4] hover:border-gray-300'
@@ -479,21 +479,21 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
 
       {/* HIZLI ERİŞİM */}
       {planlar.length > 0 && (
-        <div className="mt-2">
+        <div>
           <div className="text-xs font-semibold tracking-wider text-gray-400 uppercase mb-3 pl-1">
             Hızlı Erişim
           </div>
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => navigate('/olustur')}
-              className="bg-[#FAFAF9] rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-4 active:scale-95 transition-transform flex flex-col items-center justify-center gap-2 hover:shadow-md"
+              className="bg-[#FAFAF9] rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-4 active:scale-[0.98] transition-all flex flex-col items-center justify-center gap-2 hover:shadow-md"
             >
               <span className="text-2xl">📅</span>
               <span className="text-sm font-bold text-[#2D5BE3]">Plan Oluştur</span>
             </button>
             <button
               onClick={() => navigate('/yukle')}
-              className="bg-[#FAFAF9] rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-4 active:scale-95 transition-transform flex flex-col items-center justify-center gap-2 hover:shadow-md"
+              className="bg-[#FAFAF9] rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-4 active:scale-[0.98] transition-all flex flex-col items-center justify-center gap-2 hover:shadow-md"
             >
               <span className="text-2xl">📤</span>
               <span className="text-sm font-bold text-[#2D5BE3]">Dosya Yükle</span>

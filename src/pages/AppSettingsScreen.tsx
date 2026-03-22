@@ -150,7 +150,7 @@ export function AppSettingsScreen({ onPlanEkle }: AppSettingsScreenProps) {
   return (
     <div className="max-w-lg mx-auto p-4 w-full">
       <div className="mb-6 mt-2">
-        <h1 className="text-3xl font-bold text-[#2D5BE3]">⚙️ Ayarlar</h1>
+        <h1 className="text-3xl font-bold text-[#2D5BE3]">Ayarlar</h1>
         <p className="text-gray-500 mt-2 text-sm">
           Bilgilerini güncelle, yeni sınıflar için plan ekle.
         </p>
@@ -219,7 +219,7 @@ export function AppSettingsScreen({ onPlanEkle }: AppSettingsScreenProps) {
                 key={s}
                 type="button"
                 onClick={() => toggleSinif(s)}
-                className={`px-3.5 py-1.5 rounded-full text-sm font-bold border transition-all ${
+                className={`px-3.5 py-1.5 rounded-full text-sm font-bold border transition-all active:scale-95 ${
                   siniflar.includes(s)
                     ? 'bg-[#2D5BE3] text-white border-[#2D5BE3]'
                     : 'bg-[#FAFAF9] text-gray-500 border-[#E7E5E4] hover:border-gray-300'
@@ -246,7 +246,7 @@ export function AppSettingsScreen({ onPlanEkle }: AppSettingsScreenProps) {
         {/* Yeni sınıf uyarısı */}
         {yeniSinifSayisi > 0 && (
           <div className="bg-[#2D5BE3]/10 border border-[#2D5BE3]/20 rounded-xl px-3.5 py-2.5 text-[#2D5BE3] text-xs font-semibold">
-            ✨ Kaydet'e basınca {yeniSinifSayisi} yeni sınıf için plan oluşturulacak.
+            Kaydet'e basınca {yeniSinifSayisi} yeni sınıf için plan oluşturulacak.
           </div>
         )}
 

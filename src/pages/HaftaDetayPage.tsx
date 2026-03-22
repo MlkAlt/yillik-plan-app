@@ -111,13 +111,15 @@ export function HaftaDetayPage() {
       <div className="flex items-center gap-3 mb-6 mt-2">
         <button
           onClick={() => navigate(-1)}
-          className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+          className="text-gray-400 hover:text-gray-600 transition-colors p-2 -ml-1 rounded-lg hover:bg-gray-100 active:scale-95"
         >
-          ←
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12.5 15L7.5 10L12.5 5" />
+          </svg>
         </button>
         <div>
-          <h1 className="text-2xl font-black text-[#2D5BE3]">{no}. Hafta</h1>
-          {ders && <p className="text-sm text-gray-400 font-medium">{ders} · {sinif}</p>}
+          <h1 className="text-2xl font-bold text-[#2D5BE3]">{no}. Hafta</h1>
+          {ders && <p className="text-sm text-gray-400 font-medium mt-0.5">{ders} · {sinif}</p>}
         </div>
         {tamamlandi && (
           <span className="ml-auto bg-[#059669]/10 text-[#059669] text-xs font-bold px-3 py-1.5 rounded-full border border-[#059669]/30">
@@ -139,7 +141,7 @@ export function HaftaDetayPage() {
       {hafta && !hafta.tatilMi && (
         <div className="bg-[#FAFAF9] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-5 mb-4">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-[10px] font-bold uppercase tracking-widest bg-slate-100 text-slate-500 px-3 py-1.5 rounded-full">
+            <span className="text-[10px] font-bold uppercase tracking-widest bg-gray-100 text-gray-500 px-3 py-1.5 rounded-full">
               {hafta.donem}. Dönem
             </span>
             <span className="text-xs text-gray-400 font-medium">
@@ -174,7 +176,7 @@ export function HaftaDetayPage() {
       {uploadedRow && (
         <div className="bg-[#FAFAF9] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-5 mb-4">
           {uploadedRow.donem && (
-            <span className="inline-block text-[10px] font-bold uppercase tracking-widest bg-slate-100 text-slate-500 px-3 py-1.5 rounded-full mb-3">
+            <span className="inline-block text-[10px] font-bold uppercase tracking-widest bg-gray-100 text-gray-500 px-3 py-1.5 rounded-full mb-3">
               {uploadedRow.donem}
             </span>
           )}

@@ -48,8 +48,20 @@ export function PlanPage({ entry }: PlanPageProps) {
 
   if (!entry) {
     return (
-      <div className="p-4 flex justify-center items-center h-full text-gray-500">
-        Henüz plan oluşturulmadı.
+      <div className="p-4 pb-24 w-full max-w-lg mx-auto">
+        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6">
+          <div className="text-6xl mb-5">📋</div>
+          <h2 className="text-xl font-bold text-[#2D5BE3] mb-2">Henüz plan yok</h2>
+          <p className="text-sm text-gray-400 font-medium mb-6 leading-relaxed">
+            Ana ekrandan planını oluştur ve tüm haftaları burada takip et.
+          </p>
+          <button
+            onClick={() => navigate('/app')}
+            className="bg-[#F59E0B] text-white px-6 py-3 rounded-xl font-bold text-sm active:scale-95 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.06)]"
+          >
+            Plan Oluştur →
+          </button>
+        </div>
       </div>
     );
   }
@@ -68,10 +80,10 @@ export function PlanPage({ entry }: PlanPageProps) {
   return (
     <div className="p-4 pb-24 w-full max-w-lg mx-auto">
       {/* Üst Bilgi Kartı */}
-      <div className="mb-4 bg-[#FAFAF9] p-4 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4]">
+      <div className="mb-4 bg-[#FAFAF9] p-5 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4]">
         <div className="flex items-start justify-between mb-3">
           <div>
-            <h1 className="text-xl font-black text-[#2D5BE3] tracking-tight uppercase">
+            <h1 className="text-xl font-bold text-[#2D5BE3] tracking-tight uppercase">
               {ders || 'Ders Seçilmedi'}
             </h1>
             <p className="text-sm text-gray-400 font-medium mt-0.5">{sinifGercek || sinif}</p>
@@ -103,14 +115,14 @@ export function PlanPage({ entry }: PlanPageProps) {
             <div
               key={`meb-${h.haftaNo}-${i}`}
               onClick={() => navigate(`/app/hafta/${h.haftaNo}`)}
-              className={`rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] p-4 border transition-colors cursor-pointer ${
+              className={`rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] p-4 border transition-all cursor-pointer ${
                 isTamamlandi ? 'bg-[#059669]/10 border-[#059669]/30' :
                 isTatil ? 'bg-amber-50 border-amber-200' :
-                'bg-[#FAFAF9] border-[#E7E5E4] hover:shadow-md'
+                'bg-[#FAFAF9] border-[#E7E5E4] hover:shadow-md active:scale-[0.99]'
               }`}
             >
               <div className="flex justify-between items-start mb-3">
-                <span className={`font-extrabold text-lg ${
+                <span className={`font-bold text-lg ${
                   isTamamlandi ? 'text-[#059669]' :
                   isTatil ? 'text-amber-700' :
                   'text-[#2D5BE3]'
@@ -144,7 +156,7 @@ export function PlanPage({ entry }: PlanPageProps) {
               )}
 
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-widest bg-slate-100 text-slate-500 px-3 py-1.5 rounded-full">
+                <span className="text-[10px] font-bold uppercase tracking-widest bg-gray-100 text-gray-500 px-3 py-1.5 rounded-full">
                   {h.donem}. Dönem
                 </span>
                 {isTatil && (
@@ -163,12 +175,12 @@ export function PlanPage({ entry }: PlanPageProps) {
             <div
               key={`row-${i}`}
               onClick={() => navigate(`/app/hafta/${r.haftaNo}`)}
-              className={`rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] p-4 border cursor-pointer transition-colors ${
-                isTamamlandi ? 'bg-[#059669]/10 border-[#059669]/30' : 'bg-[#FAFAF9] border-[#E7E5E4] hover:shadow-md'
+              className={`rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] p-4 border cursor-pointer transition-all ${
+                isTamamlandi ? 'bg-[#059669]/10 border-[#059669]/30' : 'bg-[#FAFAF9] border-[#E7E5E4] hover:shadow-md active:scale-[0.99]'
               }`}
             >
               <div className="flex justify-between items-start mb-3">
-                <span className={`font-extrabold text-lg ${isTamamlandi ? 'text-[#059669]' : 'text-[#2D5BE3]'}`}>
+                <span className={`font-bold text-lg ${isTamamlandi ? 'text-[#059669]' : 'text-[#2D5BE3]'}`}>
                   {r.haftaNo ? `${r.haftaNo}. Hafta` : 'Ekstra'}
                 </span>
                 <div className="flex items-center gap-2">
@@ -185,11 +197,11 @@ export function PlanPage({ entry }: PlanPageProps) {
                 </div>
               </div>
               {r.donem && (
-                <span className="text-[10px] font-bold uppercase tracking-widest bg-slate-100 text-slate-500 px-3 py-1.5 rounded-full inline-block mb-3">
+                <span className="text-[10px] font-bold uppercase tracking-widest bg-gray-100 text-gray-500 px-3 py-1.5 rounded-full inline-block mb-3">
                   {r.donem}
                 </span>
               )}
-              <div className="mt-3 text-[13px] text-gray-600 border-t border-[#E7E5E4] pt-3 leading-relaxed font-medium">
+              <div className="mt-3 text-[13px] text-gray-500 border-t border-[#E7E5E4] pt-3 leading-relaxed font-medium">
                 {r.kazanim}
               </div>
             </div>
