@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import type { OlusturulmusPlan, Hafta } from '../types/takvim'
+import type { Hafta } from '../types/takvim'
 import type { ParsedRow } from '../lib/fileParser'
+import type { PlanEntry } from '../types/planEntry'
 
 function formatTarih(isoTarih: string): string {
   const aylar = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
@@ -30,17 +31,11 @@ export function HaftaDetayPage() {
       // Plan verisini tum-planlar'dan oku
       const planlarItem = localStorage.getItem('tum-planlar')
       if (planlarItem) {
-        const planlar = JSON.parse(planlarItem) as Array<{
-          tip: 'meb' | 'yukle'
-          plan: OlusturulmusPlan | null
-          rows: ParsedRow[] | null
-          ders: string
-          sinif: string
-        }>
+        const planlar = JSON.parse(planlarItem) as PlanEntry[]
         const entry = planlar.find(p => p.sinif === aktifSinifStr) || planlar[0]
         if (entry) {
           setDers(entry.ders || '')
-          setSinif(entry.sinif || '')
+          setSinif(entry.sinifGercek || entry.sinif || '')
           if (entry.tip === 'meb' && entry.plan) {
             const bulunan = entry.plan.haftalar.find((h) => h.haftaNo === no)
             if (bulunan) setHafta(bulunan)

@@ -54,7 +54,7 @@ export function PlanPage({ entry }: PlanPageProps) {
     );
   }
 
-  const { plan, rows, ders, sinif, tip } = entry;
+  const { plan, rows, ders, sinif, sinifGercek, tip } = entry;
   const isMeb = tip === 'meb' && plan && plan.haftalar.length > 0;
   const isUploaded = tip === 'yukle' && rows && rows.length > 0;
   const dataLength = isMeb ? plan!.haftalar.length : (isUploaded ? rows!.length : 0);
@@ -74,7 +74,7 @@ export function PlanPage({ entry }: PlanPageProps) {
             <h1 className="text-xl font-black text-[#2D5BE3] tracking-tight uppercase">
               {ders || 'Ders Seçilmedi'}
             </h1>
-            <p className="text-sm text-gray-400 font-medium mt-0.5">{sinif}</p>
+            <p className="text-sm text-gray-400 font-medium mt-0.5">{sinifGercek || sinif}</p>
           </div>
           <div className="bg-amber-100 border border-amber-200 text-[#F59E0B] px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">
             {dataLength} hafta
