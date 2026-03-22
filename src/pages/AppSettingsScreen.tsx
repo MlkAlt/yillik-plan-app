@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import type { PlanEntry } from '../types/planEntry';
 import { planOlustur, mufredatliPlanOlustur } from '../lib/takvimUtils';
 import { getMufredat } from '../lib/mufredatRegistry';
+import { signOut, type User } from '../lib/auth';
+import { AuthModal } from '../components/AuthModal';
 
 const DERS_SECENEKLERI = [
   'Fen Bilimleri', 'Matematik', 'Türkçe', 'Hayat Bilgisi', 'Sosyal Bilgiler',
@@ -58,9 +60,10 @@ function buildPlan(ders: string, sinif: string, yil: string) {
 
 interface AppSettingsScreenProps {
   onPlanEkle: (entries: PlanEntry[]) => void;
+  user?: User | null;
 }
 
-export function AppSettingsScreen({ onPlanEkle }: AppSettingsScreenProps) {
+export function AppSettingsScreen({ onPlanEkle, user }: AppSettingsScreenProps) {
   const [adSoyad, setAdSoyad] = useState('');
   const [okulAdi, setOkulAdi] = useState('');
   const [sehir, setSehir] = useState('');
@@ -68,6 +71,7 @@ export function AppSettingsScreen({ onPlanEkle }: AppSettingsScreenProps) {
   const [siniflar, setSiniflar] = useState<string[]>(['5. Sınıf']);
   const [yil, setYil] = useState('2025-2026');
   const [basariMesaji, setBasariMesaji] = useState(false);
+  const [authModalAcik, setAuthModalAcik] = useState(false);
 
   useEffect(() => {
     try {
@@ -142,13 +146,47 @@ export function AppSettingsScreen({ onPlanEkle }: AppSettingsScreenProps) {
   })();
 
   return (
-    <div className="max-w-lg mx-auto p-4 w-full">
+    <div className="max-w-lg mx-auto p-4 w-full pb-24">
       <div className="mb-6 mt-2">
         <h1 className="text-3xl font-bold text-[#2D5BE3]">Ayarlar</h1>
         <p className="text-gray-500 mt-2 text-sm">
           Bilgilerini güncelle, yeni sınıflar için plan ekle.
         </p>
       </div>
+
+      {/* Hesap Bölümü */}
+      <div className="bg-[#FAFAF9] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-5 mb-4">
+        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Hesap</p>
+        {user ? (
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-bold text-[#1C1917]">{user.email}</p>
+              <p className="text-xs text-gray-400 mt-0.5">Giriş yapıldı</p>
+            </div>
+            <button
+              onClick={() => signOut()}
+              className="text-xs font-bold text-red-500 border border-red-200 bg-red-50 px-3 py-1.5 rounded-lg active:scale-95 transition-all hover:bg-red-100"
+            >
+              Çıkış Yap
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-[#1C1917]">Giriş yapılmadı</p>
+              <p className="text-xs text-gray-400 mt-0.5">Planlarını buluta kaydet</p>
+            </div>
+            <button
+              onClick={() => setAuthModalAcik(true)}
+              className="text-xs font-bold text-[#2D5BE3] border border-[#2D5BE3]/30 bg-[#2D5BE3]/5 px-3 py-1.5 rounded-lg active:scale-95 transition-all hover:bg-[#2D5BE3]/10"
+            >
+              Giriş Yap / Kayıt Ol
+            </button>
+          </div>
+        )}
+      </div>
+
+      {authModalAcik && <AuthModal onClose={() => setAuthModalAcik(false)} />}
 
       <div className="flex flex-col gap-5 bg-[#FAFAF9] p-5 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4]">
 

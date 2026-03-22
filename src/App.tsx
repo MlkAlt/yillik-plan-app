@@ -11,11 +11,18 @@ import { HaftaDetayPage } from './pages/HaftaDetayPage'
 import type { PlanEntry } from './types/planEntry'
 import type { OlusturulmusPlan } from './types/takvim'
 import type { ParsedRow } from './lib/fileParser'
+import { onAuthStateChange, type User } from './lib/auth'
 
 function App() {
   const [planlar, setPlanlar] = useState<PlanEntry[]>([])
   const [aktifSinif, setAktifSinif] = useState('')
   const [yuklendi, setYuklendi] = useState(false)
+  const [user, setUser] = useState<User | null>(null)
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChange(setUser)
+    return unsubscribe
+  }, [])
 
   useEffect(() => {
     try {
@@ -127,7 +134,7 @@ function App() {
                 </AppLayout>
           }
         />
-        <Route path="/app/ayarlar" element={<AppLayout><AppSettingsScreen onPlanEkle={handlePlanEkle} /></AppLayout>} />
+        <Route path="/app/ayarlar" element={<AppLayout><AppSettingsScreen onPlanEkle={handlePlanEkle} user={user} /></AppLayout>} />
         <Route path="/app/hafta/:haftaNo" element={<AppLayout><HaftaDetayPage /></AppLayout>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
