@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import type { Hafta } from '../types/takvim';
 import type { ParsedRow } from '../lib/fileParser';
 import type { PlanEntry } from '../types/planEntry';
+import { exportPlanToExcel, exportPlanToWord } from '../lib/exportUtils';
 
 interface PlanPageProps {
   entry: PlanEntry | null;
@@ -28,6 +29,26 @@ export function PlanPage({ entry }: PlanPageProps) {
   const navigate = useNavigate();
 
   const [tamamlananlar, setTamamlananlar] = useState<number[]>([]);
+  const [exporting, setExporting] = useState(false);
+
+  async function handleExcelIndir() {
+    if (!entry) return;
+    setExporting(true);
+    try {
+      const ayarlar = localStorage.getItem('ogretmen-ayarlari');
+      const meta = ayarlar ? JSON.parse(ayarlar) : {};
+      await exportPlanToExcel(entry, { okulAdi: meta.okulAdi, ogretmenAdi: meta.adSoyad });
+    } finally {
+      setExporting(false);
+    }
+  }
+
+  function handleWordIndir() {
+    if (!entry) return;
+    const ayarlar = localStorage.getItem('ogretmen-ayarlari');
+    const meta = ayarlar ? JSON.parse(ayarlar) : {};
+    exportPlanToWord(entry, { okulAdi: meta.okulAdi, ogretmenAdi: meta.adSoyad });
+  }
 
   useEffect(() => {
     if (!entry) return;
@@ -104,6 +125,23 @@ export function PlanPage({ entry }: PlanPageProps) {
             style={{ width: `${yuzde}%` }}
           />
         </div>
+      </div>
+
+      {/* İndirme butonları */}
+      <div className="flex gap-2 mb-4">
+        <button
+          onClick={handleExcelIndir}
+          disabled={exporting}
+          className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-[#E7E5E4] bg-[#FAFAF9] text-sm font-bold text-[#2D5BE3] hover:border-[#2D5BE3] active:scale-95 transition-all disabled:opacity-60"
+        >
+          {exporting ? <span className="animate-pulse text-xs">Hazırlanıyor...</span> : <>📥 Excel İndir</>}
+        </button>
+        <button
+          onClick={handleWordIndir}
+          className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-[#E7E5E4] bg-[#FAFAF9] text-sm font-bold text-[#2D5BE3] hover:border-[#2D5BE3] active:scale-95 transition-all"
+        >
+          📄 Word İndir
+        </button>
       </div>
 
       {/* Hafta Listesi */}
