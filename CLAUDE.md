@@ -62,6 +62,12 @@ Kullanıcı ders+sınıf seçer
 → PlanEntry olarak tum-planlar'a kaydedilir
 ```
 
+### Export
+
+`src/lib/exportUtils.ts` — Excel (`exceljs`) ve Word export fonksiyonları.
+- `exportPlanToExcel(entry, meta)` — Stillenmiş Excel çıktısı
+- `exportPlanToWord(entry, meta)` — Word (.docx) çıktısı, Blob olarak indirilir
+
 `PlanEntry.tip === 'meb'` → `plan: OlusturulmusPlan` (hafta bazlı, takvim + müfredat)
 `PlanEntry.tip === 'yukle'` → `rows: ParsedRow[]` (Excel/Word'den parse edilmiş)
 
@@ -78,14 +84,19 @@ Excel beklenen format: `[Ay, HaftaNo, Dönem, TarihAralığı, Kazanım]` sütun
 
 ### Müfredat Verisi
 
-`src/data/mufredat/fen-bilimleri-{3..8}.json` — Her dosya `MufredatJson` tipinde:
+`src/data/mufredat/fen-bilimleri-{3..8}.json` — İki farklı format:
+
+**Ortaokul (5–8):** Standart `MufredatJson` tipinde:
 ```ts
 { ders, sinif, toplamHafta, haftalar: MufredatHafta[] }
 // MufredatHafta: { haftaNo, unite, uniteAdi, kazanim, kazanimDetay }
 ```
+
+**İlkokul (3–4):** `IlkokulMufredatJson` tipinde — `uniteler: IlkokulUnite[]` formatında. `ilkokulMufredatiniDonustur()` ile standart formata çevrilir.
+
 Müfredat `haftaNo` ile takvim haftaları eşleştirilir → `Hafta.kazanim/kazanimDetay/uniteAdi` alanlarına atanır.
 
-**Dikkat:** `fen-bilimleri-3.json` ve `fen-bilimleri-4.json` dosyaları mevcut ama `buildPlan()` içinde henüz entegre edilmedi — `planOlustur()` fallback'i kullanıyor.
+**Dikkat:** `fen-bilimleri-3.json` ve `fen-bilimleri-4.json` dosyaları mevcut, `ilkokulMufredatiniDonustur()` hazır ama `buildPlan()` içinde henüz entegre edilmedi — `planOlustur()` fallback'i kullanıyor.
 
 Yeni branş eklerken:
 1. `src/data/mufredat/` altına JSON ekle
@@ -117,7 +128,13 @@ hafta-notlari       → Record<sinif, Record<string, string>>
 `src/types/takvim.ts` — `OlusturulmusPlan`, `Hafta`, `MebYilTakvim`
 `src/types/planEntry.ts` — `PlanEntry` (localStorage'da saklanan birim; `label?` ve `sinifGercek?` opsiyonel)
 `src/types/lead.ts` — `Lead`, `LeadFormData`
-`src/lib/takvimUtils.ts` — `MufredatJson`, `MufredatHafta`, `planOlustur()`, `mufredatliPlanOlustur()`
+`src/lib/takvimUtils.ts` — `MufredatJson`, `MufredatHafta`, `IlkokulMufredatJson`, `IlkokulUnite`, `planOlustur()`, `mufredatliPlanOlustur()`, `ilkokulMufredatiniDonustur()`
+
+## Bilinen Teknik Notlar
+
+- **`DERS_SINIF_MAP`** 4 dosyada ayrı ayrı tanımlı: `AppHomeScreen`, `PlanOlusturPage`, `AppSettingsScreen`, `OnboardingPage`. Yeni ders/sınıf eklerken hepsini güncelle.
+- **Test altyapısı yok** — Vitest veya benzeri bir framework kurulmamış.
+- **PWA yapılandırması** — `public/manifest.json` (start_url: `/app`), `public/sw.js` service worker.
 
 ## Kodlama Kuralları
 
@@ -156,9 +173,10 @@ VITE_SUPABASE_ANON_KEY=
 - [x] Fen Bilimleri 5–8 müfredatı
 - [x] Sınıf öğretmeni desteği (composite key, çoklu ders)
 - [x] Lead toplama formu (Supabase `leads` tablosu)
+- [x] Excel ve Word export (`exportUtils.ts`)
 
 ### Yapılacaklar
-- [ ] Fen Bilimleri 3–4 müfredatı entegrasyonu (JSON hazır, `buildPlan()` güncellenmeli)
+- [ ] Fen Bilimleri 3–4 müfredatı entegrasyonu (JSON + dönüştürücü hazır, `buildPlan()` güncellenmeli)
 - [ ] Tüm branşlar için müfredat
 - [ ] Arayüz geçiş animasyonları
 - [ ] Kullanıcı kaydı (Supabase Auth)
