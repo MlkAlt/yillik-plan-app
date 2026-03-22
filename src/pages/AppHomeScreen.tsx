@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Hafta, OlusturulmusPlan } from '../types/takvim';
 import type { PlanEntry } from '../types/planEntry';
-import { planOlustur, mufredatliPlanOlustur, type MufredatJson } from '../lib/takvimUtils';
+import { planOlustur, mufredatliPlanOlustur, ilkokulMufredatiniDonustur, type MufredatJson, type IlkokulMufredatJson } from '../lib/takvimUtils';
+import fen3Mufredat from '../data/mufredat/fen-bilimleri-3.json';
+import fen4Mufredat from '../data/mufredat/fen-bilimleri-4.json';
 import fen5Mufredat from '../data/mufredat/fen-bilimleri-5.json';
 import fen6Mufredat from '../data/mufredat/fen-bilimleri-6.json';
 import fen7Mufredat from '../data/mufredat/fen-bilimleri-7.json';
@@ -22,7 +24,7 @@ const DERS_SECENEKLERI = [
 const SINIF_SEVIYELERI = Array.from({ length: 12 }, (_, i) => `${i + 1}. Sınıf`)
 
 const DERS_SINIF_MAP: Record<string, string[]> = {
-  'Fen Bilimleri': ['5. Sınıf', '6. Sınıf', '7. Sınıf', '8. Sınıf'],
+  'Fen Bilimleri': ['3. Sınıf', '4. Sınıf', '5. Sınıf', '6. Sınıf', '7. Sınıf', '8. Sınıf'],
   'Sosyal Bilgiler': ['4. Sınıf', '5. Sınıf', '6. Sınıf', '7. Sınıf'],
   'Türkçe': Array.from({ length: 8 }, (_, i) => `${i + 1}. Sınıf`),
   'Matematik': SINIF_SEVIYELERI,
@@ -40,13 +42,17 @@ const DERS_SINIF_MAP: Record<string, string[]> = {
 
 // Sınıf öğretmeni sabitleri
 const SINIF_OGRETMENI_DERSLER = [
-  'Türkçe', 'Matematik', 'Hayat Bilgisi', 'İlkokul Fen Bilimleri',
+  'Türkçe', 'Matematik', 'Hayat Bilgisi', 'Fen Bilimleri',
   'Sosyal Bilgiler', 'İngilizce', 'Müzik', 'Görsel Sanatlar', 'Beden Eğitimi',
 ]
 const SINIF_OGRETMENI_SINIFLAR = ['1. Sınıf', '2. Sınıf', '3. Sınıf', '4. Sınıf']
 
 function buildPlan(ders: string, sinif: string, yil: string): OlusturulmusPlan {
   if (ders === 'Fen Bilimleri') {
+    if (sinif === '3. Sınıf' || sinif === '4. Sınıf') {
+      const raw = sinif === '3. Sınıf' ? fen3Mufredat : fen4Mufredat
+      return mufredatliPlanOlustur(yil, ilkokulMufredatiniDonustur(raw as IlkokulMufredatJson))
+    }
     let mufredatData: MufredatJson | null = null
     if (sinif === '5. Sınıf') mufredatData = fen5Mufredat as MufredatJson
     else if (sinif === '6. Sınıf') mufredatData = fen6Mufredat as MufredatJson
@@ -54,7 +60,6 @@ function buildPlan(ders: string, sinif: string, yil: string): OlusturulmusPlan {
     else if (sinif === '8. Sınıf') mufredatData = fen8Mufredat as MufredatJson
     if (mufredatData) return mufredatliPlanOlustur(yil, mufredatData)
   }
-  // İlkokul Fen Bilimleri — müfredat JSON formatı farklı, şimdilik takvim planı
   return planOlustur(yil)
 }
 

@@ -75,6 +75,49 @@ export function mevcutYillar(): string[] {
     return (takvimData.yillar as MebYilTakvim[]).map((y) => y.yil)
 }
 
+export interface IlkokulKazanim {
+  kod: string
+  baslik: string
+  adimlar: string[]
+}
+
+export interface IlkokulUnite {
+  no: number
+  ad: string
+  kazanimlar: IlkokulKazanim[]
+}
+
+export interface IlkokulMufredatJson {
+  ders: string
+  sinif: string
+  uniteler: IlkokulUnite[]
+}
+
+export function ilkokulMufredatiniDonustur(json: IlkokulMufredatJson): MufredatJson {
+  const haftalar: MufredatHafta[] = []
+  let haftaNo = 1
+
+  for (const unite of json.uniteler) {
+    for (const kazanim of unite.kazanimlar) {
+      haftalar.push({
+        haftaNo,
+        unite: unite.no,
+        uniteAdi: unite.ad,
+        kazanim: `${kazanim.kod} — ${kazanim.baslik}`,
+        kazanimDetay: kazanim.adimlar.join(' '),
+      })
+      haftaNo++
+    }
+  }
+
+  return {
+    ders: json.ders,
+    sinif: json.sinif,
+    toplamHafta: haftalar.length,
+    haftalar,
+  }
+}
+
 export interface MufredatHafta {
   haftaNo: number
   unite: number

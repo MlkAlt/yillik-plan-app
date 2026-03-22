@@ -1,0 +1,240 @@
+{
+  "ders": "Fen Bilimleri",
+  "sinif": "4. Sınıf",
+  "uniteler": [
+    {
+      "no": 1,
+      "ad": "BİLİME YOLCULUK",
+      "kazanimlar": [
+        {
+          "kod": "FB.4.1.1",
+          "baslik": "Bilimin özellikleri ile ilgili yansıtma yapabilme",
+          "adimlar": [
+            "Bilim ile ilgili bilgi ve deneyimini gözden geçirir.",
+            "Bilimin özellikleri ile ilgili çıkarım yapar.",
+            "Bilimin özellikleri ile ilgili ulaşılan çıkarımları değerlendirir."
+          ]
+        },
+        {
+          "kod": "FB.4.1.2",
+          "baslik": "Bilgi kaynağının güvenilirliğini sorgulayabilme",
+          "adimlar": [
+            "Merak ettiği bilimsel bir konuyu tanımlar.",
+            "İlgili konu hakkında sorular sorar.",
+            "İlgili konu hakkında teknolojik araçlar ve diğer kaynakları kullanarak bilgi toplar.",
+            "Toplanan bilgilerden hareketle bilginin doğruluğunu değerlendirir.",
+            "Yaptığı değerlendirmeler sonucunda bilgi kaynaklarının güvenilirliği ile ilgili çıkarım yapar."
+          ]
+        }
+      ]
+    },
+    {
+      "no": 2,
+      "ad": "SAĞLIKLI BESLENİYORUM",
+      "kazanimlar": [
+        {
+          "kod": "FB.4.2.1",
+          "baslik": "Besin içeriklerini ayırt etmek için deney yapabilme",
+          "adimlar": [
+            "Besinlerdeki protein, karbohidrat, yağ ve su içeriğini ayırt etmek için deney tasarlar.",
+            "Yaptığı deneyde veri analizi yapar."
+          ]
+        },
+        {
+          "kod": "FB.4.2.2",
+          "baslik": "Besinlerde vitamin ve/veya mineral bulunduğuna ilişkin genelleme yapabilme",
+          "adimlar": [
+            "Besinlerdeki vitamin ve mineraller ile ilgili bilgi toplar.",
+            "Besinlerdeki ortak olan özellikleri belirler.",
+            "Besinlerdeki ortak olmayan özellikleri belirler.",
+            "Örüntüler üzerinden besinlerde vitamin ve/veya minerallerin bulunduğu önermesinde bulunur."
+          ]
+        },
+        {
+          "kod": "FB.4.2.3",
+          "baslik": "Besinlerin işlevleri ile ilgili hipotez oluşturabilme",
+          "adimlar": [
+            "Besinlerin işlevleri ile ilgili problemi tanımlar.",
+            "Besinlerin işlevleri ve vücudumuzdaki görevleri arasındaki neden-sonuç ilişkilerini belirler.",
+            "Besinlerin içerikleri ile ilgili verilen değişkenleri belirler.",
+            "Besinlerin işlevleri ile ilgili değişkenleri kontrol eder.",
+            "Besinlerin işlevleri ve sağlıklı yaşam arasındaki ilişkiye yönelik önerme sunar."
+          ]
+        }
+      ]
+    },
+    {
+      "no": 3,
+      "ad": "DÜNYA'MIZI KEŞFEDELİM",
+      "kazanimlar": [
+        {
+          "kod": "FB.4.3.1",
+          "baslik": "Dünya'nın şekli ile ilgili bilimsel gözleme dayalı tahmin yapabilme",
+          "adimlar": [
+            "Dünya'nın şekli ile ilgili ön bilgi ve deneyimlerine dayalı önerme oluşturur.",
+            "Dünya'nın şekli ile ilgili gözleme dayalı olan önermeleri karşılaştırır.",
+            "Dünya'nın şekli ile ilgili tahminlerini temellendirmek için gözlem verilerinden sonuç çıkarır.",
+            "Dünya'nın şekli ile ilgili veriye dayalı tahminde bulunur.",
+            "Dünya'nın şekli ile ilgili verilere dayalı tahminlerin geçerliğini sorgular."
+          ]
+        },
+        {
+          "kod": "FB.4.3.2",
+          "baslik": "Dünya'nın yapısıyla ilgili bilimsel model oluşturabilme",
+          "adimlar": [
+            "Dünya'nın yapısını açıklamak için model önerir.",
+            "Dünya'nın yapısını açıklamak için yeni kanıtlarla modeli geliştirir."
+          ]
+        },
+        {
+          "kod": "FB.4.3.3",
+          "baslik": "Dünya'nın hareketlerini gözlemlerine dayanarak tahmin edebilme",
+          "adimlar": [
+            "Dünya'nın hareketleri ile ilgili önceki gözlem ve/veya deneyimini ilişkilendirir.",
+            "Dünya'nın hareketlerine ilişkin çıkarım yapar.",
+            "Dünya'nın hareketlerinin sonuçlarına ilişkin yargıda bulunur."
+          ]
+        }
+      ]
+    },
+    {
+      "no": 4,
+      "ad": "MADDENİN DEĞİŞİMİ",
+      "kazanimlar": [
+        {
+          "kod": "FB.4.4.1",
+          "baslik": "Maddelerin hâl değişimine yönelik bilimsel çıkarım yapabilme",
+          "adimlar": [
+            "Maddelerin hâllerine yönelik nitelikleri tanımlar.",
+            "Maddelerin hâl değişimine yönelik verileri kaydeder.",
+            "Maddelerin hâl değişimine yönelik verileri yorumlayarak değerlendirir."
+          ]
+        },
+        {
+          "kod": "FB.4.4.2",
+          "baslik": "Maddelerin ısı etkisiyle değişimine yönelik deney yapabilme",
+          "adimlar": [
+            "Maddelerin ısı etkisiyle değişimine yönelik deney tasarlar.",
+            "Maddelerin ısı etkisiyle değişimine yönelik veri analizi yapar."
+          ]
+        }
+      ]
+    },
+    {
+      "no": 5,
+      "ad": "MIKNATISI KEŞFEDİYORUM",
+      "kazanimlar": [
+        {
+          "kod": "FB.4.5.1",
+          "baslik": "Mıknatısın kutupları ve birbirleriyle etkileşimleri ile ilgili tümevarımsal akıl yürütebilme",
+          "adimlar": [
+            "Mıknatıs çeşitlerinin kutupları ve birbiriyle etkileşimleri ile ilgili örüntü bulur.",
+            "Mıknatısın kutupları ve birbiriyle etkileşimleri ile ilgili genelleme yapar."
+          ]
+        },
+        {
+          "kod": "FB.4.5.2",
+          "baslik": "Mıknatısın etki ettiği maddelere ilişkin bilimsel gözleme dayalı tahmin yapabilme",
+          "adimlar": [
+            "Mıknatısın etki ettiği maddelere ilişkin ön bilgi ve deneyimlerine dayanarak önerme oluşturur.",
+            "Mıknatısın etki ettiği maddelere ilişkin gözleme dayalı önermeleri karşılaştırır.",
+            "Mıknatısın etki ettiği maddelere ilişkin tahminlerini temellendirmek için gözlem verilerinden sonuç çıkarır.",
+            "Mıknatısın etki ettiği maddelerle ilgili gözlemlenmemiş duruma ilişkin tahminde bulunur.",
+            "Tahminlerin geçerliğini sorgular."
+          ]
+        },
+        {
+          "kod": "FB.4.5.3",
+          "baslik": "Mıknatısın kullanım alanlarına yönelik bilimsel sorgulama yapabilme",
+          "adimlar": [
+            "Mıknatısın kullanım alanlarına yönelik bir soru veya problem tanımlar.",
+            "Sorusunu/problemini cevaplamada kullanabileceği bir model geliştirir.",
+            "Modelini oluşturmaya yönelik araştırma planlayarak gerçekleştirir.",
+            "Oluşturduğu modele ilişkin verileri analiz ederek yorumlar.",
+            "Oluşturduğu modelle ilgili sorunlara ilişkin kanıta dayalı açıklama yaparak çözüm üretir.",
+            "Oluşturduğu modeli değerlendirerek paylaşır."
+          ]
+        }
+      ]
+    },
+    {
+      "no": 6,
+      "ad": "ENERJİ DEDEKTİFLERİ",
+      "kazanimlar": [
+        {
+          "kod": "FB.4.6.1",
+          "baslik": "Basit bir elektrik devresi kurmaya ilişkin bilimsel sorgulama yapabilme",
+          "adimlar": [
+            "Devre elemanlarını kullanarak basit bir elektrik devresi kurmaya ilişkin soru veya problemi tanımlar.",
+            "Sorusunu/problemini cevaplamada kullanacağı basit bir elektrik devresi modeli geliştirir.",
+            "Basit bir elektrik devresinde devre elemanlarına ve işlevlerine ilişkin araştırmayı planlayarak gerçekleştirir.",
+            "Basit bir elektrik devresine ilişkin verileri analiz ederek yorumlar.",
+            "Elektrik devresinin çalışıp çalışmamasına yönelik kanıta dayalı açıklama yaparak çözüm üretir.",
+            "Çalışan basit bir elektrik devresi kurmaya ilişkin bilgiyi değerlendirerek paylaşır."
+          ]
+        },
+        {
+          "kod": "FB.4.6.2",
+          "baslik": "Elektrik üretiminde yenilenebilir ve yenilenemeyen enerji kaynaklarını kullanmaya ilişkin eleştirel düşünebilme",
+          "adimlar": [
+            "Elektrik üretiminde yenilenebilir ve yenilenemeyen enerji kaynaklarını kullanmaya ilişkin bir durumu veya problemi sorgular.",
+            "Elektrik üretiminde yenilenebilir ve yenilenemeyen enerji kaynaklarını kullanmaya ilişkin durum veya problemin canlılar ve çevre üzerine etkileri konusunda akıl yürütür.",
+            "Enerji kaynaklarının sürdürülebilirliklerine ilişkin akıl yürütmeyle ulaştığı çıkarımları yansıtır."
+          ]
+        }
+      ]
+    },
+    {
+      "no": 7,
+      "ad": "IŞIĞIN PEŞİNDE",
+      "kazanimlar": [
+        {
+          "kod": "FB.4.7.1",
+          "baslik": "Görme olayının gerçekleşebilmesi için ışığın rolüne ilişkin deney yapabilme",
+          "adimlar": [
+            "Görme olayının gerçekleşebilmesi için ışığın rolüne ilişkin deney tasarlar.",
+            "Görme olayında ışığın rolüne ilişkin deneyde veri analizi yapar."
+          ]
+        },
+        {
+          "kod": "FB.4.7.2",
+          "baslik": "Doğal ve yapay ışık kaynaklarını karşılaştırabilme",
+          "adimlar": [
+            "Çevresindeki ışık kaynaklarına ilişkin özellikleri belirler.",
+            "Işık kaynaklarının benzerliklerini listeler.",
+            "Işık kaynaklarının farklılıklarını listeler."
+          ]
+        },
+        {
+          "kod": "FB.4.7.3",
+          "baslik": "Işık kirliliğinin canlılara etkisine ilişkin probleme yönelik çözüm önerilerini değerlendirebilme",
+          "adimlar": [
+            "Işık kirliliğinin canlılara etkisine ilişkin problemi yapılandırır.",
+            "Problemi özetler.",
+            "Problemin çözümüne yönelik gözleme dayalı/mevcut bilgiye/veriye dayalı tahmin eder.",
+            "Problemin çözümüne yönelik önermeler üzerinden akıl yürütür.",
+            "Problemin çözümüne ilişkin yansıtmada/değerlendirmede bulunur."
+          ]
+        }
+      ]
+    },
+    {
+      "no": 8,
+      "ad": "SÜRDÜRÜLEBİLİR ŞEHİRLER VE TOPLULUKLAR",
+      "kazanimlar": [
+        {
+          "kod": "FB.4.8.1",
+          "baslik": "Sürdürülebilir bir yaşam alanı kurmaya ilişkin bilimsel sorgulama yapabilme",
+          "adimlar": [
+            "Sürdürülebilir bir yaşam alanı kurmaya ilişkin soru veya problem tanımlar.",
+            "Sorusunu/problemini cevaplamada kullanabileceği bir sürdürülebilir yaşam alanı modeli geliştirir.",
+            "Sürdürülebilir bir yaşam alanı kurmaya ilişkin araştırma planlayarak modelini gerçekleştirir.",
+            "Yaşam alanının sürdürülebilirliğine ilişkin verileri analiz ederek yorumlar.",
+            "Yaşam alanının sürdürülebilir olup olmadığına ilişkin kanıta dayalı açıklama yaparak çözüm üretir.",
+            "Sürdürülebilir bir yaşam alanı kurmaya ilişkin bilgiyi değerlendirerek paylaşır."
+          ]
+        }
+      ]
+    }
+  ]
+}

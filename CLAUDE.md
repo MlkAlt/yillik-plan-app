@@ -27,6 +27,8 @@ npm run preview    # Build önizleme
 npm run lint       # ESLint kontrol
 ```
 
+**Test altyapısı yok** — birim veya entegrasyon testi mevcut değil.
+
 ## Uygulama Mimarisi
 
 ### İki Ayrı UI Katmanı
@@ -35,9 +37,9 @@ npm run lint       # ESLint kontrol
 
 **App katmanı** (`/app/*`) — `AppLayout` wrapper ile, mobil-öncelikli bottom-nav içerir:
 - `/app` → `AppHomeScreen` (bu haftaki kazanım + onboarding)
-- `/app/plan` → `PlanPage` (tüm haftalar listesi)
-- `/app/ayarlar` → `AppSettingsScreen`
-- `/app/hafta/:haftaNo` → `HaftaDetayPage` (hafta tamamlama + not)
+- `/app/plan` → `PlanPage` (tüm haftalar listesi; plan yoksa `/app`'e yönlendirir)
+- `/app/ayarlar` → `AppSettingsScreen` (öğretmen bilgileri + plan silme/yeniden oluşturma; `onPlanEkle` prop'u alır)
+- `/app/hafta/:haftaNo` → `HaftaDetayPage` (hafta tamamlama + not; props almaz, localStorage'dan okur)
 
 ### State Yönetimi
 
@@ -69,6 +71,8 @@ Kullanıcı ders+sınıf seçer
 
 Sınıf öğretmeni seçildiğinde her ders için ayrı `PlanEntry` oluşturulur. `PlanEntry.sinif` alanı composite key olarak kullanılır: `"3. Sınıf—Türkçe"`. Görüntüleme için `label` (ders adı) ve `sinifGercek` (gerçek sınıf adı, örn. "3. Sınıf") alanları kullanılır.
 
+**Dikkat — isimlendirme tutarsızlığı:** `SINIF_OGRETMENI_DERSLER` listesinde ders adı `'İlkokul Fen Bilimleri'` olarak geçer, ancak `buildPlan()` `'Fen Bilimleri'` string'i kontrol eder. Bu yüzden sınıf öğretmeni modunda Fen Bilimleri müfredat eşleşmesi olmadan `planOlustur()` ile oluşturulur. Yeni branş eklerken bu isim farkına dikkat et.
+
 ### Dosya Yükleme
 
 `src/lib/fileParser.ts` — `.xlsx/.xls` için `xlsx` paketi, `.docx` için `mammoth` kullanır.
@@ -76,21 +80,40 @@ Excel beklenen format: `[Ay, HaftaNo, Dönem, TarihAralığı, Kazanım]` sütun
 
 `src/lib/templateGenerator.ts` — `sablonIndir()` ile boş Excel şablonu indirme.
 
+### Export (Excel / Word)
+
+`src/lib/exportUtils.ts` — `PlanPage`'den çağrılır; iki export fonksiyonu içerir:
+- `exportPlanToExcel(entry, meta)` — `exceljs` ile (dinamik import) biçimlendirilmiş `.xlsx` oluşturur; ay ve ünite sütunları birleştirilir, tatil satırları renklendirilir.
+- `exportPlanToWord(entry, meta)` — HTML-to-doc yaklaşımıyla `.doc` oluşturur (BOM + Word namespace). Her ikisi de `ogretmen-ayarlari`'nden okul adı ve öğretmen adı alır.
+
+**Dikkat:** `guessDate()` içinde yıl `2025`/`2026` hardcode edilmiştir — yüklenen planlar için ay-tarih dönüşümünde kullanılır.
+
 ### Müfredat Verisi
 
-`src/data/mufredat/fen-bilimleri-{3..8}.json` — Her dosya `MufredatJson` tipinde:
+`src/data/mufredat/fen-bilimleri-{3..8}.json` — İki farklı JSON formatı vardır:
+
+**5–8 formatı** (`MufredatJson`): hafta bazlı, `haftaNo` içerir.
 ```ts
 { ders, sinif, toplamHafta, haftalar: MufredatHafta[] }
 // MufredatHafta: { haftaNo, unite, uniteAdi, kazanim, kazanimDetay }
 ```
+
+**3–4 formatı** (`IlkokulMufredatJson`): ünite/kazanım bazlı, `haftaNo` içermez.
+```ts
+{ ders, sinif, uniteler: IlkokulUnite[] }
+// IlkokulUnite: { no, ad, kazanimlar: IlkokulKazanim[] }
+// IlkokulKazanim: { kod, baslik, adimlar: string[] }
+```
+`ilkokulMufredatiniDonustur()` (`takvimUtils.ts`) bu formatı `MufredatJson`'a çevirir: her kazanım sıralı `haftaNo` alır (1, 2, 3…). **5–8'den farkı:** 5–8'de `haftaNo` takvim haftalarıyla önceden hizalanmış; 3–4'te ise hafta sayısı kazanım sayısına göre belirlenir ve tatil/boş haftalar göz ardı edilebilir. Sonuç `mufredatliPlanOlustur()` ile işlenir.
+
 Müfredat `haftaNo` ile takvim haftaları eşleştirilir → `Hafta.kazanim/kazanimDetay/uniteAdi` alanlarına atanır.
 
-**Dikkat:** `fen-bilimleri-3.json` ve `fen-bilimleri-4.json` dosyaları mevcut ama `buildPlan()` içinde henüz entegre edilmedi — `planOlustur()` fallback'i kullanıyor.
+`DERS_SINIF_MAP` yalnızca sınıf aralığı kısıtlaması olan dersler için tanımlanmıştır; bu map'te yer almayan dersler tüm sınıf seviyelerine açılır ve `planOlustur()` ile müfredat eşleşmesi olmadan plan oluşturur.
 
 Yeni branş eklerken:
 1. `src/data/mufredat/` altına JSON ekle
 2. `AppHomeScreen.tsx`'teki `buildPlan()` fonksiyonuna koşul ekle
-3. `DERS_SINIF_MAP` içinde sınıf aralığı tanımla
+3. Gerekiyorsa `DERS_SINIF_MAP` içinde sınıf aralığı tanımla
 
 ### Lead Toplama
 
@@ -117,7 +140,18 @@ hafta-notlari       → Record<sinif, Record<string, string>>
 `src/types/takvim.ts` — `OlusturulmusPlan`, `Hafta`, `MebYilTakvim`
 `src/types/planEntry.ts` — `PlanEntry` (localStorage'da saklanan birim; `label?` ve `sinifGercek?` opsiyonel)
 `src/types/lead.ts` — `Lead`, `LeadFormData`
-`src/lib/takvimUtils.ts` — `MufredatJson`, `MufredatHafta`, `planOlustur()`, `mufredatliPlanOlustur()`
+`src/lib/takvimUtils.ts` — `MufredatJson`, `MufredatHafta`, `IlkokulMufredatJson`, `IlkokulUnite`, `IlkokulKazanim`, `planOlustur()`, `mufredatliPlanOlustur()`, `ilkokulMufredatiniDonustur()`
+
+**Dikkat — eski/kullanılmayan dosyalar:**
+- `src/types/plan.ts` — eski Supabase şema tipi (`id`, `plan_id` vb. içerir); mevcut veri modeli ile karıştırılmamalı. Sadece `WeekView` bileşeni kullanır.
+- `src/components/WeekView/` — gün bazlı kazanım görünümü prototipi; router'a bağlı değil, aktif kullanımda yok.
+- `src/pages/OnboardingPage.tsx` — eski landing katmanı onboarding sayfası; router'a eklenmemiş, yerini `AppHomeScreen` içindeki onboarding aldı.
+
+## Dikkat Edilmesi Gerekenler
+
+- **Hardcoded yıl:** `yil: '2025-2026'` değeri `App.tsx` (legacy handler'lar) ve `AppHomeScreen.tsx` içinde sabitlenmiştir. Yeni öğretim yılına geçişte bu değerlerin güncellenmesi gerekir.
+- **Sınıf öğretmeni composite key:** `PlanEntry.sinif` alanında `"3. Sınıf—Türkçe"` formatı kullanılır (em dash `—`). Bu anahtarı ayrıştırırken veya oluştururken em dash karakterine dikkat et.
+- **AppSettingsScreen buildPlan() eskidir:** `AppSettingsScreen.tsx` içindeki `buildPlan()` ve `DERS_SINIF_MAP` yalnızca Fen Bilimleri 5–8'i destekler; 3–4 desteği eklenmemiştir. Plan yeniden oluşturulurken bu sayfa da tetiklenebileceğinden (`onPlanEkle` prop'u), Fen Bilimleri 3–4 seçilmişse yeniden oluşturma müfredat olmadan yapılır.
 
 ## Kodlama Kuralları
 
@@ -156,9 +190,9 @@ VITE_SUPABASE_ANON_KEY=
 - [x] Fen Bilimleri 5–8 müfredatı
 - [x] Sınıf öğretmeni desteği (composite key, çoklu ders)
 - [x] Lead toplama formu (Supabase `leads` tablosu)
+- [x] Fen Bilimleri 3–4 müfredatı entegrasyonu (`ilkokulMufredatiniDonustur()` converter ile)
 
 ### Yapılacaklar
-- [ ] Fen Bilimleri 3–4 müfredatı entegrasyonu (JSON hazır, `buildPlan()` güncellenmeli)
 - [ ] Tüm branşlar için müfredat
 - [ ] Arayüz geçiş animasyonları
 - [ ] Kullanıcı kaydı (Supabase Auth)

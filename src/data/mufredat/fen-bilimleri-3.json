@@ -1,0 +1,245 @@
+{
+  "ders": "Fen Bilimleri",
+  "sinif": "3. Sınıf",
+  "uniteler": [
+    {
+      "no": 1,
+      "ad": "BİLİMSEL KEŞİF YOLCULUĞU",
+      "kazanimlar": [
+        {
+          "kod": "FB.3.1.1",
+          "baslik": "Bilimsel bilgiye ulaşma yollarını sorgulayabilme",
+          "adimlar": [
+            "Merak ettiği bilimsel bir konuyu tanımlar.",
+            "İlgili konu hakkında sorular sorar.",
+            "Sorularını cevaplamaya yönelik bilgi toplar.",
+            "Bilimsel bilgiye ulaşma yollarının uygunluğunu değerlendirir.",
+            "Toplanan bilgiler üzerinden bilimsel bilgiye ulaşma yollarına ilişkin çıkarım yapar."
+          ]
+        },
+        {
+          "kod": "FB.3.1.2",
+          "baslik": "Bilim insanlarının özelliklerine ilişkin genelleme yapabilme",
+          "adimlar": [
+            "Bilim insanları hakkında bilgi toplar.",
+            "Bilim insanlarının ortak özelliklerini belirler.",
+            "Bilim insanlarının ortak olmayan özelliklerini belirler.",
+            "Örüntüler üzerinden bilim insanlarının özellikleri hakkında önermede bulunur."
+          ]
+        }
+      ]
+    },
+    {
+      "no": 2,
+      "ad": "CANLILAR DÜNYASINA YOLCULUK",
+      "kazanimlar": [
+        {
+          "kod": "FB.3.2.1",
+          "baslik": "Canlıları; mikroskopla görülebilen canlılar, mantarlar, bitkiler ve hayvanlar olarak sınıflandırabilme",
+          "adimlar": [
+            "Canlıların benzer ve farklı niteliklerini belirler.",
+            "Canlıları niteliklerine göre ayırır.",
+            "Canlıları gruplandırır.",
+            "Canlıları etiketler."
+          ]
+        },
+        {
+          "kod": "FB.3.2.2",
+          "baslik": "Canlıların çevrelerini farklı yollarla algılamaları konusunda bilimsel çıkarım yapabilme",
+          "adimlar": [
+            "Canlıların çevrelerini algılama biçimlerine ilişkin nitelikleri tanımlar.",
+            "Duyu organlarının işlevleri ile ilgili veri toplayarak kaydeder.",
+            "Canlıların çevrelerini farklı biçimlerde algılamalarına ilişkin verileri yorumlayarak değerlendirir."
+          ]
+        },
+        {
+          "kod": "FB.3.2.3",
+          "baslik": "Canlıların yaşam döngülerini açıklamada tümevarımsal akıl yürütebilme",
+          "adimlar": [
+            "Canlıların yaşam döngüleri ile ilgili örüntüleri bulur.",
+            "Canlıların yaşam döngüleri ile ilgili genelleme yapar."
+          ]
+        }
+      ]
+    },
+    {
+      "no": 3,
+      "ad": "YER BİLİMCİLER İŞ BAŞINDA",
+      "kazanimlar": [
+        {
+          "kod": "FB.3.3.1",
+          "baslik": "Kayaçlar, madenler ve mineraller ile ilgili tümdengelimsel akıl yürütebilme",
+          "adimlar": [
+            "Kayaçlar, madenler ve mineralleri belirler.",
+            "Kayaçlar, madenler ve mineraller arasında ilişki kurar.",
+            "Kayaçlar, madenler ve mineraller arasında genelden genele veya genelden özele çıkarım yapar."
+          ]
+        },
+        {
+          "kod": "FB.3.3.2",
+          "baslik": "Fosil oluşumu ile ilgili sentez yapabilme",
+          "adimlar": [
+            "Fosil oluşumunu gösteren sürecin bütün ve parçalarını belirler.",
+            "Süreci oluşturan aşamalar arasında ilişki kurar.",
+            "Fosillerin oluşum sürecini oluşturan aşamaları uygun sırayla bir bütün hâline getirir."
+          ]
+        }
+      ]
+    },
+    {
+      "no": 4,
+      "ad": "MADDEYİ TANIYALIM, KARIŞTIRIP AYIRALIM",
+      "kazanimlar": [
+        {
+          "kod": "FB.3.4.1",
+          "baslik": "Çevresindeki maddeleri hâllerine göre sınıflandırabilme",
+          "adimlar": [
+            "Çevresindeki maddelerin niteliklerini tanımlar.",
+            "Çevresindeki maddeleri niteliklerine göre ayırır.",
+            "Çevresindeki maddeleri hâllerine göre gruplandırır.",
+            "Maddeleri hâllerine göre katı, sıvı ve gaz olarak etiketler."
+          ]
+        },
+        {
+          "kod": "FB.3.4.2",
+          "baslik": "Günlük yaşamda karşılaştığı karışımların ayrılmasında kullanılabilecek uygun yöntemleri kullanarak deney yapabilme",
+          "adimlar": [
+            "Karışımların ayrılmasında kullanılabilecek yöntemlerle ilgili deney tasarlar.",
+            "Karışımların ayrılmasına ilişkin deney sonucu ile hipotezi arasında uyumsuzluk olduğunda deneyini tekrar eder ve/veya hipotezini yeniler."
+          ]
+        },
+        {
+          "kod": "FB.3.4.3",
+          "baslik": "Atıkların ayrıştırılmasına ilişkin problem çözebilme",
+          "adimlar": [
+            "Atıkların ayrıştırılmasına ilişkin problemi yapılandırır.",
+            "Atıkların ayrıştırılmasına ilişkin problemi özetler.",
+            "Atıkların ayrıştırılmasına ilişkin çözüm önerilerini gözleme ya da veriye dayalı tahmin eder.",
+            "Atıkların ayrıştırılmasına ilişkin problemin çözümüne yönelik önermeler üzerinden akıl yürütür.",
+            "Atıkların ayrıştırılmasına ilişkin problemin çözümüne yönelik yansıtmada/değerlendirmede bulunur."
+          ]
+        }
+      ]
+    },
+    {
+      "no": 5,
+      "ad": "HAREKETİ KEŞFEDİYORUM",
+      "kazanimlar": [
+        {
+          "kod": "FB.3.5.1",
+          "baslik": "Varlıkların hareket durumlarını gözleme dayalı tahmin edebilme",
+          "adimlar": [
+            "Varlıkların hareket durumlarına ilişkin ön gözlem ve/veya deneyimlerini ilişkilendirir.",
+            "Varlıkların hareket durumlarına ilişkin çıkarım yapar.",
+            "Varlıkların hareket durumlarının sonuçlarına ilişkin yargıda bulunur."
+          ]
+        },
+        {
+          "kod": "FB.3.5.2",
+          "baslik": "Kuvvetin varlıklar üzerindeki etkilerini bilimsel gözleme dayalı tahmin edebilme",
+          "adimlar": [
+            "Varlıkların hareketinin ve şekil değiştirmesinin nedenine ilişkin ön bilgi ve deneyimleriyle önerme oluşturur.",
+            "Varlıkların hareketinin ve şekil değiştirmesinin nedenine ilişkin gözleme dayalı olan önermeleri karşılaştırır.",
+            "Kuvvetin varlıkların hareketine ve şekil değiştirmesine etkilerine ilişkin tahminlerini temellendirmek için gözlem verilerinden sonuç çıkarır.",
+            "Kuvvetin varlıkların hareketine ve şekil değiştirmesine etkileri ile ilgili gözlemlenmemiş duruma ilişkin tahminde bulunur.",
+            "Kuvvetin varlıkların hareketine ve şekil değiştirmesine etkileri ile ilgili tahminlerinin geçerliliğini sorgular."
+          ]
+        }
+      ]
+    },
+    {
+      "no": 6,
+      "ad": "YAŞAMIMIZI KOLAYLAŞTIRAN ELEKTRİK",
+      "kazanimlar": [
+        {
+          "kod": "FB.3.6.1",
+          "baslik": "Bazı araç gereçlerin elektrikli olduğuna ilişkin bilimsel çıkarım yapabilme",
+          "adimlar": [
+            "Farklı araç gereçlerin niteliklerini tanımlar.",
+            "Elektrikli araç gereçlerle ilgili veri toplayarak kaydeder.",
+            "Elektrikli araç gereçlerle ilgili verileri değerlendirir."
+          ]
+        },
+        {
+          "kod": "FB.3.6.2",
+          "baslik": "Elektrikli araç gereçlerin güvenli kullanımı ile ilgili eleştirel düşünebilme",
+          "adimlar": [
+            "Elektrikli araç gereçlerin güvenli kullanımı ile ilgili verilen bir olay/konu/problem veya durumu sorgular.",
+            "Elektrikli araç gereçlerin kullanımında güvenliğin sağlanabileceğine yönelik akıl yürütür.",
+            "Akıl yürütmeyle ulaştığı çıkarımları yansıtır."
+          ]
+        },
+        {
+          "kod": "FB.3.6.3",
+          "baslik": "Elektriği tasarruflu kullanma konusunda bilimsel veriye dayalı tahmin edebilme",
+          "adimlar": [
+            "Elektriği tasarruflu kullanma konusunda verilere ve/veya ön bilgilere dayalı önerme oluşturur.",
+            "Elektriği tasarruflu kullanma üzerine nicel ölçüm verilerine dayalı önermelerini gerekçelendirir.",
+            "Hesaplamalarına dayalı olarak tahmin eder.",
+            "Tahminlerin geçerliliğini sorgular."
+          ]
+        }
+      ]
+    },
+    {
+      "no": 7,
+      "ad": "TOPRAĞI TANIYORUM, TARIMI KEŞFEDİYORUM",
+      "kazanimlar": [
+        {
+          "kod": "FB.3.7.1",
+          "baslik": "Toprak oluşumuna ve yapısına ilişkin bilimsel gözlem yapabilme",
+          "adimlar": [
+            "Toprağın oluşumuna ve yapısına ilişkin nitelikleri tanımlar.",
+            "Toprağın yapısına ilişkin veri toplayarak kaydeder.",
+            "Toprağın yapısına ilişkin topladığı verileri açıklar."
+          ]
+        },
+        {
+          "kod": "FB.3.7.2",
+          "baslik": "Bir bitkinin yetişmesi için gerekenlere ilişkin genelleme yapabilme",
+          "adimlar": [
+            "Çevresinde bulunan tarım ürünlerinin nasıl yetiştirildiği konusunda araştırma yaparak bilgi toplar.",
+            "Bitki yetiştirmek için gerekli ortak özellikleri belirler.",
+            "Farklı bitkilerin yetiştirilmesinde ortak olmayan özellikleri belirler.",
+            "Bir bitki yetiştirmek için yapılması gerekenler konusunda önermede bulunur."
+          ]
+        }
+      ]
+    },
+    {
+      "no": 8,
+      "ad": "CANLILARIN YAŞAM ALANLARINA YOLCULUK",
+      "kazanimlar": [
+        {
+          "kod": "FB.3.8.1",
+          "baslik": "Canlıların yaşam alanlarının özelliklerini belirlemeye yönelik kanıt kullanabilme",
+          "adimlar": [
+            "Canlıların yaşam alanlarının özelliklerine ilişkin veri toplayarak kaydeder.",
+            "Canlıların yaşam alanlarına ilişkin veri setleri oluşturur.",
+            "Canlıların yaşam alanlarının özelliklerine ilişkin veriye dayalı açıklama yapar."
+          ]
+        },
+        {
+          "kod": "FB.3.8.2",
+          "baslik": "Yaşam alanındaki canlı çeşitliliğini operasyonel olarak tanımlayabilme",
+          "adimlar": [
+            "Yaşam alanının özelliklerini tanımlar.",
+            "Yaşam alanındaki canlı çeşitliliği ile ilgili ölçüm yapar.",
+            "Canlı çeşitliliğinin tanımını yapar."
+          ]
+        },
+        {
+          "kod": "FB.3.8.3",
+          "baslik": "Yaşam alanlarının korunması için yapılacakları sorgulayabilme",
+          "adimlar": [
+            "Merak ettiği konuyu tanımlar.",
+            "İlgili konu hakkında sorular sorar.",
+            "İlgili konu hakkında bilgi toplar.",
+            "Toplanan bilgilerin doğruluğunu değerlendirir.",
+            "Toplanan bilgiler üzerinde çıkarım yapar."
+          ]
+        }
+      ]
+    }
+  ]
+}
