@@ -1,21 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { planOlustur, mevcutYillar, mufredatliPlanOlustur, type MufredatJson } from '../lib/takvimUtils'
+import { planOlustur, mevcutYillar, mufredatliPlanOlustur } from '../lib/takvimUtils'
+import { getMufredat } from '../lib/mufredatRegistry'
 import type { OlusturulmusPlan } from '../types/takvim'
-import fen5Mufredat from '../data/mufredat/fen-bilimleri-5.json'
-import fen6Mufredat from '../data/mufredat/fen-bilimleri-6.json'
-import fen7Mufredat from '../data/mufredat/fen-bilimleri-7.json'
-import fen8Mufredat from '../data/mufredat/fen-bilimleri-8.json'
-
-const SINIF_SEVIYELERI = [
-    '1. Sınıf', '2. Sınıf', '3. Sınıf', '4. Sınıf',
-    '5. Sınıf', '6. Sınıf', '7. Sınıf', '8. Sınıf',
-    '9. Sınıf', '10. Sınıf', '11. Sınıf', '12. Sınıf',
-]
-
-const DERS_SINIF_MAP: Record<string, string[]> = {
-    'Fen Bilimleri': ['5. Sınıf', '6. Sınıf', '7. Sınıf', '8. Sınıf'],
-}
+import { SINIF_SEVIYELERI, DERS_SINIF_MAP } from '../lib/dersSinifMap'
 
 interface PlanOlusturPageProps {
     onPlanOlustur: (plan: OlusturulmusPlan, ders: string, sinif: string) => void
@@ -53,7 +41,7 @@ export function PlanOlusturPage({ onPlanOlustur }: PlanOlusturPageProps) {
                 if (ayarlar.sinif) return ayarlar.sinif
             }
         } catch { /* okunamadı */ }
-        return DERS_SINIF_MAP['Fen Bilimleri'][0]
+        return (DERS_SINIF_MAP['Fen Bilimleri'] ?? SINIF_SEVIYELERI)[0]
     })
     const [hata, setHata] = useState('')
 
@@ -65,22 +53,10 @@ export function PlanOlusturPage({ onPlanOlustur }: PlanOlusturPageProps) {
         setHata('')
 
         try {
-            let plan: OlusturulmusPlan;
-            if (ders.trim() === 'Fen Bilimleri') {
-                let mufredatData = null;
-                if (sinif === '5. Sınıf') mufredatData = fen5Mufredat;
-                else if (sinif === '6. Sınıf') mufredatData = fen6Mufredat;
-                else if (sinif === '7. Sınıf') mufredatData = fen7Mufredat;
-                else if (sinif === '8. Sınıf') mufredatData = fen8Mufredat;
-
-                if (mufredatData) {
-                    plan = mufredatliPlanOlustur(seciliYil, mufredatData as MufredatJson);
-                } else {
-                    plan = planOlustur(seciliYil);
-                }
-            } else {
-                plan = planOlustur(seciliYil)
-            }
+            const mufredat = getMufredat(ders.trim(), sinif)
+            const plan = mufredat
+                ? mufredatliPlanOlustur(seciliYil, mufredat)
+                : planOlustur(seciliYil)
             onPlanOlustur(plan, ders.trim(), sinif)
             navigate('/app/plan')
         } catch {
@@ -125,12 +101,14 @@ export function PlanOlusturPage({ onPlanOlustur }: PlanOlusturPageProps) {
                         onChange={(e) => {
                             const yDers = e.target.value;
                             setDers(yDers);
-                            const yeniSiniflar = DERS_SINIF_MAP[yDers] || SINIF_SEVIYELERI;
+                            const yeniSiniflar = DERS_SINIF_MAP[yDers] ?? SINIF_SEVIYELERI;
                             setSinif(yeniSiniflar[0]);
                         }}
                         className="w-full border border-[#E7E5E4] rounded-lg px-3 py-2.5 text-[#1C1917] focus:outline-none focus:ring-2 focus:ring-[#2D5BE3]/40"
                     >
-                        <option value="Fen Bilimleri">Fen Bilimleri</option>
+                        {Object.keys(DERS_SINIF_MAP).map((d) => (
+                            <option key={d} value={d}>{d}</option>
+                        ))}
                     </select>
                 </div>
 
@@ -144,7 +122,7 @@ export function PlanOlusturPage({ onPlanOlustur }: PlanOlusturPageProps) {
                         onChange={(e) => setSinif(e.target.value)}
                         className="w-full border border-[#E7E5E4] rounded-lg px-3 py-2.5 text-[#1C1917] focus:outline-none focus:ring-2 focus:ring-[#2D5BE3]/40"
                     >
-                        {(DERS_SINIF_MAP[ders] || SINIF_SEVIYELERI).map((s) => (
+                        {(DERS_SINIF_MAP[ders] ?? SINIF_SEVIYELERI).map((s) => (
                             <option key={s} value={s}>{s}</option>
                         ))}
                     </select>
