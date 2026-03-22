@@ -273,7 +273,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
     return ['5. Sınıf'];
   });
   const [onbSinifOgrSinif, setOnbSinifOgrSinif] = useState('3. Sınıf');
-  const [onbSinifOgrDersler, setOnbSinifOgrDersler] = useState<string[]>(['Türkçe']);
+  const [onbSinifOgrDersler, setOnbSinifOgrDersler] = useState<string[]>(SINIF_OGRETMENI_DERSLER);
 
   useEffect(() => {
     // Haftanın kazanımını bildirim olarak göster (yeni hafta ise)
@@ -294,8 +294,12 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
 
   function handleOnbDersChange(ders: string) {
     setOnbDers(ders);
-    const siniflar = DERS_SINIF_MAP[ders] || SINIF_SEVIYELERI;
-    setOnbSiniflar([siniflar[0]]);
+    if (ders === 'Sınıf Öğretmeni') {
+      setOnbSinifOgrDersler(SINIF_OGRETMENI_DERSLER);
+    } else {
+      const siniflar = DERS_SINIF_MAP[ders] || SINIF_SEVIYELERI;
+      setOnbSiniflar([siniflar[0]]);
+    }
   }
 
   function toggleOnbSinif(sinif: string) {
