@@ -125,7 +125,7 @@ Müfredat `haftaNo` ile takvim haftaları eşleştirilir → `Hafta.kazanim/kaza
 Yeni branş eklerken:
 1. `src/data/mufredat/` altına JSON ekle (formatı seç: ilkokul veya lise)
 2. `src/lib/mufredatRegistry.ts`'e import et ve ilgili map'e (`ILKOKUL_MAP` veya `MUFREDAT_MAP`) ekle
-3. Gerekiyorsa `DERS_SINIF_MAP` içinde sınıf aralığı tanımla (her iki ekran dosyasında)
+3. Gerekiyorsa `src/lib/dersSinifMap.ts` içindeki `DERS_SINIF_MAP`'e sınıf aralığını ekle
 
 ### Lead Toplama
 
@@ -155,16 +155,11 @@ hafta-notlari       → Record<sinif, Record<string, string>>
 `src/lib/takvimUtils.ts` — `MufredatJson`, `MufredatHafta`, `IlkokulMufredatJson`, `IlkokulUnite`, `IlkokulKazanim`, `planOlustur()`, `mufredatliPlanOlustur()`, `ilkokulMufredatiniDonustur()`
 `src/lib/mufredatRegistry.ts` — `getMufredat(ders, sinif)`: tüm müfredat JSON'larını import edip döndürür
 
-**Dikkat — eski/kullanılmayan dosyalar:**
-- `src/types/plan.ts` — eski Supabase şema tipi (`id`, `plan_id` vb. içerir); mevcut veri modeli ile karıştırılmamalı. Sadece `WeekView` bileşeni kullanır.
-- `src/components/WeekView/` — gün bazlı kazanım görünümü prototipi; router'a bağlı değil, aktif kullanımda yok.
-- `src/pages/OnboardingPage.tsx` — eski landing katmanı onboarding sayfası; router'a eklenmemiş, yerini `AppHomeScreen` içindeki onboarding aldı.
-
 ## Dikkat Edilmesi Gerekenler
 
 - **Hardcoded yıl:** `yil: '2025-2026'` değeri `App.tsx` (legacy handler'lar) ve `AppHomeScreen.tsx` içinde sabitlenmiştir. Yeni öğretim yılına geçişte bu değerlerin güncellenmesi gerekir.
 - **Sınıf öğretmeni composite key:** `PlanEntry.sinif` alanında `"3. Sınıf—Türkçe"` formatı kullanılır (em dash `—`). Bu anahtarı ayrıştırırken veya oluştururken em dash karakterine dikkat et.
-- **İki ekran, iki DERS_SINIF_MAP:** `AppHomeScreen.tsx` ve `AppSettingsScreen.tsx` her ikisi de `buildPlan()` ve `DERS_SINIF_MAP` tanımlar. Yeni branş veya sınıf aralığı eklenince **her iki dosyada** güncelleme gerekir.
+- **Merkezi DERS_SINIF_MAP:** `src/lib/dersSinifMap.ts` — `AppHomeScreen`, `AppSettingsScreen`, `PlanOlusturPage` buradan import eder. Yeni branş veya sınıf aralığı eklenince **sadece bu dosya** güncellenir.
 
 ## Kodlama Kuralları
 
@@ -214,6 +209,13 @@ VITE_ADSENSE_SLOT=XXXXXXXXXX                  # Reklam birimi ID
 - [x] Kullanıcı kaydı (Supabase Auth — email/şifre, `AuthModal`)
 - [x] Push bildirim (Notification API + SW, `src/lib/notifications.ts`)
 - [x] Google AdSense entegrasyonu (`AdBanner` bileşeni, env var ile yapılandırılır)
+- [x] `DERS_SINIF_MAP` ve `SINIF_SEVIYELERI` merkezi lib'e taşındı (`src/lib/dersSinifMap.ts`)
+- [x] Kullanılmayan dosyalar temizlendi (`WeekView/`, `types/plan.ts`, `OnboardingPage.tsx`)
+- [x] UX: Plan oluşturma sonrası `/app/plan`'a yönlendirme + hata mesajı
+- [x] UX: Bottom nav — `/app/hafta/:no` route'unda "Planım" tab'ı aktif
+- [x] UX: Plan listesinde aktif haftayı vurgulama (mavi çerçeve + "Bu Hafta" badge) ve otomatik scroll
+- [x] UX: Word export loading state, not kaydetme "✓ Kaydedildi" feedback'i
+- [x] UX: `BuHaftaKarti` sınıf seçimi `aktif-sinif` ile senkronize başlıyor
 
 ### Yapılacaklar
 - [ ] Arayüz geçiş animasyonları
