@@ -3,12 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import type { Hafta, OlusturulmusPlan } from '../types/takvim';
 import type { PlanEntry } from '../types/planEntry';
 import { showKazanimBildirimi } from '../lib/notifications';
-import {
-  SINIF_SEVIYELERI, DERS_SINIF_MAP,
-  DERS_GRUPLARI, SINIF_OGRETMENI_DERSLER, SINIF_OGRETMENI_SINIFLAR,
-  getYilSecenekleri,
-} from '../lib/dersSinifMap';
-import { buildPlan } from '../lib/planBuilder';
+import { getYilSecenekleri } from '../lib/dersSinifMap';
+import { PlanSelector } from '../components/PlanSelector';
 
 function formatTarihKısa(isoTarih: string): string {
   const aylar = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara']
@@ -195,9 +191,6 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing }: AppH
     } catch { /* localStorage okunamadı */ }
     return '';
   });
-  const [, setOnboardingTamamlandi] = useState(
-    () => !!localStorage.getItem('onboarding-tamamlandi')
-  );
   const [tamamlananlar] = useState<Record<string, number[]>>(() => {
     try {
       const tItem = localStorage.getItem('tamamlanan-haftalar');
@@ -212,34 +205,6 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing }: AppH
     } catch { /* localStorage okunamadı */ }
     return {};
   });
-  const [olusturuluyor, setOlusturuluyor] = useState(false);
-  const [olusturuldu, setOlusturuldu] = useState(false);
-  const [olusturmaHata, setOlusturmaHata] = useState('');
-  const [mufredatUyari, setMufredatUyari] = useState('');
-
-  const [onbDers, setOnbDers] = useState(() => {
-    try {
-      const item = localStorage.getItem('ogretmen-ayarlari');
-      if (item) {
-        const parsed = JSON.parse(item);
-        if (parsed.ders) return parsed.ders as string;
-      }
-    } catch { /* localStorage okunamadı */ }
-    return 'Fen Bilimleri';
-  });
-  const [onbSiniflar, setOnbSiniflar] = useState<string[]>(() => {
-    try {
-      const item = localStorage.getItem('ogretmen-ayarlari');
-      if (item) {
-        const parsed = JSON.parse(item);
-        if (parsed.siniflar?.length) return parsed.siniflar;
-        if (parsed.sinif) return [parsed.sinif];
-      }
-    } catch { /* localStorage okunamadı */ }
-    return ['5. Sınıf'];
-  });
-  const [onbSinifOgrSinif, setOnbSinifOgrSinif] = useState('3. Sınıf');
-  const [onbSinifOgrDersler, setOnbSinifOgrDersler] = useState<string[]>(SINIF_OGRETMENI_DERSLER);
 
   useEffect(() => {
     // Haftanın kazanımını bildirim olarak göster (yeni hafta ise)
@@ -258,102 +223,12 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing }: AppH
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [planlar.length]);
 
-  function handleOnbDersChange(ders: string) {
-    setOnbDers(ders);
-    if (ders === 'Sınıf Öğretmeni') {
-      setOnbSinifOgrDersler(SINIF_OGRETMENI_DERSLER);
-    } else {
-      const siniflar = DERS_SINIF_MAP[ders] || SINIF_SEVIYELERI;
-      setOnbSiniflar([siniflar[0]]);
-    }
-  }
-
-  function toggleOnbSinif(sinif: string) {
-    setOnbSiniflar(prev =>
-      prev.includes(sinif)
-        ? prev.length > 1 ? prev.filter(s => s !== sinif) : prev
-        : [...prev, sinif]
-    );
-  }
-
-  function toggleSinifOgrDers(ders: string) {
-    setOnbSinifOgrDersler(prev =>
-      prev.includes(ders)
-        ? prev.length > 1 ? prev.filter(d => d !== ders) : prev
-        : [...prev, ders]
-    );
-  }
-
-  function handleOnboardingTamamla() {
-    setOlusturuluyor(true);
-    setOlusturmaHata('');
-    try {
-      const yil = getYilSecenekleri()[0];
-      const isSinifOgretmeni = onbDers === 'Sınıf Öğretmeni';
-
-      if (isSinifOgretmeni) {
-        if (onbSinifOgrDersler.length === 0) { setOlusturuluyor(false); return; }
-        localStorage.setItem('ogretmen-ayarlari', JSON.stringify({
-          ders: onbSinifOgrDersler[0], siniflar: onbSinifOgrDersler, yil,
-          ogretmenTuru: 'sinif', sinifGercek: onbSinifOgrSinif,
-        }));
-        localStorage.setItem('onboarding-tamamlandi', '1');
-        setOnboardingTamamlandi(true);
-        const sinifOgrResults = onbSinifOgrDersler.map(d => ({ ...buildPlan(d, onbSinifOgrSinif, yil), ders: d }));
-        const sinifOgrEntries: PlanEntry[] = sinifOgrResults.map(r => ({
-          sinif: `${onbSinifOgrSinif}—${r.ders}`,
-          ders: r.ders, yil, tip: 'meb' as const,
-          plan: r.plan, rows: null,
-          label: r.ders, sinifGercek: onbSinifOgrSinif,
-        }));
-        onPlanEkle(sinifOgrEntries);
-        onSinifSec(sinifOgrEntries[0].sinif);
-        const eksikSinifOgr = sinifOgrResults.filter(r => !r.hasMufredat).map(r => r.ders);
-        if (eksikSinifOgr.length > 0) {
-          setMufredatUyari(`${eksikSinifOgr.join(', ')} için müfredat bulunamadı, boş plan oluşturuldu.`);
-          setOlusturuldu(true);
-          setTimeout(() => navigate('/app/plan'), 2500);
-        } else {
-          setOlusturuldu(true);
-          setTimeout(() => navigate('/app/plan'), 700);
-        }
-      } else {
-        if (onbSiniflar.length === 0) { setOlusturuluyor(false); return; }
-        localStorage.setItem('ogretmen-ayarlari', JSON.stringify({ ders: onbDers, siniflar: onbSiniflar, yil }));
-        localStorage.setItem('onboarding-tamamlandi', '1');
-        setOnboardingTamamlandi(true);
-        const branşResults = onbSiniflar.map(s => ({ ...buildPlan(onbDers, s, yil), sinif: s }));
-        const branşEntries: PlanEntry[] = branşResults.map(r => ({
-          sinif: r.sinif, ders: onbDers, yil, tip: 'meb' as const,
-          plan: r.plan, rows: null,
-        }));
-        onPlanEkle(branşEntries);
-        onSinifSec(branşEntries[0].sinif);
-        const eksikBrans = branşResults.filter(r => !r.hasMufredat).map(r => r.sinif);
-        if (eksikBrans.length > 0) {
-          setMufredatUyari(`${eksikBrans.join(', ')} için müfredat bulunamadı, boş plan oluşturuldu.`);
-          setOlusturuldu(true);
-          setTimeout(() => navigate('/app/plan'), 2500);
-        } else {
-          setOlusturuldu(true);
-          setTimeout(() => navigate('/app/plan'), 700);
-        }
-      }
-    } catch {
-      setOlusturuluyor(false);
-      setOlusturmaHata('Plan oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.');
-    }
-  }
-
   const saat = new Date().getHours();
   let mesaj = 'İyi geceler';
   if (saat >= 6 && saat < 12) mesaj = 'Günaydın';
   else if (saat >= 12 && saat < 17) mesaj = 'İyi günler';
   else if (saat >= 17 && saat < 21) mesaj = 'İyi akşamlar';
   const karsilama = ogretmenAd ? `${mesaj}, ${ogretmenAd}!` : `${mesaj}!`;
-
-  const isSinifOgretmeni = onbDers === 'Sınıf Öğretmeni';
-  const aktifSiniflar = DERS_SINIF_MAP[onbDers] || SINIF_SEVIYELERI;
 
   return (
     <div className="p-4 pb-24 w-full max-w-lg mx-auto">
@@ -376,122 +251,15 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing }: AppH
       {/* ONBOARDING — planlar yoksa her zaman göster (ilk kurulum veya tüm planlar silindi) */}
       {planlar.length === 0 && (
         <div className="bg-[#FAFAF9] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-5 mb-5">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Başlayalım</p>
-          <h2 className="text-base font-bold text-[#2D5BE3] mb-4">
-            Branşını seç, planın hazır olsun.
-          </h2>
-
-          {/* Ders / Branş seçimi */}
-          <div className="mb-4">
-            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">
-              Branş / Ders
-            </label>
-            <select
-              value={onbDers}
-              onChange={(e) => handleOnbDersChange(e.target.value)}
-              className="w-full p-3 rounded-xl border border-[#E7E5E4] bg-[#FAFAF9] text-[#1C1917] font-medium focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/30 focus:border-[#F59E0B] transition-all text-sm"
-            >
-              {DERS_GRUPLARI.map(g => (
-                <optgroup key={g.grup} label={g.grup}>
-                  {g.dersler.map(d => <option key={d} value={d}>{d}</option>)}
-                </optgroup>
-              ))}
-            </select>
-          </div>
-
-          {/* Sınıf Öğretmeni seçilince */}
-          {isSinifOgretmeni ? (
-            <>
-              <div className="mb-4">
-                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-                  Sınıfın
-                </label>
-                <div className="flex gap-2 flex-wrap">
-                  {SINIF_OGRETMENI_SINIFLAR.map(s => (
-                    <button
-                      key={s}
-                      onClick={() => setOnbSinifOgrSinif(s)}
-                      className={`px-3.5 py-1.5 rounded-full text-sm font-bold border transition-all active:scale-95 ${
-                        onbSinifOgrSinif === s
-                          ? 'bg-[#2D5BE3] text-white border-[#2D5BE3]'
-                          : 'bg-[#FAFAF9] text-gray-500 border-[#E7E5E4] hover:border-gray-300'
-                      }`}
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="mb-4">
-                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-                  Dersler
-                  <span className="text-gray-300 font-normal ml-1">(birden fazla seçebilirsin)</span>
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {SINIF_OGRETMENI_DERSLER.map(d => (
-                    <button
-                      key={d}
-                      onClick={() => toggleSinifOgrDers(d)}
-                      className={`px-3.5 py-1.5 rounded-full text-sm font-bold border transition-all active:scale-95 ${
-                        onbSinifOgrDersler.includes(d)
-                          ? 'bg-[#2D5BE3] text-white border-[#2D5BE3]'
-                          : 'bg-[#FAFAF9] text-gray-500 border-[#E7E5E4] hover:border-gray-300'
-                      }`}
-                    >
-                      {d}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="mb-4">
-              <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-                Sınıf Seviyeleri
-                <span className="text-gray-300 font-normal ml-1">(birden fazla seçebilirsin)</span>
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {aktifSiniflar.map(s => (
-                  <button
-                    key={s}
-                    onClick={() => toggleOnbSinif(s)}
-                    className={`px-3.5 py-1.5 rounded-full text-sm font-bold border transition-all active:scale-95 ${
-                      onbSiniflar.includes(s)
-                        ? 'bg-[#2D5BE3] text-white border-[#2D5BE3]'
-                        : 'bg-[#FAFAF9] text-gray-500 border-[#E7E5E4] hover:border-gray-300'
-                    }`}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {olusturmaHata && (
-            <p className="text-red-500 text-sm mb-3 font-medium">{olusturmaHata}</p>
-          )}
-          {mufredatUyari && (
-            <div className="bg-[#F59E0B]/10 border border-[#F59E0B]/20 rounded-xl px-3.5 py-2.5 mb-3">
-              <p className="text-[#92400e] text-xs font-semibold">⚠️ {mufredatUyari}</p>
-            </div>
-          )}
-          <button
-            onClick={handleOnboardingTamamla}
-            disabled={olusturuluyor || olusturuldu || (isSinifOgretmeni ? onbSinifOgrDersler.length === 0 : onbSiniflar.length === 0)}
-            className={`w-full py-3 rounded-xl font-bold shadow-[0_1px_3px_rgba(0,0,0,0.06)] active:scale-95 transition-all hover:opacity-90 disabled:opacity-80 flex items-center justify-center gap-2 ${
-              olusturuldu
-                ? 'bg-[#059669] text-white animate-pop-in'
-                : 'bg-[#F59E0B] text-white'
-            }`}
-          >
-            {olusturuluyor
-              ? <span className="animate-pulse">Oluşturuluyor...</span>
-              : olusturuldu
-              ? <>✓ Hazır! Planlar oluşturuldu</>
-              : <>Planlarımı Oluştur →</>
-            }
-          </button>
+          <PlanSelector
+            yil={getYilSecenekleri()[0]}
+            onComplete={entries => {
+              localStorage.setItem('onboarding-tamamlandi', '1')
+              onPlanEkle(entries)
+              onSinifSec(entries[0].sinif)
+              navigate('/app/plan')
+            }}
+          />
         </div>
       )}
 

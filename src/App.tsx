@@ -9,7 +9,6 @@ import { AppSettingsScreen } from './pages/AppSettingsScreen'
 import { AppLayout } from './components/AppLayout'
 import { HaftaDetayPage } from './pages/HaftaDetayPage'
 import type { PlanEntry } from './types/planEntry'
-import type { OlusturulmusPlan } from './types/takvim'
 import type { ParsedRow } from './lib/fileParser'
 import { onAuthStateChange, type User } from './lib/auth'
 import { syncPlansToSupabase, fetchPlansFromSupabase, deletePlanFromSupabase, fetchProgressFromSupabase } from './lib/planSync'
@@ -150,12 +149,6 @@ function App() {
     }
   }
 
-  // /olustur ve /yukle sayfaları için eski interface'i koru
-  function handlePlanOlusturLegacy(plan: OlusturulmusPlan, ders: string, sinif: string) {
-    const entry: PlanEntry = { sinif, ders, yil: getYilSecenekleri()[0], tip: 'meb', plan, rows: null }
-    handlePlanEkle([entry])
-  }
-
   function handleYukleLegacy(rows: ParsedRow[], ders: string, sinif: string) {
     const entry: PlanEntry = { sinif, ders, yil: getYilSecenekleri()[0], tip: 'yukle', plan: null, rows }
     handlePlanEkle([entry])
@@ -169,7 +162,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/olustur" element={<PlanOlusturPage onPlanOlustur={handlePlanOlusturLegacy} />} />
+        <Route path="/olustur" element={<PlanOlusturPage onPlanEkle={handlePlanEkle} />} />
         <Route path="/yukle" element={<YuklemePage onYukle={handleYukleLegacy} />} />
         <Route
           path="/plan"
