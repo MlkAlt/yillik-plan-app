@@ -8,6 +8,8 @@ import { AdBanner } from '../components/AdBanner';
 
 interface PlanPageProps {
   entry: PlanEntry | null;
+  planlar?: PlanEntry[];
+  onSinifSec?: (sinif: string) => void;
 }
 
 function formatTarih(isoTarih: string): string {
@@ -26,12 +28,13 @@ const getEmoji = (ad: string = '') => {
   return '🏖️';
 };
 
-export function PlanPage({ entry }: PlanPageProps) {
+export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
   const navigate = useNavigate();
 
   const [tamamlananlar, setTamamlananlar] = useState<number[]>([]);
   const [exporting, setExporting] = useState(false);
   const [exportingWord, setExportingWord] = useState(false);
+  const [visibleYuzde, setVisibleYuzde] = useState(0);
   const bugunRef = useRef<HTMLDivElement>(null);
 
   const bugunStr = new Date().toISOString().split('T')[0]
@@ -94,6 +97,18 @@ export function PlanPage({ entry }: PlanPageProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entry?.sinif]);
 
+  // Progress bar mount animasyonu — 0'dan gerçek yüzdeye
+  useEffect(() => {
+    if (!entry) { setVisibleYuzde(0); return; }
+    const isMebCalc = entry.tip === 'meb' && entry.plan && entry.plan.haftalar.length > 0;
+    const toplamCalc = isMebCalc
+      ? entry.plan!.haftalar.filter(h => !h.tatilMi).length
+      : (entry.tip === 'yukle' && entry.rows ? entry.rows.length : 0);
+    const calc = toplamCalc > 0 ? Math.round((tamamlananlar.length / toplamCalc) * 100) : 0;
+    const t = setTimeout(() => setVisibleYuzde(calc), 80)
+    return () => clearTimeout(t)
+  }, [tamamlananlar, entry])
+
   if (!entry) {
     return (
       <div className="p-4 pb-24 w-full max-w-lg mx-auto">
@@ -148,11 +163,30 @@ export function PlanPage({ entry }: PlanPageProps) {
         </div>
         <div className="w-full bg-gray-100 rounded-full h-2">
           <div
-            className="bg-[#F59E0B] h-2 rounded-full transition-all duration-500"
-            style={{ width: `${yuzde}%` }}
+            className="bg-[#F59E0B] h-2 rounded-full transition-all duration-700 ease-out"
+            style={{ width: `${visibleYuzde}%` }}
           />
         </div>
       </div>
+
+      {/* Plan seçici — birden fazla plan varsa */}
+      {planlar && planlar.length > 1 && (
+        <div className="flex gap-2 overflow-x-auto pb-1 mb-4 -mx-1 px-1">
+          {planlar.map(p => (
+            <button
+              key={p.sinif}
+              onClick={() => onSinifSec?.(p.sinif)}
+              className={`whitespace-nowrap flex-shrink-0 px-3.5 py-1.5 rounded-full text-sm font-bold border transition-all active:scale-95 ${
+                p.sinif === entry?.sinif
+                  ? 'bg-[#2D5BE3] text-white border-[#2D5BE3]'
+                  : 'bg-[#FAFAF9] text-gray-500 border-[#E7E5E4] hover:border-gray-300'
+              }`}
+            >
+              {p.label || p.sinif}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* İndirme butonları */}
       <div className="flex gap-2 mb-4">

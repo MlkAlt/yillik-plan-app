@@ -1,27 +1,18 @@
 import { useState } from 'react';
 import type { PlanEntry } from '../types/planEntry';
-import { planOlustur, mufredatliPlanOlustur } from '../lib/takvimUtils';
-import { getMufredat } from '../lib/mufredatRegistry';
 import { signOut, type User } from '../lib/auth';
 import { AuthModal } from '../components/AuthModal';
 import {
   isBildirimDestekleniyor, getBildirimIzni, isBildirimAktif,
   setBildirimAktif, requestBildirimIzni,
 } from '../lib/notifications';
-import { SINIF_SEVIYELERI, DERS_SINIF_MAP } from '../lib/dersSinifMap';
-
-const DERS_SECENEKLERI = [
-  'Fen Bilimleri', 'Matematik', 'Türkçe', 'Hayat Bilgisi', 'Sosyal Bilgiler',
-  'İngilizce', 'Türk Dili ve Edebiyatı', 'Tarih', 'Coğrafya',
-  'Fizik', 'Kimya', 'Biyoloji',
-  'Din Kültürü ve Ahlak Bilgisi', 'Almanca', 'Fransızca',
-  'Beden Eğitimi', 'Müzik', 'Görsel Sanatlar', 'Felsefe', 'Psikoloji', 'Sosyoloji',
-  'Mantık', 'Matematik Uygulamaları',
-  'Bilişim Teknolojileri', 'Trafik ve İlk Yardım', 'Sağlık Bilgisi',
-  'DKAB', 'Meslek Dersi', 'Diğer',
-]
-
-const YIL_SECENEKLERI = ['2024-2025', '2025-2026']
+import {
+  SINIF_SEVIYELERI, DERS_SINIF_MAP,
+  DERS_SECENEKLERI, SINIF_OGRETMENI_DERSLER, SINIF_OGRETMENI_SINIFLAR,
+  getYilSecenekleri,
+} from '../lib/dersSinifMap';
+import { buildPlan } from '../lib/planBuilder';
+import { LeadForm } from '../components/LeadForm';
 
 const SEHIRLER = [
   "Adana", "Adıyaman", "Afyonkarahisar", "Ağrı", "Amasya", "Ankara", "Antalya", "Artvin",
@@ -36,15 +27,11 @@ const SEHIRLER = [
   "Ardahan", "Iğdır", "Yalova", "Karabük", "Kilis", "Osmaniye", "Düzce"
 ]
 
-function buildPlan(ders: string, sinif: string, yil: string) {
-  const mufredat = getMufredat(ders, sinif)
-  if (mufredat) return mufredatliPlanOlustur(yil, mufredat)
-  return planOlustur(yil)
-}
-
 interface AppSettingsScreenProps {
   onPlanEkle: (entries: PlanEntry[]) => void;
+  onPlanSil?: (sinif: string) => void;
   user?: User | null;
+  planlar?: PlanEntry[];
 }
 
 function readAyarlar() {
@@ -55,29 +42,46 @@ function readAyarlar() {
   return {};
 }
 
-export function AppSettingsScreen({ onPlanEkle, user }: AppSettingsScreenProps) {
+export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planlarProp = [] }: AppSettingsScreenProps) {
   const [adSoyad, setAdSoyad] = useState(() => readAyarlar().adSoyad || '');
   const [okulAdi, setOkulAdi] = useState(() => readAyarlar().okulAdi || '');
   const [sehir, setSehir] = useState(() => readAyarlar().sehir || '');
-  const [ders, setDers] = useState(() => readAyarlar().ders || 'Fen Bilimleri');
+  const [ders, setDers] = useState(() => {
+    const a = readAyarlar();
+    if (a.ogretmenTuru === 'sinif') return 'Sınıf Öğretmeni';
+    return a.ders || 'Fen Bilimleri';
+  });
   const [siniflar, setSiniflar] = useState<string[]>(() => {
     const a = readAyarlar();
+    if (a.ogretmenTuru === 'sinif') return ['5. Sınıf']; // branş modunda kullanılmaz
     if (a.siniflar?.length) return a.siniflar;
     if (a.sinif) return [a.sinif];
     return ['5. Sınıf'];
   });
+  const [sinifOgrSinif, setSinifOgrSinif] = useState(() => readAyarlar().sinifGercek || '3. Sınıf');
+  const [sinifOgrDersler, setSinifOgrDersler] = useState<string[]>(() => {
+    const a = readAyarlar();
+    if (a.ogretmenTuru === 'sinif' && a.siniflar?.length) return a.siniflar;
+    return SINIF_OGRETMENI_DERSLER;
+  });
   const [yil, setYil] = useState(() => readAyarlar().yil || '2025-2026');
   const [basariMesaji, setBasariMesaji] = useState(false);
+  const [mufredatUyari, setMufredatUyari] = useState('');
   const [authModalAcik, setAuthModalAcik] = useState(false);
+  const [silOnayBekleyen, setSilOnayBekleyen] = useState<string | null>(null);
   const [bildirimAktif, setBildirimAktifState] = useState(isBildirimAktif);
   const [bildirimIzni, setBildirimIzniState] = useState(getBildirimIzni);
 
+
+  const isSinifOgretmeni = ders === 'Sınıf Öğretmeni';
+
   function handleDersChange(yeniDers: string) {
     setDers(yeniDers);
-    const secilebilir = DERS_SINIF_MAP[yeniDers] || SINIF_SEVIYELERI;
-    // Mevcut seçimleri koru, geçersiz olanları filtrele, boşsa ilkini seç
-    const gecerli = siniflar.filter(s => secilebilir.includes(s));
-    setSiniflar(gecerli.length > 0 ? gecerli : [secilebilir[0]]);
+    if (yeniDers !== 'Sınıf Öğretmeni') {
+      const secilebilir = DERS_SINIF_MAP[yeniDers] || SINIF_SEVIYELERI;
+      const gecerli = siniflar.filter(s => secilebilir.includes(s));
+      setSiniflar(gecerli.length > 0 ? gecerli : [secilebilir[0]]);
+    }
   }
 
   function toggleSinif(sinif: string) {
@@ -88,33 +92,58 @@ export function AppSettingsScreen({ onPlanEkle, user }: AppSettingsScreenProps) 
     );
   }
 
+  function toggleSinifOgrDers(d: string) {
+    setSinifOgrDersler(prev =>
+      prev.includes(d)
+        ? prev.length > 1 ? prev.filter(x => x !== d) : prev
+        : [...prev, d]
+    );
+  }
+
   function handleSave() {
-    // Ayarları kaydet
-    localStorage.setItem('ogretmen-ayarlari', JSON.stringify({
-      adSoyad, okulAdi, sehir, ders, siniflar, yil
-    }));
-
-    // Yeni/değişen sınıflar için plan oluştur
-    const mevcutPlanlarItem = localStorage.getItem('tum-planlar');
-    const mevcutPlanlar: PlanEntry[] = mevcutPlanlarItem ? JSON.parse(mevcutPlanlarItem) : [];
-
-    const yeniEntries: PlanEntry[] = siniflar
-      .filter(s => !mevcutPlanlar.find(p => p.sinif === s && p.ders === ders))
-      .map(s => ({
-        sinif: s,
-        ders,
-        yil,
-        tip: 'meb' as const,
-        plan: buildPlan(ders, s, yil),
-        rows: null,
+    if (isSinifOgretmeni) {
+      localStorage.setItem('ogretmen-ayarlari', JSON.stringify({
+        adSoyad, okulAdi, sehir,
+        ders: sinifOgrDersler[0],
+        siniflar: sinifOgrDersler,
+        yil, ogretmenTuru: 'sinif', sinifGercek: sinifOgrSinif,
       }));
-
-    if (yeniEntries.length > 0) {
-      onPlanEkle(yeniEntries);
+      const yeniResults = sinifOgrDersler
+        .filter(d => !planlarProp.find(p => p.sinif === `${sinifOgrSinif}—${d}`))
+        .map(d => ({ ders: d, ...buildPlan(d, sinifOgrSinif, yil) }));
+      if (yeniResults.length > 0) {
+        const yeniEntries: PlanEntry[] = yeniResults.map(r => ({
+          sinif: `${sinifOgrSinif}—${r.ders}`,
+          ders: r.ders, yil, tip: 'meb' as const, plan: r.plan, rows: null,
+          label: r.ders, sinifGercek: sinifOgrSinif,
+        }));
+        onPlanEkle(yeniEntries);
+      }
+      const eksik = yeniResults.filter(r => !r.hasMufredat).map(r => r.ders);
+      setMufredatUyari(eksik.length > 0 ? `${eksik.join(', ')} için müfredat bulunamadı, boş plan oluşturuldu.` : '');
+    } else {
+      localStorage.setItem('ogretmen-ayarlari', JSON.stringify({
+        adSoyad, okulAdi, sehir, ders, siniflar, yil
+      }));
+      const yeniResults = siniflar
+        .filter(s => !planlarProp.find(p => p.sinif === s && p.ders === ders))
+        .map(s => ({ sinif: s, ...buildPlan(ders, s, yil) }));
+      if (yeniResults.length > 0) {
+        const yeniEntries: PlanEntry[] = yeniResults.map(r => ({
+          sinif: r.sinif, ders, yil, tip: 'meb' as const, plan: r.plan, rows: null,
+        }));
+        onPlanEkle(yeniEntries);
+      }
+      const eksik = yeniResults.filter(r => !r.hasMufredat).map(r => r.sinif);
+      setMufredatUyari(eksik.length > 0 ? `${eksik.join(', ')} için müfredat bulunamadı, boş plan oluşturuldu.` : '');
     }
-
     setBasariMesaji(true);
     setTimeout(() => setBasariMesaji(false), 2500);
+  }
+
+  function handlePlanSilOnayla(sinif: string) {
+    if (onPlanSil) onPlanSil(sinif);
+    setSilOnayBekleyen(null);
   }
 
   async function handleBildirimToggle() {
@@ -132,13 +161,9 @@ export function AppSettingsScreen({ onPlanEkle, user }: AppSettingsScreenProps) 
   }
 
   const aktifSiniflar = DERS_SINIF_MAP[ders] || SINIF_SEVIYELERI;
-  const yeniSinifSayisi = (() => {
-    try {
-      const item = localStorage.getItem('tum-planlar');
-      const mevcut: PlanEntry[] = item ? JSON.parse(item) : [];
-      return siniflar.filter(s => !mevcut.find(p => p.sinif === s && p.ders === ders)).length;
-    } catch { return 0; }
-  })();
+  const yeniSinifSayisi = isSinifOgretmeni
+    ? sinifOgrDersler.filter(d => !planlarProp.find(p => p.sinif === `${sinifOgrSinif}—${d}`)).length
+    : siniflar.filter(s => !planlarProp.find(p => p.sinif === s && p.ders === ders)).length;
 
   return (
     <div className="max-w-lg mx-auto p-4 w-full pb-24">
@@ -182,6 +207,15 @@ export function AppSettingsScreen({ onPlanEkle, user }: AppSettingsScreenProps) 
       </div>
 
       {authModalAcik && <AuthModal onClose={() => setAuthModalAcik(false)} />}
+
+      {/* Lead toplama — giriş yapılmamışsa */}
+      {!user && (
+        <div className="bg-[#FAFAF9] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-5 mb-4">
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Güncellemelerden Haberdar Ol</p>
+          <p className="text-sm text-gray-500 mb-4">Yeni müfredat ve özellikler için bildirim al.</p>
+          <LeadForm embedded />
+        </div>
+      )}
 
       {/* Bildirim Bölümü */}
       {isBildirimDestekleniyor() && (
@@ -264,29 +298,58 @@ export function AppSettingsScreen({ onPlanEkle, user }: AppSettingsScreenProps) 
           </select>
         </div>
 
-        {/* Sınıflar — multi-select */}
-        <div className="flex flex-col gap-2">
-          <label className="font-medium text-[#2D5BE3] text-sm">
-            Sınıf Seviyeleri
-            <span className="text-gray-400 font-normal text-xs ml-1">(birden fazla seçilebilir)</span>
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {aktifSiniflar.map(s => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => toggleSinif(s)}
-                className={`px-3.5 py-1.5 rounded-full text-sm font-bold border transition-all active:scale-95 ${
-                  siniflar.includes(s)
-                    ? 'bg-[#2D5BE3] text-white border-[#2D5BE3]'
-                    : 'bg-[#FAFAF9] text-gray-500 border-[#E7E5E4] hover:border-gray-300'
-                }`}
-              >
-                {s}
-              </button>
-            ))}
+        {/* Sınıf Öğretmeni: sınıf + ders seçimi */}
+        {isSinifOgretmeni ? (
+          <>
+            <div className="flex flex-col gap-2">
+              <label className="font-medium text-[#2D5BE3] text-sm">Sınıfın</label>
+              <div className="flex gap-2 flex-wrap">
+                {SINIF_OGRETMENI_SINIFLAR.map(s => (
+                  <button key={s} type="button" onClick={() => setSinifOgrSinif(s)}
+                    className={`px-3.5 py-1.5 rounded-full text-sm font-bold border transition-all active:scale-95 ${
+                      sinifOgrSinif === s
+                        ? 'bg-[#2D5BE3] text-white border-[#2D5BE3]'
+                        : 'bg-[#FAFAF9] text-gray-500 border-[#E7E5E4] hover:border-gray-300'
+                    }`}>{s}</button>
+                ))}
+              </div>
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="font-medium text-[#2D5BE3] text-sm">
+                Dersler
+                <span className="text-gray-400 font-normal text-xs ml-1">(birden fazla seçilebilir)</span>
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {SINIF_OGRETMENI_DERSLER.map(d => (
+                  <button key={d} type="button" onClick={() => toggleSinifOgrDers(d)}
+                    className={`px-3.5 py-1.5 rounded-full text-sm font-bold border transition-all active:scale-95 ${
+                      sinifOgrDersler.includes(d)
+                        ? 'bg-[#2D5BE3] text-white border-[#2D5BE3]'
+                        : 'bg-[#FAFAF9] text-gray-500 border-[#E7E5E4] hover:border-gray-300'
+                    }`}>{d}</button>
+                ))}
+              </div>
+            </div>
+          </>
+        ) : (
+          /* Branş öğretmeni: sınıf seviyeleri multi-select */
+          <div className="flex flex-col gap-2">
+            <label className="font-medium text-[#2D5BE3] text-sm">
+              Sınıf Seviyeleri
+              <span className="text-gray-400 font-normal text-xs ml-1">(birden fazla seçilebilir)</span>
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {aktifSiniflar.map(s => (
+                <button key={s} type="button" onClick={() => toggleSinif(s)}
+                  className={`px-3.5 py-1.5 rounded-full text-sm font-bold border transition-all active:scale-95 ${
+                    siniflar.includes(s)
+                      ? 'bg-[#2D5BE3] text-white border-[#2D5BE3]'
+                      : 'bg-[#FAFAF9] text-gray-500 border-[#E7E5E4] hover:border-gray-300'
+                  }`}>{s}</button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Akademik Yıl */}
         <div className="flex flex-col gap-2">
@@ -296,7 +359,7 @@ export function AppSettingsScreen({ onPlanEkle, user }: AppSettingsScreenProps) 
             onChange={(e) => setYil(e.target.value)}
             className="w-full p-3 rounded-xl border border-[#E7E5E4] bg-[#FAFAF9] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/20 focus:border-[#F59E0B] transition-all text-[#1C1917] text-sm"
           >
-            {YIL_SECENEKLERI.map(y => <option key={y} value={y}>{y}</option>)}
+            {getYilSecenekleri().map(y => <option key={y} value={y}>{y}</option>)}
           </select>
         </div>
 
@@ -320,7 +383,53 @@ export function AppSettingsScreen({ onPlanEkle, user }: AppSettingsScreenProps) 
             ✅ Ayarlar kaydedildi!
           </p>
         )}
+
+        {mufredatUyari && (
+          <div className="bg-[#F59E0B]/10 border border-[#F59E0B]/20 rounded-xl px-3.5 py-2.5">
+            <p className="text-[#92400e] text-xs font-semibold">⚠️ {mufredatUyari}</p>
+          </div>
+        )}
       </div>
+
+      {/* Mevcut Planlar */}
+      {planlarProp.length > 0 && (
+        <div className="bg-[#FAFAF9] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-5 mt-4">
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Mevcut Planlar</p>
+          <div className="flex flex-col gap-3">
+            {planlarProp.map(p => (
+              <div key={p.sinif} className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-[#1C1917] truncate">{p.label || p.ders}</p>
+                  <p className="text-xs text-gray-400">{p.sinifGercek || p.sinif} · {p.yil}</p>
+                </div>
+                {silOnayBekleyen === p.sinif ? (
+                  <div className="flex gap-1.5 shrink-0">
+                    <button
+                      onClick={() => handlePlanSilOnayla(p.sinif)}
+                      className="text-xs font-bold text-white bg-red-500 px-2.5 py-1.5 rounded-lg active:scale-95 transition-all"
+                    >
+                      Evet, Sil
+                    </button>
+                    <button
+                      onClick={() => setSilOnayBekleyen(null)}
+                      className="text-xs font-bold text-gray-500 border border-[#E7E5E4] px-2.5 py-1.5 rounded-lg active:scale-95 transition-all"
+                    >
+                      İptal
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setSilOnayBekleyen(p.sinif)}
+                    className="text-xs font-bold text-red-500 border border-red-200 bg-red-50 px-2.5 py-1.5 rounded-lg active:scale-95 transition-all hover:bg-red-100 shrink-0"
+                  >
+                    Sil
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

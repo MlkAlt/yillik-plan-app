@@ -60,3 +60,30 @@ export async function deletePlanFromSupabase(userId: string, sinif: string) {
     .eq('user_id', userId)
     .eq('sinif', sinif)
 }
+
+export async function syncProgressToSupabase(
+  userId: string,
+  tamamlanan: Record<string, number[]>,
+  notlar: Record<string, Record<string, string>>,
+) {
+  if (!userId) return
+  await supabase
+    .from('user_progress')
+    .upsert({ user_id: userId, tamamlanan_json: tamamlanan, notlar_json: notlar, updated_at: new Date().toISOString() })
+}
+
+export async function fetchProgressFromSupabase(userId: string): Promise<{
+  tamamlanan: Record<string, number[]>
+  notlar: Record<string, Record<string, string>>
+} | null> {
+  const { data, error } = await supabase
+    .from('user_progress')
+    .select('tamamlanan_json, notlar_json')
+    .eq('user_id', userId)
+    .single()
+  if (error || !data) return null
+  return {
+    tamamlanan: (data.tamamlanan_json as Record<string, number[]>) || {},
+    notlar: (data.notlar_json as Record<string, Record<string, string>>) || {},
+  }
+}

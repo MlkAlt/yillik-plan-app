@@ -12,19 +12,22 @@ import type { PlanEntry } from './types/planEntry'
 import type { OlusturulmusPlan } from './types/takvim'
 import type { ParsedRow } from './lib/fileParser'
 import { onAuthStateChange, type User } from './lib/auth'
-import { syncPlansToSupabase, fetchPlansFromSupabase } from './lib/planSync'
+import { syncPlansToSupabase, fetchPlansFromSupabase, deletePlanFromSupabase, fetchProgressFromSupabase } from './lib/planSync'
+import { getYilSecenekleri } from './lib/dersSinifMap'
 
 function App() {
   const [planlar, setPlanlar] = useState<PlanEntry[]>([])
   const [aktifSinif, setAktifSinif] = useState('')
   const [yuklendi, setYuklendi] = useState(false)
   const [user, setUser] = useState<User | null>(null)
+  const [syncing, setSyncing] = useState(false)
 
   useEffect(() => {
     const unsubscribe = onAuthStateChange(async (newUser) => {
       setUser(newUser)
       if (newUser) {
         // Login olunca Supabase'den planları çek, localStorage ile birleştir
+        setSyncing(true)
         try {
           const bulutPlanlar = await fetchPlansFromSupabase(newUser.id)
           if (bulutPlanlar.length > 0) {
@@ -46,8 +49,28 @@ function App() {
               return yeniPlanlar
             })
           }
+          // Progress (tamamlanan + notlar) sync
+          const cloudProgress = await fetchProgressFromSupabase(newUser.id)
+          if (cloudProgress) {
+            try {
+              const localTamamlananStr = localStorage.getItem('tamamlanan-haftalar')
+              const localTamamlanan = localTamamlananStr ? JSON.parse(localTamamlananStr) : {}
+              const mergedTamamlanan = { ...localTamamlanan, ...cloudProgress.tamamlanan }
+              localStorage.setItem('tamamlanan-haftalar', JSON.stringify(mergedTamamlanan))
+
+              const localNotlarStr = localStorage.getItem('hafta-notlari')
+              const localNotlar = localNotlarStr ? JSON.parse(localNotlarStr) : {}
+              const mergedNotlar: Record<string, Record<string, string>> = { ...localNotlar }
+              for (const sinif of Object.keys(cloudProgress.notlar)) {
+                mergedNotlar[sinif] = { ...(localNotlar[sinif] || {}), ...cloudProgress.notlar[sinif] }
+              }
+              localStorage.setItem('hafta-notlari', JSON.stringify(mergedNotlar))
+            } catch { /* merge başarısız */ }
+          }
         } catch {
           // Supabase erişilemiyorsa localStorage'a devam et
+        } finally {
+          setSyncing(false)
         }
       }
     })
@@ -113,14 +136,28 @@ function App() {
     localStorage.setItem('aktif-sinif', sinif)
   }
 
+  function handlePlanSil(sinif: string) {
+    const sonuc = planlar.filter(p => p.sinif !== sinif)
+    setPlanlar(sonuc)
+    localStorage.setItem('tum-planlar', JSON.stringify(sonuc))
+    if (aktifSinif === sinif) {
+      const yeniAktif = sonuc[0]?.sinif || ''
+      setAktifSinif(yeniAktif)
+      localStorage.setItem('aktif-sinif', yeniAktif)
+    }
+    if (user) {
+      deletePlanFromSupabase(user.id, sinif).catch(() => {})
+    }
+  }
+
   // /olustur ve /yukle sayfaları için eski interface'i koru
   function handlePlanOlusturLegacy(plan: OlusturulmusPlan, ders: string, sinif: string) {
-    const entry: PlanEntry = { sinif, ders, yil: '2025-2026', tip: 'meb', plan, rows: null }
+    const entry: PlanEntry = { sinif, ders, yil: getYilSecenekleri()[0], tip: 'meb', plan, rows: null }
     handlePlanEkle([entry])
   }
 
   function handleYukleLegacy(rows: ParsedRow[], ders: string, sinif: string) {
-    const entry: PlanEntry = { sinif, ders, yil: '2025-2026', tip: 'yukle', plan: null, rows }
+    const entry: PlanEntry = { sinif, ders, yil: getYilSecenekleri()[0], tip: 'yukle', plan: null, rows }
     handlePlanEkle([entry])
   }
 
@@ -138,7 +175,7 @@ function App() {
           path="/plan"
           element={
             aktifEntry
-              ? <PlanPage entry={aktifEntry} />
+              ? <PlanPage entry={aktifEntry} planlar={planlar} onSinifSec={handleSinifSec} />
               : <Navigate to="/olustur" replace />
           }
         />
@@ -150,6 +187,7 @@ function App() {
                 planlar={planlar}
                 onPlanEkle={handlePlanEkle}
                 onSinifSec={handleSinifSec}
+                syncing={syncing}
               />
             </AppLayout>
           }
@@ -158,17 +196,18 @@ function App() {
           path="/app/plan"
           element={
             aktifEntry
-              ? <AppLayout><PlanPage entry={aktifEntry} /></AppLayout>
+              ? <AppLayout><PlanPage entry={aktifEntry} planlar={planlar} onSinifSec={handleSinifSec} /></AppLayout>
               : <AppLayout>
                   <AppHomeScreen
                     planlar={planlar}
                     onPlanEkle={handlePlanEkle}
                     onSinifSec={handleSinifSec}
+                    syncing={syncing}
                   />
                 </AppLayout>
           }
         />
-        <Route path="/app/ayarlar" element={<AppLayout><AppSettingsScreen onPlanEkle={handlePlanEkle} user={user} /></AppLayout>} />
+        <Route path="/app/ayarlar" element={<AppLayout><AppSettingsScreen onPlanEkle={handlePlanEkle} onPlanSil={handlePlanSil} planlar={planlar} user={user} /></AppLayout>} />
         <Route path="/app/hafta/:haftaNo" element={<AppLayout><HaftaDetayPage /></AppLayout>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

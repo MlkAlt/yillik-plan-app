@@ -38,7 +38,7 @@ npm run lint       # ESLint kontrol
 **App katmanı** (`/app/*`) — `AppLayout` wrapper ile, mobil-öncelikli bottom-nav içerir:
 - `/app` → `AppHomeScreen` (bu haftaki kazanım + onboarding)
 - `/app/plan` → `PlanPage` (tüm haftalar listesi; plan yoksa `/app`'e yönlendirir)
-- `/app/ayarlar` → `AppSettingsScreen` (öğretmen bilgileri + plan silme/yeniden oluşturma; `onPlanEkle` prop'u alır)
+- `/app/ayarlar` → `AppSettingsScreen` (öğretmen bilgileri + plan silme/yeniden oluşturma; `onPlanEkle`, `onPlanSil?`, `planlar`, `user?` prop'larını alır)
 - `/app/hafta/:haftaNo` → `HaftaDetayPage` (hafta tamamlama + not; props almaz, localStorage'dan okur)
 
 ### State Yönetimi
@@ -49,15 +49,20 @@ Tüm global state **`App.tsx`**'te tutulur ve prop olarak iletilir — Zustand v
 App.tsx
   planlar: PlanEntry[]          ← tum-planlar (localStorage)
   aktifSinif: string            ← aktif-sinif (localStorage)
+  user: User | null             ← Supabase Auth oturumu (onAuthStateChange)
 ```
 
 `HaftaDetayPage` ve `PlanPage` aktif sınıfı ve plan verisini localStorage'dan doğrudan okur (prop almaz).
+
+`AppSettingsScreen`'e `user`, `onPlanEkle`, `onPlanSil?`, `planlar` prop'ları geçilir. `AuthModal` bileşeni (`src/components/AuthModal/AuthModal.tsx`) burada açılır — `onClose` prop'u alır, giriş/kayıt formunu modal olarak sunar.
+
+`AppHomeScreen` ayrıca `syncing: boolean` prop'u alır — Supabase senkronizasyonu devam ederken gösterilir.
 
 ### Veri Akışı: Plan Oluşturma
 
 ```
 Kullanıcı ders+sınıf seçer
-  → buildPlan(ders, sinif, yil)         [AppHomeScreen.tsx / AppSettingsScreen.tsx]
+  → buildPlan(ders, sinif, yil)         [src/lib/planBuilder.ts]
     → getMufredat(ders, sinif)          [mufredatRegistry.ts]
         → ilkokulMufredatiniDonustur()  ← ilkokul formatı (1-4. sınıf)
         veya doğrudan MufredatJson      ← ortaokul/lise formatı (5-12. sınıf)
@@ -127,12 +132,41 @@ Yeni branş eklerken:
 2. `src/lib/mufredatRegistry.ts`'e import et ve ilgili map'e (`ILKOKUL_MAP` veya `MUFREDAT_MAP`) ekle
 3. Gerekiyorsa `src/lib/dersSinifMap.ts` içindeki `DERS_SINIF_MAP`'e sınıf aralığını ekle
 
+### Bildirimler
+
+`src/lib/notifications.ts` — Web Notifications API sarmalayıcısı:
+- `showKazanimBildirimi(haftaNo, kazanim, ders)` — her hafta bir kez bildirim gönderir (aynı hafta için tekrar göndermez); `AppHomeScreen.tsx`'ten çağrılır.
+- `isBildirimDestekleniyor/getBildirimIzni/isBildirimAktif/setBildirimAktif/requestBildirimIzni` — `AppSettingsScreen`'deki toggle tarafından kullanılır.
+- localStorage: `bildirim-aktif` (`'1'`/`'0'`), `bildirim-son-hafta` (son bildirilen hafta numarası — tekrar bildirim engeller).
+
 ### Lead Toplama
 
 `src/components/LeadForm/LeadForm.tsx` — Supabase `leads` tablosuna veri gönderir.
 - `embedded` prop: `true` → standalone sayfa olmadan sadece form kartını render eder.
 - `src/types/lead.ts` — `Lead` ve `LeadFormData` tipleri.
 - `src/lib/supabase.ts` — `createClient` ile başlatılmış Supabase istemcisi; env değişkenleri dolu olmalı.
+
+### Auth + Supabase Sync
+
+`src/lib/auth.ts` — Supabase Auth sarmalayıcısı: `signUp`, `signIn`, `signOut`, `getSession`, `onAuthStateChange`.
+
+`src/lib/planSync.ts` — Supabase senkronizasyon fonksiyonları:
+- `syncPlansToSupabase(userId, planlar)` — upsert; conflict key: `user_id, sinif`
+- `fetchPlansFromSupabase(userId)` — kullanıcıya ait planları çeker
+- `deletePlanFromSupabase(userId, sinif)` — tek plan siler
+- `syncProgressToSupabase(userId, tamamlanan, notlar)` — hafta tamamlama + notları `user_progress` tablosuna upsert eder; `HaftaDetayPage`'den çağrılır
+- `fetchProgressFromSupabase(userId)` — tamamlanan hafta ve notları çeker; login sırasında localStorage ile birleştirilir (bulut öncelikli)
+
+**Senkronizasyon akışı (App.tsx):**
+1. Login → `fetchPlansFromSupabase` → localStorage ile birleştirilir; **bulut önceliklidir** (çakışmada bulut planı kazanır)
+2. Login → `fetchProgressFromSupabase` → tamamlanan haftalar ve notlar localStorage ile birleştirilir (bulut öncelikli)
+3. `handlePlanEkle` çağrıldığında kullanıcı login ise `syncPlansToSupabase` da çağrılır (sessiz hata)
+4. Login değilse tüm işlemler yalnızca localStorage üzerinden yürür
+
+**Supabase tabloları:**
+- `leads` — LeadForm'dan toplanan öğretmen iletişim bilgileri
+- `plans` — `user_id, sinif, ders, yil, tip, plan_json, rows_json, label, sinif_gercek`; PK conflict key: `(user_id, sinif)`
+- `user_progress` — `user_id, tamamlanan_json, notlar_json, updated_at`; PK: `user_id`
 
 ## localStorage Veri Modeli
 
@@ -143,6 +177,8 @@ ogretmen-ayarlari   → { ders, siniflar: string[], yil, adSoyad?, okulAdi?, seh
 onboarding-tamamlandi → "1"
 tamamlanan-haftalar → Record<sinif, number[]>
 hafta-notlari       → Record<sinif, Record<string, string>>
+bildirim-aktif      → '1' | '0'
+bildirim-son-hafta  → string  (son bildirilen haftaNo; tekrar bildirim engeller)
 ```
 
 **Migration:** `App.tsx` başlangıçta eski `aktif-plan` key'ini yeni `tum-planlar` formatına otomatik çevirir.
@@ -154,10 +190,11 @@ hafta-notlari       → Record<sinif, Record<string, string>>
 `src/types/lead.ts` — `Lead`, `LeadFormData`
 `src/lib/takvimUtils.ts` — `MufredatJson`, `MufredatHafta`, `IlkokulMufredatJson`, `IlkokulUnite`, `IlkokulKazanim`, `planOlustur()`, `mufredatliPlanOlustur()`, `ilkokulMufredatiniDonustur()`
 `src/lib/mufredatRegistry.ts` — `getMufredat(ders, sinif)`: tüm müfredat JSON'larını import edip döndürür
+`src/lib/planBuilder.ts` — `buildPlan(ders, sinif, yil)`: müfredat varlığına göre `mufredatliPlanOlustur` veya `planOlustur` çağırır; `AppHomeScreen` ve `AppSettingsScreen` tarafından kullanılır
 
 ## Dikkat Edilmesi Gerekenler
 
-- **Hardcoded yıl:** `yil: '2025-2026'` değeri `App.tsx` (legacy handler'lar) ve `AppHomeScreen.tsx` içinde sabitlenmiştir. Yeni öğretim yılına geçişte bu değerlerin güncellenmesi gerekir.
+- **Yıl seçeneği:** `getYilSecenekleri()` (`src/lib/dersSinifMap.ts`) mevcut tarihe göre akademik yılı dinamik hesaplar; 18 Ağustos'tan itibaren bir sonraki yılı da seçenek olarak ekler. Legacy handler'lar (`App.tsx`) ve onboarding (`AppHomeScreen.tsx`) artık `getYilSecenekleri()[0]` kullanır. `guessDate()` içinde yıl hâlâ hardcode'dur — yüklenen planlar için ay-tarih dönüşümünde kullanılır.
 - **Sınıf öğretmeni composite key:** `PlanEntry.sinif` alanında `"3. Sınıf—Türkçe"` formatı kullanılır (em dash `—`). Bu anahtarı ayrıştırırken veya oluştururken em dash karakterine dikkat et.
 - **Merkezi DERS_SINIF_MAP:** `src/lib/dersSinifMap.ts` — `AppHomeScreen`, `AppSettingsScreen`, `PlanOlusturPage` buradan import eder. Yeni branş veya sınıf aralığı eklenince **sadece bu dosya** güncellenir.
 
@@ -188,34 +225,6 @@ VITE_ADSENSE_SLOT=XXXXXXXXXX                  # Reklam birimi ID
 
 `VITE_ADSENSE_CLIENT` boşsa `AdBanner` bileşeni hiçbir şey render etmez (`null` döner). `loadAdSense()` script'i de yüklenmez.
 
-## Özellik Durumu
+## Yapılacaklar
 
-### Tamamlanan
-- [x] MEB takvimine göre otomatik yıllık plan oluşturma
-- [x] Excel/Word yükleme ile plan import
-- [x] Excel şablonu indirme (`sablonIndir`)
-- [x] Hafta bazlı kazanım görünümü (ders programı gerekmez)
-- [x] Çoklu sınıf desteği — her sınıf ayrı `PlanEntry`
-- [x] Onboarding (ana ekranda kart)
-- [x] Hafta tamamlandı işaretleme + öğretmen notu
-- [x] Sınıf başına bağımsız ilerleme takibi (SVG halka)
-- [x] Fen Bilimleri 5–8 müfredatı
-- [x] Sınıf öğretmeni desteği (composite key, çoklu ders)
-- [x] Lead toplama formu (Supabase `leads` tablosu)
-- [x] Fen Bilimleri 3–4 müfredatı entegrasyonu (`ilkokulMufredatiniDonustur()` converter ile)
-- [x] Tüm ana branşlar için müfredat (Matematik 3–12, Türkçe 3–8, Hayat Bilgisi 1–3, Sosyal Bilgiler 4–7, İngilizce 5–12, Fizik/Kimya/Biyoloji/Tarih/Coğrafya/TDE 9–12)
-- [x] Merkezi müfredat registry (`mufredatRegistry.ts`)
-- [x] Yazdırma / PDF export (browser print API, `exportPlanToPrint()`)
-- [x] Kullanıcı kaydı (Supabase Auth — email/şifre, `AuthModal`)
-- [x] Push bildirim (Notification API + SW, `src/lib/notifications.ts`)
-- [x] Google AdSense entegrasyonu (`AdBanner` bileşeni, env var ile yapılandırılır)
-- [x] `DERS_SINIF_MAP` ve `SINIF_SEVIYELERI` merkezi lib'e taşındı (`src/lib/dersSinifMap.ts`)
-- [x] Kullanılmayan dosyalar temizlendi (`WeekView/`, `types/plan.ts`, `OnboardingPage.tsx`)
-- [x] UX: Plan oluşturma sonrası `/app/plan`'a yönlendirme + hata mesajı
-- [x] UX: Bottom nav — `/app/hafta/:no` route'unda "Planım" tab'ı aktif
-- [x] UX: Plan listesinde aktif haftayı vurgulama (mavi çerçeve + "Bu Hafta" badge) ve otomatik scroll
-- [x] UX: Word export loading state, not kaydetme "✓ Kaydedildi" feedback'i
-- [x] UX: `BuHaftaKarti` sınıf seçimi `aktif-sinif` ile senkronize başlıyor
-
-### Yapılacaklar
 - [ ] Arayüz geçiş animasyonları

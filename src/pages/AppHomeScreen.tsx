@@ -2,35 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Hafta, OlusturulmusPlan } from '../types/takvim';
 import type { PlanEntry } from '../types/planEntry';
-import { planOlustur, mufredatliPlanOlustur } from '../lib/takvimUtils';
-import { getMufredat } from '../lib/mufredatRegistry';
 import { showKazanimBildirimi } from '../lib/notifications';
-import { SINIF_SEVIYELERI, DERS_SINIF_MAP } from '../lib/dersSinifMap';
-
-const DERS_SECENEKLERI = [
-  'Sınıf Öğretmeni',
-  'Fen Bilimleri', 'Matematik', 'Türkçe', 'Hayat Bilgisi', 'Sosyal Bilgiler',
-  'İngilizce', 'Türk Dili ve Edebiyatı', 'Tarih', 'Coğrafya',
-  'Fizik', 'Kimya', 'Biyoloji',
-  'Din Kültürü ve Ahlak Bilgisi', 'Almanca', 'Fransızca',
-  'Beden Eğitimi', 'Müzik', 'Görsel Sanatlar', 'Felsefe', 'Psikoloji', 'Sosyoloji',
-  'Mantık', 'Matematik Uygulamaları',
-  'Bilişim Teknolojileri', 'Trafik ve İlk Yardım', 'Sağlık Bilgisi',
-  'DKAB', 'Meslek Dersi', 'Diğer',
-]
-
-// Sınıf öğretmeni sabitleri
-const SINIF_OGRETMENI_DERSLER = [
-  'Türkçe', 'Matematik', 'Hayat Bilgisi', 'Fen Bilimleri',
-  'Sosyal Bilgiler', 'İngilizce', 'Müzik', 'Görsel Sanatlar', 'Beden Eğitimi',
-]
-const SINIF_OGRETMENI_SINIFLAR = ['1. Sınıf', '2. Sınıf', '3. Sınıf', '4. Sınıf']
-
-function buildPlan(ders: string, sinif: string, yil: string): OlusturulmusPlan {
-  const mufredat = getMufredat(ders, sinif)
-  if (mufredat) return mufredatliPlanOlustur(yil, mufredat)
-  return planOlustur(yil)
-}
+import {
+  SINIF_SEVIYELERI, DERS_SINIF_MAP,
+  DERS_SECENEKLERI, SINIF_OGRETMENI_DERSLER, SINIF_OGRETMENI_SINIFLAR,
+  getYilSecenekleri,
+} from '../lib/dersSinifMap';
+import { buildPlan } from '../lib/planBuilder';
 
 function formatTarihKısa(isoTarih: string): string {
   const aylar = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara']
@@ -52,6 +30,7 @@ interface AppHomeScreenProps {
   planlar: PlanEntry[];
   onPlanEkle: (entries: PlanEntry[]) => void;
   onSinifSec: (sinif: string) => void;
+  syncing?: boolean;
 }
 
 function ProgressRing({ yuzde, selected = false, size = 20 }: { yuzde: number; selected?: boolean; size?: number }) {
@@ -117,7 +96,7 @@ function BuHaftaKarti({
       {/* Kazanım içeriği — tıklanabilir */}
       <button
         onClick={handleKazanimTikla}
-        className="w-full text-left mb-4 group min-h-[56px]"
+        className="w-full text-left mb-4 group h-[96px] overflow-hidden"
       >
         {/* Hafta sonu */}
         {haftaSonu && !aktifHafta && (
@@ -162,7 +141,7 @@ function BuHaftaKarti({
 
       {/* Sınıf seçici — birden fazla sınıf varsa */}
       {planlar.length > 1 && (
-        <div className="flex gap-2 pt-3 border-t border-[#E7E5E4]">
+        <div className="flex gap-2 pt-3 border-t border-[#E7E5E4] overflow-x-auto pb-0.5 -mx-1 px-1">
           {planlar.map(entry => {
             const total = entry.plan?.haftalar.filter(h => !h.tatilMi).length || 0
             const done = tamamlananlar[entry.sinif]?.length || 0
@@ -171,8 +150,8 @@ function BuHaftaKarti({
             return (
               <button
                 key={entry.sinif}
-                onClick={() => setSeciliSinif(entry.sinif)}
-                className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border font-bold text-sm transition-all active:scale-95 ${
+                onClick={() => { setSeciliSinif(entry.sinif); onSinifSec(entry.sinif); }}
+                className={`flex-shrink-0 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border font-bold text-sm transition-all active:scale-95 whitespace-nowrap ${
                   isSelected
                     ? 'bg-[#2D5BE3] border-[#2D5BE3] text-white'
                     : 'bg-[#FAFAF9] border-[#E7E5E4] text-gray-500 hover:border-gray-300'
@@ -203,7 +182,7 @@ function BuHaftaKarti({
   )
 }
 
-export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreenProps) {
+export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing }: AppHomeScreenProps) {
   const navigate = useNavigate();
 
   const [ogretmenAd] = useState(() => {
@@ -216,7 +195,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
     } catch { /* localStorage okunamadı */ }
     return '';
   });
-  const [onboardingTamamlandi, setOnboardingTamamlandi] = useState(
+  const [, setOnboardingTamamlandi] = useState(
     () => !!localStorage.getItem('onboarding-tamamlandi')
   );
   const [tamamlananlar] = useState<Record<string, number[]>>(() => {
@@ -234,7 +213,9 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
     return {};
   });
   const [olusturuluyor, setOlusturuluyor] = useState(false);
+  const [olusturuldu, setOlusturuldu] = useState(false);
   const [olusturmaHata, setOlusturmaHata] = useState('');
+  const [mufredatUyari, setMufredatUyari] = useState('');
 
   const [onbDers, setOnbDers] = useState(() => {
     try {
@@ -307,7 +288,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
     setOlusturuluyor(true);
     setOlusturmaHata('');
     try {
-      const yil = '2025-2026';
+      const yil = getYilSecenekleri()[0];
       const isSinifOgretmeni = onbDers === 'Sınıf Öğretmeni';
 
       if (isSinifOgretmeni) {
@@ -318,29 +299,45 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
         }));
         localStorage.setItem('onboarding-tamamlandi', '1');
         setOnboardingTamamlandi(true);
-        const entries: PlanEntry[] = onbSinifOgrDersler.map(ders => ({
-          sinif: `${onbSinifOgrSinif}—${ders}`,
-          ders, yil, tip: 'meb' as const,
-          plan: buildPlan(ders, onbSinifOgrSinif, yil),
-          rows: null,
-          label: ders,
-          sinifGercek: onbSinifOgrSinif,
+        const sinifOgrResults = onbSinifOgrDersler.map(d => ({ ...buildPlan(d, onbSinifOgrSinif, yil), ders: d }));
+        const sinifOgrEntries: PlanEntry[] = sinifOgrResults.map(r => ({
+          sinif: `${onbSinifOgrSinif}—${r.ders}`,
+          ders: r.ders, yil, tip: 'meb' as const,
+          plan: r.plan, rows: null,
+          label: r.ders, sinifGercek: onbSinifOgrSinif,
         }));
-        onPlanEkle(entries);
-        onSinifSec(entries[0].sinif);
-        navigate('/app/plan');
+        onPlanEkle(sinifOgrEntries);
+        onSinifSec(sinifOgrEntries[0].sinif);
+        const eksikSinifOgr = sinifOgrResults.filter(r => !r.hasMufredat).map(r => r.ders);
+        if (eksikSinifOgr.length > 0) {
+          setMufredatUyari(`${eksikSinifOgr.join(', ')} için müfredat bulunamadı, boş plan oluşturuldu.`);
+          setOlusturuldu(true);
+          setTimeout(() => navigate('/app/plan'), 2500);
+        } else {
+          setOlusturuldu(true);
+          setTimeout(() => navigate('/app/plan'), 700);
+        }
       } else {
         if (onbSiniflar.length === 0) { setOlusturuluyor(false); return; }
         localStorage.setItem('ogretmen-ayarlari', JSON.stringify({ ders: onbDers, siniflar: onbSiniflar, yil }));
         localStorage.setItem('onboarding-tamamlandi', '1');
         setOnboardingTamamlandi(true);
-        const entries: PlanEntry[] = onbSiniflar.map(sinif => ({
-          sinif, ders: onbDers, yil, tip: 'meb' as const,
-          plan: buildPlan(onbDers, sinif, yil), rows: null,
+        const branşResults = onbSiniflar.map(s => ({ ...buildPlan(onbDers, s, yil), sinif: s }));
+        const branşEntries: PlanEntry[] = branşResults.map(r => ({
+          sinif: r.sinif, ders: onbDers, yil, tip: 'meb' as const,
+          plan: r.plan, rows: null,
         }));
-        onPlanEkle(entries);
-        onSinifSec(entries[0].sinif);
-        navigate('/app/plan');
+        onPlanEkle(branşEntries);
+        onSinifSec(branşEntries[0].sinif);
+        const eksikBrans = branşResults.filter(r => !r.hasMufredat).map(r => r.sinif);
+        if (eksikBrans.length > 0) {
+          setMufredatUyari(`${eksikBrans.join(', ')} için müfredat bulunamadı, boş plan oluşturuldu.`);
+          setOlusturuldu(true);
+          setTimeout(() => navigate('/app/plan'), 2500);
+        } else {
+          setOlusturuldu(true);
+          setTimeout(() => navigate('/app/plan'), 700);
+        }
       }
     } catch {
       setOlusturuluyor(false);
@@ -366,8 +363,18 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
         <p className="text-gray-500 mt-1.5 text-sm font-medium">Bu haftanın kazanımları</p>
       </div>
 
-      {/* ONBOARDING */}
-      {!onboardingTamamlandi && planlar.length === 0 && (
+      {/* Supabase sync bildirimi */}
+      {syncing && (
+        <div className="mb-4 bg-[#2D5BE3]/5 border border-[#2D5BE3]/20 rounded-xl px-3.5 py-2.5 flex items-center gap-2 animate-fade-in">
+          <svg className="animate-spin text-[#2D5BE3] flex-shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+          </svg>
+          <span className="text-xs font-semibold text-[#2D5BE3]">Planlar buluttan güncelleniyor...</span>
+        </div>
+      )}
+
+      {/* ONBOARDING — planlar yoksa her zaman göster (ilk kurulum veya tüm planlar silindi) */}
+      {planlar.length === 0 && (
         <div className="bg-[#FAFAF9] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-5 mb-5">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Başlayalım</p>
           <h2 className="text-base font-bold text-[#2D5BE3] mb-4">
@@ -460,13 +467,24 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
           {olusturmaHata && (
             <p className="text-red-500 text-sm mb-3 font-medium">{olusturmaHata}</p>
           )}
+          {mufredatUyari && (
+            <div className="bg-[#F59E0B]/10 border border-[#F59E0B]/20 rounded-xl px-3.5 py-2.5 mb-3">
+              <p className="text-[#92400e] text-xs font-semibold">⚠️ {mufredatUyari}</p>
+            </div>
+          )}
           <button
             onClick={handleOnboardingTamamla}
-            disabled={olusturuluyor || (isSinifOgretmeni ? onbSinifOgrDersler.length === 0 : onbSiniflar.length === 0)}
-            className="w-full bg-[#F59E0B] text-white py-3 rounded-xl font-bold shadow-[0_1px_3px_rgba(0,0,0,0.06)] active:scale-95 transition-all hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2"
+            disabled={olusturuluyor || olusturuldu || (isSinifOgretmeni ? onbSinifOgrDersler.length === 0 : onbSiniflar.length === 0)}
+            className={`w-full py-3 rounded-xl font-bold shadow-[0_1px_3px_rgba(0,0,0,0.06)] active:scale-95 transition-all hover:opacity-90 disabled:opacity-80 flex items-center justify-center gap-2 ${
+              olusturuldu
+                ? 'bg-[#059669] text-white animate-pop-in'
+                : 'bg-[#F59E0B] text-white'
+            }`}
           >
             {olusturuluyor
               ? <span className="animate-pulse">Oluşturuluyor...</span>
+              : olusturuldu
+              ? <>✓ Hazır! Planlar oluşturuldu</>
               : <>Planlarımı Oluştur →</>
             }
           </button>

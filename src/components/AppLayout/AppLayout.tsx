@@ -41,7 +41,10 @@ export function AppLayout({ children }: AppLayoutProps) {
         <header className="sticky top-0 z-40 bg-white border-b border-[#E7E5E4] h-14 px-5 flex items-center justify-between shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
           <span className="font-bold text-[#2D5BE3] text-lg tracking-tight">Yıllık Plan</span>
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-[#F59E0B] text-white flex items-center justify-center font-bold text-sm shadow-[0_1px_3px_rgba(0,0,0,0.06)] ring-2 ring-amber-50 cursor-pointer">
+            <div
+              onClick={() => navigate('/app/ayarlar')}
+              className="w-8 h-8 rounded-full bg-[#F59E0B] text-white flex items-center justify-center font-bold text-sm shadow-[0_1px_3px_rgba(0,0,0,0.06)] ring-2 ring-amber-50 cursor-pointer active:scale-90 transition-transform"
+            >
               {basharf ? basharf : '👤'}
             </div>
           </div>
@@ -49,7 +52,8 @@ export function AppLayout({ children }: AppLayoutProps) {
 
         {/* MAIN CONTENT AREA */}
         {/* pb-20 prevents content from hiding behind the fixed tab bar */}
-        <main className="flex-1 overflow-y-auto pb-20">
+        {/* key prop ile her route değişiminde fade-in animasyonu tetiklenir */}
+        <main key={location.pathname} className="flex-1 overflow-y-auto pb-20 animate-fade-in">
           {children}
         </main>
 
@@ -66,18 +70,24 @@ export function AppLayout({ children }: AppLayoutProps) {
                 <button
                   key={tab.path}
                   onClick={() => navigate(tab.path)}
-                  className="flex flex-col items-center gap-1 min-w-[4rem] group"
+                  className="flex flex-col items-center gap-1 min-w-[4rem] group relative pb-1"
                 >
-                  <span className={`text-[22px] transition-transform ${isActive ? 'scale-110' : 'opacity-70 group-hover:opacity-100'}`}>
+                  <span className={`text-[22px] transition-transform duration-200 ${isActive ? 'scale-110' : 'opacity-70 group-hover:opacity-100'}`}>
                     {tab.icon}
                   </span>
                   <span
-                    className={`text-[10px] font-bold transition-colors ${
+                    className={`text-[10px] font-bold transition-colors duration-200 ${
                       isActive ? 'text-[#F59E0B]' : 'text-gray-400 group-hover:text-gray-600'
                     }`}
                   >
                     {tab.name}
                   </span>
+                  {/* Aktif nokta göstergesi */}
+                  <span
+                    className={`absolute bottom-0 rounded-full bg-[#F59E0B] transition-all duration-300 ${
+                      isActive ? 'w-4 h-1 opacity-100' : 'w-0 h-1 opacity-0'
+                    }`}
+                  />
                 </button>
               )
             })}

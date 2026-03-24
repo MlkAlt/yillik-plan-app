@@ -102,14 +102,21 @@ export function AuthModal({ onClose }: AuthModalProps) {
           )}
 
           {success && (
-            <p className="text-green-600 text-xs font-medium bg-green-50 border border-green-100 rounded-lg px-3 py-2">
-              {success}
-            </p>
+            <div className="bg-green-50 border border-green-100 rounded-lg px-3 py-2">
+              <p className="text-green-600 text-xs font-medium">{success}</p>
+              <button
+                type="button"
+                onClick={onClose}
+                className="mt-2 text-xs font-bold text-green-700 underline"
+              >
+                Tamam
+              </button>
+            </div>
           )}
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !!success}
             className="w-full bg-[#2D5BE3] text-white py-3 rounded-xl font-bold text-sm active:scale-95 transition-all hover:opacity-90 disabled:opacity-60 mt-1"
           >
             {loading ? <span className="animate-pulse">İşleniyor...</span> : tab === 'giris' ? 'Giriş Yap' : 'Kayıt Ol'}
