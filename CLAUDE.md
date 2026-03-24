@@ -58,10 +58,29 @@ App.tsx
 
 `AppHomeScreen` ayrıca `syncing: boolean` prop'u alır — Supabase senkronizasyonu devam ederken gösterilir.
 
+### Plan Oluşturma: PlanSelector Bileşeni
+
+`src/components/PlanSelector/` — hem `AppHomeScreen` onboarding'inde hem `/olustur` sayfasında kullanılan ortak seçim bileşeni.
+
+**Adım akışı:**
+- **Tek dersli branş** (Matematik, Fizik, İngilizce…): Branş → Sınıf seç → Plan oluştur (2 adım)
+- **Sınıf Öğretmenliği**: Branş → Sınıf + dersler → Plan oluştur (2 adım)
+
+```
+PlanSelector/
+  index.tsx          ← orkestratör; step state, buildPlan çağrısı, ogretmen-ayarlari kaydı
+  BranchStep.tsx     ← arama + popüler/tüm branş grid'i
+  ClassStep.tsx      ← branş modu: sınıf multi-select + dinamik kısayollar
+  LessonClassStep.tsx← sınıf öğretmeni modu: sınıf (tekil) + dersler (çoklu) + kısayollar
+```
+
+`PlanSelector` props: `yil`, `onComplete(entries: PlanEntry[])`, `onCancel?`
+`onComplete` çağrılmadan önce `ogretmen-ayarlari` localStorage'a kaydedilir. `onboarding-tamamlandi` kaydı parent'ın sorumluluğundadır.
+
 ### Veri Akışı: Plan Oluşturma
 
 ```
-Kullanıcı ders+sınıf seçer
+Kullanıcı PlanSelector'dan seçim yapar
   → buildPlan(ders, sinif, yil)         [src/lib/planBuilder.ts]
     → getMufredat(ders, sinif)          [mufredatRegistry.ts]
         → ilkokulMufredatiniDonustur()  ← ilkokul formatı (1-4. sınıf)
@@ -69,7 +88,7 @@ Kullanıcı ders+sınıf seçer
       → mufredatliPlanOlustur(yil, json)[takvimUtils.ts]
     veya planOlustur(yil)               [takvimUtils.ts] ← müfredat yoksa
       → meb-takvim.json                [src/data/]
-→ PlanEntry olarak tum-planlar'a kaydedilir
+→ PlanEntry[] olarak tum-planlar'a kaydedilir
 ```
 
 `PlanEntry.tip === 'meb'` → `plan: OlusturulmusPlan` (hafta bazlı, takvim + müfredat)
@@ -188,15 +207,18 @@ bildirim-son-hafta  → string  (son bildirilen haftaNo; tekrar bildirim engelle
 `src/types/takvim.ts` — `OlusturulmusPlan`, `Hafta`, `MebYilTakvim`
 `src/types/planEntry.ts` — `PlanEntry` (localStorage'da saklanan birim; `label?` ve `sinifGercek?` opsiyonel)
 `src/types/lead.ts` — `Lead`, `LeadFormData`
-`src/lib/takvimUtils.ts` — `MufredatJson`, `MufredatHafta`, `IlkokulMufredatJson`, `IlkokulUnite`, `IlkokulKazanim`, `planOlustur()`, `mufredatliPlanOlustur()`, `ilkokulMufredatiniDonustur()`
+`src/lib/takvimUtils.ts` — `MufredatJson`, `MufredatHafta`, `IlkokulMufredatJson`, `IlkokulUnite`, `IlkokulKazanim`, `planOlustur()`, `mufredatliPlanOlustur()`, `ilkokulMufredatiniDonustur()`, `mevcutYillar()`
 `src/lib/mufredatRegistry.ts` — `getMufredat(ders, sinif)`: tüm müfredat JSON'larını import edip döndürür
-`src/lib/planBuilder.ts` — `buildPlan(ders, sinif, yil)`: müfredat varlığına göre `mufredatliPlanOlustur` veya `planOlustur` çağırır; `AppHomeScreen` ve `AppSettingsScreen` tarafından kullanılır
+`src/lib/planBuilder.ts` — `buildPlan(ders, sinif, yil)`: müfredat varlığına göre `mufredatliPlanOlustur` veya `planOlustur` çağırır; `PlanSelector` ve `AppSettingsScreen` tarafından kullanılır
+`src/lib/branchConfig.ts` — UI branş seçim veri modeli: `Branch`, `BranchMode`, `BRANCHES`, `SO_DERSLER`, `SO_SINIFLAR`
 
 ## Dikkat Edilmesi Gerekenler
 
-- **Yıl seçeneği:** `getYilSecenekleri()` (`src/lib/dersSinifMap.ts`) mevcut tarihe göre akademik yılı dinamik hesaplar; 18 Ağustos'tan itibaren bir sonraki yılı da seçenek olarak ekler. Legacy handler'lar (`App.tsx`) ve onboarding (`AppHomeScreen.tsx`) artık `getYilSecenekleri()[0]` kullanır. `guessDate()` içinde yıl hâlâ hardcode'dur — yüklenen planlar için ay-tarih dönüşümünde kullanılır.
+- **Yıl seçeneği — iki farklı kaynak:** `getYilSecenekleri()` (`src/lib/dersSinifMap.ts`) mevcut tarihe göre dinamik hesaplar; `App.tsx`, `AppHomeScreen.tsx` ve `PlanOlusturPage` bu fonksiyonu kullanır. `mevcutYillar()` (`src/lib/takvimUtils.ts`) ise `meb-takvim.json`'daki yılları döndürür; artık yalnızca takvim içi hesaplamalarda kullanılır. `guessDate()` içinde yıl hâlâ hardcode'dur — yüklenen planlar için ay-tarih dönüşümünde kullanılır.
 - **Sınıf öğretmeni composite key:** `PlanEntry.sinif` alanında `"3. Sınıf—Türkçe"` formatı kullanılır (em dash `—`). Bu anahtarı ayrıştırırken veya oluştururken em dash karakterine dikkat et.
-- **Merkezi DERS_SINIF_MAP:** `src/lib/dersSinifMap.ts` — `AppHomeScreen`, `AppSettingsScreen`, `PlanOlusturPage` buradan import eder. Yeni branş veya sınıf aralığı eklenince **sadece bu dosya** güncellenir.
+- **Branş verisi iki yerde:** `src/lib/branchConfig.ts` UI seçim akışının kaynağıdır (PlanSelector tarafından kullanılır). `src/lib/dersSinifMap.ts` ise `AppSettingsScreen` ve export fonksiyonları için hâlâ kullanılmaktadır. **Yeni branş eklerken her iki dosya da güncellenmeli.**
+- **`/olustur` navigasyonu:** `PlanOlusturPage` plan oluşturduktan sonra `/plan`'a yönlendirir (landing katmanı; `/app`'e değil).
+- **`PlanSelector` kısayolları:** `ClassStep` branşın sınıf aralığına göre dinamik kısayol gösterir (örn. 9-12 arası branşta sadece "Lise (9–12)" görünür). `LessonClassStep`'te "Temel Dersler" = `['Türkçe', 'Matematik', 'Hayat Bilgisi', 'Fen Bilimleri', 'Sosyal Bilgiler']`.
 
 ## Git Akışı
 
