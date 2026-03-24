@@ -42,17 +42,24 @@ export function getYilSecenekleri(): string[] {
   return [mevcutYil]
 }
 
+// Branş öğretmeni için sınıf seçenekleri.
+// İlkokul (1-4) ana dersler sınıf öğretmeni tarafından okutulur;
+// yalnızca Yabancı Dil (2. sınıftan) ve DKAB (4. sınıftan) zorunlu branştır.
+// Hayat Bilgisi tamamen sınıf öğretmeni dersidir, branş öğretmeni yoktur.
 export const DERS_SINIF_MAP: Record<string, string[]> = {
-  'Hayat Bilgisi': ['1. Sınıf', '2. Sınıf', '3. Sınıf'],
-  'Fen Bilimleri': ['3. Sınıf', '4. Sınıf', '5. Sınıf', '6. Sınıf', '7. Sınıf', '8. Sınıf'],
-  'Sosyal Bilgiler': ['4. Sınıf', '5. Sınıf', '6. Sınıf', '7. Sınıf'],
-  'Türkçe': Array.from({ length: 8 }, (_, i) => `${i + 1}. Sınıf`),
-  'Matematik': SINIF_SEVIYELERI,
-  'Beden Eğitimi': SINIF_SEVIYELERI,
-  'Müzik': Array.from({ length: 8 }, (_, i) => `${i + 1}. Sınıf`),
-  'Görsel Sanatlar': Array.from({ length: 8 }, (_, i) => `${i + 1}. Sınıf`),
-  'İngilizce': SINIF_SEVIYELERI,
-  'Din Kültürü ve Ahlak Bilgisi': SINIF_SEVIYELERI,
+  // Ortaokul branş dersleri (5'ten başlar)
+  'Fen Bilimleri': ['5. Sınıf', '6. Sınıf', '7. Sınıf', '8. Sınıf'],
+  'Sosyal Bilgiler': ['5. Sınıf', '6. Sınıf', '7. Sınıf'],
+  'Türkçe': ['5. Sınıf', '6. Sınıf', '7. Sınıf', '8. Sınıf'],
+  'Matematik': Array.from({ length: 8 }, (_, i) => `${i + 5}. Sınıf`), // 5-12
+  // İlkokul + ortaokul + lise branş dersleri
+  'İngilizce': Array.from({ length: 11 }, (_, i) => `${i + 2}. Sınıf`), // 2-12
+  'Din Kültürü ve Ahlak Bilgisi': Array.from({ length: 9 }, (_, i) => `${i + 4}. Sınıf`), // 4-12
+  // İlkokulda isteğe bağlı branş olabilir (okul kadrosuna göre)
+  'Müzik': Array.from({ length: 8 }, (_, i) => `${i + 1}. Sınıf`), // 1-8
+  'Görsel Sanatlar': Array.from({ length: 8 }, (_, i) => `${i + 1}. Sınıf`), // 1-8
+  'Beden Eğitimi': SINIF_SEVIYELERI, // 1-12
+  // Lise branş dersleri
   'Türk Dili ve Edebiyatı': ['9. Sınıf', '10. Sınıf', '11. Sınıf', '12. Sınıf'],
   'Tarih': ['9. Sınıf', '10. Sınıf', '11. Sınıf', '12. Sınıf'],
   'Coğrafya': ['9. Sınıf', '10. Sınıf', '11. Sınıf', '12. Sınıf'],
