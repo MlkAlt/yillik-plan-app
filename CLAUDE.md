@@ -198,6 +198,10 @@ bildirim-son-hafta  → string  (son bildirilen haftaNo; tekrar bildirim engelle
 - **Sınıf öğretmeni composite key:** `PlanEntry.sinif` alanında `"3. Sınıf—Türkçe"` formatı kullanılır (em dash `—`). Bu anahtarı ayrıştırırken veya oluştururken em dash karakterine dikkat et.
 - **Merkezi DERS_SINIF_MAP:** `src/lib/dersSinifMap.ts` — `AppHomeScreen`, `AppSettingsScreen`, `PlanOlusturPage` buradan import eder. Yeni branş veya sınıf aralığı eklenince **sadece bu dosya** güncellenir.
 
+## Git Akışı
+
+Her önemli değişiklikten sonra kullanıcıya sormadan `git commit + git push origin main` yap. Vercel GitHub'a bağlı, push edince otomatik deploy olur.
+
 ## Kodlama Kuralları
 
 - **Değişken/fonksiyon isimleri:** İngilizce — Türkçe YASAK
