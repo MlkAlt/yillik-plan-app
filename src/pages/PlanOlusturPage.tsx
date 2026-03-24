@@ -4,15 +4,23 @@ import { planOlustur, mevcutYillar, mufredatliPlanOlustur } from '../lib/takvimU
 import { getMufredat } from '../lib/mufredatRegistry'
 import type { OlusturulmusPlan } from '../types/takvim'
 import {
-  SINIF_SEVIYELERI, DERS_SINIF_MAP, DERS_GRUPLARI, SINIF_OGRETMENI_SINIFLAR,
+  SINIF_SEVIYELERI, DERS_SINIF_MAP, DERS_GRUPLARI,
+  SINIF_OGRETMENI_SINIFLAR, SINIF_OGRETMENI_DERSLER,
 } from '../lib/dersSinifMap'
+
+const SINIF_OGR_GRUP = 'Sınıf Öğretmenliği'
 
 interface PlanOlusturPageProps {
   onPlanOlustur: (plan: OlusturulmusPlan, ders: string, sinif: string) => void
 }
 
-function getSiniflar(ders: string): string[] {
-  if (ders === 'Sınıf Öğretmeni') return SINIF_OGRETMENI_SINIFLAR
+function getDersler(brans: string): string[] {
+  if (brans === SINIF_OGR_GRUP) return SINIF_OGRETMENI_DERSLER
+  return DERS_GRUPLARI.find(g => g.grup === brans)?.dersler ?? []
+}
+
+function getSiniflar(brans: string, ders: string): string[] {
+  if (brans === SINIF_OGR_GRUP) return SINIF_OGRETMENI_SINIFLAR
   return DERS_SINIF_MAP[ders] ?? SINIF_SEVIYELERI
 }
 
@@ -21,7 +29,7 @@ export function PlanOlusturPage({ onPlanOlustur }: PlanOlusturPageProps) {
   const yillar = mevcutYillar()
 
   const ilkGrup = DERS_GRUPLARI[0]
-  const ilkDers = ilkGrup.dersler[0]
+  const ilkDers = getDersler(ilkGrup.grup)[0]
 
   const [seciliYil, setSeciliYil] = useState(() => {
     try {
@@ -36,23 +44,23 @@ export function PlanOlusturPage({ onPlanOlustur }: PlanOlusturPageProps) {
 
   const [brans, setBrans] = useState(ilkGrup.grup)
   const [ders, setDers] = useState(ilkDers)
-  const [sinif, setSinif] = useState(getSiniflar(ilkDers)[0])
+  const [sinif, setSinif] = useState(getSiniflar(ilkGrup.grup, ilkDers)[0])
   const [hata, setHata] = useState('')
 
-  const guncelDersler = DERS_GRUPLARI.find(g => g.grup === brans)?.dersler ?? []
-  const guncelSiniflar = getSiniflar(ders)
+  const guncelDersler = getDersler(brans)
+  const guncelSiniflar = getSiniflar(brans, ders)
 
   function handleBransChange(yeniBrans: string) {
     setBrans(yeniBrans)
-    const dersler = DERS_GRUPLARI.find(g => g.grup === yeniBrans)?.dersler ?? []
+    const dersler = getDersler(yeniBrans)
     const yeniDers = dersler[0] ?? ''
     setDers(yeniDers)
-    setSinif(getSiniflar(yeniDers)[0])
+    setSinif(getSiniflar(yeniBrans, yeniDers)[0])
   }
 
   function handleDersChange(yeniDers: string) {
     setDers(yeniDers)
-    setSinif(getSiniflar(yeniDers)[0])
+    setSinif(getSiniflar(brans, yeniDers)[0])
   }
 
   function handleSubmit() {
@@ -162,7 +170,7 @@ export function PlanOlusturPage({ onPlanOlustur }: PlanOlusturPageProps) {
         </button>
 
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/app')}
           className="w-full mt-3 text-gray-500 hover:text-gray-700 text-sm py-2 transition-colors"
         >
           ← Ana sayfaya dön
