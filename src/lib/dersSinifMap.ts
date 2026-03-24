@@ -7,17 +7,28 @@ export const SINIF_OGRETMENI_DERSLER = [
   'Sosyal Bilgiler', 'İngilizce', 'Müzik', 'Görsel Sanatlar', 'Beden Eğitimi',
 ]
 
-export const DERS_SECENEKLERI = [
-  'Sınıf Öğretmeni',
-  'Fen Bilimleri', 'Matematik', 'Türkçe', 'Hayat Bilgisi', 'Sosyal Bilgiler',
-  'İngilizce', 'Türk Dili ve Edebiyatı', 'Tarih', 'Coğrafya',
-  'Fizik', 'Kimya', 'Biyoloji',
-  'Din Kültürü ve Ahlak Bilgisi', 'Almanca', 'Fransızca',
-  'Beden Eğitimi', 'Müzik', 'Görsel Sanatlar', 'Felsefe', 'Psikoloji', 'Sosyoloji',
-  'Mantık', 'Matematik Uygulamaları',
-  'Bilişim Teknolojileri', 'Trafik ve İlk Yardım', 'Sağlık Bilgisi',
-  'DKAB', 'Meslek Dersi', 'Diğer',
+export const DERS_GRUPLARI: { grup: string; dersler: string[] }[] = [
+  { grup: 'Sınıf Öğretmenliği', dersler: ['Sınıf Öğretmeni'] },
+  { grup: 'İlkokul Branş Dersleri', dersler: ['İlkokul İngilizce', 'İlkokul Din Kültürü'] },
+  {
+    grup: 'Ortaokul / Lise Branş Dersleri', dersler: [
+      'Fen Bilimleri', 'Matematik', 'Türkçe', 'Sosyal Bilgiler',
+      'İngilizce', 'Din Kültürü ve Ahlak Bilgisi',
+      'Türk Dili ve Edebiyatı', 'Tarih', 'Coğrafya',
+      'Fizik', 'Kimya', 'Biyoloji',
+    ],
+  },
+  { grup: 'Sanat ve Spor', dersler: ['Müzik', 'Görsel Sanatlar', 'Beden Eğitimi'] },
+  {
+    grup: 'Diğer', dersler: [
+      'Almanca', 'Fransızca', 'Felsefe', 'Psikoloji', 'Sosyoloji',
+      'Mantık', 'Matematik Uygulamaları', 'Bilişim Teknolojileri',
+      'Trafik ve İlk Yardım', 'Sağlık Bilgisi', 'Meslek Dersi', 'Diğer',
+    ],
+  },
 ]
+
+export const DERS_SECENEKLERI = DERS_GRUPLARI.flatMap(g => g.dersler)
 
 /**
  * Mevcut akademik yılı hesaplar.
@@ -47,15 +58,17 @@ export function getYilSecenekleri(): string[] {
 // yalnızca Yabancı Dil (2. sınıftan) ve DKAB (4. sınıftan) zorunlu branştır.
 // Hayat Bilgisi tamamen sınıf öğretmeni dersidir, branş öğretmeni yoktur.
 export const DERS_SINIF_MAP: Record<string, string[]> = {
+  // İlkokul branş dersleri
+  'İlkokul İngilizce': ['2. Sınıf', '3. Sınıf', '4. Sınıf'],
+  'İlkokul Din Kültürü': ['4. Sınıf'],
   // Ortaokul branş dersleri (5'ten başlar)
   'Fen Bilimleri': ['5. Sınıf', '6. Sınıf', '7. Sınıf', '8. Sınıf'],
   'Sosyal Bilgiler': ['5. Sınıf', '6. Sınıf', '7. Sınıf'],
   'Türkçe': ['5. Sınıf', '6. Sınıf', '7. Sınıf', '8. Sınıf'],
   'Matematik': Array.from({ length: 8 }, (_, i) => `${i + 5}. Sınıf`), // 5-12
-  // İlkokul + ortaokul + lise branş dersleri
-  'İngilizce': Array.from({ length: 11 }, (_, i) => `${i + 2}. Sınıf`), // 2-12
-  'Din Kültürü ve Ahlak Bilgisi': Array.from({ length: 9 }, (_, i) => `${i + 4}. Sınıf`), // 4-12
-  // İlkokulda isteğe bağlı branş olabilir (okul kadrosuna göre)
+  'İngilizce': Array.from({ length: 8 }, (_, i) => `${i + 5}. Sınıf`), // 5-12
+  'Din Kültürü ve Ahlak Bilgisi': Array.from({ length: 8 }, (_, i) => `${i + 5}. Sınıf`), // 5-12
+  // Sanat ve spor (ilkokul dahil branş öğretmeni)
   'Müzik': Array.from({ length: 8 }, (_, i) => `${i + 1}. Sınıf`), // 1-8
   'Görsel Sanatlar': Array.from({ length: 8 }, (_, i) => `${i + 1}. Sınıf`), // 1-8
   'Beden Eğitimi': SINIF_SEVIYELERI, // 1-12

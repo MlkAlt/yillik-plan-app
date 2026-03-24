@@ -8,7 +8,7 @@ import {
 } from '../lib/notifications';
 import {
   SINIF_SEVIYELERI, DERS_SINIF_MAP,
-  DERS_SECENEKLERI, SINIF_OGRETMENI_DERSLER, SINIF_OGRETMENI_SINIFLAR,
+  DERS_GRUPLARI, SINIF_OGRETMENI_DERSLER, SINIF_OGRETMENI_SINIFLAR,
   getYilSecenekleri,
 } from '../lib/dersSinifMap';
 import { buildPlan } from '../lib/planBuilder';
@@ -294,7 +294,11 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
             onChange={(e) => handleDersChange(e.target.value)}
             className="w-full p-3 rounded-xl border border-[#E7E5E4] bg-[#FAFAF9] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/20 focus:border-[#F59E0B] transition-all text-[#1C1917] text-sm"
           >
-            {DERS_SECENEKLERI.map(d => <option key={d} value={d}>{d}</option>)}
+            {DERS_GRUPLARI.map(g => (
+              <optgroup key={g.grup} label={g.grup}>
+                {g.dersler.map(d => <option key={d} value={d}>{d}</option>)}
+              </optgroup>
+            ))}
           </select>
         </div>
 
