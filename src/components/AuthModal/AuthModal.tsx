@@ -38,12 +38,12 @@ export function AuthModal({ onClose }: AuthModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative z-10 bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-sm mx-auto p-6 shadow-xl">
+      <div className="relative z-10 bg-white rounded-2xl w-full max-w-sm mx-auto p-6 shadow-xl">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-lg font-bold text-[#1C1917]">
             {tab === 'giris' ? 'Giriş Yap' : 'Kayıt Ol'}
