@@ -4,9 +4,11 @@ import { signIn, signUp } from '../../lib/auth'
 
 interface AuthModalProps {
   onClose: () => void
+  mode?: 'default' | 'prompt'
 }
 
-export function AuthModal({ onClose }: AuthModalProps) {
+export function AuthModal({ onClose, mode = 'default' }: AuthModalProps) {
+  const isPrompt = mode === 'prompt'
   const [tab, setTab] = useState<'giris' | 'kayit'>('giris')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -45,13 +47,25 @@ export function AuthModal({ onClose }: AuthModalProps) {
 
       {/* Modal */}
       <div className="relative z-10 bg-white rounded-2xl w-full max-w-sm mx-auto p-6 shadow-xl">
+        {isPrompt && (
+          <div className="text-center mb-5">
+            <div className="text-4xl mb-3">☁️</div>
+            <h2 className="text-lg font-bold text-[#1C1917] mb-1">Planını kaydet</h2>
+            <p className="text-sm text-gray-500 leading-relaxed">
+              Ücretsiz hesap oluştur, planların tüm cihazlarında erişilebilir olsun.
+            </p>
+          </div>
+        )}
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-bold text-[#1C1917]">
-            {tab === 'giris' ? 'Giriş Yap' : 'Kayıt Ol'}
-          </h2>
+          {!isPrompt && (
+            <h2 className="text-lg font-bold text-[#1C1917]">
+              {tab === 'giris' ? 'Giriş Yap' : 'Kayıt Ol'}
+            </h2>
+          )}
+          {isPrompt && <div />}
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-xl leading-none"
+            className="text-gray-400 hover:text-gray-600 text-xl leading-none ml-auto"
           >
             ✕
           </button>
@@ -130,6 +144,19 @@ export function AuthModal({ onClose }: AuthModalProps) {
             : 'Planların buluta kaydedilir ve tüm cihazlarında erişilebilir olur.'
           }
         </p>
+
+        {isPrompt && (
+          <button
+            type="button"
+            onClick={() => {
+              localStorage.setItem('auth-prompt-gosterildi', '1')
+              onClose()
+            }}
+            className="w-full text-center text-xs text-gray-400 mt-3 py-2 hover:text-gray-600 transition-colors"
+          >
+            Şimdi değil
+          </button>
+        )}
       </div>
     </div>
   )

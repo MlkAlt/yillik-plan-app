@@ -14,10 +14,16 @@ interface PlanSelectorProps {
   yil: string
   onComplete: (entries: PlanEntry[]) => void
   onCancel?: () => void
+  onStepChange?: (step: 'branch' | 'configure') => void
 }
 
-export function PlanSelector({ yil, onComplete, onCancel }: PlanSelectorProps) {
+export function PlanSelector({ yil, onComplete, onCancel, onStepChange }: PlanSelectorProps) {
   const [step, setStep] = useState<Step>('branch')
+
+  function goStep(s: Step) {
+    setStep(s)
+    onStepChange?.(s)
+  }
   const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null)
 
   // Branş modu state
@@ -39,11 +45,11 @@ export function PlanSelector({ yil, onComplete, onCancel }: PlanSelectorProps) {
     if (branch.mode === 'brans') {
       setSelectedClasses([branch.classes[0]])
     }
-    setStep('configure')
+    goStep('configure')
   }
 
   function handleBack() {
-    setStep('branch')
+    goStep('branch')
     setSelectedBranch(null)
     setSuccess(false)
     setError('')

@@ -10,6 +10,7 @@ interface PlanPageProps {
   entry: PlanEntry | null;
   planlar?: PlanEntry[];
   onSinifSec?: (sinif: string) => void;
+  onHeaderAction?: (action: { label: string; onClick: () => void } | null) => void;
 }
 
 function formatTarih(isoTarih: string): string {
@@ -28,7 +29,7 @@ const getEmoji = (ad: string = '') => {
   return '🏖️';
 };
 
-export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
+export function PlanPage({ entry, planlar, onSinifSec, onHeaderAction }: PlanPageProps) {
   const navigate = useNavigate();
 
   const [tamamlananlar, setTamamlananlar] = useState<number[]>([]);
@@ -36,6 +37,18 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
   const [exporting, setExporting] = useState<'excel' | 'word' | null>(null);
   const [visibleYuzde, setVisibleYuzde] = useState(0);
   const bugunRef = useRef<HTMLDivElement>(null);
+
+  // Header'a export butonu kaydet
+  useEffect(() => {
+    if (!onHeaderAction) return
+    if (entry) {
+      onHeaderAction({ label: '📥 İndir', onClick: () => setExportMenuAcik(p => !p) })
+    } else {
+      onHeaderAction(null)
+    }
+    return () => onHeaderAction(null)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entry?.sinif])
 
   const bugunStr = new Date().toISOString().split('T')[0]
   // Aktif hafta veya en yakın hafta (hafta sonu dahil)

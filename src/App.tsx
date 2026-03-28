@@ -13,6 +13,7 @@ import type { ParsedRow } from './lib/fileParser'
 import { onAuthStateChange, type User } from './lib/auth'
 import { syncPlansToSupabase, fetchPlansFromSupabase, deletePlanFromSupabase, fetchProgressFromSupabase } from './lib/planSync'
 import { getYilSecenekleri } from './lib/dersSinifMap'
+import { AuthModal } from './components/AuthModal'
 
 function App() {
   const [planlar, setPlanlar] = useState<PlanEntry[]>([])
@@ -20,6 +21,8 @@ function App() {
   const [yuklendi, setYuklendi] = useState(false)
   const [user, setUser] = useState<User | null>(null)
   const [syncing, setSyncing] = useState(false)
+  const [headerAction, setHeaderAction] = useState<{ label: string; onClick: () => void } | null>(null)
+  const [authPromptAcik, setAuthPromptAcik] = useState(false)
   const [tamamlananlar, setTamamlananlar] = useState<Record<string, number[]>>(() => {
     try {
       const item = localStorage.getItem('tamamlanan-haftalar')
@@ -134,6 +137,10 @@ function App() {
       setAktifSinif(entries[0].sinif)
       localStorage.setItem('aktif-sinif', entries[0].sinif)
     }
+    // Login değilse ve prompt daha önce gösterilmediyse 1.5sn sonra göster
+    if (!user && localStorage.getItem('auth-prompt-gosterildi') !== '1') {
+      setTimeout(() => setAuthPromptAcik(true), 1500)
+    }
   }
 
   function handleSinifSec(sinif: string) {
@@ -166,8 +173,7 @@ function App() {
 
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
+      <Routes>        <Route path="/" element={<HomePage />} />
         <Route path="/olustur" element={<PlanOlusturPage onPlanEkle={handlePlanEkle} />} />
         <Route path="/yukle" element={<YuklemePage onYukle={handleYukleLegacy} />} />
         <Route
@@ -196,7 +202,7 @@ function App() {
           path="/app/plan"
           element={
             aktifEntry
-              ? <AppLayout><PlanPage entry={aktifEntry} planlar={planlar} onSinifSec={handleSinifSec} /></AppLayout>
+              ? <AppLayout headerAction={headerAction ?? undefined}><PlanPage entry={aktifEntry} planlar={planlar} onSinifSec={handleSinifSec} onHeaderAction={setHeaderAction} /></AppLayout>
               : <AppLayout>
                   <AppHomeScreen
                     planlar={planlar}
@@ -212,6 +218,12 @@ function App() {
         <Route path="/app/hafta/:haftaNo" element={<AppLayout><HaftaDetayPage entry={aktifEntry} /></AppLayout>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      {authPromptAcik && (
+        <AuthModal
+          mode="prompt"
+          onClose={() => setAuthPromptAcik(false)}
+        />
+      )}
     </BrowserRouter>
   )
 }

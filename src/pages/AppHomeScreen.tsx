@@ -5,6 +5,7 @@ import type { PlanEntry } from '../types/planEntry';
 import { showKazanimBildirimi } from '../lib/notifications';
 import { getYilSecenekleri } from '../lib/dersSinifMap';
 import { PlanSelector } from '../components/PlanSelector';
+import { BottomSheet } from '../components/UI/BottomSheet';
 
 function formatTarihKısa(isoTarih: string): string {
   const aylar = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara']
@@ -181,6 +182,8 @@ function BuHaftaKarti({
 
 export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamamlananlar: tamamlananlarProp }: AppHomeScreenProps) {
   const navigate = useNavigate();
+  const [planSelectorAcik, setPlanSelectorAcik] = useState(false);
+  const [onboardingStep, setOnboardingStep] = useState<'branch' | 'configure'>('branch');
 
   const [ogretmenAd] = useState(() => {
     try {
@@ -275,16 +278,58 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
 
       {/* ONBOARDING — planlar yoksa her zaman göster (ilk kurulum veya tüm planlar silindi) */}
       {planlar.length === 0 && (
-        <div className="bg-[#FAFAF9] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-5 mb-5">
-          <PlanSelector
-            yil={getYilSecenekleri()[0]}
-            onComplete={entries => {
-              localStorage.setItem('onboarding-tamamlandi', '1')
-              onPlanEkle(entries)
-              onSinifSec(entries[0].sinif)
-              navigate('/app/plan')
-            }}
-          />
+        <div className="mb-5">
+          {/* Karşılama başlığı */}
+          <div className="text-center mb-6 px-2">
+            <div className="text-5xl mb-3">{onboardingStep === 'branch' ? '📋' : '🎯'}</div>
+            <h2 className="text-xl font-bold text-[#1C1917] mb-1.5">
+              {onboardingStep === 'branch' ? 'İlk planını oluştur' : 'Sınıflarını seç'}
+            </h2>
+            <p className="text-sm text-gray-400 leading-relaxed">
+              {onboardingStep === 'branch'
+                ? 'Branşını seç, sınıflarını belirle — MEB takvimine göre yıllık planın hazır olsun.'
+                : 'Hangi sınıflar için plan oluşturmak istiyorsun?'}
+            </p>
+          </div>
+          {/* Adım göstergesi */}
+          <div className="flex items-center justify-center gap-2 mb-5">
+            <div className="flex items-center gap-1.5">
+              <div className={`w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center transition-all ${
+                onboardingStep === 'branch' ? 'bg-[#2D5BE3] text-white' : 'bg-[#059669] text-white'
+              }`}>
+                {onboardingStep === 'branch' ? '1' : '✓'}
+              </div>
+              <span className={`text-xs font-semibold transition-colors ${
+                onboardingStep === 'branch' ? 'text-[#2D5BE3]' : 'text-[#059669]'
+              }`}>Branş</span>
+            </div>
+            <div className={`w-8 h-px transition-colors ${onboardingStep === 'configure' ? 'bg-[#2D5BE3]' : 'bg-[#E7E5E4]'}`} />
+            <div className="flex items-center gap-1.5">
+              <div className={`w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center transition-all ${
+                onboardingStep === 'configure' ? 'bg-[#2D5BE3] text-white' : 'bg-[#E7E5E4] text-gray-400'
+              }`}>2</div>
+              <span className={`text-xs font-semibold transition-colors ${
+                onboardingStep === 'configure' ? 'text-[#2D5BE3]' : 'text-gray-400'
+              }`}>Sınıf</span>
+            </div>
+            <div className="w-8 h-px bg-[#E7E5E4]" />
+            <div className="flex items-center gap-1.5">
+              <div className="w-6 h-6 rounded-full bg-[#E7E5E4] text-gray-400 text-xs font-bold flex items-center justify-center">3</div>
+              <span className="text-xs font-semibold text-gray-400">Hazır</span>
+            </div>
+          </div>
+          <div className="bg-[#FAFAF9] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-5">
+            <PlanSelector
+              yil={getYilSecenekleri()[0]}
+              onStepChange={setOnboardingStep}
+              onComplete={entries => {
+                localStorage.setItem('onboarding-tamamlandi', '1')
+                onPlanEkle(entries)
+                onSinifSec(entries[0].sinif)
+                navigate('/app/plan')
+              }}
+            />
+          </div>
         </div>
       )}
 
@@ -306,11 +351,11 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
           </div>
           <div className="grid grid-cols-2 gap-3">
             <button
-              onClick={() => navigate('/olustur')}
+              onClick={() => setPlanSelectorAcik(true)}
               className="bg-[#FAFAF9] rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-4 active:scale-[0.98] transition-all flex flex-col items-center justify-center gap-2 hover:shadow-md"
             >
-              <span className="text-2xl">📅</span>
-              <span className="text-sm font-bold text-[#2D5BE3]">Plan Oluştur</span>
+              <span className="text-2xl">➕</span>
+              <span className="text-sm font-bold text-[#2D5BE3]">Yeni Plan Ekle</span>
             </button>
             <button
               onClick={() => navigate('/yukle')}
@@ -322,6 +367,20 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
           </div>
         </div>
       )}
+
+      {/* YENİ PLAN EKLE — Bottom Sheet */}
+      <BottomSheet open={planSelectorAcik} onClose={() => setPlanSelectorAcik(false)}>
+        <PlanSelector
+          yil={getYilSecenekleri()[0]}
+          onComplete={entries => {
+            onPlanEkle(entries)
+            onSinifSec(entries[0].sinif)
+            setPlanSelectorAcik(false)
+            navigate('/app/plan')
+          }}
+          onCancel={() => setPlanSelectorAcik(false)}
+        />
+      </BottomSheet>
     </div>
   );
 }

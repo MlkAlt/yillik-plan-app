@@ -246,6 +246,63 @@ const [leadGonderildi, setLeadGonderildi] = useState(() =>
 
 ---
 
+### Faz 4: UX Parlatma
+
+#### Header Action Slot
+
+`AppLayout`'a opsiyonel `headerAction` prop'u eklenerek sayfa bazlı header butonları desteklenecek:
+
+```tsx
+interface AppLayoutProps {
+  children: ReactNode
+  headerAction?: { label: string; onClick: () => void }
+}
+
+// Header içinde
+{headerAction && (
+  <button
+    onClick={headerAction.onClick}
+    className="text-sm font-bold text-[#2D5BE3] active:scale-95 transition-all"
+  >
+    {headerAction.label}
+  </button>
+)}
+```
+
+`PlanPage`'deki export/kaydet butonu bu slot'a taşınacak. Sayfa içindeki sticky buton kaldırılacak.
+
+#### BottomSheet Bileşeni
+
+`src/components/UI/BottomSheet.tsx` — yeni evrensel bottom sheet wrapper:
+
+```tsx
+interface BottomSheetProps {
+  open: boolean
+  onClose: () => void
+  children: ReactNode
+}
+
+// CSS transition ile slide-up animasyonu
+// createPortal ile document.body'e render
+// Overlay tıklaması onClose tetikler
+```
+
+`AppHomeScreen`'de `planlar.length > 0` iken "Yeni Plan Ekle" butonu QuickActions'a eklenir. Tıklandığında `PlanSelector` bu sheet içinde açılır.
+
+#### Auth Prompt Akışı
+
+Plan oluşturma sonrası (`handlePlanEkle`) kullanıcı login değilse 1.5 saniye gecikmeyle `AuthModal` `mode="prompt"` ile açılır. Bu prompt bir kez gösterilir (`auth-prompt-gosterildi` localStorage anahtarı ile kontrol edilir).
+
+```
+Plan oluştur → handlePlanEkle → !user && !promptGosterildi
+  → setTimeout 1500ms
+  → AuthModal mode="prompt" açılır
+  → "Şimdi değil" → localStorage.setItem('auth-prompt-gosterildi', '1') + kapat
+  → Login/Kayıt → Supabase sync + kapat
+```
+
+---
+
 ## Data Models
 
 ### localStorage Veri Modeli (Mevcut + Değişiklikler)
@@ -260,6 +317,7 @@ hafta-notlari         → Record<sinif, Record<string, string>>
 bildirim-aktif        → '1' | '0'
 bildirim-son-hafta    → string
 lead-gonderildi       → "1"   ← YENİ (Faz 3)
+auth-prompt-gosterildi → "1"  ← YENİ (Faz 4)
 ```
 
 ```ts

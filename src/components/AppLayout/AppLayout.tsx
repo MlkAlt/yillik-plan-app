@@ -4,9 +4,10 @@ import type { ReactNode } from 'react'
 
 interface AppLayoutProps {
   children: ReactNode
+  headerAction?: { label: string; onClick: () => void }
 }
 
-export function AppLayout({ children }: AppLayoutProps) {
+export function AppLayout({ children, headerAction }: AppLayoutProps) {
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -46,6 +47,14 @@ export function AppLayout({ children }: AppLayoutProps) {
             Yıllık Plan
           </button>
           <div className="flex items-center gap-3">
+            {headerAction && (
+              <button
+                onClick={headerAction.onClick}
+                className="text-sm font-bold text-[#2D5BE3] active:scale-95 transition-all px-3 py-1.5 rounded-lg bg-[#2D5BE3]/8 hover:bg-[#2D5BE3]/15"
+              >
+                {headerAction.label}
+              </button>
+            )}
             <div
               onClick={() => navigate('/app/ayarlar')}
               className="w-8 h-8 rounded-full bg-[#F59E0B] text-white flex items-center justify-center font-bold text-sm shadow-[0_1px_3px_rgba(0,0,0,0.06)] ring-2 ring-amber-50 cursor-pointer active:scale-90 transition-transform"

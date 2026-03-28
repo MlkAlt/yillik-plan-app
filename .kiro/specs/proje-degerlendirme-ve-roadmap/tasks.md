@@ -167,6 +167,55 @@
 - [x] 18. Final checkpoint — Tüm testler
   - Ensure all tests pass, ask the user if questions arise.
 
+---
+
+## Faz 4 — UX Parlatma (Header Kaydet + Bottom Sheet + Auth Prompt)
+
+- [x] 19. "Kaydet" butonunu header'a taşı
+  - [x] 19.1 `AppLayout.tsx`'e opsiyonel `headerAction?: { label: string; onClick: () => void }` prop'u ekle
+    - Header sağ tarafına `headerAction` varsa buton render et (avatar'ın soluna)
+    - `PlanPage` ve `HaftaDetayPage`'den `headerAction` prop'u geçilebilir hale getir
+    - _Requirements: 4.2, 4.3_
+  - [x] 19.2 `PlanPage`'deki mevcut "Kaydet/Export" butonunu `headerAction` olarak geç
+    - Sayfa içindeki sticky/floating kaydet butonunu kaldır
+    - `AppLayout`'a `headerAction={{ label: 'Kaydet', onClick: handleExport }}` geç
+    - _Requirements: 4.2_
+
+- [x] 20. PlanSelector'ı bottom sheet modal olarak aç
+  - [x] 20.1 `AppHomeScreen`'e `planSelectorAcik` state'i ekle
+    - `planlar.length > 0` iken "Yeni Plan Ekle" butonu göster (QuickActions'a ekle)
+    - Butona tıklandığında `planSelectorAcik = true` yap
+    - _Requirements: 1.1, 2.5_
+  - [x] 20.2 `BottomSheet` wrapper bileşeni oluştur (`src/components/UI/BottomSheet.tsx`)
+    - `open`, `onClose`, `children` prop'ları
+    - `fixed inset-0 z-50` overlay + `fixed bottom-0 w-full max-w-lg` panel
+    - `translate-y-full` → `translate-y-0` CSS transition (300ms ease-out)
+    - `createPortal` ile `document.body`'e render et
+    - _Requirements: 4.1, 4.2_
+  - [x] 20.3 `AppHomeScreen`'de `PlanSelector`'ı `BottomSheet` içinde render et
+    - `planSelectorAcik` state'i ile kontrol et
+    - `onComplete` callback'inde sheet'i kapat, planı ekle
+    - `onCancel` callback'inde sheet'i kapat
+    - _Requirements: 1.1, 2.5_
+
+- [x] 21. Plan oluşturma sonrası auth prompt göster
+  - [x] 21.1 `App.tsx`'e `authPromptAcik` state'i ekle
+    - `handlePlanEkle` içinde `!user` ise `setTimeout(() => setAuthPromptAcik(true), 1500)` ile tetikle
+    - `localStorage.getItem('auth-prompt-gosterildi') === '1'` ise gösterme
+    - _Requirements: 7.1, 7.3_
+  - [x] 21.2 `AuthModal`'a `mode?: 'prompt'` prop'u ekle
+    - `mode === 'prompt'` iken başlık: "Planını kaydet", alt metin: "Ücretsiz hesap oluştur, planların tüm cihazlarında erişilebilir olsun."
+    - Mevcut giriş/kayıt formu aynı kalır
+    - "Şimdi değil" butonu ekle → `onClose` çağırır + `localStorage.setItem('auth-prompt-gosterildi', '1')`
+    - _Requirements: 7.1, 7.3_
+  - [x] 21.3 `App.tsx`'te `authPromptAcik` state'ini `AuthModal`'a bağla
+    - `<AuthModal mode="prompt" onClose={() => setAuthPromptAcik(false)} />` render et
+    - Başarılı login/kayıt sonrası `authPromptAcik = false` yap
+    - _Requirements: 7.1, 7.3_
+
+- [x] 22. Checkpoint — Faz 4 testleri
+  - Ensure all tests pass, ask the user if questions arise.
+
 ## Notes
 
 - `*` ile işaretli görevler opsiyoneldir, MVP için atlanabilir
