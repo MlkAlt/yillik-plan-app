@@ -38,8 +38,11 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
   const bugunRef = useRef<HTMLDivElement>(null);
 
   const bugunStr = new Date().toISOString().split('T')[0]
+  // Aktif hafta veya en yakın hafta (hafta sonu dahil)
   const bugunHaftaNo = entry?.plan?.haftalar.find(
     h => bugunStr >= h.baslangicTarihi && bugunStr <= h.bitisTarihi
+  )?.haftaNo ?? entry?.plan?.haftalar.find(
+    h => h.baslangicTarihi >= bugunStr
   )?.haftaNo ?? null
 
   function scrollToBugunHafta() {
