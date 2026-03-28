@@ -71,6 +71,9 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
   const [silOnayBekleyen, setSilOnayBekleyen] = useState<string | null>(null);
   const [bildirimAktif, setBildirimAktifState] = useState(isBildirimAktif);
   const [bildirimIzni, setBildirimIzniState] = useState(getBildirimIzni);
+  const [leadGonderildi, setLeadGonderildi] = useState(
+    () => localStorage.getItem('lead-gonderildi') === '1'
+  );
 
 
   const isSinifOgretmeni = ders === 'Sınıf Öğretmeni';
@@ -208,12 +211,18 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
 
       {authModalAcik && <AuthModal onClose={() => setAuthModalAcik(false)} />}
 
-      {/* Lead toplama — giriş yapılmamışsa */}
-      {!user && (
+      {/* Lead toplama — giriş yapılmamış ve daha önce gönderilmemişse */}
+      {!user && !leadGonderildi && (
         <div className="bg-[#FAFAF9] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-5 mb-4">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Güncellemelerden Haberdar Ol</p>
           <p className="text-sm text-gray-500 mb-4">Yeni müfredat ve özellikler için bildirim al.</p>
-          <LeadForm embedded />
+          <LeadForm
+            embedded
+            onSuccess={() => {
+              localStorage.setItem('lead-gonderildi', '1')
+              setLeadGonderildi(true)
+            }}
+          />
         </div>
       )}
 

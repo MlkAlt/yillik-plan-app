@@ -20,6 +20,16 @@ function App() {
   const [yuklendi, setYuklendi] = useState(false)
   const [user, setUser] = useState<User | null>(null)
   const [syncing, setSyncing] = useState(false)
+  const [tamamlananlar, setTamamlananlar] = useState<Record<string, number[]>>(() => {
+    try {
+      const item = localStorage.getItem('tamamlanan-haftalar')
+      if (item) {
+        const parsed = JSON.parse(item)
+        return Array.isArray(parsed) ? {} : parsed
+      }
+    } catch { /* okunamadı */ }
+    return {}
+  })
 
   useEffect(() => {
     const unsubscribe = onAuthStateChange(async (newUser) => {
@@ -31,14 +41,11 @@ function App() {
           const bulutPlanlar = await fetchPlansFromSupabase(newUser.id)
           if (bulutPlanlar.length > 0) {
             setPlanlar(prev => {
-              // Buluttaki planlar mevcut yerelde olmayan planları ekler,
-              // çakışmalarda bulut önceliklidir
               const yereldeSiniflar = prev.map(p => p.sinif)
               const yeniPlanlar = [
                 ...prev.filter(p => !bulutPlanlar.find(b => b.sinif === p.sinif)),
                 ...bulutPlanlar,
               ]
-              // Aktif sınıf hâlâ geçerliyse koru, değilse ilkini seç
               const aktifGecerli = yeniPlanlar.find(p => p.sinif === yereldeSiniflar[0])
               if (!aktifGecerli && yeniPlanlar.length > 0) {
                 setAktifSinif(yeniPlanlar[0].sinif)
@@ -56,6 +63,7 @@ function App() {
               const localTamamlanan = localTamamlananStr ? JSON.parse(localTamamlananStr) : {}
               const mergedTamamlanan = { ...localTamamlanan, ...cloudProgress.tamamlanan }
               localStorage.setItem('tamamlanan-haftalar', JSON.stringify(mergedTamamlanan))
+              setTamamlananlar(mergedTamamlanan)
 
               const localNotlarStr = localStorage.getItem('hafta-notlari')
               const localNotlar = localNotlarStr ? JSON.parse(localNotlarStr) : {}
@@ -66,8 +74,6 @@ function App() {
               localStorage.setItem('hafta-notlari', JSON.stringify(mergedNotlar))
             } catch { /* merge başarısız */ }
           }
-        } catch {
-          // Supabase erişilemiyorsa localStorage'a devam et
         } finally {
           setSyncing(false)
         }
@@ -181,6 +187,7 @@ function App() {
                 onPlanEkle={handlePlanEkle}
                 onSinifSec={handleSinifSec}
                 syncing={syncing}
+                tamamlananlar={tamamlananlar}
               />
             </AppLayout>
           }
@@ -196,6 +203,7 @@ function App() {
                     onPlanEkle={handlePlanEkle}
                     onSinifSec={handleSinifSec}
                     syncing={syncing}
+                    tamamlananlar={tamamlananlar}
                   />
                 </AppLayout>
           }

@@ -27,6 +27,7 @@ interface AppHomeScreenProps {
   onPlanEkle: (entries: PlanEntry[]) => void;
   onSinifSec: (sinif: string) => void;
   syncing?: boolean;
+  tamamlananlar?: Record<string, number[]>;
 }
 
 function ProgressRing({ yuzde, selected = false, size = 20 }: { yuzde: number; selected?: boolean; size?: number }) {
@@ -178,7 +179,7 @@ function BuHaftaKarti({
   )
 }
 
-export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing }: AppHomeScreenProps) {
+export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamamlananlar: tamamlananlarProp }: AppHomeScreenProps) {
   const navigate = useNavigate();
 
   const [ogretmenAd] = useState(() => {
@@ -191,7 +192,10 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing }: AppH
     } catch { /* localStorage okunamadı */ }
     return '';
   });
-  const [tamamlananlar, setTamamlananlar] = useState<Record<string, number[]>>(() => {
+
+  // Prop varsa kullan, yoksa localStorage'dan oku (fallback)
+  const [tamamlananlarLocal, setTamamlananlarLocal] = useState<Record<string, number[]>>(() => {
+    if (tamamlananlarProp) return tamamlananlarProp
     try {
       const tItem = localStorage.getItem('tamamlanan-haftalar');
       if (tItem) {
@@ -206,18 +210,20 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing }: AppH
     return {};
   });
 
+  const tamamlananlar = tamamlananlarProp ?? tamamlananlarLocal
+
   useEffect(() => {
-    // syncing false'a döndüğünde (Supabase sync tamamlandı) tamamlananları yenile
-    if (!syncing) {
+    // syncing false'a döndüğünde (Supabase sync tamamlandı) ve prop yoksa yenile
+    if (!syncing && !tamamlananlarProp) {
       try {
         const tItem = localStorage.getItem('tamamlanan-haftalar');
         if (tItem) {
           const parsed = JSON.parse(tItem);
           if (Array.isArray(parsed)) {
             const sinif = planlar[0]?.sinif || '';
-            setTamamlananlar(sinif ? { [sinif]: parsed } : {});
+            setTamamlananlarLocal(sinif ? { [sinif]: parsed } : {});
           } else {
-            setTamamlananlar(parsed);
+            setTamamlananlarLocal(parsed);
           }
         }
       } catch { /* localStorage okunamadı */ }

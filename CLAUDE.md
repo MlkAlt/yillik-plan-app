@@ -307,3 +307,16 @@ CLAUDE.md dosyasının sonuna şu bölümü ekle:
 1. `tamamlananlar` state'ini App.tsx'e taşı
 2. Supabase offline fallback wrapper
 3. Lead form gönderim sonrası gizleme
+
+## Geliştirme Durumu — 28 Mart 2026 (Faz 3 Tamamlandı)
+
+### Faz 3 — Auth + Lead Toplama ✅
+
+- `tamamlananlar` state'i App.tsx'e taşındı — Supabase sync sonrası `setTamamlananlar` çağrılıyor, `AppHomeScreen`'e prop olarak geçiliyor
+- `withSupabaseFallback<T>()` wrapper `planSync.ts`'e eklendi — `fetchPlansFromSupabase` ve `fetchProgressFromSupabase` artık sessiz fallback yapıyor
+- App.tsx'teki outer try/catch kaldırıldı (artık gereksiz)
+- Lead form: `leadGonderildi` localStorage anahtarı eklendi — form gönderildikten sonra gizleniyor
+- `LeadForm`'a `onSuccess` prop ve `validateLeadForm` eklendi — ad/email boşsa inline hata gösteriliyor
+
+### Tüm Fazlar Tamamlandı ✅
+Sıradaki adım: Müfredat JSON'larını tamamla (eksik branşlar), ardından kullanıcı testine aç.

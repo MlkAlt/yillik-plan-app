@@ -14,12 +14,22 @@ const initialFormData: LeadFormData = {
 
 interface LeadFormProps {
   embedded?: boolean
+  onSuccess?: () => void
 }
 
-export function LeadForm({ embedded = false }: LeadFormProps) {
+export function LeadForm({ embedded = false, onSuccess }: LeadFormProps) {
   const [formData, setFormData] = useState<LeadFormData>(initialFormData)
   const [status, setStatus] = useState<FormStatus>('idle')
   const [errorMessage, setErrorMessage] = useState('')
+  const [validationErrors, setValidationErrors] = useState<Partial<Record<keyof LeadFormData, string>>>({})
+
+  function validateLeadForm(data: LeadFormData): boolean {
+    const errors: Partial<Record<keyof LeadFormData, string>> = {}
+    if (!data.ad.trim()) errors.ad = 'Ad zorunludur'
+    if (!data.email.trim()) errors.email = 'E-posta zorunludur'
+    setValidationErrors(errors)
+    return Object.keys(errors).length === 0
+  }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target
@@ -28,6 +38,7 @@ export function LeadForm({ embedded = false }: LeadFormProps) {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    if (!validateLeadForm(formData)) return
     setStatus('loading')
     setErrorMessage('')
 
@@ -38,6 +49,7 @@ export function LeadForm({ embedded = false }: LeadFormProps) {
 
       setStatus('success')
       setFormData(initialFormData)
+      onSuccess?.()
     } catch (err: unknown) {
       setStatus('error')
       if (err instanceof Error) {
@@ -116,10 +128,13 @@ export function LeadForm({ embedded = false }: LeadFormProps) {
                 onChange={handleChange}
                 placeholder={placeholder}
                 required
-                className="w-full px-4 py-2.5 rounded-xl border border-[#E7E5E4] text-sm text-[#1C1917] placeholder-gray-400
+                className={`w-full px-4 py-2.5 rounded-xl border text-sm text-[#1C1917] placeholder-gray-400
                   focus:outline-none focus:ring-2 focus:ring-[#2D5BE3]/40 focus:border-transparent
-                  transition duration-150"
+                  transition duration-150 ${validationErrors[name] ? 'border-red-400 bg-red-50' : 'border-[#E7E5E4]'}`}
               />
+              {validationErrors[name] && (
+                <p className="text-xs text-red-500 mt-1">{validationErrors[name]}</p>
+              )}
             </div>
           ))}
 

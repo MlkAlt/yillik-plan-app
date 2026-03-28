@@ -125,33 +125,33 @@
 
 ## Faz 3 — Auth + Lead Toplama
 
-- [ ] 14. `tamamlananlar` state'ini App.tsx'e taşı ve prop olarak geç
-  - [ ] 14.1 `App.tsx`'e `tamamlananlar` state'i ekle, localStorage'dan başlat
+- [x] 14. `tamamlananlar` state'ini App.tsx'e taşı ve prop olarak geç
+  - [x] 14.1 `App.tsx`'e `tamamlananlar` state'i ekle, localStorage'dan başlat
     - `useState<Record<string, number[]>>` ile başlat
     - Supabase sync sonrası `setTamamlananlar(mergedTamamlanan)` çağır
     - _Requirements: 7.2, 7.4_
-  - [ ] 14.2 `AppHomeScreen`'e `tamamlananlar` prop'u geç
+  - [x] 14.2 `AppHomeScreen`'e `tamamlananlar` prop'u geç
     - `BuHaftaKarti` içindeki local state'i kaldır, prop'tan oku
     - _Requirements: 7.2_
   - [ ]* 14.3 Property testi: Bulut-yerel merge stratejisi
     - **Property 7: Bulut-yerel merge stratejisi**
     - **Validates: Requirements 7.2**
 
-- [ ] 15. Supabase offline fallback wrapper'ı ekle
-  - [ ] 15.1 `src/lib/planSync.ts`'e `withSupabaseFallback<T>(fn, fallback)` yardımcı fonksiyonu ekle
+- [x] 15. Supabase offline fallback wrapper'ı ekle
+  - [x] 15.1 `src/lib/planSync.ts`'e `withSupabaseFallback<T>(fn, fallback)` yardımcı fonksiyonu ekle
     - Tüm Supabase çağrılarını bu wrapper ile sar
     - _Requirements: 7.5_
   - [ ]* 15.2 Property testi: Çıkış sonrası localStorage korunması
     - **Property 8: Çıkış sonrası localStorage korunması**
     - **Validates: Requirements 7.6**
 
-- [ ] 16. Lead form görünürlük ve gönderim sonrası gizleme mantığını ekle
-  - [ ] 16.1 `AppSettingsScreen`'de `leadGonderildi` state'i ekle
+- [x] 16. Lead form görünürlük ve gönderim sonrası gizleme mantığını ekle
+  - [x] 16.1 `AppSettingsScreen`'de `leadGonderildi` state'i ekle
     - `localStorage.getItem('lead-gonderildi') === '1'` ile başlat
     - `!user && !leadGonderildi` koşulunda `LeadForm` göster
     - `onSuccess` callback'inde `localStorage.setItem('lead-gonderildi', '1')` kaydet ve state güncelle
     - _Requirements: 6.1, 6.4_
-  - [ ] 16.2 `LeadForm`'a `validateLeadForm` fonksiyonu ekle
+  - [x] 16.2 `LeadForm`'a `validateLeadForm` fonksiyonu ekle
     - `ad` veya `email` boş/whitespace-only ise submit reddet
     - Inline hata mesajı göster
     - _Requirements: 6.3_
@@ -164,7 +164,7 @@
     - **Property 9: Export fonksiyonları hata fırlatmama invariantı**
     - **Validates: Requirements 8.1, 8.2, 8.3**
 
-- [ ] 18. Final checkpoint — Tüm testler
+- [x] 18. Final checkpoint — Tüm testler
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes

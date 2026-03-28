@@ -1,6 +1,15 @@
 import { supabase } from './supabase'
 import type { PlanEntry } from '../types/planEntry'
 
+// Supabase erişilemezse fallback değeri döner — sessiz hata
+export async function withSupabaseFallback<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
+  try {
+    return await fn()
+  } catch {
+    return fallback
+  }
+}
+
 interface SupabasePlan {
   user_id: string
   sinif: string
@@ -34,23 +43,25 @@ export async function syncPlansToSupabase(userId: string, planlar: PlanEntry[]) 
 }
 
 export async function fetchPlansFromSupabase(userId: string): Promise<PlanEntry[]> {
-  const { data, error } = await supabase
-    .from('plans')
-    .select('*')
-    .eq('user_id', userId)
+  return withSupabaseFallback(async () => {
+    const { data, error } = await supabase
+      .from('plans')
+      .select('*')
+      .eq('user_id', userId)
 
-  if (error || !data) return []
+    if (error || !data) return []
 
-  return data.map(row => ({
-    sinif: row.sinif,
-    ders: row.ders,
-    yil: row.yil,
-    tip: row.tip as 'meb' | 'yukle',
-    plan: row.plan_json ?? null,
-    rows: row.rows_json ?? null,
-    label: row.label ?? undefined,
-    sinifGercek: row.sinif_gercek ?? undefined,
-  }))
+    return data.map(row => ({
+      sinif: row.sinif,
+      ders: row.ders,
+      yil: row.yil,
+      tip: row.tip as 'meb' | 'yukle',
+      plan: row.plan_json ?? null,
+      rows: row.rows_json ?? null,
+      label: row.label ?? undefined,
+      sinifGercek: row.sinif_gercek ?? undefined,
+    }))
+  }, [])
 }
 
 export async function deletePlanFromSupabase(userId: string, sinif: string) {
@@ -76,14 +87,16 @@ export async function fetchProgressFromSupabase(userId: string): Promise<{
   tamamlanan: Record<string, number[]>
   notlar: Record<string, Record<string, string>>
 } | null> {
-  const { data, error } = await supabase
-    .from('user_progress')
-    .select('tamamlanan_json, notlar_json')
-    .eq('user_id', userId)
-    .single()
-  if (error || !data) return null
-  return {
-    tamamlanan: (data.tamamlanan_json as Record<string, number[]>) || {},
-    notlar: (data.notlar_json as Record<string, Record<string, string>>) || {},
-  }
+  return withSupabaseFallback(async () => {
+    const { data, error } = await supabase
+      .from('user_progress')
+      .select('tamamlanan_json, notlar_json')
+      .eq('user_id', userId)
+      .single()
+    if (error || !data) return null
+    return {
+      tamamlanan: (data.tamamlanan_json as Record<string, number[]>) || {},
+      notlar: (data.notlar_json as Record<string, Record<string, string>>) || {},
+    }
+  }, null)
 }
