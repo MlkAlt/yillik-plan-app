@@ -421,10 +421,10 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
           </div>
         )}
 
-        {/* Kaydet */}
+        {/* Kaydet — sticky */}
         <button
           onClick={handleSave}
-          className="w-full bg-[#F59E0B] text-white py-3.5 rounded-xl font-bold shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:opacity-90 active:scale-[0.98] transition-all"
+          className="sticky bottom-4 w-full bg-[#F59E0B] text-white py-3.5 rounded-xl font-bold shadow-[0_2px_8px_rgba(245,158,11,0.4)] hover:opacity-90 active:scale-[0.98] transition-all"
         >
           Kaydet
         </button>

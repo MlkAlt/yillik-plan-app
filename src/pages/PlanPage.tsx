@@ -32,8 +32,8 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
   const navigate = useNavigate();
 
   const [tamamlananlar, setTamamlananlar] = useState<number[]>([]);
-  const [exporting, setExporting] = useState(false);
-  const [exportingWord, setExportingWord] = useState(false);
+  const [exportMenuAcik, setExportMenuAcik] = useState(false);
+  const [exporting, setExporting] = useState<'excel' | 'word' | null>(null);
   const [visibleYuzde, setVisibleYuzde] = useState(0);
   const bugunRef = useRef<HTMLDivElement>(null);
 
@@ -42,41 +42,53 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
     h => bugunStr >= h.baslangicTarihi && bugunStr <= h.bitisTarihi
   )?.haftaNo ?? null
 
+  function scrollToBugunHafta() {
+    if (!bugunRef.current) return
+    bugunRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }
+
   async function handleExcelIndir() {
     if (!entry) return;
-    setExporting(true);
+    setExporting('excel');
+    setExportMenuAcik(false);
     try {
       const ayarlar = localStorage.getItem('ogretmen-ayarlari');
       const meta = ayarlar ? JSON.parse(ayarlar) : {};
       await exportPlanToExcel(entry, { okulAdi: meta.okulAdi, ogretmenAdi: meta.adSoyad });
     } finally {
-      setExporting(false);
+      setExporting(null);
     }
   }
 
   function handleWordIndir() {
     if (!entry) return;
-    setExportingWord(true);
+    setExporting('word');
+    setExportMenuAcik(false);
     try {
       const ayarlar = localStorage.getItem('ogretmen-ayarlari');
       const meta = ayarlar ? JSON.parse(ayarlar) : {};
       exportPlanToWord(entry, { okulAdi: meta.okulAdi, ogretmenAdi: meta.adSoyad });
     } finally {
-      setExportingWord(false);
+      setExporting(null);
     }
   }
 
   function handleYazdir() {
     if (!entry) return;
+    setExportMenuAcik(false);
     const ayarlar = localStorage.getItem('ogretmen-ayarlari');
     const meta = ayarlar ? JSON.parse(ayarlar) : {};
     exportPlanToPrint(entry, { okulAdi: meta.okulAdi, ogretmenAdi: meta.adSoyad });
   }
 
   useEffect(() => {
-    if (bugunRef.current) {
-      bugunRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    }
+    // Kısa gecikme ile scroll — AppLayout'un overflow-y-auto container'ı için
+    const t = setTimeout(() => {
+      if (bugunRef.current) {
+        bugunRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
+    }, 150)
+    return () => clearTimeout(t)
   }, [entry?.sinif])
 
   useEffect(() => {
@@ -188,28 +200,44 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
         </div>
       )}
 
-      {/* İndirme butonları */}
+      {/* Üst araç çubuğu — export dropdown + bu haftaya git */}
       <div className="flex gap-2 mb-4">
-        <button
-          onClick={handleExcelIndir}
-          disabled={exporting}
-          className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-[#E7E5E4] bg-[#FAFAF9] text-sm font-bold text-[#2D5BE3] hover:border-[#2D5BE3] active:scale-95 transition-all disabled:opacity-60"
-        >
-          {exporting ? <span className="animate-pulse text-xs">Hazırlanıyor...</span> : <>📥 Excel</>}
-        </button>
-        <button
-          onClick={handleWordIndir}
-          disabled={exportingWord}
-          className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-[#E7E5E4] bg-[#FAFAF9] text-sm font-bold text-[#2D5BE3] hover:border-[#2D5BE3] active:scale-95 transition-all disabled:opacity-60"
-        >
-          {exportingWord ? <span className="animate-pulse text-xs">Hazırlanıyor...</span> : <>📄 Word</>}
-        </button>
-        <button
-          onClick={handleYazdir}
-          className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-[#E7E5E4] bg-[#FAFAF9] text-sm font-bold text-[#2D5BE3] hover:border-[#2D5BE3] active:scale-95 transition-all"
-        >
-          🖨️ Yazdır/PDF
-        </button>
+        {/* Export dropdown */}
+        <div className="relative flex-1">
+          <button
+            onClick={() => setExportMenuAcik(p => !p)}
+            disabled={!!exporting}
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-[#E7E5E4] bg-[#FAFAF9] text-sm font-bold text-[#2D5BE3] hover:border-[#2D5BE3] active:scale-95 transition-all disabled:opacity-60"
+          >
+            {exporting ? <span className="animate-pulse text-xs">Hazırlanıyor...</span> : <>📥 İndir ↓</>}
+          </button>
+          {exportMenuAcik && (
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setExportMenuAcik(false)} />
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl border border-[#E7E5E4] shadow-lg z-20 overflow-hidden">
+                <button onClick={handleExcelIndir} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-[#1C1917] hover:bg-gray-50 active:bg-gray-100 transition-colors border-b border-[#E7E5E4]">
+                  📊 Excel (.xlsx)
+                </button>
+                <button onClick={handleWordIndir} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-[#1C1917] hover:bg-gray-50 active:bg-gray-100 transition-colors border-b border-[#E7E5E4]">
+                  📄 Word (.doc)
+                </button>
+                <button onClick={handleYazdir} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-[#1C1917] hover:bg-gray-50 active:bg-gray-100 transition-colors">
+                  🖨️ Yazdır / PDF
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Bu haftaya git */}
+        {bugunHaftaNo && (
+          <button
+            onClick={scrollToBugunHafta}
+            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-[#2D5BE3]/30 bg-[#2D5BE3]/5 text-sm font-bold text-[#2D5BE3] active:scale-95 transition-all hover:bg-[#2D5BE3]/10 whitespace-nowrap"
+          >
+            📍 Bu Hafta
+          </button>
+        )}
       </div>
 
       <AdBanner className="mb-4 rounded-xl" />

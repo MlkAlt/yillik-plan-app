@@ -39,7 +39,12 @@ export function AppLayout({ children }: AppLayoutProps) {
 
         {/* HEADER */}
         <header className="sticky top-0 z-40 bg-white border-b border-[#E7E5E4] h-14 px-5 flex items-center justify-between shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-          <span className="font-bold text-[#2D5BE3] text-lg tracking-tight">Yıllık Plan</span>
+          <button
+            onClick={() => navigate('/app')}
+            className="font-bold text-[#2D5BE3] text-lg tracking-tight active:opacity-70 transition-opacity"
+          >
+            Yıllık Plan
+          </button>
           <div className="flex items-center gap-3">
             <div
               onClick={() => navigate('/app/ayarlar')}
