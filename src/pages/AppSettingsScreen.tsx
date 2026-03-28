@@ -173,7 +173,7 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
     : siniflar.filter(s => !planlarProp.find(p => p.sinif === s && p.ders === ders)).length;
 
   return (
-    <div className="max-w-lg mx-auto p-4 w-full pb-24">
+    <div className="max-w-lg mx-auto p-4 w-full pb-36">
       <div className="mb-6 mt-2 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-[#2D5BE3]">Ayarlar</h1>
