@@ -85,13 +85,7 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
   }
 
   useEffect(() => {
-    // Kısa gecikme ile scroll — AppLayout'un overflow-y-auto container'ı için
-    const t = setTimeout(() => {
-      if (bugunRef.current) {
-        bugunRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      }
-    }, 150)
-    return () => clearTimeout(t)
+    // Otomatik scroll kaldırıldı — kullanıcı "Bu Hafta" butonuna basınca gider
   }, [entry?.sinif])
 
   useEffect(() => {

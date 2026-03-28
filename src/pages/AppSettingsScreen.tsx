@@ -174,11 +174,19 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
 
   return (
     <div className="max-w-lg mx-auto p-4 w-full pb-24">
-      <div className="mb-6 mt-2">
-        <h1 className="text-3xl font-bold text-[#2D5BE3]">Ayarlar</h1>
-        <p className="text-gray-500 mt-2 text-sm">
-          Bilgilerini güncelle, yeni sınıflar için plan ekle.
-        </p>
+      <div className="mb-6 mt-2 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-[#2D5BE3]">Ayarlar</h1>
+          <p className="text-gray-500 mt-2 text-sm">
+            Bilgilerini güncelle, yeni sınıflar için plan ekle.
+          </p>
+        </div>
+        <button
+          onClick={handleSave}
+          className="shrink-0 bg-[#F59E0B] text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:opacity-90 active:scale-95 transition-all"
+        >
+          {basariMesaji ? '✅ Kaydedildi' : 'Kaydet'}
+        </button>
       </div>
 
       {/* Hesap Bölümü */}
@@ -421,19 +429,13 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
           </div>
         )}
 
-        {/* Kaydet — sticky */}
+        {/* Kaydet — sticky bottom, overflow-y-auto parent'ı aşmak için fixed */}
         <button
           onClick={handleSave}
-          className="sticky bottom-4 w-full bg-[#F59E0B] text-white py-3.5 rounded-xl font-bold shadow-[0_2px_8px_rgba(245,158,11,0.4)] hover:opacity-90 active:scale-[0.98] transition-all"
+          className="w-full bg-[#F59E0B] text-white py-3.5 rounded-xl font-bold shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:opacity-90 active:scale-[0.98] transition-all"
         >
-          Kaydet
+          {basariMesaji ? '✅ Kaydedildi!' : 'Kaydet'}
         </button>
-
-        {basariMesaji && (
-          <p className="text-center text-[#059669] font-medium text-sm">
-            ✅ Ayarlar kaydedildi!
-          </p>
-        )}
 
         {mufredatUyari && (
           <div className="bg-[#F59E0B]/10 border border-[#F59E0B]/20 rounded-xl px-3.5 py-2.5">
