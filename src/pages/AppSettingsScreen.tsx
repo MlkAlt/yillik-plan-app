@@ -173,7 +173,7 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
     : siniflar.filter(s => !planlarProp.find(p => p.sinif === s && p.ders === ders)).length;
 
   return (
-    <div className="max-w-lg mx-auto p-4 w-full pb-36">
+    <div className="max-w-lg mx-auto p-4 w-full pb-24">
       <div className="mb-6 mt-2 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-[#2D5BE3]">Ayarlar</h1>
@@ -181,6 +181,12 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
             Bilgilerini güncelle, yeni sınıflar için plan ekle.
           </p>
         </div>
+        <button
+          onClick={handleSave}
+          className="shrink-0 bg-[#F59E0B] text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:opacity-90 active:scale-95 transition-all"
+        >
+          {basariMesaji ? '✅ Kaydedildi' : 'Kaydet'}
+        </button>
       </div>
 
       {/* Hesap Bölümü */}
@@ -470,17 +476,6 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
         </div>
       )}
 
-      {/* Sticky Kaydet Butonu */}
-      <div className="fixed bottom-16 left-0 right-0 flex justify-center pointer-events-none z-30">
-        <div className="w-full max-w-lg px-4 pointer-events-auto">
-          <button
-            onClick={handleSave}
-            className="w-full bg-[#F59E0B] text-white py-3.5 rounded-xl font-bold shadow-lg hover:opacity-90 active:scale-[0.98] transition-all"
-          >
-            {basariMesaji ? '✅ Kaydedildi!' : 'Kaydet'}
-          </button>
-        </div>
-      </div>
     </div>
   );
 }
