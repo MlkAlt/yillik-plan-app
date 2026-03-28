@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(for f:*)",
+      "Bash(do echo:*)",
+      "Read(//c/Users/melik/Desktop/yıllık_plan_app/**)",
+      "Bash(done)",
+      "Bash(rm src/components/WeekView/WeekView.tsx src/components/WeekView/index.ts)",
+      "Bash(rmdir src/components/WeekView)",
+      "Bash(rm src/types/plan.ts)",
+      "Bash(rm src/pages/OnboardingPage.tsx)"
+    ]
+  }
+}

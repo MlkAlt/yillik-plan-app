@@ -201,7 +201,7 @@ function App() {
           }
         />
         <Route path="/app/ayarlar" element={<AppLayout><AppSettingsScreen onPlanEkle={handlePlanEkle} onPlanSil={handlePlanSil} planlar={planlar} user={user} /></AppLayout>} />
-        <Route path="/app/hafta/:haftaNo" element={<AppLayout><HaftaDetayPage /></AppLayout>} />
+        <Route path="/app/hafta/:haftaNo" element={<AppLayout><HaftaDetayPage entry={aktifEntry} /></AppLayout>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

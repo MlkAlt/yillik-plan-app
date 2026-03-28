@@ -19,6 +19,15 @@ export interface Branch {
 // Sınıf öğretmeni için ders ve sınıf listeleri (dersSinifMap'ten)
 export { SINIF_OGRETMENI_DERSLER as SO_DERSLER, SINIF_OGRETMENI_SINIFLAR as SO_SINIFLAR }
 
+// Branş için sınıf listesi — tek kaynak
+export function getSiniflarForDers(ders: string): string[] {
+  const branch = BRANCHES.find(b => b.lessonId === ders)
+  return branch?.classes ?? SINIF_SEVIYELERI
+}
+
+// Re-export: AppSettingsScreen ve exportUtils için geriye dönük uyumluluk
+export { DERS_SINIF_MAP, DERS_GRUPLARI, DERS_SECENEKLERI, getYilSecenekleri } from './dersSinifMap'
+
 export const BRANCHES: Branch[] = [
   // ── POPÜLER ──────────────────────────────────────────────────────────────
   {

@@ -28,6 +28,7 @@ export function PlanSelector({ yil, onComplete, onCancel }: PlanSelectorProps) {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+  const [mufredatUyari, setMufredatUyari] = useState('')
 
   function handleBranchSelect(branch: Branch) {
     setSelectedBranch(branch)
@@ -66,32 +67,42 @@ export function PlanSelector({ yil, onComplete, onCancel }: PlanSelectorProps) {
     if (!selectedBranch) return
     setLoading(true)
     setError('')
+    setMufredatUyari('')
     try {
       let entries: PlanEntry[]
+      let eksikDersler: string[] = []
 
       if (selectedBranch.mode === 'sinif-ogretmeni') {
-        entries = selectedLessons.map(ders => {
-          const { plan } = buildPlan(ders, selectedClass, yil)
-          return {
-            sinif: `${selectedClass}—${ders}`,
-            ders, yil, tip: 'meb' as const, plan, rows: null,
-            label: ders, sinifGercek: selectedClass,
-          }
+        const results = selectedLessons.map(ders => {
+          const { plan, hasMufredat } = buildPlan(ders, selectedClass, yil)
+          return { ders, plan, hasMufredat }
         })
+        eksikDersler = results.filter(r => !r.hasMufredat).map(r => r.ders)
+        entries = results.map(r => ({
+          sinif: `${selectedClass}—${r.ders}`,
+          ders: r.ders, yil, tip: 'meb' as const, plan: r.plan, rows: null,
+          label: r.ders, sinifGercek: selectedClass,
+        }))
         localStorage.setItem('ogretmen-ayarlari', JSON.stringify({
           ders: selectedLessons[0], siniflar: selectedLessons, yil,
           ogretmenTuru: 'sinif', sinifGercek: selectedClass,
         }))
       } else {
-        entries = selectedClasses.map(sinif => {
-          const { plan } = buildPlan(selectedBranch.lessonId, sinif, yil)
-          return {
-            sinif, ders: selectedBranch.lessonId, yil, tip: 'meb' as const, plan, rows: null,
-          }
+        const results = selectedClasses.map(sinif => {
+          const { plan, hasMufredat } = buildPlan(selectedBranch.lessonId, sinif, yil)
+          return { sinif, plan, hasMufredat }
         })
+        eksikDersler = results.filter(r => !r.hasMufredat).map(r => r.sinif)
+        entries = results.map(r => ({
+          sinif: r.sinif, ders: selectedBranch.lessonId, yil, tip: 'meb' as const, plan: r.plan, rows: null,
+        }))
         localStorage.setItem('ogretmen-ayarlari', JSON.stringify({
           ders: selectedBranch.lessonId, siniflar: selectedClasses, yil,
         }))
+      }
+
+      if (eksikDersler.length > 0) {
+        setMufredatUyari(`${eksikDersler.join(', ')} için müfredat bulunamadı, boş plan oluşturuldu.`)
       }
 
       setLoading(false)
@@ -129,6 +140,11 @@ export function PlanSelector({ yil, onComplete, onCancel }: PlanSelectorProps) {
       {error && (
         <div className="mb-3 bg-red-50 border border-red-200 rounded-xl px-3.5 py-2.5">
           <p className="text-red-600 text-xs font-semibold">{error}</p>
+        </div>
+      )}
+      {mufredatUyari && (
+        <div className="mb-3 bg-[#F59E0B]/10 border border-[#F59E0B]/30 rounded-xl px-3.5 py-2.5">
+          <p className="text-[#92400e] text-xs font-semibold">⚠️ {mufredatUyari}</p>
         </div>
       )}
       {selectedBranch.mode === 'sinif-ogretmeni' ? (

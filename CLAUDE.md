@@ -254,3 +254,56 @@ VITE_ADSENSE_SLOT=XXXXXXXXXX                  # Reklam birimi ID
 ## Yapılacaklar
 
 - [ ] Arayüz geçiş animasyonları
+
+CLAUDE.md dosyasının sonuna şu bölümü ekle:
+
+## Geliştirme Durumu — 27 Mart 2026
+
+### Tamamlananlar
+- MEB Takvimi (2024-2025, 2025-2026 resmi PDF ile doğrulandı)
+- App layout — alt tab bar, header, profil avatarı
+- AppHomeScreen — kişisel karşılama, aktif plan kartı, bugünün kazanımı, tek tuşla plan oluşturma
+- AppSettingsScreen — ders/sınıf/yıl/ad/okul/şehir, localStorage
+- PlanPage — hafta kartları, kazanım + ünite badge, tarih formatı
+- HaftaDetayPage — Pzt-Cuma günlük not ekleme
+- localStorage — plan yenilemede kaybolmuyor
+- PWA — ana ekrana ekleme, service worker
+- Vercel deploy — canlı
+- Müfredat JSON — Fen Bilimleri 5-6-7-8. Sınıf
+- Onboarding — AppHomeScreen içinde kart olarak (devam ediyor)
+
+### Sıradaki
+1. Onboarding kartını bitir
+2. Diğer dersler için müfredat JSON
+3. Supabase Auth
+4. Admin paneli
+
+## Geliştirme Durumu — 28 Mart 2026 (Faz 2 Tamamlandı)
+
+### Faz 2 — Teknik Borç + UI Tutarlılığı ✅
+
+- `guessDate()` hardcode yıl kaldırıldı → `aktifYilBul()` ile dinamik hesaplama (`exportUtils.ts`)
+- Branş verisi tek kaynağa çekildi → `branchConfig.ts`'e `getSiniflarForDers()` eklendi, `DERS_SINIF_MAP`/`DERS_GRUPLARI` re-export edildi
+- `HaftaDetayPage` prop tabanlı veri alımına geçirildi → `entry: PlanEntry | null` prop'u eklendi, localStorage plan okuma kaldırıldı (progress okuma korundu)
+- `console.log` temizlendi (zaten yoktu), `CellStyle = any` → `Record<string, unknown>` ile değiştirildi
+- UI tutarlılığı doğrulandı — tüm kartlar, butonlar, boş durumlar zaten standarda uygun
+
+### Sıradaki (Faz 1 — Temel UX)
+1. Test altyapısı kur (vitest + fast-check)
+2. BranchStep'e arama input'u ekle
+3. AppHomeScreen OnboardingCard/DashboardView ayrımını netleştir
+4. Müfredat uyarı mekanizması (PlanSelector'da hasMufredat kontrolü)
+
+## Geliştirme Durumu — 28 Mart 2026 (Faz 1 Tamamlandı)
+
+### Faz 1 — Temel UX ✅
+
+- BranchStep arama zaten mevcuttu, doğrulandı
+- AppHomeScreen onboarding/dashboard ayrımı zaten mevcuttu, doğrulandı
+- PlanSelector'a müfredat uyarı mekanizması eklendi — `hasMufredat: false` durumunda inline uyarı gösteriliyor
+- `tamamlananlar` state'i `syncing` false'a döndüğünde localStorage'dan yenileniyor (Supabase sync sonrası stale veri sorunu giderildi)
+
+### Sıradaki (Faz 3 — Auth + Lead Toplama)
+1. `tamamlananlar` state'ini App.tsx'e taşı
+2. Supabase offline fallback wrapper
+3. Lead form gönderim sonrası gizleme

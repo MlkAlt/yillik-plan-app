@@ -1,10 +1,8 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import type { Hafta } from '../types/takvim'
 import type { ParsedRow } from '../lib/fileParser'
 import type { PlanEntry } from '../types/planEntry'
-import { getSession } from '../lib/auth'
-import { syncProgressToSupabase } from '../lib/planSync'
 
 function formatTarih(isoTarih: string): string {
   const aylar = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
@@ -13,11 +11,7 @@ function formatTarih(isoTarih: string): string {
   return `${d.getDate()} ${aylar[d.getMonth()]} ${d.getFullYear()}`
 }
 
-interface HaftaDetayPageProps {
-  entry: PlanEntry | null
-}
-
-export function HaftaDetayPage({ entry }: HaftaDetayPageProps) {
+export function HaftaDetayPage() {
   const { haftaNo } = useParams<{ haftaNo: string }>()
   const navigate = useNavigate()
   const no = Number(haftaNo)
@@ -26,33 +20,33 @@ export function HaftaDetayPage({ entry }: HaftaDetayPageProps) {
   const [uploadedRow, setUploadedRow] = useState<ParsedRow | null>(null)
   const [ders, setDers] = useState('')
   const [sinif, setSinif] = useState('')
-  const [tumHaftaNoları, setTumHaftaNoları] = useState<number[]>([])
   const [tamamlandi, setTamamlandi] = useState(false)
-  const [tamamlaAnimating, setTamamlaAnimating] = useState(false)
   const [not, setNot] = useState('')
-  const [notKaydedildi, setNotKaydedildi] = useState(false)
-  const notTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
-    // Plan verisini prop'tan oku
-    if (entry) {
-      setDers(entry.ders || '')
-      setSinif(entry.sinifGercek || entry.sinif || '')
-      if (entry.tip === 'meb' && entry.plan) {
-        const bulunan = entry.plan.haftalar.find((h) => h.haftaNo === no)
-        if (bulunan) setHafta(bulunan)
-        setTumHaftaNoları(entry.plan.haftalar.map(h => h.haftaNo))
-      } else if (entry.tip === 'yukle' && entry.rows) {
-        const bulunan = entry.rows.find((r) => r.haftaNo === no)
-        if (bulunan) setUploadedRow(bulunan)
-        setTumHaftaNoları(entry.rows.filter(r => r.haftaNo != null).map(r => r.haftaNo!))
-      }
-    }
-
-    // Progress verisi localStorage'dan okunmaya devam eder (global)
     try {
+      // Aktif sınıfı oku
       const aktifSinifStr = localStorage.getItem('aktif-sinif') || ''
 
+      // Plan verisini tum-planlar'dan oku
+      const planlarItem = localStorage.getItem('tum-planlar')
+      if (planlarItem) {
+        const planlar = JSON.parse(planlarItem) as PlanEntry[]
+        const entry = planlar.find(p => p.sinif === aktifSinifStr) || planlar[0]
+        if (entry) {
+          setDers(entry.ders || '')
+          setSinif(entry.sinifGercek || entry.sinif || '')
+          if (entry.tip === 'meb' && entry.plan) {
+            const bulunan = entry.plan.haftalar.find((h) => h.haftaNo === no)
+            if (bulunan) setHafta(bulunan)
+          } else if (entry.tip === 'yukle' && entry.rows) {
+            const bulunan = entry.rows.find((r) => r.haftaNo === no)
+            if (bulunan) setUploadedRow(bulunan)
+          }
+        }
+      }
+
+      // Tamamlanma durumunu sınıf bazlı oku
       const tamamlananItem = localStorage.getItem('tamamlanan-haftalar')
       if (tamamlananItem) {
         const parsed = JSON.parse(tamamlananItem)
@@ -62,9 +56,11 @@ export function HaftaDetayPage({ entry }: HaftaDetayPageProps) {
         setTamamlandi(liste.includes(no))
       }
 
+      // Notu sınıf bazlı oku
       const notlarItem = localStorage.getItem('hafta-notlari')
       if (notlarItem) {
         const parsed = JSON.parse(notlarItem)
+        // Yeni format: { "6. Sınıf": { "1": "not" } } veya eski format { "1": "not" }
         const notlar = aktifSinifStr && parsed[aktifSinifStr]
           ? parsed[aktifSinifStr]
           : parsed
@@ -73,7 +69,7 @@ export function HaftaDetayPage({ entry }: HaftaDetayPageProps) {
     } catch {
       // localStorage okunamadı
     }
-  }, [no, entry])
+  }, [no])
 
   function handleTamamlaToggle() {
     try {
@@ -88,15 +84,7 @@ export function HaftaDetayPage({ entry }: HaftaDetayPageProps) {
         ? { [aktifSinifStr]: yeniListe }
         : { ...parsed, [aktifSinifStr]: yeniListe }
       localStorage.setItem('tamamlanan-haftalar', JSON.stringify(yeniParsed))
-      if (!tamamlandi) setTamamlaAnimating(true)
       setTamamlandi(!tamamlandi)
-      // Arka planda Supabase'e sync
-      getSession().then(session => {
-        if (!session) return
-        const notlarItem = localStorage.getItem('hafta-notlari')
-        const notlar = notlarItem ? JSON.parse(notlarItem) : {}
-        syncProgressToSupabase(session.user.id, yeniParsed, notlar).catch(() => {})
-      })
     } catch {
       // kayıt başarısız
     }
@@ -112,17 +100,6 @@ export function HaftaDetayPage({ entry }: HaftaDetayPageProps) {
       sinifNotlar[String(no)] = deger
       parsed[aktifSinifStr] = sinifNotlar
       localStorage.setItem('hafta-notlari', JSON.stringify(parsed))
-      // Kaydedildi göstergesi — debounced
-      if (notTimerRef.current) clearTimeout(notTimerRef.current)
-      setNotKaydedildi(true)
-      notTimerRef.current = setTimeout(() => setNotKaydedildi(false), 1500)
-      // Arka planda Supabase'e sync (debounced ile aynı süre)
-      getSession().then(session => {
-        if (!session) return
-        const tamamlananItem = localStorage.getItem('tamamlanan-haftalar')
-        const tamamlanan = tamamlananItem ? JSON.parse(tamamlananItem) : {}
-        syncProgressToSupabase(session.user.id, tamamlanan, parsed).catch(() => {})
-      })
     } catch {
       // kayıt başarısız
     }
@@ -145,7 +122,7 @@ export function HaftaDetayPage({ entry }: HaftaDetayPageProps) {
           {ders && <p className="text-sm text-gray-400 font-medium mt-0.5">{ders} · {sinif}</p>}
         </div>
         {tamamlandi && (
-          <span className="ml-auto bg-[#059669]/10 text-[#059669] text-xs font-bold px-3 py-1.5 rounded-full border border-[#059669]/30 animate-slide-up">
+          <span className="ml-auto bg-[#059669]/10 text-[#059669] text-xs font-bold px-3 py-1.5 rounded-full border border-[#059669]/30">
             ✅ Tamamlandı
           </span>
         )}
@@ -222,54 +199,20 @@ export function HaftaDetayPage({ entry }: HaftaDetayPageProps) {
       {/* Tamamlandı butonu */}
       <button
         onClick={handleTamamlaToggle}
-        onAnimationEnd={() => setTamamlaAnimating(false)}
         className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all active:scale-95 mb-4 flex items-center justify-center gap-2 ${
           tamamlandi
             ? 'bg-[#059669]/10 text-[#059669] border-2 border-[#059669]/30 hover:bg-[#059669]/20'
             : 'bg-[#F59E0B] text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:opacity-90'
-        } ${tamamlaAnimating ? 'animate-pop-in' : ''}`}
+        }`}
       >
         {tamamlandi ? <>✅ Tamamlandı — geri al</> : <>Haftayı Tamamladım ✓</>}
       </button>
 
-      {/* Önceki / Sonraki hafta navigasyonu */}
-      {tumHaftaNoları.length > 1 && (() => {
-        const sorted = [...tumHaftaNoları].sort((a, b) => a - b)
-        const idx = sorted.indexOf(no)
-        const prev = idx > 0 ? sorted[idx - 1] : null
-        const next = idx < sorted.length - 1 ? sorted[idx + 1] : null
-        return (
-          <div className="flex gap-3 mb-4">
-            {prev !== null ? (
-              <button
-                onClick={() => navigate(`/app/hafta/${prev}`)}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-[#E7E5E4] bg-[#FAFAF9] text-sm font-bold text-gray-500 hover:border-gray-300 active:scale-95 transition-all"
-              >
-                ← {prev}. Hafta
-              </button>
-            ) : <div className="flex-1" />}
-            {next !== null ? (
-              <button
-                onClick={() => navigate(`/app/hafta/${next}`)}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-[#E7E5E4] bg-[#FAFAF9] text-sm font-bold text-gray-500 hover:border-gray-300 active:scale-95 transition-all"
-              >
-                {next}. Hafta →
-              </button>
-            ) : <div className="flex-1" />}
-          </div>
-        )
-      })()}
-
       {/* Öğretmen notu */}
       <div className="bg-[#FAFAF9] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-5">
-        <div className="flex items-center justify-between mb-2">
-          <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider">
-            Notlarım
-          </label>
-          {notKaydedildi && (
-            <span className="text-xs font-bold text-[#059669] transition-opacity">✓ Kaydedildi</span>
-          )}
-        </div>
+        <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+          Notlarım
+        </label>
         <textarea
           value={not}
           onChange={(e) => handleNotChange(e.target.value)}

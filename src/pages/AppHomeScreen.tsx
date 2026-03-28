@@ -191,7 +191,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing }: AppH
     } catch { /* localStorage okunamadı */ }
     return '';
   });
-  const [tamamlananlar] = useState<Record<string, number[]>>(() => {
+  const [tamamlananlar, setTamamlananlar] = useState<Record<string, number[]>>(() => {
     try {
       const tItem = localStorage.getItem('tamamlanan-haftalar');
       if (tItem) {
@@ -205,6 +205,25 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing }: AppH
     } catch { /* localStorage okunamadı */ }
     return {};
   });
+
+  useEffect(() => {
+    // syncing false'a döndüğünde (Supabase sync tamamlandı) tamamlananları yenile
+    if (!syncing) {
+      try {
+        const tItem = localStorage.getItem('tamamlanan-haftalar');
+        if (tItem) {
+          const parsed = JSON.parse(tItem);
+          if (Array.isArray(parsed)) {
+            const sinif = planlar[0]?.sinif || '';
+            setTamamlananlar(sinif ? { [sinif]: parsed } : {});
+          } else {
+            setTamamlananlar(parsed);
+          }
+        }
+      } catch { /* localStorage okunamadı */ }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [syncing]);
 
   useEffect(() => {
     // Haftanın kazanımını bildirim olarak göster (yeni hafta ise)
