@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { SO_DERSLER, SO_SINIFLAR, type Branch } from '../../lib/branchConfig'
+import { SO_SINIFLAR, type Branch } from '../../lib/branchConfig'
 
 const TEMEL_DERSLER = ['Türkçe', 'Matematik', 'Hayat Bilgisi', 'Fen Bilimleri', 'Sosyal Bilgiler']
 import type { PlanEntry } from '../../types/planEntry'
