@@ -181,12 +181,6 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
             Bilgilerini güncelle, yeni sınıflar için plan ekle.
           </p>
         </div>
-        <button
-          onClick={handleSave}
-          className="shrink-0 bg-[#F59E0B] text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:opacity-90 active:scale-95 transition-all"
-        >
-          {basariMesaji ? '✅ Kaydedildi' : 'Kaydet'}
-        </button>
       </div>
 
       {/* Hesap Bölümü */}
@@ -429,14 +423,6 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
           </div>
         )}
 
-        {/* Kaydet — sticky bottom, overflow-y-auto parent'ı aşmak için fixed */}
-        <button
-          onClick={handleSave}
-          className="w-full bg-[#F59E0B] text-white py-3.5 rounded-xl font-bold shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:opacity-90 active:scale-[0.98] transition-all"
-        >
-          {basariMesaji ? '✅ Kaydedildi!' : 'Kaydet'}
-        </button>
-
         {mufredatUyari && (
           <div className="bg-[#F59E0B]/10 border border-[#F59E0B]/20 rounded-xl px-3.5 py-2.5">
             <p className="text-[#92400e] text-xs font-semibold">⚠️ {mufredatUyari}</p>
@@ -483,6 +469,18 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
           </div>
         </div>
       )}
+
+      {/* Sticky Kaydet Butonu */}
+      <div className="fixed bottom-16 left-0 right-0 flex justify-center pointer-events-none z-30">
+        <div className="w-full max-w-lg px-4 pointer-events-auto">
+          <button
+            onClick={handleSave}
+            className="w-full bg-[#F59E0B] text-white py-3.5 rounded-xl font-bold shadow-lg hover:opacity-90 active:scale-[0.98] transition-all"
+          >
+            {basariMesaji ? '✅ Kaydedildi!' : 'Kaydet'}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

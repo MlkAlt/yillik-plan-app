@@ -21,9 +21,7 @@ function App() {
   const [yuklendi, setYuklendi] = useState(false)
   const [user, setUser] = useState<User | null>(null)
   const [syncing, setSyncing] = useState(false)
-  const [headerAction, setHeaderAction] = useState<{ label: string; onClick: () => void } | null>(null)
-  const [authPromptAcik, setAuthPromptAcik] = useState(false)
-  const [tamamlananlar, setTamamlananlar] = useState<Record<string, number[]>>(() => {
+  const [authPromptAcik, setAuthPromptAcik] = useState(false)  const [tamamlananlar, setTamamlananlar] = useState<Record<string, number[]>>(() => {
     try {
       const item = localStorage.getItem('tamamlanan-haftalar')
       if (item) {
@@ -202,7 +200,7 @@ function App() {
           path="/app/plan"
           element={
             aktifEntry
-              ? <AppLayout headerAction={headerAction ?? undefined}><PlanPage entry={aktifEntry} planlar={planlar} onSinifSec={handleSinifSec} onHeaderAction={setHeaderAction} /></AppLayout>
+              ? <AppLayout><PlanPage entry={aktifEntry} planlar={planlar} onSinifSec={handleSinifSec} /></AppLayout>
               : <AppLayout>
                   <AppHomeScreen
                     planlar={planlar}
