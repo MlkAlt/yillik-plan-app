@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { PlanEntry } from '../types/planEntry';
 import { signOut, type User } from '../lib/auth';
 import { AuthModal } from '../components/AuthModal';
@@ -77,8 +77,31 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
     () => localStorage.getItem('lead-gonderildi') === '1'
   );
 
-
   const isSinifOgretmeni = ders === 'Sınıf Öğretmeni';
+
+  // Auto-save: kişisel bilgiler değişince debounced kaydet
+  const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const isFirstRender = useRef(true)
+
+  useEffect(() => {
+    if (isFirstRender.current) { isFirstRender.current = false; return }
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current)
+    autoSaveTimerRef.current = setTimeout(() => {
+      const base = { adSoyad, okulAdi, sehir, yil }
+      if (isSinifOgretmeni) {
+        localStorage.setItem('ogretmen-ayarlari', JSON.stringify({
+          ...base, ders: sinifOgrDersler[0], siniflar: sinifOgrDersler,
+          ogretmenTuru: 'sinif', sinifGercek: sinifOgrSinif,
+        }))
+      } else {
+        localStorage.setItem('ogretmen-ayarlari', JSON.stringify({ ...base, ders, siniflar }))
+      }
+      setBasariMesaji(true)
+      setTimeout(() => setBasariMesaji(false), 1500)
+    }, 600)
+    return () => { if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current) }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [adSoyad, okulAdi, sehir, yil])
 
   function handleDersChange(yeniDers: string) {
     setDers(yeniDers);
@@ -181,12 +204,9 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
             Bilgilerini güncelle, yeni sınıflar için plan ekle.
           </p>
         </div>
-        <button
-          onClick={handleSave}
-          className="shrink-0 bg-[#F59E0B] text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:opacity-90 active:scale-95 transition-all"
-        >
-          {basariMesaji ? '✅ Kaydedildi' : 'Kaydet'}
-        </button>
+        {basariMesaji && (
+          <span className="text-xs font-bold text-[#059669] animate-fade-in">✓ Kaydedildi</span>
+        )}
       </div>
 
       {/* Hesap Bölümü */}
@@ -424,9 +444,12 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
 
         {/* Yeni sınıf uyarısı */}
         {yeniSinifSayisi > 0 && (
-          <div className="bg-[#2D5BE3]/10 border border-[#2D5BE3]/20 rounded-xl px-3.5 py-2.5 text-[#2D5BE3] text-xs font-semibold">
-            Kaydet'e basınca {yeniSinifSayisi} yeni sınıf için plan oluşturulacak.
-          </div>
+          <button
+            onClick={handleSave}
+            className="w-full bg-[#2D5BE3] text-white py-3 rounded-xl font-bold text-sm active:scale-[0.98] transition-all hover:opacity-90"
+          >
+            {yeniSinifSayisi} yeni sınıf için plan oluştur →
+          </button>
         )}
 
         {mufredatUyari && (
