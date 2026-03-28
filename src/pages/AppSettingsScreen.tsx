@@ -8,9 +8,10 @@ import {
 } from '../lib/notifications';
 import {
   SINIF_SEVIYELERI, DERS_SINIF_MAP,
-  DERS_GRUPLARI, SINIF_OGRETMENI_DERSLER, SINIF_OGRETMENI_SINIFLAR,
+  SINIF_OGRETMENI_DERSLER, SINIF_OGRETMENI_SINIFLAR,
   getYilSecenekleri,
 } from '../lib/dersSinifMap';
+import { BRANCHES } from '../lib/branchConfig';
 import { buildPlan } from '../lib/planBuilder';
 import { LeadForm } from '../components/LeadForm';
 
@@ -51,6 +52,7 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
     if (a.ogretmenTuru === 'sinif') return 'Sınıf Öğretmeni';
     return a.ders || 'Fen Bilimleri';
   });
+  const [bransTumunuGoster, setBransTumunuGoster] = useState(false);
   const [siniflar, setSiniflar] = useState<string[]>(() => {
     const a = readAyarlar();
     if (a.ogretmenTuru === 'sinif') return ['5. Sınıf']; // branş modunda kullanılmaz
@@ -81,7 +83,8 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
   function handleDersChange(yeniDers: string) {
     setDers(yeniDers);
     if (yeniDers !== 'Sınıf Öğretmeni') {
-      const secilebilir = DERS_SINIF_MAP[yeniDers] || SINIF_SEVIYELERI;
+      const branch = BRANCHES.find(b => b.lessonId === yeniDers)
+      const secilebilir = branch?.classes || DERS_SINIF_MAP[yeniDers] || SINIF_SEVIYELERI;
       const gecerli = siniflar.filter(s => secilebilir.includes(s));
       setSiniflar(gecerli.length > 0 ? gecerli : [secilebilir[0]]);
     }
@@ -163,7 +166,8 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
     }
   }
 
-  const aktifSiniflar = DERS_SINIF_MAP[ders] || SINIF_SEVIYELERI;
+  const aktifBranch = BRANCHES.find(b => b.lessonId === ders)
+  const aktifSiniflar = aktifBranch?.classes || DERS_SINIF_MAP[ders] || SINIF_SEVIYELERI;
   const yeniSinifSayisi = isSinifOgretmeni
     ? sinifOgrDersler.filter(d => !planlarProp.find(p => p.sinif === `${sinifOgrSinif}—${d}`)).length
     : siniflar.filter(s => !planlarProp.find(p => p.sinif === s && p.ders === ders)).length;
@@ -295,20 +299,54 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
           </select>
         </div>
 
-        {/* Ders */}
+        {/* Branş / Ders */}
         <div className="flex flex-col gap-2">
           <label className="font-medium text-[#2D5BE3] text-sm">Branş / Ders</label>
-          <select
-            value={ders}
-            onChange={(e) => handleDersChange(e.target.value)}
-            className="w-full p-3 rounded-xl border border-[#E7E5E4] bg-[#FAFAF9] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/20 focus:border-[#F59E0B] transition-all text-[#1C1917] text-sm"
-          >
-            {DERS_GRUPLARI.map(g => (
-              <optgroup key={g.grup} label={g.grup}>
-                {g.dersler.map(d => <option key={d} value={d}>{d}</option>)}
-              </optgroup>
+          {/* Popüler branşlar */}
+          <div className="grid grid-cols-2 gap-2">
+            {BRANCHES.filter(b => b.popular).map(b => (
+              <button
+                key={b.id}
+                type="button"
+                onClick={() => handleDersChange(b.lessonId)}
+                className={`flex items-center gap-2.5 p-3 rounded-xl border text-left text-sm font-semibold transition-all active:scale-[0.97] ${
+                  ders === b.lessonId
+                    ? 'bg-[#2D5BE3] text-white border-[#2D5BE3]'
+                    : 'bg-[#FAFAF9] text-[#1C1917] border-[#E7E5E4] hover:border-[#2D5BE3]/40'
+                }`}
+              >
+                <span className="text-lg flex-shrink-0">{b.icon}</span>
+                <span className="leading-tight">{b.label}</span>
+              </button>
             ))}
-          </select>
+          </div>
+          {/* Diğer branşlar */}
+          {bransTumunuGoster && (
+            <div className="grid grid-cols-2 gap-2 mt-1">
+              {BRANCHES.filter(b => !b.popular).map(b => (
+                <button
+                  key={b.id}
+                  type="button"
+                  onClick={() => handleDersChange(b.lessonId)}
+                  className={`flex items-center gap-2.5 p-3 rounded-xl border text-left text-sm font-semibold transition-all active:scale-[0.97] ${
+                    ders === b.lessonId
+                      ? 'bg-[#2D5BE3] text-white border-[#2D5BE3]'
+                      : 'bg-[#FAFAF9] text-[#1C1917] border-[#E7E5E4] hover:border-[#2D5BE3]/40'
+                  }`}
+                >
+                  <span className="text-lg flex-shrink-0">{b.icon}</span>
+                  <span className="leading-tight">{b.label}</span>
+                </button>
+              ))}
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={() => setBransTumunuGoster(p => !p)}
+            className="mt-1 py-2 text-xs font-bold text-[#2D5BE3] border border-[#2D5BE3]/20 bg-[#2D5BE3]/5 rounded-xl active:scale-95 transition-all hover:bg-[#2D5BE3]/10"
+          >
+            {bransTumunuGoster ? 'Daha az göster ↑' : `Tüm branşları göster ↓`}
+          </button>
         </div>
 
         {/* Sınıf Öğretmeni: sınıf + ders seçimi */}

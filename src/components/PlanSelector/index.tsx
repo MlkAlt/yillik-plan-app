@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { SO_DERSLER, SO_SINIFLAR, type Branch } from '../../lib/branchConfig'
+
+const TEMEL_DERSLER = ['Türkçe', 'Matematik', 'Hayat Bilgisi', 'Fen Bilimleri', 'Sosyal Bilgiler']
 import type { PlanEntry } from '../../types/planEntry'
 import { buildPlan } from '../../lib/planBuilder'
 import { BranchStep } from './BranchStep'
@@ -23,7 +25,7 @@ export function PlanSelector({ yil, onComplete, onCancel }: PlanSelectorProps) {
 
   // Sınıf öğretmeni modu state
   const [selectedClass, setSelectedClass] = useState(SO_SINIFLAR[2]) // varsayılan: 3. Sınıf
-  const [selectedLessons, setSelectedLessons] = useState<string[]>(SO_DERSLER)
+  const [selectedLessons, setSelectedLessons] = useState<string[]>(TEMEL_DERSLER)
 
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)

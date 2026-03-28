@@ -7,6 +7,7 @@ interface BranchStepProps {
 
 export function BranchStep({ onSelect }: BranchStepProps) {
   const [query, setQuery] = useState('')
+  const [tumunuGoster, setTumunuGoster] = useState(false)
 
   const filtered = query
     ? BRANCHES.filter(b => b.label.toLowerCase().includes(query.toLowerCase()))
@@ -14,6 +15,10 @@ export function BranchStep({ onSelect }: BranchStepProps) {
 
   const popular = filtered.filter(b => b.popular)
   const rest = filtered.filter(b => !b.popular)
+
+  // Arama yokken "diğer" branşları gizle/göster
+  const gosterilecekRest = query || tumunuGoster ? rest : rest.slice(0, 6)
+  const kalanSayi = rest.length - 6
 
   return (
     <div>
@@ -40,14 +45,24 @@ export function BranchStep({ onSelect }: BranchStepProps) {
       )}
 
       {/* Tümü / Arama sonuçları */}
-      {(query ? filtered : rest).length > 0 && (
+      {(query ? filtered : gosterilecekRest).length > 0 && (
         <div>
           {!query && (
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2.5">Diğer Branşlar</p>
           )}
           <div className="grid grid-cols-2 gap-2">
-            {(query ? filtered : rest).map(b => <BranchCard key={b.id} branch={b} onSelect={onSelect} />)}
+            {(query ? filtered : gosterilecekRest).map(b => <BranchCard key={b.id} branch={b} onSelect={onSelect} />)}
           </div>
+
+          {/* Tümünü göster / gizle */}
+          {!query && kalanSayi > 0 && (
+            <button
+              onClick={() => setTumunuGoster(p => !p)}
+              className="mt-3 w-full py-2 text-xs font-bold text-[#2D5BE3] border border-[#2D5BE3]/20 bg-[#2D5BE3]/5 rounded-xl active:scale-95 transition-all hover:bg-[#2D5BE3]/10"
+            >
+              {tumunuGoster ? 'Daha az göster ↑' : `+${kalanSayi} branş daha göster ↓`}
+            </button>
+          )}
         </div>
       )}
 
