@@ -21,7 +21,8 @@ function App() {
   const [yuklendi, setYuklendi] = useState(false)
   const [user, setUser] = useState<User | null>(null)
   const [syncing, setSyncing] = useState(false)
-  const [authPromptAcik, setAuthPromptAcik] = useState(false)  const [tamamlananlar, setTamamlananlar] = useState<Record<string, number[]>>(() => {
+  const [authPromptAcik, setAuthPromptAcik] = useState(false)
+  const [tamamlananlar, setTamamlananlar] = useState<Record<string, number[]>>(() => {
     try {
       const item = localStorage.getItem('tamamlanan-haftalar')
       if (item) {
