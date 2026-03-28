@@ -44,6 +44,7 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
   const [okulAdi, setOkulAdi] = useState(() => readAyarlar().okulAdi || '');
   const [sehir, setSehir] = useState(() => readAyarlar().sehir || '');
   const [yil, setYil] = useState(() => readAyarlar().yil || getYilSecenekleri()[0]);
+  const [degisti, setDegisti] = useState(false);
   const [kaydedildi, setKaydedildi] = useState(false);
   const [authModalAcik, setAuthModalAcik] = useState(false);
   const [planSelectorAcik, setPlanSelectorAcik] = useState(false);
@@ -51,21 +52,22 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
   const [bildirimAktif, setBildirimAktifState] = useState(isBildirimAktif);
   const [bildirimIzni, setBildirimIzniState] = useState(getBildirimIzni);
   const [mufredatUyari, setMufredatUyari] = useState('');
-  const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isFirst = useRef(true);
 
   useEffect(() => {
     if (isFirst.current) { isFirst.current = false; return; }
-    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
-    autoSaveTimer.current = setTimeout(() => {
-      const a = readAyarlar();
-      localStorage.setItem('ogretmen-ayarlari', JSON.stringify({ ...a, adSoyad, okulAdi, sehir, yil }));
-      setKaydedildi(true);
-      setTimeout(() => setKaydedildi(false), 1500);
-    }, 600);
-    return () => { if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current); };
+    setDegisti(true);
+    setKaydedildi(false);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [adSoyad, okulAdi, sehir, yil]);
+
+  function handleKaydet() {
+    const a = readAyarlar();
+    localStorage.setItem('ogretmen-ayarlari', JSON.stringify({ ...a, adSoyad, okulAdi, sehir, yil }));
+    setDegisti(false);
+    setKaydedildi(true);
+    setTimeout(() => setKaydedildi(false), 2000);
+  }
 
   function handlePlanSilOnayla(sinif: string) {
     if (onPlanSil) onPlanSil(sinif);
@@ -94,7 +96,6 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
     <div className="max-w-lg mx-auto p-4 w-full pb-24">
       <div className="mb-6 mt-2 flex items-center justify-between h-10">
         <h1 className="text-3xl font-bold text-[#2D5BE3]">Ayarlar</h1>
-        {kaydedildi && <span className="text-xs font-bold text-[#059669]">Kaydedildi</span>}
       </div>
 
       {/* PROFIL */}
@@ -110,6 +111,18 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
             <option value="" disabled>Sehir sec</option>
             {SEHIRLER.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
+          {/* Kaydet — sadece değişiklik varsa görünür */}
+          <div className={`overflow-hidden transition-all duration-200 ${degisti ? 'max-h-16 opacity-100' : 'max-h-0 opacity-0'}`}>
+            <button
+              onClick={handleKaydet}
+              className="w-full bg-[#F59E0B] text-white py-3 rounded-xl font-bold text-sm active:scale-[0.98] transition-all hover:opacity-90 mt-1"
+            >
+              Kaydet
+            </button>
+          </div>
+          {kaydedildi && !degisti && (
+            <p className="text-xs font-bold text-[#059669] text-center">Kaydedildi</p>
+          )}
         </div>
       </div>
 
