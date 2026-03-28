@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { signIn, signUp } from '../../lib/auth'
 
 interface AuthModalProps {
@@ -37,7 +38,7 @@ export function AuthModal({ onClose }: AuthModalProps) {
     }
   }
 
-  return (
+  const modal = (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
@@ -132,4 +133,6 @@ export function AuthModal({ onClose }: AuthModalProps) {
       </div>
     </div>
   )
+
+  return createPortal(modal, document.body)
 }
