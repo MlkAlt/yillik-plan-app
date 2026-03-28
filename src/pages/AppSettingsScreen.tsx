@@ -10,19 +10,6 @@ import { getYilSecenekleri } from '../lib/dersSinifMap';
 import { BottomSheet } from '../components/UI/BottomSheet';
 import { PlanSelector } from '../components/PlanSelector';
 
-const SEHIRLER = [
-  "Adana", "Ankara", "Antalya", "Bursa", "Denizli", "Diyarbakir", "Edirne",
-  "Erzurum", "Eskisehir", "Gaziantep", "Hatay", "Istanbul", "Izmir", "Kayseri",
-  "Kocaeli", "Konya", "Malatya", "Manisa", "Mersin", "Mugla", "Ordu", "Sakarya",
-  "Samsun", "Tekirdag", "Trabzon", "Van", "Adiyaman", "Afyonkarahisar", "Agri",
-  "Amasya", "Artvin", "Aydin", "Balikesir", "Bilecik", "Bingol", "Bitlis", "Bolu",
-  "Burdur", "Canakkale", "Cankiri", "Corum", "Elazig", "Erzincan", "Giresun",
-  "Gumushane", "Hakkari", "Isparta", "Kars", "Kastamonu", "Kirklareli", "Kirsehir",
-  "Kutahya", "Kahramanmaras", "Mardin", "Mus", "Nevsehir", "Nigde", "Rize",
-  "Siirt", "Sinop", "Sivas", "Tokat", "Tunceli", "Sanliurfa", "Usak", "Yozgat",
-  "Zonguldak", "Aksaray", "Bayburt", "Karaman", "Kirikkale", "Batman", "Sirnak",
-  "Bartin", "Ardahan", "Igdir", "Yalova", "Karabuk", "Kilis", "Osmaniye", "Duzce",
-];
 
 interface AppSettingsScreenProps {
   onPlanEkle: (entries: PlanEntry[]) => void;
@@ -42,7 +29,6 @@ function readAyarlar() {
 export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planlarProp = [] }: AppSettingsScreenProps) {
   const [adSoyad, setAdSoyad] = useState(() => readAyarlar().adSoyad || '');
   const [okulAdi, setOkulAdi] = useState(() => readAyarlar().okulAdi || '');
-  const [sehir, setSehir] = useState(() => readAyarlar().sehir || '');
   const [yil, setYil] = useState(() => readAyarlar().yil || getYilSecenekleri()[0]);
   const [degisti, setDegisti] = useState(false);
   const [kaydedildi, setKaydedildi] = useState(false);
@@ -59,11 +45,11 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
     setDegisti(true);
     setKaydedildi(false);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [adSoyad, okulAdi, sehir, yil]);
+  }, [adSoyad, okulAdi, yil]);
 
   function handleKaydet() {
     const a = readAyarlar();
-    localStorage.setItem('ogretmen-ayarlari', JSON.stringify({ ...a, adSoyad, okulAdi, sehir, yil }));
+    localStorage.setItem('ogretmen-ayarlari', JSON.stringify({ ...a, adSoyad, okulAdi, yil }));
     setDegisti(false);
     setKaydedildi(true);
     setTimeout(() => setKaydedildi(false), 2000);
@@ -106,11 +92,6 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
             className="w-full p-3 rounded-xl border border-[#E7E5E4] bg-white focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/20 focus:border-[#F59E0B] transition-all text-[#1C1917] text-sm" />
           <input type="text" placeholder="Okul Adi" value={okulAdi} onChange={e => setOkulAdi(e.target.value)}
             className="w-full p-3 rounded-xl border border-[#E7E5E4] bg-white focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/20 focus:border-[#F59E0B] transition-all text-[#1C1917] text-sm" />
-          <select value={sehir} onChange={e => setSehir(e.target.value)}
-            className="w-full p-3 rounded-xl border border-[#E7E5E4] bg-white focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/20 focus:border-[#F59E0B] transition-all text-[#1C1917] text-sm">
-            <option value="" disabled>Sehir sec</option>
-            {SEHIRLER.map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
           {/* Kaydet — sadece değişiklik varsa görünür */}
           <div className={`overflow-hidden transition-all duration-200 ${degisti ? 'max-h-16 opacity-100' : 'max-h-0 opacity-0'}`}>
             <button
