@@ -1,0 +1,14 @@
+{
+  "enabled": true,
+  "name": "Auto Commit & Push",
+  "description": "Agent durduğunda git add, commit ve push işlemlerini otomatik yapar",
+  "version": "1",
+  "when": {
+    "type": "agentStop"
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "powershell -ExecutionPolicy Bypass -File scripts/auto-commit-push.ps1",
+    "timeout": 30
+  }
+}
