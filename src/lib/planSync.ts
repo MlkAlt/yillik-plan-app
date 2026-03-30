@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
 import type { PlanEntry } from '../types/planEntry'
+import { validatePlanRows } from './planValidator'
 
 // Supabase erişilemezse fallback değeri döner — sessiz hata
 export async function withSupabaseFallback<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
@@ -36,7 +37,6 @@ export async function syncPlansToSupabase(userId: string, planlar: PlanEntry[]) 
     label: p.label ?? null,
     sinif_gercek: p.sinifGercek ?? null,
   }))
-
   await supabase
     .from('plans')
     .upsert(rows, { onConflict: 'user_id,sinif' })
@@ -51,7 +51,7 @@ export async function fetchPlansFromSupabase(userId: string): Promise<PlanEntry[
 
     if (error || !data) return []
 
-    return data.map(row => ({
+    const mapped = data.map(row => ({
       sinif: row.sinif,
       ders: row.ders,
       yil: row.yil,
@@ -61,6 +61,7 @@ export async function fetchPlansFromSupabase(userId: string): Promise<PlanEntry[
       label: row.label ?? undefined,
       sinifGercek: row.sinif_gercek ?? undefined,
     }))
+    return validatePlanRows(mapped)
   }, [])
 }
 

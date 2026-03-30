@@ -5,9 +5,16 @@ import { signIn, signUp } from '../../lib/auth'
 interface AuthModalProps {
   onClose: () => void
   mode?: 'default' | 'prompt'
+  planBaglami?: { ders: string; sinif: string }
 }
 
-export function AuthModal({ onClose, mode = 'default' }: AuthModalProps) {
+const MOTIVASYON_MADDELERI = [
+  { ikon: '📱', metin: 'Telefon değişse de planların kaybolmaz' },
+  { ikon: '🔄', metin: 'Geçen yılın planını bir tıkla tekrar kullan' },
+  { ikon: '👥', metin: 'Meslektaşlarınla kolayca paylaş' },
+]
+
+export function AuthModal({ onClose, mode = 'default', planBaglami }: AuthModalProps) {
   const isPrompt = mode === 'prompt'
   const [tab, setTab] = useState<'giris' | 'kayit'>('giris')
   const [email, setEmail] = useState('')
@@ -48,12 +55,27 @@ export function AuthModal({ onClose, mode = 'default' }: AuthModalProps) {
       {/* Modal */}
       <div className="relative z-10 bg-white rounded-2xl w-full max-w-sm mx-auto p-6 shadow-xl">
         {isPrompt && (
-          <div className="text-center mb-5">
-            <div className="text-4xl mb-3">☁️</div>
-            <h2 className="text-lg font-bold text-[#1C1917] mb-1">Planını kaydet</h2>
-            <p className="text-sm text-gray-500 leading-relaxed">
-              Ücretsiz hesap oluştur, planların tüm cihazlarında erişilebilir olsun.
-            </p>
+          <div className="mb-5">
+            <div className="text-center mb-4">
+              <div className="text-4xl mb-2">☁️</div>
+              <h2 className="text-lg font-bold text-[#1C1917] mb-1">
+                {planBaglami ? `${planBaglami.ders} planını güvende tut` : 'Planını güvende tut'}
+              </h2>
+              {planBaglami && (
+                <p className="text-xs text-[#2D5BE3] font-semibold bg-[#2D5BE3]/8 rounded-lg px-3 py-1.5 inline-block mb-2">
+                  Az önce oluşturduğun {planBaglami.sinif} planını kaydet
+                </p>
+              )}
+            </div>
+            {/* Motivasyon maddeleri */}
+            <div className="flex flex-col gap-2 mb-1">
+              {MOTIVASYON_MADDELERI.map((m, i) => (
+                <div key={i} className="flex items-center gap-3 bg-[#FAFAF9] border border-[#E7E5E4] rounded-xl px-3 py-2.5">
+                  <span className="text-base">{m.ikon}</span>
+                  <span className="text-xs font-medium text-[#1C1917]">{m.metin}</span>
+                </div>
+              ))}
+            </div>
           </div>
         )}
         <div className="flex items-center justify-between mb-5">

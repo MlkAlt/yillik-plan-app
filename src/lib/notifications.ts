@@ -1,5 +1,7 @@
-const BILDIRIM_AYAR_KEY = 'bildirim-aktif'
-const BILDIRIM_SON_HAFTA_KEY = 'bildirim-son-hafta'
+import { StorageKeys } from './storageKeys'
+
+const BILDIRIM_AYAR_KEY = StorageKeys.BILDIRIM_AKTIF
+const BILDIRIM_SON_HAFTA_KEY = StorageKeys.BILDIRIM_SON_HAFTA
 
 export function isBildirimDestekleniyor(): boolean {
   return 'Notification' in window

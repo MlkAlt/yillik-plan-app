@@ -12,6 +12,22 @@
   --color-ink:      #1C1917;
   --color-border:   #E7E5E4;
 
+  /* UX Yeniden Tasarım — Anlamlı Renk Token'ları */
+  /* aksiyon: Tıklanabilir öğeler, butonlar, linkler */
+  --color-aksiyon:  #2D5BE3;
+  /* aktif: Aktif/seçili durum, navigasyon vurgusu */
+  --color-aktif:    #F59E0B;
+  /* basari: Tamamlandı, başarı durumu */
+  --color-basari:   #059669;
+  /* icerik: Başlık ve etiket metinleri */
+  --color-icerik:   #1C1917;
+  /* ikincil: Yardımcı metin, açıklama */
+  --color-ikincil:  #6B7280;
+  /* sinir: Kenarlık, ayırıcı */
+  --color-sinir:    #E7E5E4;
+  /* zemin: Kart arka planı */
+  --color-zemin:    #FAFAF9;
+
   --shadow-card: 0 1px 3px rgba(0,0,0,0.06);
 
   --radius-card: 16px;
@@ -19,9 +35,7 @@
   --animate-fade-in:  fade-in  0.18s ease-out both;
   --animate-pop-in:   pop-in   0.22s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   --animate-slide-up: slide-up 0.2s ease-out both;
-}
-
-@keyframes fade-in {
+}@keyframes fade-in {
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }

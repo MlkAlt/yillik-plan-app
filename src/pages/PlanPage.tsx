@@ -5,6 +5,9 @@ import type { ParsedRow } from '../lib/fileParser';
 import type { PlanEntry } from '../types/planEntry';
 import { exportPlanToExcel, exportPlanToWord, exportPlanToPrint } from '../lib/exportUtils';
 import { AdBanner } from '../components/AdBanner';
+import { Card } from '../components/UI/Card';
+import { Button } from '../components/Button';
+import { Download, FileSpreadsheet, FileText, Printer, MapPin, Check, CalendarDays } from 'lucide-react';
 
 interface PlanPageProps {
   entry: PlanEntry | null;
@@ -17,16 +20,6 @@ function formatTarih(isoTarih: string): string {
   const d = new Date(isoTarih)
   return `${String(d.getDate()).padStart(2, '0')} ${aylar[d.getMonth()]}`
 }
-
-const getEmoji = (ad: string = '') => {
-  const lower = ad.toLowerCase();
-  if (lower.includes('bayram')) return '🎊';
-  if (lower.includes('yılbaşı')) return '🎄';
-  if (lower.includes('ara tatil')) return '🌴';
-  if (lower.includes('yarıyıl')) return '⛄';
-  if (lower.includes('atatürk')) return '🇹🇷';
-  return '🏖️';
-};
 
 export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
   const navigate = useNavigate();
@@ -120,19 +113,18 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
 
   if (!entry) {
     return (
-      <div className="p-4 pb-24 w-full max-w-lg mx-auto">
+      <div className="p-4 pb-20 w-full max-w-lg mx-auto">
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6">
-          <div className="text-6xl mb-5">📋</div>
-          <h2 className="text-xl font-bold text-[#2D5BE3] mb-2">Henüz plan yok</h2>
+          <div className="w-16 h-16 bg-[#2D5BE3]/10 rounded-2xl flex items-center justify-center mb-5">
+            <CalendarDays size={32} className="text-[#2D5BE3]" />
+          </div>
+          <h2 className="text-xl font-bold text-[#1C1917] mb-2">Henüz plan yok</h2>
           <p className="text-sm text-gray-400 font-medium mb-6 leading-relaxed">
             Ana ekrandan planını oluştur ve tüm haftaları burada takip et.
           </p>
-          <button
-            onClick={() => navigate('/app')}
-            className="bg-[#F59E0B] text-white px-6 py-3 rounded-xl font-bold text-sm active:scale-95 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.06)]"
-          >
+          <Button onClick={() => navigate('/app')} variant="primary" size="md">
             Plan Oluştur →
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -150,12 +142,12 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
   const yuzde = toplamDers > 0 ? Math.round((tamamlananSayi / toplamDers) * 100) : 0;
 
   return (
-    <div className="p-4 pb-24 w-full max-w-lg mx-auto">
+    <div className="p-4 pb-20 w-full max-w-lg mx-auto">
       {/* Üst Bilgi Kartı */}
-      <div className="mb-4 bg-[#FAFAF9] p-5 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4]">
+      <Card className="mb-4">
         <div className="flex items-start justify-between mb-3">
           <div>
-            <h1 className="text-xl font-bold text-[#2D5BE3] tracking-tight uppercase">
+            <h1 className="text-xl font-bold text-[#1C1917] tracking-tight uppercase">
               {ders || 'Ders Seçilmedi'}
             </h1>
             <p className="text-sm text-gray-400 font-medium mt-0.5">{sinifGercek || sinif}</p>
@@ -176,7 +168,7 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
             style={{ width: `${visibleYuzde}%` }}
           />
         </div>
-      </div>
+      </Card>
 
       {/* Plan seçici — birden fazla plan varsa */}
       {planlar && planlar.length > 1 && (
@@ -206,20 +198,20 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
             disabled={!!exporting}
             className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-[#E7E5E4] bg-[#FAFAF9] text-sm font-bold text-[#2D5BE3] hover:border-[#2D5BE3] active:scale-95 transition-all disabled:opacity-60"
           >
-            {exporting ? <span className="animate-pulse text-xs">Hazırlanıyor...</span> : <>📥 İndir ↓</>}
+            {exporting ? <span className="animate-pulse text-xs">Hazırlanıyor...</span> : <><Download size={16} /> İndir</>}
           </button>
           {exportMenuAcik && (
             <>
               <div className="fixed inset-0 z-10" onClick={() => setExportMenuAcik(false)} />
               <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl border border-[#E7E5E4] shadow-lg z-20 overflow-hidden">
                 <button onClick={handleExcelIndir} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-[#1C1917] hover:bg-gray-50 active:bg-gray-100 transition-colors border-b border-[#E7E5E4]">
-                  📊 Excel (.xlsx)
+                  <FileSpreadsheet size={16} className="text-green-600" /> Excel (.xlsx)
                 </button>
                 <button onClick={handleWordIndir} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-[#1C1917] hover:bg-gray-50 active:bg-gray-100 transition-colors border-b border-[#E7E5E4]">
-                  📄 Word (.doc)
+                  <FileText size={16} className="text-blue-600" /> Word (.doc)
                 </button>
                 <button onClick={handleYazdir} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-[#1C1917] hover:bg-gray-50 active:bg-gray-100 transition-colors">
-                  🖨️ Yazdır / PDF
+                  <Printer size={16} className="text-gray-600" /> Yazdır / PDF
                 </button>
               </div>
             </>
@@ -232,7 +224,7 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
             onClick={scrollToBugunHafta}
             className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-[#2D5BE3]/30 bg-[#2D5BE3]/5 text-sm font-bold text-[#2D5BE3] active:scale-95 transition-all hover:bg-[#2D5BE3]/10 whitespace-nowrap"
           >
-            📍 Bu Hafta
+            <MapPin size={15} /> Bu Hafta
           </button>
         )}
       </div>
@@ -275,8 +267,8 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
                 </div>
                 <div className="flex items-center gap-2">
                   {isTamamlandi && (
-                    <span className="text-xs font-bold text-[#059669] bg-[#059669]/10 px-2 py-0.5 rounded-full border border-[#059669]/30">
-                      ✅ Tamam
+                    <span className="flex items-center gap-1 text-xs font-bold text-[#059669] bg-[#059669]/10 px-2 py-0.5 rounded-full border border-[#059669]/30">
+                      <Check size={11} strokeWidth={3} /> Tamam
                     </span>
                   )}
                   <span className="text-[11px] text-gray-500 font-semibold bg-[#FAFAF9] px-2.5 py-1 rounded-md border border-[#E7E5E4]/50">
@@ -304,9 +296,7 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
                   {h.donem}. Dönem
                 </span>
                 {isTatil && (
-                  <span className="text-sm font-bold text-[#F59E0B] flex items-center gap-1.5">
-                    <span className="text-lg">{getEmoji(h.tatilAdi)}</span> {h.tatilAdi}
-                  </span>
+                  <span className="text-sm font-bold text-[#F59E0B]">{h.tatilAdi}</span>
                 )}
               </div>
             </div>
@@ -329,8 +319,8 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
                 </span>
                 <div className="flex items-center gap-2">
                   {isTamamlandi && (
-                    <span className="text-xs font-bold text-[#059669] bg-[#059669]/10 px-2 py-0.5 rounded-full border border-[#059669]/30">
-                      ✅ Tamam
+                    <span className="flex items-center gap-1 text-xs font-bold text-[#059669] bg-[#059669]/10 px-2 py-0.5 rounded-full border border-[#059669]/30">
+                      <Check size={11} strokeWidth={3} /> Tamam
                     </span>
                   )}
                   {r.tarihAraligi && (

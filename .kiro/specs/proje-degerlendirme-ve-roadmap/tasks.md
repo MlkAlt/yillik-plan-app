@@ -10,7 +10,7 @@
 
 ## Faz 1 — Temel UX (Onboarding + AppHomeScreen)
 
-- [ ] 1. Test altyapısını kur
+- [x] 1. Test altyapısını kur
   - `vitest`, `@testing-library/react`, `fast-check` paketlerini yükle
   - `vite.config.ts`'e `test: { environment: 'jsdom', globals: true }` ekle
   - `src/test/` dizini oluştur
@@ -106,8 +106,8 @@
     - `PlanPage` plan yokken, `HaftaDetayPage` entry null iken
     - _Requirements: 4.5_
 
-- [ ] 12. `buildPlan()` ve `getMufredat()` için birim testleri yaz
-  - [ ] 12.1 `buildPlan()` birim testleri
+- [x] 12. `buildPlan()` ve `getMufredat()` için birim testleri yaz
+  - [x] 12.1 `buildPlan()` birim testleri
     - Müfredat var → `hasMufredat: true`, `haftalar.length > 0`
     - Müfredat yok → `hasMufredat: false`, plan yine de geçerli
     - _Requirements: 5.6_

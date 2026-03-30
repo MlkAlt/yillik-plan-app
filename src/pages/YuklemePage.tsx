@@ -43,8 +43,8 @@ export function YuklemePage({ onYukle }: YuklemePageProps) {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-            <div className="bg-[#FAFAF9] rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.10)] w-full max-w-md p-8">
+        <div className="p-4 pb-20 max-w-md mx-auto w-full">
+            <div className="bg-[#FAFAF9] rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.10)] w-full p-8 mt-4">
                 <h1 className="text-2xl font-bold text-[#1C1917] mb-2">Plan Yükle</h1>
                 <p className="text-gray-500 text-sm mb-8">
                     Excel (.xlsx) veya Word (.docx) dosyanızı yükleyin.

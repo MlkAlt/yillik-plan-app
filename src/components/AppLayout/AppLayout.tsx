@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import type { ReactNode } from 'react'
+import { Home, CalendarDays, User } from 'lucide-react'
 
 interface AppLayoutProps {
   children: ReactNode
@@ -28,9 +29,8 @@ export function AppLayout({ children, headerAction }: AppLayoutProps) {
   })
 
   const tabs = [
-    { name: 'Ana', path: '/app', icon: '🏠' },
-    { name: 'Planım', path: '/app/plan', icon: '📅' },
-    { name: 'Ayarlar', path: '/app/ayarlar', icon: '⚙️' },
+    { name: 'Ana', path: '/app', icon: Home },
+    { name: 'Planım', path: '/app/plan', icon: CalendarDays },
   ]
 
   return (
@@ -42,7 +42,7 @@ export function AppLayout({ children, headerAction }: AppLayoutProps) {
         <header className="sticky top-0 z-40 bg-white border-b border-[#E7E5E4] h-14 px-5 flex items-center justify-between shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
           <button
             onClick={() => navigate('/app')}
-            className="font-bold text-[#2D5BE3] text-lg tracking-tight active:opacity-70 transition-opacity"
+            className="font-bold text-[#1C1917] text-lg tracking-tight active:opacity-70 transition-opacity"
           >
             Yıllık Plan
           </button>
@@ -55,12 +55,6 @@ export function AppLayout({ children, headerAction }: AppLayoutProps) {
                 {headerAction.label}
               </button>
             )}
-            <div
-              onClick={() => navigate('/app/ayarlar')}
-              className="w-8 h-8 rounded-full bg-[#F59E0B] text-white flex items-center justify-center font-bold text-sm shadow-[0_1px_3px_rgba(0,0,0,0.06)] ring-2 ring-amber-50 cursor-pointer active:scale-90 transition-transform"
-            >
-              {basharf ? basharf : '👤'}
-            </div>
           </div>
         </header>
 
@@ -71,40 +65,54 @@ export function AppLayout({ children, headerAction }: AppLayoutProps) {
           {children}
         </main>
 
-        {/* BOTTOM TAB BAR */}
         <nav className="fixed bottom-0 w-full max-w-lg bg-white border-t border-[#E7E5E4] z-50">
           <div className="flex justify-around items-center px-4 py-2">
             {tabs.map((tab) => {
-              // /app/hafta/:no → "Planım" aktif; diğerleri exact match
               const isActive = tab.path === '/app/plan'
                 ? location.pathname.startsWith('/app/plan') || location.pathname.startsWith('/app/hafta')
                 : location.pathname === tab.path
+              const Icon = tab.icon
 
               return (
                 <button
                   key={tab.path}
-                  onClick={() => navigate(tab.path)}
+                  onClick={() => navigate(tab.path, { replace: isActive })}
                   className="flex flex-col items-center gap-1 min-w-[4rem] group relative pb-1"
                 >
-                  <span className={`text-[22px] transition-transform duration-200 ${isActive ? 'scale-110' : 'opacity-70 group-hover:opacity-100'}`}>
-                    {tab.icon}
-                  </span>
-                  <span
-                    className={`text-[10px] font-bold transition-colors duration-200 ${
-                      isActive ? 'text-[#F59E0B]' : 'text-gray-400 group-hover:text-gray-600'
-                    }`}
-                  >
+                  <Icon
+                    size={22}
+                    className={`transition-all duration-200 ${isActive ? 'text-[#2D5BE3] scale-110' : 'text-gray-400 group-hover:text-gray-600'}`}
+                    strokeWidth={isActive ? 2.5 : 1.8}
+                  />
+                  <span className={`text-[10px] font-bold transition-colors duration-200 ${isActive ? 'text-[#2D5BE3]' : 'text-gray-400 group-hover:text-gray-600'}`}>
                     {tab.name}
                   </span>
-                  {/* Aktif nokta göstergesi */}
-                  <span
-                    className={`absolute bottom-0 rounded-full bg-[#F59E0B] transition-all duration-300 ${
-                      isActive ? 'w-4 h-1 opacity-100' : 'w-0 h-1 opacity-0'
-                    }`}
-                  />
+                  <span className={`absolute bottom-0 rounded-full bg-[#2D5BE3] transition-all duration-300 ${isActive ? 'w-4 h-0.5 opacity-100' : 'w-0 h-0.5 opacity-0'}`} />
                 </button>
               )
             })}
+
+            {/* Profil / Ayarlar butonu */}
+            <button
+              onClick={() => navigate('/app/ayarlar')}
+              className="flex flex-col items-center gap-1 min-w-[4rem] group relative pb-1"
+            >
+              {basharf ? (
+                <div className={`w-7 h-7 rounded-full bg-[#2D5BE3] text-white flex items-center justify-center font-bold text-xs transition-all duration-200 ${location.pathname === '/app/ayarlar' ? 'scale-110' : 'opacity-70 group-hover:opacity-100'}`}>
+                  {basharf}
+                </div>
+              ) : (
+                <User
+                  size={22}
+                  className={`transition-all duration-200 ${location.pathname === '/app/ayarlar' ? 'text-[#2D5BE3] scale-110' : 'text-gray-400 group-hover:text-gray-600'}`}
+                  strokeWidth={location.pathname === '/app/ayarlar' ? 2.5 : 1.8}
+                />
+              )}
+              <span className={`text-[10px] font-bold transition-colors duration-200 ${location.pathname === '/app/ayarlar' ? 'text-[#2D5BE3]' : 'text-gray-400 group-hover:text-gray-600'}`}>
+                Profil
+              </span>
+              <span className={`absolute bottom-0 rounded-full bg-[#2D5BE3] transition-all duration-300 ${location.pathname === '/app/ayarlar' ? 'w-4 h-0.5 opacity-100' : 'w-0 h-0.5 opacity-0'}`} />
+            </button>
           </div>
         </nav>
 

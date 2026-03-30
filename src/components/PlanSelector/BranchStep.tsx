@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { BRANCHES, type Branch } from '../../lib/branchConfig'
+import { Search } from 'lucide-react'
 
 interface BranchStepProps {
   onSelect: (branch: Branch) => void
@@ -24,7 +25,7 @@ export function BranchStep({ onSelect }: BranchStepProps) {
     <div>
       {/* Arama */}
       <div className="relative mb-5">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">🔍</span>
+        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
         <input
           type="text"
           placeholder="Branş ara... (Matematik, Fizik, Müzik...)"

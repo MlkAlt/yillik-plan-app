@@ -5,6 +5,10 @@ import type { ParsedRow } from '../lib/fileParser'
 import type { PlanEntry } from '../types/planEntry'
 import { getSession } from '../lib/auth'
 import { syncProgressToSupabase } from '../lib/planSync'
+import { useToast } from '../lib/toast'
+import { StorageKeys } from '../lib/storageKeys'
+import { ChevronLeft, Check } from 'lucide-react'
+import { Card } from '../components/UI/Card'
 
 function formatTarih(isoTarih: string): string {
   const aylar = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
@@ -30,8 +34,8 @@ export function HaftaDetayPage({ entry }: HaftaDetayPageProps) {
   const [tamamlandi, setTamamlandi] = useState(false)
   const [tamamlaAnimating, setTamamlaAnimating] = useState(false)
   const [not, setNot] = useState('')
-  const [notKaydedildi, setNotKaydedildi] = useState(false)
   const notTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const { goster } = useToast()
 
   useEffect(() => {
     // Plan verisini prop'tan oku
@@ -51,9 +55,9 @@ export function HaftaDetayPage({ entry }: HaftaDetayPageProps) {
 
     // Progress verisi localStorage'dan okunmaya devam eder (global)
     try {
-      const aktifSinifStr = localStorage.getItem('aktif-sinif') || ''
+      const aktifSinifStr = localStorage.getItem(StorageKeys.AKTIF_SINIF) || ''
 
-      const tamamlananItem = localStorage.getItem('tamamlanan-haftalar')
+      const tamamlananItem = localStorage.getItem(StorageKeys.TAMAMLANAN_HAFTALAR)
       if (tamamlananItem) {
         const parsed = JSON.parse(tamamlananItem)
         const liste: number[] = Array.isArray(parsed)
@@ -62,7 +66,7 @@ export function HaftaDetayPage({ entry }: HaftaDetayPageProps) {
         setTamamlandi(liste.includes(no))
       }
 
-      const notlarItem = localStorage.getItem('hafta-notlari')
+      const notlarItem = localStorage.getItem(StorageKeys.HAFTA_NOTLARI)
       if (notlarItem) {
         const parsed = JSON.parse(notlarItem)
         const notlar = aktifSinifStr && parsed[aktifSinifStr]
@@ -77,8 +81,8 @@ export function HaftaDetayPage({ entry }: HaftaDetayPageProps) {
 
   function handleTamamlaToggle() {
     try {
-      const aktifSinifStr = localStorage.getItem('aktif-sinif') || sinif
-      const tamamlananItem = localStorage.getItem('tamamlanan-haftalar')
+      const aktifSinifStr = localStorage.getItem(StorageKeys.AKTIF_SINIF) || sinif
+      const tamamlananItem = localStorage.getItem(StorageKeys.TAMAMLANAN_HAFTALAR)
       const parsed = tamamlananItem ? JSON.parse(tamamlananItem) : {}
       const eskiListe: number[] = Array.isArray(parsed) ? parsed : (parsed[aktifSinifStr] || [])
       const yeniListe = tamamlandi
@@ -87,13 +91,13 @@ export function HaftaDetayPage({ entry }: HaftaDetayPageProps) {
       const yeniParsed = Array.isArray(parsed)
         ? { [aktifSinifStr]: yeniListe }
         : { ...parsed, [aktifSinifStr]: yeniListe }
-      localStorage.setItem('tamamlanan-haftalar', JSON.stringify(yeniParsed))
+      localStorage.setItem(StorageKeys.TAMAMLANAN_HAFTALAR, JSON.stringify(yeniParsed))
       if (!tamamlandi) setTamamlaAnimating(true)
       setTamamlandi(!tamamlandi)
       // Arka planda Supabase'e sync
       getSession().then(session => {
         if (!session) return
-        const notlarItem = localStorage.getItem('hafta-notlari')
+        const notlarItem = localStorage.getItem(StorageKeys.HAFTA_NOTLARI)
         const notlar = notlarItem ? JSON.parse(notlarItem) : {}
         syncProgressToSupabase(session.user.id, yeniParsed, notlar).catch(() => {})
       })
@@ -105,21 +109,22 @@ export function HaftaDetayPage({ entry }: HaftaDetayPageProps) {
   function handleNotChange(deger: string) {
     setNot(deger)
     try {
-      const aktifSinifStr = localStorage.getItem('aktif-sinif') || sinif
-      const notlarItem = localStorage.getItem('hafta-notlari')
+      const aktifSinifStr = localStorage.getItem(StorageKeys.AKTIF_SINIF) || sinif
+      const notlarItem = localStorage.getItem(StorageKeys.HAFTA_NOTLARI)
       const parsed = notlarItem ? JSON.parse(notlarItem) : {}
       const sinifNotlar = parsed[aktifSinifStr] || {}
       sinifNotlar[String(no)] = deger
       parsed[aktifSinifStr] = sinifNotlar
-      localStorage.setItem('hafta-notlari', JSON.stringify(parsed))
+      localStorage.setItem(StorageKeys.HAFTA_NOTLARI, JSON.stringify(parsed))
       // Kaydedildi göstergesi — debounced
       if (notTimerRef.current) clearTimeout(notTimerRef.current)
-      setNotKaydedildi(true)
-      notTimerRef.current = setTimeout(() => setNotKaydedildi(false), 1500)
+      notTimerRef.current = setTimeout(() => {
+        goster('Not kaydedildi', 'basari')
+      }, 800)
       // Arka planda Supabase'e sync (debounced ile aynı süre)
       getSession().then(session => {
         if (!session) return
-        const tamamlananItem = localStorage.getItem('tamamlanan-haftalar')
+        const tamamlananItem = localStorage.getItem(StorageKeys.TAMAMLANAN_HAFTALAR)
         const tamamlanan = tamamlananItem ? JSON.parse(tamamlananItem) : {}
         syncProgressToSupabase(session.user.id, tamamlanan, parsed).catch(() => {})
       })
@@ -129,24 +134,22 @@ export function HaftaDetayPage({ entry }: HaftaDetayPageProps) {
   }
 
   return (
-    <div className="p-4 pb-24 w-full max-w-lg mx-auto">
+    <div className="p-4 pb-20 w-full max-w-lg mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6 mt-2">
         <button
           onClick={() => navigate(-1)}
           className="text-gray-400 hover:text-gray-600 transition-colors p-2 -ml-1 rounded-lg hover:bg-gray-100 active:scale-95"
         >
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12.5 15L7.5 10L12.5 5" />
-          </svg>
+          <ChevronLeft size={20} strokeWidth={2.5} />
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-[#2D5BE3]">{no}. Hafta</h1>
+          <h1 className="text-2xl font-bold text-[#1C1917]">{no}. Hafta</h1>
           {ders && <p className="text-sm text-gray-400 font-medium mt-0.5">{ders} · {sinif}</p>}
         </div>
         {tamamlandi && (
-          <span className="ml-auto bg-[#059669]/10 text-[#059669] text-xs font-bold px-3 py-1.5 rounded-full border border-[#059669]/30 animate-slide-up">
-            ✅ Tamamlandı
+          <span className="ml-auto flex items-center gap-1 bg-[#059669]/10 text-[#059669] text-xs font-bold px-3 py-1.5 rounded-full border border-[#059669]/30 animate-slide-up">
+            <Check size={12} strokeWidth={3} /> Tamamlandı
           </span>
         )}
       </div>
@@ -162,7 +165,7 @@ export function HaftaDetayPage({ entry }: HaftaDetayPageProps) {
 
       {/* Kazanım kartı — MEB planı */}
       {hafta && !hafta.tatilMi && (
-        <div className="bg-[#FAFAF9] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-5 mb-4">
+        <Card className="mb-4">
           <div className="flex items-center justify-between mb-3">
             <span className="text-[10px] font-bold uppercase tracking-widest bg-gray-100 text-gray-500 px-3 py-1.5 rounded-full">
               {hafta.donem}. Dönem
@@ -192,12 +195,12 @@ export function HaftaDetayPage({ entry }: HaftaDetayPageProps) {
           ) : (
             <p className="text-gray-400 text-sm italic">Bu hafta için kazanım girilmemiş.</p>
           )}
-        </div>
+        </Card>
       )}
 
       {/* Kazanım kartı — yüklenen plan */}
       {uploadedRow && (
-        <div className="bg-[#FAFAF9] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-5 mb-4">
+        <Card className="mb-4">
           {uploadedRow.donem && (
             <span className="inline-block text-[10px] font-bold uppercase tracking-widest bg-gray-100 text-gray-500 px-3 py-1.5 rounded-full mb-3">
               {uploadedRow.donem}
@@ -209,14 +212,14 @@ export function HaftaDetayPage({ entry }: HaftaDetayPageProps) {
           <p className="font-bold text-[#2D5BE3] text-base leading-snug">
             {uploadedRow.kazanim}
           </p>
-        </div>
+        </Card>
       )}
 
       {/* Plan yoksa */}
       {!hafta && !uploadedRow && (
-        <div className="bg-[#FAFAF9] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-5 mb-4 text-center">
+        <Card className="mb-4 text-center">
           <p className="text-gray-400 text-sm">Bu hafta için plan bilgisi bulunamadı.</p>
-        </div>
+        </Card>
       )}
 
       {/* Tamamlandı butonu */}
@@ -229,9 +232,11 @@ export function HaftaDetayPage({ entry }: HaftaDetayPageProps) {
             : 'bg-[#F59E0B] text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:opacity-90'
         } ${tamamlaAnimating ? 'animate-pop-in' : ''}`}
       >
-        {tamamlandi ? <>✅ Tamamlandı — geri al</> : <>Haftayı Tamamladım ✓</>}
+        {tamamlandi
+          ? <><Check size={16} strokeWidth={3} /> Tamamlandı — geri al</>
+          : <>Haftayı Tamamladım <Check size={16} strokeWidth={3} /></>
+        }
       </button>
-
       {/* Önceki / Sonraki hafta navigasyonu */}
       {tumHaftaNoları.length > 1 && (() => {
         const sorted = [...tumHaftaNoları].sort((a, b) => a - b)
@@ -261,14 +266,11 @@ export function HaftaDetayPage({ entry }: HaftaDetayPageProps) {
       })()}
 
       {/* Öğretmen notu */}
-      <div className="bg-[#FAFAF9] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-5">
+      <Card>
         <div className="flex items-center justify-between mb-2">
           <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider">
             Notlarım
           </label>
-          {notKaydedildi && (
-            <span className="text-xs font-bold text-[#059669] transition-opacity">✓ Kaydedildi</span>
-          )}
         </div>
         <textarea
           value={not}
@@ -277,7 +279,7 @@ export function HaftaDetayPage({ entry }: HaftaDetayPageProps) {
           placeholder="Bu haftayla ilgili not ekle..."
           className="w-full border border-[#E7E5E4] rounded-xl p-3 text-sm text-[#1C1917] bg-[#FAFAF9] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/20 focus:border-[#F59E0B] transition-all resize-none"
         />
-      </div>
+      </Card>
     </div>
   )
 }

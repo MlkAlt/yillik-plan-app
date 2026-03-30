@@ -4,8 +4,14 @@ import type { Hafta, OlusturulmusPlan } from '../types/takvim';
 import type { PlanEntry } from '../types/planEntry';
 import { showKazanimBildirimi } from '../lib/notifications';
 import { getYilSecenekleri } from '../lib/dersSinifMap';
-import { PlanSelector } from '../components/PlanSelector';
 import { BottomSheet } from '../components/UI/BottomSheet';
+import { PlanSelector } from '../components/PlanSelector';
+import { useToast } from '../lib/toast';
+import { IlerlemeGostergesi } from '../components/IlerlemeGostergesi/IlerlemeGostergesi';
+import { BosdurumuEkrani } from '../components/BosdurumuEkrani/BosdurumuEkrani';
+import { StorageKeys } from '../lib/storageKeys';
+import { Plus, Upload } from 'lucide-react';
+import { Card } from '../components/UI/Card';
 
 function formatTarihKısa(isoTarih: string): string {
   const aylar = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara']
@@ -59,7 +65,7 @@ function BuHaftaKarti({
   navigate: ReturnType<typeof useNavigate>;
 }) {
   const [seciliSinif, setSeciliSinif] = useState(() => {
-    const aktif = localStorage.getItem('aktif-sinif')
+    const aktif = localStorage.getItem(StorageKeys.AKTIF_SINIF)
     if (aktif && planlar.find(p => p.sinif === aktif)) return aktif
     return planlar[0]?.sinif || ''
   })
@@ -84,7 +90,7 @@ function BuHaftaKarti({
     : 'Bu Hafta'
 
   return (
-    <div className="bg-[#FAFAF9] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-5 mb-5">
+    <Card className="mb-5">
       {/* Başlık */}
       <div className="flex items-center justify-between mb-4">
         <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Bu Hafta</span>
@@ -114,7 +120,7 @@ function BuHaftaKarti({
                 {aktifHafta.uniteAdi}
               </p>
             )}
-            <p className="text-[#2D5BE3] font-bold text-[15px] leading-snug group-active:opacity-70 transition-opacity">
+            <p className="text-[#2D5BE3] font-semibold text-base leading-snug group-active:opacity-70 transition-opacity">
               {aktifHafta.kazanim || 'Bu hafta için kazanım girilmemiş.'}
             </p>
             {aktifHafta.kazanimDetay && (
@@ -139,27 +145,37 @@ function BuHaftaKarti({
 
       {/* Sınıf seçici — birden fazla sınıf varsa */}
       {planlar.length > 1 && (
-        <div className="flex gap-2 pt-3 border-t border-[#E7E5E4] overflow-x-auto pb-0.5 -mx-1 px-1">
-          {planlar.map(entry => {
-            const total = entry.plan?.haftalar.filter(h => !h.tatilMi).length || 0
-            const done = tamamlananlar[entry.sinif]?.length || 0
-            const yuzde = total > 0 ? Math.round((done / total) * 100) : 0
-            const isSelected = entry.sinif === seciliSinif
-            return (
-              <button
-                key={entry.sinif}
-                onClick={() => { setSeciliSinif(entry.sinif); onSinifSec(entry.sinif); }}
-                className={`flex-shrink-0 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border font-bold text-sm transition-all active:scale-95 whitespace-nowrap ${
-                  isSelected
-                    ? 'bg-[#2D5BE3] border-[#2D5BE3] text-white'
-                    : 'bg-[#FAFAF9] border-[#E7E5E4] text-gray-500 hover:border-gray-300'
-                }`}
-              >
-                <ProgressRing yuzde={yuzde} selected={isSelected} size={20} />
-                {entry.label || entry.sinif}
-              </button>
-            )
-          })}
+        <div className="pt-3 border-t border-[#E7E5E4]">
+          <div className="flex gap-2 overflow-x-auto pb-0.5 -mx-1 px-1 mb-2">
+            {planlar.map(entry => {
+              const total = entry.plan?.haftalar.filter(h => !h.tatilMi).length || 0
+              const done = tamamlananlar[entry.sinif]?.length || 0
+              const yuzde = total > 0 ? Math.round((done / total) * 100) : 0
+              const isSelected = entry.sinif === seciliSinif
+              return (
+                <button
+                  key={entry.sinif}
+                  onClick={() => { setSeciliSinif(entry.sinif); onSinifSec(entry.sinif); }}
+                  className={`flex-shrink-0 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border font-bold text-sm transition-all active:scale-95 whitespace-nowrap ${
+                    isSelected
+                      ? 'bg-[#2D5BE3] border-[#2D5BE3] text-white'
+                      : 'bg-[#FAFAF9] border-[#E7E5E4] text-gray-500 hover:border-gray-300'
+                  }`}
+                >
+                  <ProgressRing yuzde={yuzde} selected={isSelected} size={20} />
+                  {entry.label || entry.sinif}
+                </button>
+              )
+            })}
+          </div>
+          {/* Aktif sınıf için ilerleme metni */}
+          {(() => {
+            const entry = planlar.find(p => p.sinif === seciliSinif) || planlar[0]
+            const total = entry?.plan?.haftalar.filter(h => !h.tatilMi).length || 0
+            const done = tamamlananlar[entry?.sinif || '']?.length || 0
+            const bitisTarihi = entry?.plan?.haftalar[entry.plan.haftalar.length - 1]?.bitisTarihi || ''
+            return <IlerlemeGostergesi tamamlanan={done} toplam={total} bitisTarihi={bitisTarihi} />
+          })()}
         </div>
       )}
 
@@ -168,26 +184,25 @@ function BuHaftaKarti({
         const entry = planlar[0]
         const total = entry.plan?.haftalar.filter(h => !h.tatilMi).length || 0
         const done = tamamlananlar[entry.sinif]?.length || 0
-        const yuzde = total > 0 ? Math.round((done / total) * 100) : 0
+        const bitisTarihi = entry.plan?.haftalar[entry.plan.haftalar.length - 1]?.bitisTarihi || ''
         return (
-          <div className="flex items-center gap-3 pt-3 border-t border-[#E7E5E4]">
-            <ProgressRing yuzde={yuzde} size={28} />
-            <span className="text-xs text-gray-400 font-medium">{done}/{total} hafta tamamlandı</span>
+          <div className="pt-3 border-t border-[#E7E5E4]">
+            <IlerlemeGostergesi tamamlanan={done} toplam={total} bitisTarihi={bitisTarihi} />
           </div>
         )
       })()}
-    </div>
+    </Card>
   )
 }
 
 export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamamlananlar: tamamlananlarProp }: AppHomeScreenProps) {
   const navigate = useNavigate();
+  const { goster } = useToast();
   const [planSelectorAcik, setPlanSelectorAcik] = useState(false);
-  const [onboardingStep, setOnboardingStep] = useState<'branch' | 'configure'>('branch');
 
   const [ogretmenAd] = useState(() => {
     try {
-      const item = localStorage.getItem('ogretmen-ayarlari');
+      const item = localStorage.getItem(StorageKeys.OGRETMEN_AYARLARI);
       if (item) {
         const parsed = JSON.parse(item);
         if (parsed.adSoyad) return parsed.adSoyad.trim().split(' ')[0] as string;
@@ -200,7 +215,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
   const [tamamlananlarLocal, setTamamlananlarLocal] = useState<Record<string, number[]>>(() => {
     if (tamamlananlarProp) return tamamlananlarProp
     try {
-      const tItem = localStorage.getItem('tamamlanan-haftalar');
+      const tItem = localStorage.getItem(StorageKeys.TAMAMLANAN_HAFTALAR);
       if (tItem) {
         const parsed = JSON.parse(tItem);
         if (Array.isArray(parsed)) {
@@ -216,10 +231,17 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
   const tamamlananlar = tamamlananlarProp ?? tamamlananlarLocal
 
   useEffect(() => {
+    if (syncing) {
+      goster('Planlar buluttan güncelleniyor...', 'bilgi', 4000)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [syncing]);
+
+  useEffect(() => {
     // syncing false'a döndüğünde (Supabase sync tamamlandı) ve prop yoksa yenile
     if (!syncing && !tamamlananlarProp) {
       try {
-        const tItem = localStorage.getItem('tamamlanan-haftalar');
+        const tItem = localStorage.getItem(StorageKeys.TAMAMLANAN_HAFTALAR);
         if (tItem) {
           const parsed = JSON.parse(tItem);
           if (Array.isArray(parsed)) {
@@ -259,88 +281,36 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
   const karsilama = ogretmenAd ? `${mesaj}, ${ogretmenAd}!` : `${mesaj}!`;
 
   return (
-    <div className="p-4 pb-24 w-full max-w-lg mx-auto">
-      {/* KARSILAMA */}
-      <div className="mb-6 mt-2">
-        <h1 className="text-3xl font-bold text-[#2D5BE3]">{karsilama}</h1>
-        <p className="text-gray-500 mt-1.5 text-sm font-medium">Bu haftanın kazanımları</p>
-      </div>
-
-      {/* Supabase sync bildirimi */}
-      {syncing && (
-        <div className="mb-4 bg-[#2D5BE3]/5 border border-[#2D5BE3]/20 rounded-xl px-3.5 py-2.5 flex items-center gap-2 animate-fade-in">
-          <svg className="animate-spin text-[#2D5BE3] flex-shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-          </svg>
-          <span className="text-xs font-semibold text-[#2D5BE3]">Planlar buluttan güncelleniyor...</span>
+    <div className="p-4 pb-20 w-full max-w-lg mx-auto">
+      {/* BU HAFTA KARTI — birincil içerik, en üstte */}
+      {planlar.length > 0 && (
+        <div className="mt-2 mb-4">
+          <BuHaftaKarti
+            planlar={planlar}
+            tamamlananlar={tamamlananlar}
+            onSinifSec={onSinifSec}
+            navigate={navigate}
+          />
         </div>
       )}
+
+      {/* KARSILAMA — ikincil, BuHaftaKarti'nın altında */}
+      <div className="mb-5">
+        <p className="text-sm font-semibold text-gray-500">{karsilama}</p>
+      </div>
 
       {/* ONBOARDING — planlar yoksa her zaman göster (ilk kurulum veya tüm planlar silindi) */}
       {planlar.length === 0 && (
         <div className="mb-5">
-          {/* Karşılama başlığı */}
-          <div className="text-center mb-6 px-2">
-            <div className="text-5xl mb-3">{onboardingStep === 'branch' ? '📋' : '🎯'}</div>
-            <h2 className="text-xl font-bold text-[#1C1917] mb-1.5">
-              {onboardingStep === 'branch' ? 'İlk planını oluştur' : 'Sınıflarını seç'}
-            </h2>
-            <p className="text-sm text-gray-400 leading-relaxed">
-              {onboardingStep === 'branch'
-                ? 'Branşını seç, sınıflarını belirle — MEB takvimine göre yıllık planın hazır olsun.'
-                : 'Hangi sınıflar için plan oluşturmak istiyorsun?'}
-            </p>
-          </div>
-          {/* Adım göstergesi */}
-          <div className="flex items-center justify-center gap-2 mb-5">
-            <div className="flex items-center gap-1.5">
-              <div className={`w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center transition-all ${
-                onboardingStep === 'branch' ? 'bg-[#2D5BE3] text-white' : 'bg-[#059669] text-white'
-              }`}>
-                {onboardingStep === 'branch' ? '1' : '✓'}
-              </div>
-              <span className={`text-xs font-semibold transition-colors ${
-                onboardingStep === 'branch' ? 'text-[#2D5BE3]' : 'text-[#059669]'
-              }`}>Branş</span>
-            </div>
-            <div className={`w-8 h-px transition-colors ${onboardingStep === 'configure' ? 'bg-[#2D5BE3]' : 'bg-[#E7E5E4]'}`} />
-            <div className="flex items-center gap-1.5">
-              <div className={`w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center transition-all ${
-                onboardingStep === 'configure' ? 'bg-[#2D5BE3] text-white' : 'bg-[#E7E5E4] text-gray-400'
-              }`}>2</div>
-              <span className={`text-xs font-semibold transition-colors ${
-                onboardingStep === 'configure' ? 'text-[#2D5BE3]' : 'text-gray-400'
-              }`}>Sınıf</span>
-            </div>
-            <div className="w-8 h-px bg-[#E7E5E4]" />
-            <div className="flex items-center gap-1.5">
-              <div className="w-6 h-6 rounded-full bg-[#E7E5E4] text-gray-400 text-xs font-bold flex items-center justify-center">3</div>
-              <span className="text-xs font-semibold text-gray-400">Hazır</span>
-            </div>
-          </div>
-          <div className="bg-[#FAFAF9] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-5">
-            <PlanSelector
-              yil={getYilSecenekleri()[0]}
-              onStepChange={setOnboardingStep}
-              onComplete={entries => {
-                localStorage.setItem('onboarding-tamamlandi', '1')
-                onPlanEkle(entries)
-                onSinifSec(entries[0].sinif)
-                navigate('/app/plan')
-              }}
-            />
-          </div>
+          <BosdurumuEkrani
+            onTamamla={entries => {
+              localStorage.setItem(StorageKeys.ONBOARDING_TAMAMLANDI, '1')
+              onPlanEkle(entries)
+              onSinifSec(entries[0].sinif)
+              navigate('/app/plan')
+            }}
+          />
         </div>
-      )}
-
-      {/* BU HAFTA KARTI — tüm sınıflar tek kartta */}
-      {planlar.length > 0 && (
-        <BuHaftaKarti
-          planlar={planlar}
-          tamamlananlar={tamamlananlar}
-          onSinifSec={onSinifSec}
-          navigate={navigate}
-        />
       )}
 
       {/* HIZLI ERİŞİM */}
@@ -354,14 +324,14 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
               onClick={() => setPlanSelectorAcik(true)}
               className="bg-[#FAFAF9] rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-4 active:scale-[0.98] transition-all flex flex-col items-center justify-center gap-2 hover:shadow-md"
             >
-              <span className="text-2xl">➕</span>
+              <Plus size={24} className="text-[#2D5BE3]" />
               <span className="text-sm font-bold text-[#2D5BE3]">Yeni Plan Ekle</span>
             </button>
             <button
-              onClick={() => navigate('/yukle')}
+              onClick={() => navigate('/app/yukle')}
               className="bg-[#FAFAF9] rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-4 active:scale-[0.98] transition-all flex flex-col items-center justify-center gap-2 hover:shadow-md"
             >
-              <span className="text-2xl">📤</span>
+              <Upload size={24} className="text-[#2D5BE3]" />
               <span className="text-sm font-bold text-[#2D5BE3]">Dosya Yükle</span>
             </button>
           </div>

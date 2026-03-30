@@ -320,3 +320,24 @@ CLAUDE.md dosyasının sonuna şu bölümü ekle:
 
 ### Tüm Fazlar Tamamlandı ✅
 Sıradaki adım: Müfredat JSON'larını tamamla (eksik branşlar), ardından kullanıcı testine aç.
+
+## Geliştirme Durumu — 29 Mart 2026 (Faz 4 Tamamlandı)
+
+### Faz 4 — UX Parlatma ✅
+
+- `BottomSheet` bileşeni oluşturuldu (`src/components/UI/BottomSheet.tsx`) — createPortal + slide-up animasyonu
+- Ana ekranda "Yeni Plan Ekle" butonu → PlanSelector bottom sheet içinde açılıyor
+- `AppLayout`'a `headerAction` slot eklendi (sonradan kaldırıldı — sayfa içi dropdown yeterli)
+- `AuthModal`'a `mode="prompt"` desteği eklendi — "Planını kaydet" başlığı + "Şimdi değil" butonu
+- Plan oluşturduktan sonra 1.5sn gecikmeyle auth prompt gösteriliyor (`auth-prompt-gosterildi` localStorage flag'i ile bir kez)
+- Onboarding UX iyileştirildi — karşılama başlığı, emoji, açıklama metni, dinamik adım göstergesi (1→2→3)
+- `AppSettingsScreen` tamamen yeniden yazıldı — Profil / Planlarım / Tercihler / Hesap sıralaması
+- Lead form kaldırıldı (auth prompt bu amaca hizmet ediyor)
+- Şehir seçimi kaldırıldı
+- Kaydet butonu: değişiklik olunca Profil kartı içinde belirir, kaydedince kaybolur
+- Auto-commit hook eklendi (`agentStop` event'inde PowerShell script çalışıyor)
+
+### Mevcut Eksikler
+- Şehir verisi localStorage'da hâlâ `sehir` key'i olarak duruyor (temizlenmedi, zararsız)
+- Test altyapısı kurulmadı (vitest + fast-check)
+- HaftaDetayPage UX iyileştirmesi yapılmadı
