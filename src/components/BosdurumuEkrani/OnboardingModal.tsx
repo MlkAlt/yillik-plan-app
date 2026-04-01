@@ -16,6 +16,7 @@ export function OnboardingModal({ onTamamla }: OnboardingModalProps) {
   const [acikBrans, setAcikBrans] = useState<string | null>(null)
   const [seciliSiniflar, setSeciliSiniflar] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
+  const [tebrik, setTebrik] = useState<{ ders: string; siniflar: string[] } | null>(null)
   const yil = getYilSecenekleri()[0]
 
   const filtered = query
@@ -52,7 +53,12 @@ export function OnboardingModal({ onTamamla }: OnboardingModalProps) {
         const { plan } = buildPlan(branch.lessonId, sinif, yil)
         return { sinif, ders: branch.lessonId, yil, tip: 'meb' as const, plan, rows: null }
       })
-      setTimeout(() => onTamamla(entries), 400)
+      // Tebrik ekranını göster, sonra tamamla
+      setTebrik({ ders: branch.label, siniflar: seciliSiniflar })
+      setLoading(false)
+      setTimeout(() => {
+        onTamamla(entries)
+      }, 2200)
     } catch {
       setLoading(false)
     }
@@ -93,55 +99,79 @@ export function OnboardingModal({ onTamamla }: OnboardingModalProps) {
           </div>
         </div>
 
-        {/* Branş listesi */}
-        <div className="flex-1 overflow-y-auto px-5 pb-4">
-          {!query && popular.length > 0 && (
-            <div className="mb-4">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Popüler</p>
-              <BransList
-                branches={popular}
-                acikBrans={acikBrans}
-                seciliSiniflar={seciliSiniflar}
-                onBransToggle={handleBransToggle}
-                onSinifToggle={handleSinifToggle}
-              />
+        {/* Tebrik ekranı */}
+        {tebrik ? (
+          <div className="flex-1 flex flex-col items-center justify-center px-5 py-12 text-center animate-fade-in">
+            <div className="text-6xl mb-4">🎉</div>
+            <h2 className="text-2xl font-bold text-[#1C1917] mb-2">Planın hazır!</h2>
+            <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+              <span className="font-semibold text-[#1C1917]">{tebrik.ders}</span> için{' '}
+              {tebrik.siniflar.length === 1
+                ? <span className="font-semibold text-[#1C1917]">{tebrik.siniflar[0]}</span>
+                : <span className="font-semibold text-[#1C1917]">{tebrik.siniflar.length} sınıf</span>
+              }{' '}
+              yıllık planın oluşturuldu.
+            </p>
+            <div className="flex items-center gap-2 text-xs text-gray-400">
+              <svg className="animate-spin text-[#2D5BE3]" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+              </svg>
+              Plana yönlendiriliyorsun...
             </div>
-          )}
-
-          {rest.length > 0 && (
-            <div>
-              {!query && <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Diğer Branşlar</p>}
-              <BransList
-                branches={query ? filtered : rest}
-                acikBrans={acikBrans}
-                seciliSiniflar={seciliSiniflar}
-                onBransToggle={handleBransToggle}
-                onSinifToggle={handleSinifToggle}
-              />
-            </div>
-          )}
-
-          {filtered.length === 0 && (
-            <p className="text-center text-sm text-gray-400 py-10">"{query}" için sonuç bulunamadı</p>
-          )}
-        </div>
-
-        {/* CTA — branş seçilince görünür */}
-        {acikBrans && seciliBrans && (
-          <div className="px-5 pb-8 pt-3 border-t border-[#E7E5E4] flex-shrink-0 bg-white">
-            <Button
-              onClick={handleOlustur}
-              disabled={loading || seciliSiniflar.length === 0}
-              loading={loading}
-              variant="primary"
-              className="w-full text-base shadow-[0_2px_8px_rgba(245,158,11,0.3)]"
-            >
-              {seciliSiniflar.length === 1
-                ? `${seciliBrans.label} · ${seciliSiniflar[0]} için Plan Oluştur →`
-                : `${seciliBrans.label} · ${seciliSiniflar.length} sınıf için Plan Oluştur →`
-              }
-            </Button>
           </div>
+        ) : (
+          <>
+            {/* Branş listesi */}
+            <div className="flex-1 overflow-y-auto px-5 pb-4">
+              {!query && popular.length > 0 && (
+                <div className="mb-4">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Popüler</p>
+                  <BransList
+                    branches={popular}
+                    acikBrans={acikBrans}
+                    seciliSiniflar={seciliSiniflar}
+                    onBransToggle={handleBransToggle}
+                    onSinifToggle={handleSinifToggle}
+                  />
+                </div>
+              )}
+
+              {rest.length > 0 && (
+                <div>
+                  {!query && <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Diğer Branşlar</p>}
+                  <BransList
+                    branches={query ? filtered : rest}
+                    acikBrans={acikBrans}
+                    seciliSiniflar={seciliSiniflar}
+                    onBransToggle={handleBransToggle}
+                    onSinifToggle={handleSinifToggle}
+                  />
+                </div>
+              )}
+
+              {filtered.length === 0 && (
+                <p className="text-center text-sm text-gray-400 py-10">"{query}" için sonuç bulunamadı</p>
+              )}
+            </div>
+
+            {/* CTA — branş seçilince görünür */}
+            {acikBrans && seciliBrans && (
+              <div className="px-5 pb-8 pt-3 border-t border-[#E7E5E4] flex-shrink-0 bg-white">
+                <Button
+                  onClick={handleOlustur}
+                  disabled={loading || seciliSiniflar.length === 0}
+                  loading={loading}
+                  variant="primary"
+                  className="w-full text-base shadow-[0_2px_8px_rgba(245,158,11,0.3)]"
+                >
+                  {seciliSiniflar.length === 1
+                    ? `${seciliBrans.label} · ${seciliSiniflar[0]} için Plan Oluştur →`
+                    : `${seciliBrans.label} · ${seciliSiniflar.length} sınıf için Plan Oluştur →`
+                  }
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
@@ -191,7 +221,7 @@ function BransItem({
         onClick={onToggle}
         className="w-full flex items-center gap-3 px-4 py-3 text-left active:bg-gray-50 transition-colors"
       >
-        <span className="text-xl flex-shrink-0">{branch.icon}</span>
+        <branch.icon size={20} className="flex-shrink-0 text-[#2D5BE3]" />
         <span className={`text-sm font-semibold flex-1 ${isOpen ? 'text-[#2D5BE3]' : 'text-[#1C1917]'}`}>
           {branch.label}
         </span>

@@ -81,7 +81,7 @@ function BranchCard({ branch, onSelect }: { branch: Branch; onSelect: (b: Branch
       onClick={() => onSelect(branch)}
       className="flex items-center gap-3 p-3.5 bg-white rounded-xl border border-[#E7E5E4] text-left active:scale-[0.94] active:bg-[#2D5BE3]/5 transition-all hover:border-[#2D5BE3]/40 hover:shadow-sm group"
     >
-      <span className="text-xl flex-shrink-0">{branch.icon}</span>
+      <branch.icon size={20} className="flex-shrink-0 text-[#2D5BE3]" />
       <span className="text-sm font-semibold text-[#1C1917] leading-tight group-hover:text-[#2D5BE3] transition-colors">
         {branch.label}
       </span>

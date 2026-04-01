@@ -44,7 +44,7 @@ export function ClassStep({
           ← Geri
         </button>
         <div>
-          <p className="font-bold text-[#1C1917] leading-tight">{branch.icon} {branch.label}</p>
+          <p className="font-bold text-[#1C1917] leading-tight flex items-center gap-1.5"><branch.icon size={16} className="text-[#2D5BE3]" /> {branch.label}</p>
           <p className="text-xs text-gray-400">Kaç sınıf için plan oluşturacaksın?</p>
         </div>
       </div>
