@@ -412,10 +412,12 @@ Sıradaki adım: Müfredat JSON'larını tamamla (eksik branşlar), ardından ku
 
 ### Yapılacaklar
 
-- [ ] Branş ikonları emoji → Lucide/SVG (şu an emoji kullanılıyor)
-- [ ] Spacing tutarlılığı — `p-4`/`p-5`/`px-5` karışıklığı
+- [x] Branş ikonları emoji → Lucide/SVG ✅ (branchConfig.ts, BranchStep, ClassStep, OnboardingModal)
+- [x] Spacing tutarlılığı — `p-4`/`p-5`/`px-5` karışıklığı ✅
+- [x] `storageKeys.ts` kullanımı — `aktif-plan` migration key eklendi ✅
+- [x] Auto-commit hook — `.claude/settings.json` Stop event'ine eklendi ✅
 - [ ] `AppHomeScreen` karşılama mesajı hiyerarşisi
 - [ ] Supabase email confirmation'ı kapatmak veya magic link'e geçmek (UX için)
 - [ ] Eksik müfredat JSON'ları (bazı branşlar hâlâ boş plan oluşturuyor)
-- [ ] `storageKeys.ts` kullanımı — bazı dosyalarda hâlâ ham string var (notifications.ts dışındakiler)
-- [ ] Auto-commit hook'u gözden geçir (agentStop event'inde çalışıyor)
+- [ ] Success/error renkleri — `#059669` (yeşil) ve `amber` resmi palette yok; `HaftaDetayPage.tsx`, `AppSettingsScreen.tsx`, `PlanPage.tsx`, `PlanSelector/index.tsx` etkileniyor
+- [ ] OnboardingModal loading state — "Plan Oluştur" butonu sessizce disable oluyor, "Oluşturuluyor..." metni yok
