@@ -39,7 +39,7 @@ export function BranchStep({ onSelect }: BranchStepProps) {
       {/* Popüler */}
       {!query && popular.length > 0 && (
         <div className="mb-5">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2.5">Popüler</p>
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Popüler</p>
           <div className="grid grid-cols-2 gap-2">
             {popular.map(b => <BranchCard key={b.id} branch={b} onSelect={onSelect} />)}
           </div>
@@ -50,7 +50,7 @@ export function BranchStep({ onSelect }: BranchStepProps) {
       {(query ? filtered : gosterilecekRest).length > 0 && (
         <div>
           {!query && (
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2.5">Diğer Branşlar</p>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Diğer Branşlar</p>
           )}
           <div className="grid grid-cols-2 gap-2">
             {(query ? filtered : gosterilecekRest).map(b => <BranchCard key={b.id} branch={b} onSelect={onSelect} />)}

@@ -37,13 +37,13 @@ export function LessonClassStep({
 
       {/* Sınıf seçimi (tek seçim) */}
       <div className="mb-5">
-        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2.5">Sınıfın</p>
+        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Sınıfın</p>
         <div className="flex gap-2 flex-wrap">
           {SO_SINIFLAR.map(cls => (
             <button
               key={cls}
               onClick={() => onClassSelect(cls)}
-              className={`px-4 py-2 rounded-full text-sm font-bold border transition-all active:scale-95 ${
+              className={`px-3.5 py-1.5 rounded-full text-sm font-bold border transition-all active:scale-95 ${
                 selectedClass === cls
                   ? 'bg-[#2D5BE3] text-white border-[#2D5BE3]'
                   : 'bg-white text-gray-500 border-[#E7E5E4] hover:border-gray-300'
@@ -56,7 +56,7 @@ export function LessonClassStep({
       </div>
 
       {/* Ders kısayolları */}
-      <div className="flex flex-wrap gap-2 mb-3">
+      <div className="flex flex-wrap gap-2 mb-4">
         <button
           onClick={() => onShortcut(SO_DERSLER)}
           className="px-3 py-1.5 text-xs font-bold rounded-full border border-[#2D5BE3]/30 text-[#2D5BE3] bg-[#2D5BE3]/5 active:scale-95 transition-all hover:bg-[#2D5BE3]/10"
@@ -79,7 +79,7 @@ export function LessonClassStep({
 
       {/* Ders pilleri */}
       <div className="mb-6">
-        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2.5">
+        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">
           Dersler <span className="text-gray-300 font-normal normal-case tracking-normal">(birden fazla seç)</span>
         </p>
         <div className="flex flex-wrap gap-2">

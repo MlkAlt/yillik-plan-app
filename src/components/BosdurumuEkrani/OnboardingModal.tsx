@@ -219,7 +219,7 @@ function BransItem({
       {/* Branş satırı */}
       <button
         onClick={onToggle}
-        className="w-full flex items-center gap-3 px-4 py-3 text-left active:bg-gray-50 transition-colors"
+        className="w-full flex items-center gap-3 px-5 py-3 text-left active:bg-gray-50 transition-colors"
       >
         <branch.icon size={20} className="flex-shrink-0 text-[#2D5BE3]" />
         <span className={`text-sm font-semibold flex-1 ${isOpen ? 'text-[#2D5BE3]' : 'text-[#1C1917]'}`}>
@@ -232,14 +232,14 @@ function BransItem({
 
       {/* Sınıf seçimi — accordion */}
       {isOpen && (
-        <div className="px-4 pb-4 pt-1 border-t border-[#E7E5E4]/60">
-          <p className="text-xs text-gray-400 mb-2.5">Hangi sınıflar için?</p>
+        <div className="px-5 pb-4 pt-2 border-t border-[#E7E5E4]/60">
+          <p className="text-xs text-gray-400 mb-2">Hangi sınıflar için?</p>
           <div className="flex flex-wrap gap-2">
             {branch.classes.map(sinif => (
               <button
                 key={sinif}
                 onClick={() => onSinifToggle(sinif)}
-                className={`px-3 py-1.5 rounded-full text-sm font-bold border transition-all active:scale-95 ${
+                className={`px-3.5 py-1.5 rounded-full text-sm font-bold border transition-all active:scale-95 ${
                   seciliSiniflar.includes(sinif)
                     ? 'bg-[#2D5BE3] text-white border-[#2D5BE3]'
                     : 'bg-white text-gray-500 border-[#E7E5E4] hover:border-gray-300'

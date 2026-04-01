@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { Home, CalendarDays, User } from 'lucide-react'
+import { StorageKeys } from '../../lib/storageKeys'
 
 interface AppLayoutProps {
   children: ReactNode
@@ -14,7 +15,7 @@ export function AppLayout({ children, headerAction }: AppLayoutProps) {
 
   const [basharf] = useState<string | null>(() => {
     try {
-      const ayarlarItem = localStorage.getItem('ogretmen-ayarlari')
+      const ayarlarItem = localStorage.getItem(StorageKeys.OGRETMEN_AYARLARI)
       if (ayarlarItem) {
         const ayarlar = JSON.parse(ayarlarItem)
         if (ayarlar.adSoyad) {
@@ -66,7 +67,7 @@ export function AppLayout({ children, headerAction }: AppLayoutProps) {
         </main>
 
         <nav className="fixed bottom-0 w-full max-w-lg bg-white border-t border-[#E7E5E4] z-50">
-          <div className="flex justify-around items-center px-4 py-2">
+          <div className="flex justify-around items-center px-5 py-2">
             {tabs.map((tab) => {
               const isActive = tab.path === '/app/plan'
                 ? location.pathname.startsWith('/app/plan') || location.pathname.startsWith('/app/hafta')
@@ -109,7 +110,7 @@ export function AppLayout({ children, headerAction }: AppLayoutProps) {
                 />
               )}
               <span className={`text-[10px] font-bold transition-colors duration-200 ${location.pathname === '/app/ayarlar' ? 'text-[#2D5BE3]' : 'text-gray-400 group-hover:text-gray-600'}`}>
-                Profil
+                Ayarlar
               </span>
               <span className={`absolute bottom-0 rounded-full bg-[#2D5BE3] transition-all duration-300 ${location.pathname === '/app/ayarlar' ? 'w-4 h-0.5 opacity-100' : 'w-0 h-0.5 opacity-0'}`} />
             </button>
