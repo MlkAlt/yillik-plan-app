@@ -19,9 +19,10 @@ function formatTarih(isoTarih: string): string {
 
 interface HaftaDetayPageProps {
   entry: PlanEntry | null
+  onTamamlaToggle?: () => void
 }
 
-export function HaftaDetayPage({ entry }: HaftaDetayPageProps) {
+export function HaftaDetayPage({ entry, onTamamlaToggle }: HaftaDetayPageProps) {
   const { haftaNo } = useParams<{ haftaNo: string }>()
   const navigate = useNavigate()
   const no = Number(haftaNo)
@@ -34,6 +35,7 @@ export function HaftaDetayPage({ entry }: HaftaDetayPageProps) {
   const [tamamlandi, setTamamlandi] = useState(false)
   const [tamamlaAnimating, setTamamlaAnimating] = useState(false)
   const [not, setNot] = useState('')
+  const [kaydedildi, setKaydedildi] = useState(false)
   const notTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const { goster } = useToast()
 
@@ -94,6 +96,7 @@ export function HaftaDetayPage({ entry }: HaftaDetayPageProps) {
       localStorage.setItem(StorageKeys.TAMAMLANAN_HAFTALAR, JSON.stringify(yeniParsed))
       if (!tamamlandi) setTamamlaAnimating(true)
       setTamamlandi(!tamamlandi)
+      onTamamlaToggle?.() // App.tsx'teki state'i güncelle
       // Arka planda Supabase'e sync
       getSession().then(session => {
         if (!session) return
@@ -108,6 +111,7 @@ export function HaftaDetayPage({ entry }: HaftaDetayPageProps) {
 
   function handleNotChange(deger: string) {
     setNot(deger)
+    setKaydedildi(false)
     try {
       const aktifSinifStr = localStorage.getItem(StorageKeys.AKTIF_SINIF) || sinif
       const notlarItem = localStorage.getItem(StorageKeys.HAFTA_NOTLARI)
@@ -119,6 +123,7 @@ export function HaftaDetayPage({ entry }: HaftaDetayPageProps) {
       // Kaydedildi göstergesi — debounced
       if (notTimerRef.current) clearTimeout(notTimerRef.current)
       notTimerRef.current = setTimeout(() => {
+        setKaydedildi(true)
         goster('Not kaydedildi', 'basari')
       }, 800)
       // Arka planda Supabase'e sync (debounced ile aynı süre)
@@ -237,6 +242,9 @@ export function HaftaDetayPage({ entry }: HaftaDetayPageProps) {
           : <>Haftayı Tamamladım <Check size={16} strokeWidth={3} /></>
         }
       </button>
+      {!tamamlandi && (
+        <p className="text-center text-[11px] text-gray-400 -mt-3 mb-4">Haftayı tamamlayınca işaretle</p>
+      )}
       {/* Önceki / Sonraki hafta navigasyonu */}
       {tumHaftaNoları.length > 1 && (() => {
         const sorted = [...tumHaftaNoları].sort((a, b) => a - b)
@@ -279,6 +287,11 @@ export function HaftaDetayPage({ entry }: HaftaDetayPageProps) {
           placeholder="Bu haftayla ilgili not ekle..."
           className="w-full border border-[#E7E5E4] rounded-xl p-3 text-sm text-[#1C1917] bg-[#FAFAF9] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/20 focus:border-[#F59E0B] transition-all resize-none"
         />
+        <div className="flex justify-end mt-1.5 h-4">
+          {kaydedildi && (
+            <span className="text-[11px] text-green-600 font-medium">✓ Kaydedildi</span>
+          )}
+        </div>
       </Card>
     </div>
   )

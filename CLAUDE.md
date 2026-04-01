@@ -341,3 +341,81 @@ Sıradaki adım: Müfredat JSON'larını tamamla (eksik branşlar), ardından ku
 - Şehir verisi localStorage'da hâlâ `sehir` key'i olarak duruyor (temizlenmedi, zararsız)
 - Test altyapısı kurulmadı (vitest + fast-check)
 - HaftaDetayPage UX iyileştirmesi yapılmadı
+
+## Geliştirme Durumu — 31 Mart 2026 (UX Yeniden Tasarım + Mimari İyileştirmeler)
+
+### Yapılanlar
+
+**UX / Onboarding**
+- Onboarding tamamen yenilendi: sade giriş ekranı (ikon + başlık + tek buton) + accordion branş seçimi modal (`OnboardingModal.tsx`)
+- Modal: arama kutusu + popüler/diğer branş listesi + accordion sınıf seçimi + altta "Plan Oluştur" CTA
+- `BosdurumuEkrani` bileşeni sadeleştirildi — artık sadece giriş ekranı + modal tetikleyici
+- Bottom nav 2 sekme (Ana + Planım) + profil avatarı olarak güncellendi, Ayarlar sekmesi kaldırıldı
+- Ana ekranda `BuHaftaKarti` en üste taşındı, karşılama mesajı ikincil konuma indi
+- `IlerlemeGostergesi` bileşeni oluşturuldu — "X hafta kaldı · Ay'da tamamlanır" formatında bağlamsal metin
+
+**UI / Tasarım Sistemi**
+- Lucide React kuruldu, tüm emoji ikonlar SVG ikonlarla değiştirildi (🏠📅✅📥📊📄🖨️📍 vb.)
+- `Card` bileşeni oluşturuldu (`src/components/UI/Card.tsx`) — tüm kart stilleri birleştirildi
+- `Button` bileşeni tüm birincil CTA'larda kullanılmaya başlandı
+- Başlık renkleri `#2D5BE3` → `#1C1917` (mavi sadece tıklanabilir öğelerde)
+- Bottom nav aktif rengi amber'dan mavi'ye çevrildi (tutarlı aksiyon rengi)
+- Logo rengi mavi'den koyu'ya çevrildi
+- `font-black` → `font-bold`/`font-semibold` (3 ağırlık skalası)
+- `pb-24` → `pb-20` (magic number kaldırıldı)
+- `HomePage` tamamen yenilendi — Lucide ikonlar, temiz tipografi, tutarlı renkler
+- Renk token'ları `index.css` ve `src/lib/renkTokenlari.ts` ile belgelendi
+
+**Mimari**
+- `storageKeys.ts` oluşturuldu — 9 localStorage key merkezi sabite taşındı
+- `usePlanYonetimi` hook'u oluşturuldu (`src/hooks/usePlanYonetimi.ts`) — plan state ve fonksiyonları
+- `useAuthSync` hook'u oluşturuldu (`src/hooks/useAuthSync.ts`) — auth + Supabase sync
+- `App.tsx` 55 satıra indi (önceden ~200 satır)
+- `PlanValidator` oluşturuldu (`src/lib/planValidator.ts`) — Supabase'den gelen JSON'lar için type guard
+- `planSync.ts` güncellendi — `as unknown as object` cast'leri kaldırıldı, `validatePlanRows` kullanılıyor
+- Eski routing akışı kaldırıldı (`/olustur`, `/yukle`, `/plan` → `/app` altına yönlendirme)
+- `YuklemePage` `/app/yukle` altına `AppLayout` içine taşındı
+- `PlanOlusturPage` silindi (artık kullanılmıyor)
+
+**Test**
+- Vitest + @testing-library/react + fast-check kuruldu
+- `vitest.config.ts` ayrı dosyaya taşındı (vite.config.ts'den ayrıldı)
+- `buildPlan()` için 5 birim testi yazıldı
+- `ilerlemeMetniHesapla()` için 4 birim + 3 property testi yazıldı
+- Toplam 12 test, hepsi geçiyor
+
+**Deploy**
+- Vercel CLI kuruldu, production deploy yapıldı
+- Supabase env variable'ları Vercel'e eklendi
+- `https://ogretmen-yaver.vercel.app` canlıda
+
+### Karşılaşılan Hatalar
+
+- `YuklemePage.tsx`'te kapanış `}` eksikti → parse error, düzeltildi
+- `PlanPage.tsx`'te `<Card>` kapanış tag'i `</div>` olarak kalmıştı → parse error, düzeltildi
+- `App.tsx`'te duplicate `AppInner` fonksiyonu oluştu (strReplace hatası) → dosya temizden yazıldı
+- `vite.config.ts`'e `test` config eklenmesi TypeScript hatasına yol açtı → `vitest.config.ts`'e taşındı
+- `getEmoji` fonksiyonu kullanılmadan kaldı → build hatası, silindi
+- Vercel deploy sonrası beyaz sayfa → Supabase env variable'ları eksikti, eklendi
+- Telefonda PWA cache'i eski versiyonu gösteriyordu → tarayıcı cache temizlenerek çözüldü
+- `tamamlananlar` state'i `HaftaDetayPage`'de güncellenince `App.tsx`'e yansımıyordu → `onTamamlaToggle` callback prop'u eklendi
+- Render içinde state set etme hatası → `useEffect`'e taşındı
+
+### Alınan Kararlar
+
+- Onboarding için "değer önce, form sonra" yaklaşımı yerine direkt accordion modal tercih edildi (daha sade)
+- Emoji ikonlar yerine Lucide React — platform bağımsız, boyut kontrolü, tutarlı görünüm
+- `Button` bileşeni tüm CTA'larda zorunlu hale getirildi
+- `tamamlananlar` state'i `App.tsx`'te tutuldu, `useAuthSync`'ten ayrıştırıldı
+- Supabase email confirmation açık bırakıldı — kayıt sonrası kullanıcıya açıklayıcı mesaj gösteriliyor
+- `vitest.config.ts` ayrı dosya — `vite.config.ts` production build için temiz kalıyor
+
+### Yapılacaklar
+
+- [ ] Branş ikonları emoji → Lucide/SVG (şu an emoji kullanılıyor)
+- [ ] Spacing tutarlılığı — `p-4`/`p-5`/`px-5` karışıklığı
+- [ ] `AppHomeScreen` karşılama mesajı hiyerarşisi
+- [ ] Supabase email confirmation'ı kapatmak veya magic link'e geçmek (UX için)
+- [ ] Eksik müfredat JSON'ları (bazı branşlar hâlâ boş plan oluşturuyor)
+- [ ] `storageKeys.ts` kullanımı — bazı dosyalarda hâlâ ham string var (notifications.ts dışındakiler)
+- [ ] Auto-commit hook'u gözden geçir (agentStop event'inde çalışıyor)

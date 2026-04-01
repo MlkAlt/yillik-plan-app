@@ -83,17 +83,17 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
   return (
     <div className="max-w-lg mx-auto p-4 w-full pb-20">
       <div className="mb-6 mt-2 flex items-center justify-between h-10">
-        <h1 className="text-2xl font-bold text-[#1C1917]">Ayarlar</h1>
+        <h1 className="text-2xl font-bold text-[#1C1917]">Profil</h1>
       </div>
 
-      {/* PROFIL */}
+      {/* ÖĞRETMENBİLGİLERİ — en üstte, ilk kurulum için */}
       <Card className="mb-3">
-        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Profil</p>
+        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Öğretmen Bilgileri</p>
         <div className="flex flex-col gap-3">
-          <input type="text" placeholder="Ad Soyad" value={adSoyad} onChange={e => setAdSoyad(e.target.value)}            className="w-full p-3 rounded-xl border border-[#E7E5E4] bg-white focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/20 focus:border-[#F59E0B] transition-all text-[#1C1917] text-sm" />
+          <input type="text" placeholder="Ad Soyad" value={adSoyad} onChange={e => setAdSoyad(e.target.value)}
+            className="w-full p-3 rounded-xl border border-[#E7E5E4] bg-white focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/20 focus:border-[#F59E0B] transition-all text-[#1C1917] text-sm" />
           <input type="text" placeholder="Okul Adı" value={okulAdi} onChange={e => setOkulAdi(e.target.value)}
             className="w-full p-3 rounded-xl border border-[#E7E5E4] bg-white focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/20 focus:border-[#F59E0B] transition-all text-[#1C1917] text-sm" />
-          {/* Kaydet — sadece değişiklik varsa görünür */}
           <div className={`overflow-hidden transition-all duration-200 ${degisti ? 'max-h-16 opacity-100' : 'max-h-0 opacity-0'}`}>
             <Button onClick={handleKaydet} variant="primary" className="w-full mt-1">
               Kaydet
@@ -119,19 +119,19 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
               <div key={p.sinif} className="flex items-center justify-between gap-2 py-2.5 border-b border-[#E7E5E4] last:border-0">
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-[#1C1917] truncate">{p.label || p.ders}</p>
-                  <p className="text-xs text-gray-400">{p.sinifGercek || p.sinif} - {p.yil}</p>
+                  <p className="text-xs text-gray-400">{p.sinifGercek || p.sinif} · {p.yil}</p>
                 </div>
                 {silOnayBekleyen === p.sinif ? (
                   <div className="flex gap-1.5 shrink-0">
                     <button onClick={() => handlePlanSilOnayla(p.sinif)}
                       className="text-xs font-bold text-white bg-red-500 px-2.5 py-1.5 rounded-lg active:scale-95 transition-all">Sil</button>
                     <button onClick={() => setSilOnayBekleyen(null)}
-                      className="text-xs font-bold text-gray-500 border border-[#E7E5E4] px-2.5 py-1.5 rounded-lg active:scale-95 transition-all">Iptal</button>
+                      className="text-xs font-bold text-gray-500 border border-[#E7E5E4] px-2.5 py-1.5 rounded-lg active:scale-95 transition-all">İptal</button>
                   </div>
                 ) : (
                   <button onClick={() => setSilOnayBekleyen(p.sinif)}
                     className="text-sm text-gray-300 hover:text-red-400 active:scale-95 transition-all shrink-0 px-2 py-1">
-                    x
+                    ✕
                   </button>
                 )}
               </div>
@@ -147,7 +147,8 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
 
       {/* TERCIHLER */}
       <Card className="mb-3">
-        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Tercihler</p>        <div className="flex flex-col gap-4">
+        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Tercihler</p>
+        <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium text-[#1C1917]">Akademik Yıl</p>
             <select value={yil} onChange={e => setYil(e.target.value)}
@@ -172,9 +173,9 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
         </div>
       </Card>
 
-      {/* HESAP */}
+      {/* HESAP — en altta */}
       <Card>
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Hesap</p>
+        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Hesap</p>
         {user ? (
           <div className="flex items-center justify-between">
             <div>
@@ -187,15 +188,19 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
             </button>
           </div>
         ) : (
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-[#1C1917]">Giriş yapılmadı</p>
-              <p className="text-xs text-gray-400 mt-0.5">Planların tüm cihazlarda erişilebilir olsun</p>
+          <div>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                <span className="text-gray-400 text-lg">👤</span>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-[#1C1917]">Giriş yapılmadı</p>
+                <p className="text-xs text-gray-400 mt-0.5">Planların tüm cihazlarda erişilebilir olsun</p>
+              </div>
             </div>
-            <button onClick={() => setAuthModalAcik(true)}
-              className="text-xs font-bold text-[#2D5BE3] border border-[#2D5BE3]/30 bg-[#2D5BE3]/5 px-3 py-1.5 rounded-lg active:scale-95 transition-all">
-              Giriş Yap
-            </button>
+            <Button onClick={() => setAuthModalAcik(true)} variant="secondary" className="w-full">
+              Giriş Yap / Kayıt Ol
+            </Button>
           </div>
         )}
       </Card>

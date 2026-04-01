@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { SO_SINIFLAR, type Branch } from '../../lib/branchConfig'
+import { StorageKeys } from '../../lib/storageKeys'
 
 const TEMEL_DERSLER = ['Türkçe', 'Matematik', 'Hayat Bilgisi', 'Fen Bilimleri', 'Sosyal Bilgiler']
 import type { PlanEntry } from '../../types/planEntry'
@@ -91,7 +92,7 @@ export function PlanSelector({ yil, onComplete, onCancel, onStepChange }: PlanSe
           ders: r.ders, yil, tip: 'meb' as const, plan: r.plan, rows: null,
           label: r.ders, sinifGercek: selectedClass,
         }))
-        localStorage.setItem('ogretmen-ayarlari', JSON.stringify({
+        localStorage.setItem(StorageKeys.OGRETMEN_AYARLARI, JSON.stringify({
           ders: selectedLessons[0], siniflar: selectedLessons, yil,
           ogretmenTuru: 'sinif', sinifGercek: selectedClass,
         }))
@@ -104,7 +105,7 @@ export function PlanSelector({ yil, onComplete, onCancel, onStepChange }: PlanSe
         entries = results.map(r => ({
           sinif: r.sinif, ders: selectedBranch.lessonId, yil, tip: 'meb' as const, plan: r.plan, rows: null,
         }))
-        localStorage.setItem('ogretmen-ayarlari', JSON.stringify({
+        localStorage.setItem(StorageKeys.OGRETMEN_AYARLARI, JSON.stringify({
           ders: selectedBranch.lessonId, siniflar: selectedClasses, yil,
         }))
       }

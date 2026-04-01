@@ -146,6 +146,7 @@ function BuHaftaKarti({
       {/* Sınıf seçici — birden fazla sınıf varsa */}
       {planlar.length > 1 && (
         <div className="pt-3 border-t border-[#E7E5E4]">
+          <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Sınıf seç</p>
           <div className="flex gap-2 overflow-x-auto pb-0.5 -mx-1 px-1 mb-2">
             {planlar.map(entry => {
               const total = entry.plan?.haftalar.filter(h => !h.tatilMi).length || 0

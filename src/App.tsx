@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState, useCallback, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { HomePage } from './pages/HomePage'
 import { PlanPage } from './pages/PlanPage'
@@ -12,18 +12,50 @@ import { ToastProvider } from './lib/toast'
 import { usePlanYonetimi } from './hooks/usePlanYonetimi'
 import { useAuthSync } from './hooks/useAuthSync'
 import type { User } from './lib/auth'
+import { StorageKeys } from './lib/storageKeys'
 
 function AppInner() {
   const userRef = useRef<User | null>(null)
+
+  const [tamamlananlar, setTamamlananlar] = useState<Record<string, number[]>>(() => {
+    try {
+      const item = localStorage.getItem(StorageKeys.TAMAMLANAN_HAFTALAR)
+      if (item) {
+        const parsed = JSON.parse(item)
+        return Array.isArray(parsed) ? {} : parsed
+      }
+    } catch { /* okunamadı */ }
+    return {}
+  })
 
   const {
     planlar, setPlanlar, setAktifSinif,
     yuklendi, authPromptAcik, setAuthPromptAcik,
     aktifEntry, handlePlanEkle, handlePlanSil, handleSinifSec, handleYukleLegacy,
+    triggerAuthPromptIfNeeded,
   } = usePlanYonetimi(userRef)
 
-  const { user, syncing, tamamlananlar } = useAuthSync(setPlanlar, setAktifSinif)
+  const handleTamamlananGuncelle = useCallback(() => {
+    try {
+      const item = localStorage.getItem(StorageKeys.TAMAMLANAN_HAFTALAR)
+      if (item) {
+        const parsed = JSON.parse(item)
+        setTamamlananlar(Array.isArray(parsed) ? {} : parsed)
+      }
+    } catch { /* okunamadı */ }
+    triggerAuthPromptIfNeeded()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [triggerAuthPromptIfNeeded])
+
+  const { user, syncing, tamamlananlar: tamamlananlarCloud } = useAuthSync(setPlanlar, setAktifSinif)
   userRef.current = user
+
+  useEffect(() => {
+    if (tamamlananlarCloud && Object.keys(tamamlananlarCloud).length > 0) {
+      setTamamlananlar(prev => ({ ...prev, ...tamamlananlarCloud }))
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(tamamlananlarCloud)])
 
   if (!yuklendi) return null
 
@@ -38,7 +70,7 @@ function AppInner() {
         <Route path="/app/plan" element={<AppLayout>{planlar.length > 0 && aktifEntry ? <PlanPage entry={aktifEntry} planlar={planlar} onSinifSec={handleSinifSec} /> : <AppHomeScreen planlar={planlar} onPlanEkle={handlePlanEkle} onSinifSec={handleSinifSec} syncing={syncing} tamamlananlar={tamamlananlar} />}</AppLayout>} />
         <Route path="/app/yukle" element={<AppLayout><YuklemePage onYukle={handleYukleLegacy} /></AppLayout>} />
         <Route path="/app/ayarlar" element={<AppLayout><AppSettingsScreen onPlanEkle={handlePlanEkle} onPlanSil={handlePlanSil} planlar={planlar} user={user} /></AppLayout>} />
-        <Route path="/app/hafta/:haftaNo" element={<AppLayout><HaftaDetayPage entry={aktifEntry} /></AppLayout>} />
+        <Route path="/app/hafta/:haftaNo" element={<AppLayout><HaftaDetayPage entry={aktifEntry} onTamamlaToggle={handleTamamlananGuncelle} /></AppLayout>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       {authPromptAcik && (
