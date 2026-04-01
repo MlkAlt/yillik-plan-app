@@ -3,6 +3,8 @@
  * Tüm localStorage erişimlerinde ham string literal yerine bu sabitler kullanılmalıdır.
  */
 export const StorageKeys = {
+  // Migration: eski format
+  ESKI_AKTIF_PLAN:        'aktif-plan',
   TUM_PLANLAR:            'tum-planlar',
   AKTIF_SINIF:            'aktif-sinif',
   TAMAMLANAN_HAFTALAR:    'tamamlanan-haftalar',

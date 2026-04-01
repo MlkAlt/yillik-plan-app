@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"c:\\Users\\melik\\Desktop\\Öğretmen Yaver App\" && git add -A && git diff --staged --quiet || (git commit -m \"auto: agent session changes\" && git push origin main)"
+          }
+        ]
+      }
+    ]
+  }
+}

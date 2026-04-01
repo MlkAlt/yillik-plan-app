@@ -17,7 +17,7 @@ export function usePlanYonetimi(userRef?: RefObject<User | null>) {
 
   useEffect(() => {
     try {
-      const eskiPlan = localStorage.getItem('aktif-plan')
+      const eskiPlan = localStorage.getItem(StorageKeys.ESKI_AKTIF_PLAN)
       const yeniPlanlar = localStorage.getItem(StorageKeys.TUM_PLANLAR)
       if (!yeniPlanlar && eskiPlan) {
         const parsed = JSON.parse(eskiPlan)
@@ -52,8 +52,11 @@ export function usePlanYonetimi(userRef?: RefObject<User | null>) {
       setAktifSinif(entries[0].sinif)
       localStorage.setItem(StorageKeys.AKTIF_SINIF, entries[0].sinif)
     }
+  }
+
+  function triggerAuthPromptIfNeeded() {
     if (!activeUserRef.current && localStorage.getItem(StorageKeys.AUTH_PROMPT_GOSTERILDI) !== '1') {
-      setTimeout(() => setAuthPromptAcik(true), 1500)
+      setAuthPromptAcik(true)
     }
   }
 
@@ -85,5 +88,6 @@ export function usePlanYonetimi(userRef?: RefObject<User | null>) {
     yuklendi, authPromptAcik, setAuthPromptAcik,
     aktifEntry,
     handlePlanEkle, handlePlanSil, handleSinifSec, handleYukleLegacy,
+    triggerAuthPromptIfNeeded,
   }
 }
