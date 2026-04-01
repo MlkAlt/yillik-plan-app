@@ -7,7 +7,124 @@ import { exportPlanToExcel, exportPlanToWord, exportPlanToPrint } from '../lib/e
 import { AdBanner } from '../components/AdBanner';
 import { Card } from '../components/UI/Card';
 import { Button } from '../components/Button';
-import { Download, FileSpreadsheet, FileText, Printer, MapPin, Check, CalendarDays } from 'lucide-react';
+import { Download, FileSpreadsheet, FileText, Printer, MapPin, Check, CalendarDays, ChevronDown } from 'lucide-react';
+import { StorageKeys } from '../lib/storageKeys';
+
+// Dönem bazlı collapse bileşeni
+function DonemGrubu({
+  donemNo, haftalar, tamamlananlar, bugunHaftaNo, bugunRef,
+  tamamlananSayisi, toplamSayisi, acik, onToggle, navigate,
+}: {
+  donemNo: number
+  haftalar: Hafta[]
+  tamamlananlar: number[]
+  bugunHaftaNo: number | null
+  bugunRef: React.RefObject<HTMLDivElement | null>
+  tamamlananSayisi: number
+  toplamSayisi: number
+  acik: boolean
+  onToggle: () => void
+  navigate: ReturnType<typeof useNavigate>
+}) {
+  const yuzde = toplamSayisi > 0 ? Math.round((tamamlananSayisi / toplamSayisi) * 100) : 0
+  const tamamlandi = tamamlananSayisi >= toplamSayisi && toplamSayisi > 0
+
+  return (
+    <div className="rounded-2xl border border-[#E7E5E4] overflow-hidden">
+      {/* Dönem başlığı — tıklanabilir */}
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center justify-between px-4 py-3.5 bg-white active:bg-gray-50 transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-bold text-[#1C1917]">{donemNo}. Dönem</span>
+          {tamamlandi && (
+            <span className="flex items-center gap-1 text-xs font-bold text-[#059669] bg-[#059669]/10 px-2 py-0.5 rounded-full">
+              <Check size={10} strokeWidth={3} /> Tamamlandı
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <div className="w-16 bg-gray-100 rounded-full h-1.5">
+              <div
+                className={`h-1.5 rounded-full transition-all ${tamamlandi ? 'bg-[#059669]' : 'bg-[#F59E0B]'}`}
+                style={{ width: `${yuzde}%` }}
+              />
+            </div>
+            <span className="text-xs text-gray-400 font-medium">{tamamlananSayisi}/{toplamSayisi}</span>
+          </div>
+          <ChevronDown
+            size={16}
+            className={`text-gray-400 transition-transform duration-200 ${acik ? 'rotate-180' : ''}`}
+          />
+        </div>
+      </button>
+
+      {/* Hafta listesi */}
+      {acik && (
+        <div className="flex flex-col gap-2 p-3 bg-[#FAFAF9] border-t border-[#E7E5E4]">
+          {haftalar.map((h, i) => {
+            const isTatil = h.tatilMi
+            const isTamamlandi = tamamlananlar.includes(h.haftaNo)
+            const isBuHafta = h.haftaNo === bugunHaftaNo
+            return (
+              <div
+                key={`meb-${h.haftaNo}-${i}`}
+                ref={isBuHafta ? bugunRef : undefined}
+                onClick={() => navigate(`/app/hafta/${h.haftaNo}`)}
+                className={`rounded-xl p-3.5 border transition-all cursor-pointer ${
+                  isBuHafta ? 'bg-[#2D5BE3]/5 border-[#2D5BE3] ring-1 ring-[#2D5BE3]/30' :
+                  isTamamlandi ? 'bg-[#059669]/10 border-[#059669]/30' :
+                  isTatil ? 'bg-amber-50 border-amber-200' :
+                  'bg-white border-[#E7E5E4] hover:shadow-sm active:scale-[0.99]'
+                }`}
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className={`font-bold text-sm ${
+                      isBuHafta ? 'text-[#2D5BE3]' :
+                      isTamamlandi ? 'text-[#059669]' :
+                      isTatil ? 'text-amber-700' : 'text-[#1C1917]'
+                    }`}>
+                      {h.haftaNo}. Hafta
+                    </span>
+                    {isBuHafta && (
+                      <span className="text-[10px] font-bold text-white bg-[#2D5BE3] px-2 py-0.5 rounded-full">
+                        Bu Hafta
+                      </span>
+                    )}
+                    {isTamamlandi && (
+                      <span className="flex items-center gap-1 text-[10px] font-bold text-[#059669]">
+                        <Check size={10} strokeWidth={3} /> Tamam
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[11px] text-gray-400 font-medium">
+                    {formatTarih(h.baslangicTarihi)} – {formatTarih(h.bitisTarihi)}
+                  </span>
+                </div>
+
+                {isTatil ? (
+                  <p className="text-sm font-semibold text-amber-700">{h.tatilAdi}</p>
+                ) : h.kazanim ? (
+                  <div>
+                    {h.uniteAdi && (
+                      <span className="inline-block bg-[#2D5BE3]/10 text-[#2D5BE3] text-[10px] font-semibold px-2 py-0.5 rounded-full mb-1.5">
+                        {h.uniteAdi}
+                      </span>
+                    )}
+                    <p className="text-sm text-[#1C1917] font-medium leading-snug line-clamp-2">{h.kazanim}</p>
+                  </div>
+                ) : null}
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
 
 interface PlanPageProps {
   entry: PlanEntry | null;
@@ -28,6 +145,7 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
   const [exportMenuAcik, setExportMenuAcik] = useState(false);
   const [exporting, setExporting] = useState<'excel' | 'word' | null>(null);
   const [visibleYuzde, setVisibleYuzde] = useState(0);
+  const [donemAcik, setDonemAcik] = useState<Record<number, boolean>>({ 1: true, 2: false });
   const bugunRef = useRef<HTMLDivElement>(null);
 
   const bugunStr = new Date().toISOString().split('T')[0]
@@ -39,8 +157,16 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
   )?.haftaNo ?? null
 
   function scrollToBugunHafta() {
-    if (!bugunRef.current) return
-    bugunRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    if (!entry?.plan || !bugunHaftaNo) return
+    // Bu haftanın dönemini bul ve o dönemi aç
+    const bugunDonem = entry.plan.haftalar.find(h => h.haftaNo === bugunHaftaNo)?.donem ?? 1
+    setDonemAcik(prev => ({ ...prev, [bugunDonem]: true }))
+    // Bir sonraki frame'de scroll et (render bekleniyor)
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        bugunRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      })
+    })
   }
 
   async function handleExcelIndir() {
@@ -48,7 +174,7 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
     setExporting('excel');
     setExportMenuAcik(false);
     try {
-      const ayarlar = localStorage.getItem('ogretmen-ayarlari');
+      const ayarlar = localStorage.getItem(StorageKeys.OGRETMEN_AYARLARI);
       const meta = ayarlar ? JSON.parse(ayarlar) : {};
       await exportPlanToExcel(entry, { okulAdi: meta.okulAdi, ogretmenAdi: meta.adSoyad });
     } finally {
@@ -61,7 +187,7 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
     setExporting('word');
     setExportMenuAcik(false);
     try {
-      const ayarlar = localStorage.getItem('ogretmen-ayarlari');
+      const ayarlar = localStorage.getItem(StorageKeys.OGRETMEN_AYARLARI);
       const meta = ayarlar ? JSON.parse(ayarlar) : {};
       exportPlanToWord(entry, { okulAdi: meta.okulAdi, ogretmenAdi: meta.adSoyad });
     } finally {
@@ -72,19 +198,23 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
   function handleYazdir() {
     if (!entry) return;
     setExportMenuAcik(false);
-    const ayarlar = localStorage.getItem('ogretmen-ayarlari');
+    const ayarlar = localStorage.getItem(StorageKeys.OGRETMEN_AYARLARI);
     const meta = ayarlar ? JSON.parse(ayarlar) : {};
     exportPlanToPrint(entry, { okulAdi: meta.okulAdi, ogretmenAdi: meta.adSoyad });
   }
 
   useEffect(() => {
-    // Otomatik scroll kaldırıldı — kullanıcı "Bu Hafta" butonuna basınca gider
+    // Plan değişince dönem açık/kapalı state'ini sıfırla — aktif dönem açık olsun
+    if (!entry?.plan) return
+    const aktifDonem = entry.plan.haftalar.find(h => h.haftaNo === bugunHaftaNo)?.donem ?? 1
+    setDonemAcik({ 1: aktifDonem === 1, 2: aktifDonem === 2 })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entry?.sinif])
 
   useEffect(() => {
     if (!entry) return;
     try {
-      const item = localStorage.getItem('tamamlanan-haftalar');
+      const item = localStorage.getItem(StorageKeys.TAMAMLANAN_HAFTALAR);
       if (item) {
         const parsed = JSON.parse(item);
         if (Array.isArray(parsed)) {
@@ -218,6 +348,14 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
           )}
         </div>
 
+        {/* Direkt yazdır butonu */}
+        <button
+          onClick={handleYazdir}
+          className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-[#E7E5E4] bg-[#FAFAF9] text-sm font-bold text-gray-600 hover:border-gray-300 active:scale-95 transition-all whitespace-nowrap"
+        >
+          <Printer size={16} /> Yazdır
+        </button>
+
         {/* Bu haftaya git */}
         {bugunHaftaNo && (
           <button
@@ -231,78 +369,44 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
 
       <AdBanner className="mb-4 rounded-xl" />
 
-      {/* Hafta Listesi */}
+      {/* Hafta Listesi — dönem bazlı collapse */}
+      {isMeb && (() => {
+        // Dönemleri grupla
+        const donem1 = plan!.haftalar.filter(h => h.donem === 1)
+        const donem2 = plan!.haftalar.filter(h => h.donem === 2)
+        const aktifDonem = plan!.haftalar.find(h => h.haftaNo === bugunHaftaNo)?.donem ?? 1
+
+        return (
+          <div className="flex flex-col gap-4">
+            {[1, 2].map(donemNo => {
+              const donemHaftalar = donemNo === 1 ? donem1 : donem2
+              if (donemHaftalar.length === 0) return null
+              const tamamlananSayisi = donemHaftalar.filter(h => !h.tatilMi && tamamlananlar.includes(h.haftaNo)).length
+              const toplamSayisi = donemHaftalar.filter(h => !h.tatilMi).length
+              // Başlangıçta aktif dönem açık, diğeri kapalı
+              const isAcik = donemAcik[donemNo] !== undefined ? donemAcik[donemNo] : donemNo === aktifDonem
+
+              return (
+                <DonemGrubu
+                  key={donemNo}
+                  donemNo={donemNo}
+                  haftalar={donemHaftalar}
+                  tamamlananlar={tamamlananlar}
+                  bugunHaftaNo={bugunHaftaNo}
+                  bugunRef={bugunRef}
+                  tamamlananSayisi={tamamlananSayisi}
+                  toplamSayisi={toplamSayisi}
+                  acik={isAcik}
+                  onToggle={() => setDonemAcik(prev => ({ ...prev, [donemNo]: !prev[donemNo] }))}
+                  navigate={navigate}
+                />
+              )
+            })}
+          </div>
+        )
+      })()}
+
       <div className="flex flex-col gap-3">
-        {isMeb && plan!.haftalar.map((h: Hafta, i: number) => {
-          const isTatil = h.tatilMi;
-          const isTamamlandi = tamamlananlar.includes(h.haftaNo);
-          const isBuHafta = h.haftaNo === bugunHaftaNo;
-          return (
-            <div
-              key={`meb-${h.haftaNo}-${i}`}
-              ref={isBuHafta ? bugunRef : undefined}
-              onClick={() => navigate(`/app/hafta/${h.haftaNo}`)}
-              className={`rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] p-4 border transition-all cursor-pointer ${
-                isBuHafta ? 'bg-[#2D5BE3]/5 border-[#2D5BE3] ring-1 ring-[#2D5BE3]/30' :
-                isTamamlandi ? 'bg-[#059669]/10 border-[#059669]/30' :
-                isTatil ? 'bg-amber-50 border-amber-200' :
-                'bg-[#FAFAF9] border-[#E7E5E4] hover:shadow-md active:scale-[0.99]'
-              }`}
-            >
-              <div className="flex justify-between items-start mb-3">
-                <div className="flex items-center gap-2">
-                  <span className={`font-bold text-lg ${
-                    isBuHafta ? 'text-[#2D5BE3]' :
-                    isTamamlandi ? 'text-[#059669]' :
-                    isTatil ? 'text-amber-700' :
-                    'text-[#2D5BE3]'
-                  }`}>
-                    {h.haftaNo}. Hafta
-                  </span>
-                  {isBuHafta && (
-                    <span className="text-[10px] font-bold text-white bg-[#2D5BE3] px-2 py-0.5 rounded-full">
-                      Bu Hafta
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  {isTamamlandi && (
-                    <span className="flex items-center gap-1 text-xs font-bold text-[#059669] bg-[#059669]/10 px-2 py-0.5 rounded-full border border-[#059669]/30">
-                      <Check size={11} strokeWidth={3} /> Tamam
-                    </span>
-                  )}
-                  <span className="text-[11px] text-gray-500 font-semibold bg-[#FAFAF9] px-2.5 py-1 rounded-md border border-[#E7E5E4]/50">
-                    {formatTarih(h.baslangicTarihi)} – {formatTarih(h.bitisTarihi)}
-                  </span>
-                </div>
-              </div>
-
-              {h.kazanim && (
-                <div className="mb-3">
-                  {h.uniteAdi && (
-                    <span className="inline-block bg-[#2D5BE3]/10 text-[#2D5BE3] text-xs font-semibold px-2.5 py-0.5 rounded-full mb-2">
-                      {h.uniteAdi}
-                    </span>
-                  )}
-                  <p className="font-bold text-[#1C1917] text-sm mb-1">{h.kazanim}</p>
-                  {h.kazanimDetay && (
-                    <p className="text-gray-500 text-xs">{h.kazanimDetay}</p>
-                  )}
-                </div>
-              )}
-
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-widest bg-gray-100 text-gray-500 px-3 py-1.5 rounded-full">
-                  {h.donem}. Dönem
-                </span>
-                {isTatil && (
-                  <span className="text-sm font-bold text-[#F59E0B]">{h.tatilAdi}</span>
-                )}
-              </div>
-            </div>
-          );
-        })}
-
         {isUploaded && rows!.map((r: ParsedRow, i: number) => {
           const isTamamlandi = r.haftaNo ? tamamlananlar.includes(r.haftaNo) : false;
           return (
@@ -345,3 +449,4 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
     </div>
   );
 }
+
