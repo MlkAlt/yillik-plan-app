@@ -172,7 +172,7 @@ export function HaftaDetayPage({ entry, onTamamlaToggle }: HaftaDetayPageProps) 
       {hafta && !hafta.tatilMi && (
         <Card className="mb-4">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-[10px] font-bold uppercase tracking-widest bg-gray-100 text-gray-500 px-3 py-1.5 rounded-full">
+            <span className="text-xs font-bold uppercase tracking-widest bg-gray-100 text-gray-500 px-3 py-1.5 rounded-full">
               {hafta.donem}. Dönem
             </span>
             <span className="text-xs text-gray-400 font-medium">
@@ -207,7 +207,7 @@ export function HaftaDetayPage({ entry, onTamamlaToggle }: HaftaDetayPageProps) 
       {uploadedRow && (
         <Card className="mb-4">
           {uploadedRow.donem && (
-            <span className="inline-block text-[10px] font-bold uppercase tracking-widest bg-gray-100 text-gray-500 px-3 py-1.5 rounded-full mb-3">
+            <span className="inline-block text-xs font-bold uppercase tracking-widest bg-gray-100 text-gray-500 px-3 py-1.5 rounded-full mb-3">
               {uploadedRow.donem}
             </span>
           )}
@@ -243,7 +243,7 @@ export function HaftaDetayPage({ entry, onTamamlaToggle }: HaftaDetayPageProps) 
         }
       </button>
       {!tamamlandi && (
-        <p className="text-center text-[11px] text-gray-400 -mt-3 mb-4">Haftayı tamamlayınca işaretle</p>
+        <p className="text-center text-xs text-gray-400 -mt-3 mb-4">Haftayı tamamlayınca işaretle</p>
       )}
       {/* Önceki / Sonraki hafta navigasyonu */}
       {tumHaftaNoları.length > 1 && (() => {
@@ -289,7 +289,7 @@ export function HaftaDetayPage({ entry, onTamamlaToggle }: HaftaDetayPageProps) 
         />
         <div className="flex justify-end mt-1.5 h-4">
           {kaydedildi && (
-            <span className="text-[11px] text-green-600 font-medium">✓ Kaydedildi</span>
+            <span className="text-xs text-green-600 font-medium">✓ Kaydedildi</span>
           )}
         </div>
       </Card>

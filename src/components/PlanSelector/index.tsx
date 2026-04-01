@@ -128,7 +128,7 @@ export function PlanSelector({ yil, onComplete, onCancel, onStepChange }: PlanSe
       <div>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Başlayalım</p>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Başlayalım</p>
             <h2 className="text-base font-bold text-[#1C1917]">Branşını seç</h2>
           </div>
           {onCancel && (

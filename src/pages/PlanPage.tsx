@@ -90,17 +90,17 @@ function DonemGrubu({
                       {h.haftaNo}. Hafta
                     </span>
                     {isBuHafta && (
-                      <span className="text-[10px] font-bold text-white bg-[#2D5BE3] px-2 py-0.5 rounded-full">
+                      <span className="text-xs font-bold text-white bg-[#2D5BE3] px-2 py-0.5 rounded-full">
                         Bu Hafta
                       </span>
                     )}
                     {isTamamlandi && (
-                      <span className="flex items-center gap-1 text-[10px] font-bold text-[#059669]">
+                      <span className="flex items-center gap-1 text-xs font-bold text-[#059669]">
                         <Check size={10} strokeWidth={3} /> Tamam
                       </span>
                     )}
                   </div>
-                  <span className="text-[11px] text-gray-400 font-medium">
+                  <span className="text-xs text-gray-400 font-medium">
                     {formatTarih(h.baslangicTarihi)} – {formatTarih(h.bitisTarihi)}
                   </span>
                 </div>
@@ -110,7 +110,7 @@ function DonemGrubu({
                 ) : h.kazanim ? (
                   <div>
                     {h.uniteAdi && (
-                      <span className="inline-block bg-[#2D5BE3]/10 text-[#2D5BE3] text-[10px] font-semibold px-2 py-0.5 rounded-full mb-1.5">
+                      <span className="inline-block bg-[#2D5BE3]/10 text-[#2D5BE3] text-xs font-semibold px-2 py-0.5 rounded-full mb-1.5">
                         {h.uniteAdi}
                       </span>
                     )}
@@ -428,14 +428,14 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
                     </span>
                   )}
                   {r.tarihAraligi && (
-                    <span className="text-[11px] text-gray-400 font-semibold bg-[#FAFAF9] px-2.5 py-1 rounded-md border border-[#E7E5E4]/50">
+                    <span className="text-xs text-gray-400 font-semibold bg-white px-2.5 py-1 rounded-md border border-[#E7E5E4]/50">
                       {r.tarihAraligi}
                     </span>
                   )}
                 </div>
               </div>
               {r.donem && (
-                <span className="text-[10px] font-bold uppercase tracking-widest bg-gray-100 text-gray-500 px-3 py-1.5 rounded-full inline-block mb-3">
+                <span className="text-xs font-bold uppercase tracking-widest bg-gray-100 text-gray-500 px-3 py-1.5 rounded-full inline-block mb-3">
                   {r.donem}
                 </span>
               )}

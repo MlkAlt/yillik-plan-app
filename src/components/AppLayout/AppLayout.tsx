@@ -85,7 +85,7 @@ export function AppLayout({ children, headerAction }: AppLayoutProps) {
                     className={`transition-all duration-200 ${isActive ? 'text-[#2D5BE3] scale-110' : 'text-gray-400 group-hover:text-gray-600'}`}
                     strokeWidth={isActive ? 2.5 : 1.8}
                   />
-                  <span className={`text-[10px] font-bold transition-colors duration-200 ${isActive ? 'text-[#2D5BE3]' : 'text-gray-400 group-hover:text-gray-600'}`}>
+                  <span className={`text-xs font-bold transition-colors duration-200 ${isActive ? 'text-[#2D5BE3]' : 'text-gray-400 group-hover:text-gray-600'}`}>
                     {tab.name}
                   </span>
                   <span className={`absolute bottom-0 rounded-full bg-[#2D5BE3] transition-all duration-300 ${isActive ? 'w-4 h-0.5 opacity-100' : 'w-0 h-0.5 opacity-0'}`} />
@@ -109,7 +109,7 @@ export function AppLayout({ children, headerAction }: AppLayoutProps) {
                   strokeWidth={location.pathname === '/app/ayarlar' ? 2.5 : 1.8}
                 />
               )}
-              <span className={`text-[10px] font-bold transition-colors duration-200 ${location.pathname === '/app/ayarlar' ? 'text-[#2D5BE3]' : 'text-gray-400 group-hover:text-gray-600'}`}>
+              <span className={`text-xs font-bold transition-colors duration-200 ${location.pathname === '/app/ayarlar' ? 'text-[#2D5BE3]' : 'text-gray-400 group-hover:text-gray-600'}`}>
                 Ayarlar
               </span>
               <span className={`absolute bottom-0 rounded-full bg-[#2D5BE3] transition-all duration-300 ${location.pathname === '/app/ayarlar' ? 'w-4 h-0.5 opacity-100' : 'w-0 h-0.5 opacity-0'}`} />

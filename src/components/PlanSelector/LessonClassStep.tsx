@@ -37,7 +37,7 @@ export function LessonClassStep({
 
       {/* Sınıf seçimi (tek seçim) */}
       <div className="mb-5">
-        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Sınıfın</p>
+        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Sınıfın</p>
         <div className="flex gap-2 flex-wrap">
           {SO_SINIFLAR.map(cls => (
             <button
@@ -79,7 +79,7 @@ export function LessonClassStep({
 
       {/* Ders pilleri */}
       <div className="mb-6">
-        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">
+        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
           Dersler <span className="text-gray-300 font-normal normal-case tracking-normal">(birden fazla seç)</span>
         </p>
         <div className="flex flex-wrap gap-2">

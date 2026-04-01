@@ -116,7 +116,7 @@ function BuHaftaKarti({
         {aktifHafta && !aktifHafta.tatilMi && (
           <>
             {aktifHafta.uniteAdi && (
-              <p className="text-[11px] font-bold text-[#F59E0B] uppercase tracking-wider mb-1.5">
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">
                 {aktifHafta.uniteAdi}
               </p>
             )}
@@ -138,7 +138,7 @@ function BuHaftaKarti({
           </p>
         )}
 
-        <p className="text-[11px] text-gray-300 mt-2 font-medium group-hover:text-gray-400 transition-colors">
+        <p className="text-xs text-gray-300 mt-2 font-medium group-hover:text-gray-400 transition-colors">
           Yıllık plana git →
         </p>
       </button>
@@ -146,7 +146,7 @@ function BuHaftaKarti({
       {/* Sınıf seçici — birden fazla sınıf varsa */}
       {planlar.length > 1 && (
         <div className="pt-3 border-t border-[#E7E5E4]">
-          <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Sınıf seç</p>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Sınıf seç</p>
           <div className="flex gap-2 overflow-x-auto pb-0.5 -mx-1 px-1 mb-2">
             {planlar.map(entry => {
               const total = entry.plan?.haftalar.filter(h => !h.tatilMi).length || 0
@@ -323,14 +323,14 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => setPlanSelectorAcik(true)}
-              className="bg-[#FAFAF9] rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-4 active:scale-[0.98] transition-all flex flex-col items-center justify-center gap-2 hover:shadow-md"
+              className="bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-4 active:scale-[0.98] transition-all flex flex-col items-center justify-center gap-2 hover:shadow-md"
             >
               <Plus size={24} className="text-[#2D5BE3]" />
               <span className="text-sm font-bold text-[#2D5BE3]">Yeni Plan Ekle</span>
             </button>
             <button
               onClick={() => navigate('/app/yukle')}
-              className="bg-[#FAFAF9] rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-4 active:scale-[0.98] transition-all flex flex-col items-center justify-center gap-2 hover:shadow-md"
+              className="bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] p-4 active:scale-[0.98] transition-all flex flex-col items-center justify-center gap-2 hover:shadow-md"
             >
               <Upload size={24} className="text-[#2D5BE3]" />
               <span className="text-sm font-bold text-[#2D5BE3]">Dosya Yükle</span>

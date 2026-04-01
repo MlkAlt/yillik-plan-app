@@ -125,7 +125,7 @@ export function OnboardingModal({ onTamamla }: OnboardingModalProps) {
             <div className="flex-1 overflow-y-auto px-5 pb-4">
               {!query && popular.length > 0 && (
                 <div className="mb-4">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Popüler</p>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Popüler</p>
                   <BransList
                     branches={popular}
                     acikBrans={acikBrans}
@@ -138,7 +138,7 @@ export function OnboardingModal({ onTamamla }: OnboardingModalProps) {
 
               {rest.length > 0 && (
                 <div>
-                  {!query && <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Diğer Branşlar</p>}
+                  {!query && <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Diğer Branşlar</p>}
                   <BransList
                     branches={query ? filtered : rest}
                     acikBrans={acikBrans}

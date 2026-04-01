@@ -88,12 +88,12 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
 
       {/* ÖĞRETMENBİLGİLERİ — en üstte, ilk kurulum için */}
       <Card className="mb-3">
-        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Öğretmen Bilgileri</p>
+        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Öğretmen Bilgileri</p>
         <div className="flex flex-col gap-3">
           <input type="text" placeholder="Ad Soyad" value={adSoyad} onChange={e => setAdSoyad(e.target.value)}
-            className="w-full p-3 rounded-xl border border-[#E7E5E4] bg-white focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/20 focus:border-[#F59E0B] transition-all text-[#1C1917] text-sm" />
+            className="w-full p-3 rounded-xl border border-[#E7E5E4] bg-white focus:outline-none focus:ring-2 focus:ring-[#2D5BE3]/20 focus:border-[#2D5BE3] transition-all text-[#1C1917] text-sm" />
           <input type="text" placeholder="Okul Adı" value={okulAdi} onChange={e => setOkulAdi(e.target.value)}
-            className="w-full p-3 rounded-xl border border-[#E7E5E4] bg-white focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/20 focus:border-[#F59E0B] transition-all text-[#1C1917] text-sm" />
+            className="w-full p-3 rounded-xl border border-[#E7E5E4] bg-white focus:outline-none focus:ring-2 focus:ring-[#2D5BE3]/20 focus:border-[#2D5BE3] transition-all text-[#1C1917] text-sm" />
           <div className={`overflow-hidden transition-all duration-200 ${degisti ? 'max-h-16 opacity-100' : 'max-h-0 opacity-0'}`}>
             <Button onClick={handleKaydet} variant="primary" className="w-full mt-1">
               Kaydet
@@ -105,7 +105,7 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
       {/* PLANLARIM */}
       <Card className="mb-3">
         <div className="flex items-center justify-between mb-4">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Planlarım</p>
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Planlarım</p>
           <button onClick={() => setPlanSelectorAcik(true)}
             className="text-xs font-bold text-[#2D5BE3] bg-[#2D5BE3]/8 px-3 py-1.5 rounded-lg active:scale-95 transition-all">
             + Yeni Plan
@@ -124,9 +124,9 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
                 {silOnayBekleyen === p.sinif ? (
                   <div className="flex gap-1.5 shrink-0">
                     <button onClick={() => handlePlanSilOnayla(p.sinif)}
-                      className="text-xs font-bold text-white bg-red-500 px-2.5 py-1.5 rounded-lg active:scale-95 transition-all">Sil</button>
+                      className="text-xs font-bold text-white bg-red-500 px-3 py-2 rounded-lg active:scale-95 transition-all">Sil</button>
                     <button onClick={() => setSilOnayBekleyen(null)}
-                      className="text-xs font-bold text-gray-500 border border-[#E7E5E4] px-2.5 py-1.5 rounded-lg active:scale-95 transition-all">İptal</button>
+                      className="text-xs font-bold text-gray-500 border border-[#E7E5E4] px-3 py-2 rounded-lg active:scale-95 transition-all">İptal</button>
                   </div>
                 ) : (
                   <button onClick={() => setSilOnayBekleyen(p.sinif)}
@@ -147,7 +147,7 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
 
       {/* TERCIHLER */}
       <Card className="mb-3">
-        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Tercihler</p>
+        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Tercihler</p>
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium text-[#1C1917]">Akademik Yıl</p>
@@ -175,7 +175,7 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
 
       {/* HESAP — en altta */}
       <Card>
-        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Hesap</p>
+        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Hesap</p>
         {user ? (
           <div className="flex items-center justify-between">
             <div>
