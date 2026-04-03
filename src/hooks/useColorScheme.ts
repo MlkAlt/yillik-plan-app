@@ -18,7 +18,7 @@ function readStoredTheme(): Theme {
     const stored = localStorage.getItem(StorageKeys.TEMA)
     if (stored === 'light' || stored === 'dark' || stored === 'system') return stored
   } catch { /* localStorage erişim hatası */ }
-  return 'system'
+  return 'light'
 }
 
 export function useColorScheme() {

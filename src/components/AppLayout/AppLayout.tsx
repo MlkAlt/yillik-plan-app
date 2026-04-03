@@ -4,7 +4,6 @@ import { Home, CalendarDays, FolderOpen, Sparkles } from 'lucide-react'
 
 interface AppLayoutProps {
   children: ReactNode
-  headerAction?: { label: string; onClick: () => void }
 }
 
 const TABS = [
@@ -22,7 +21,7 @@ function isTabActive(tab: typeof TABS[number], pathname: string) {
   return pathname.startsWith(tab.path)
 }
 
-export function AppLayout({ children, headerAction }: AppLayoutProps) {
+export function AppLayout({ children }: AppLayoutProps) {
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -30,37 +29,7 @@ export function AppLayout({ children, headerAction }: AppLayoutProps) {
     <div className="min-h-screen font-sans flex justify-center" style={{ backgroundColor: 'var(--color-bg2, #ededea)' }}>
       <div className="w-full max-w-lg min-h-screen relative flex flex-col" style={{ backgroundColor: 'var(--color-bg, #f5f5f2)', boxShadow: 'var(--shadow-md)' }}>
 
-        {/* HEADER */}
-        <header
-          className="sticky top-0 z-40 h-14 px-5 flex items-center justify-between"
-          style={{
-            backgroundColor: 'var(--color-surface, #fff)',
-            borderBottom: '1px solid var(--color-border, #e6e6e3)',
-            boxShadow: 'var(--shadow-xs)',
-          }}
-        >
-          <button
-            onClick={() => navigate('/app')}
-            className="font-bold text-lg tracking-tight active:opacity-70 transition-opacity"
-            style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text1)' }}
-          >
-            Öğretmen Yaver
-          </button>
-          {headerAction && (
-            <button
-              onClick={headerAction.onClick}
-              className="text-sm font-bold px-3 py-1.5 rounded-full active:scale-95 transition-all"
-              style={{
-                color: 'var(--color-primary)',
-                backgroundColor: 'var(--color-primary-s)',
-              }}
-            >
-              {headerAction.label}
-            </button>
-          )}
-        </header>
-
-        {/* MAIN */}
+        {/* MAIN — header yok, her ekranın kendi topbar'ı var */}
         <main key={location.pathname} className="flex-1 overflow-y-auto pb-[72px] animate-fade-in">
           {children}
         </main>
