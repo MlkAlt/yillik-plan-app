@@ -198,7 +198,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
 
       <div className="px-4 flex flex-col gap-3">
 
-        {/* ── PLAN YOK → Onboarding ── */}
+        {/* ── PLAN YOK → Onboarding overlay (portal, blur arkaplanlı) ── */}
         {planlar.length === 0 && (
           <BosdurumuEkrani
             onTamamla={entries => {
