@@ -124,6 +124,16 @@ Son güncelleme: 2026-04-03 (oturum 2)
 - TS hata yok, 12 test geçiyor ✅
 - Sonraki: Görev #8 — Planla ekranı yeni tasarım
 
+### 2026-04-04 — Ana Ekran v6 yeniden yazımı
+- `AppHomeScreen.tsx` tamamen v6 mockup'a göre yeniden yazıldı
+- Topbar: karşılama + ad Hoca + Bell (bildirim noktası) + User ikonları
+- Tasarruf kartı: blue→indigo gradyan şerit, tamamlanan haftadan hesaplanan saat, 3 stat satırı
+- Bu Hafta widget: kart başlığı + hafta no + her plan için kazanım satırı (durum noktası)
+- Yaklaşan: deadline kartları yatay scroll (Not Girişi, ZHA, Yazılı, Karne)
+- Hızlı Erişim: Yeni Plan + Dosya Yükle (list row stili, v6 dp-prompt benzeri)
+- Tüm logic korundu (effects, state, BosdurumuEkrani, BottomSheet)
+- TS hata yok, 12 test geçiyor ✅, build başarılı ✅
+
 ### 2026-04-03 — Görev #9: Dosyam ekranı v6
 - `DosyamPage.tsx` sıfırdan yazıldı — v6 mockup referans alındı
 - Özet kartı: violet→blue gradyan şerit, belge sayacı, durum listesi, PDF indir butonu (accent renk)
