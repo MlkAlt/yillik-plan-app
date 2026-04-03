@@ -77,12 +77,12 @@ export function BosdurumuEkrani({ onTamamla }: BosdurumuEkraniProps) {
           {/* CTA */}
           <button
             onClick={() => setModalAcik(true)}
-            className="w-full py-3.5 text-[15px] font-bold text-white transition-all active:scale-[0.97]"
+            className="w-full py-3.5 text-[15px] font-bold text-white transition-all active:scale-[0.97] card-lift"
             style={{
               borderRadius: 'var(--radius-pill)',
-              backgroundColor: 'var(--color-primary)',
+              background: 'linear-gradient(135deg, var(--color-primary) 0%, color-mix(in srgb, var(--color-primary) 80%, var(--color-accent)) 100%)',
               border: 'none',
-              boxShadow: '0 4px 16px rgba(79,106,245,0.35)',
+              boxShadow: '0 4px 20px rgba(45,68,212,0.40)',
               letterSpacing: '-.01em',
             }}
           >

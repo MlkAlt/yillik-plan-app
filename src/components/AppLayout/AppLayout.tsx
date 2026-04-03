@@ -34,13 +34,13 @@ export function AppLayout({ children }: AppLayoutProps) {
           {children}
         </main>
 
-        {/* BOTTOM NAV — v6 4 sekme */}
+        {/* BOTTOM NAV */}
         <nav
           className="fixed bottom-0 w-full max-w-lg z-50 flex items-center px-1"
           style={{
             height: '72px',
-            backgroundColor: 'var(--color-surface, #fff)',
-            borderTop: '1px solid var(--color-border, #e6e6e3)',
+            background: 'linear-gradient(180deg, color-mix(in srgb, var(--color-surface) 92%, var(--color-bg)) 0%, var(--color-surface) 100%)',
+            borderTop: '1px solid var(--color-border)',
             paddingBottom: '8px',
           }}
         >
@@ -51,18 +51,27 @@ export function AppLayout({ children }: AppLayoutProps) {
               <button
                 key={tab.path}
                 onClick={() => navigate(tab.path, { replace: active })}
-                className="flex-1 flex flex-col items-center gap-[3px] px-1 py-2 rounded-xl transition-all duration-150 active:scale-90"
+                className="flex-1 flex flex-col items-center gap-[3px] px-1 py-2 transition-all duration-150 active:scale-90"
                 style={{ borderRadius: '12px' }}
               >
-                <Icon
-                  size={20}
-                  strokeWidth={active ? 2.5 : 1.8}
-                  style={{
-                    color: active ? 'var(--color-primary)' : 'var(--color-text3)',
-                    transform: active ? 'scale(1.1)' : 'scale(1)',
-                    transition: 'transform 0.15s, color 0.15s',
-                  }}
-                />
+                {/* Aktif nokta göstergesi */}
+                <div className="relative">
+                  <Icon
+                    size={20}
+                    strokeWidth={active ? 2.5 : 1.8}
+                    style={{
+                      color: active ? 'var(--color-primary)' : 'var(--color-text3)',
+                      transform: active ? 'scale(1.1)' : 'scale(1)',
+                      transition: 'transform 0.15s, color 0.15s',
+                    }}
+                  />
+                  {active && (
+                    <span
+                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
+                      style={{ backgroundColor: 'var(--color-pop)' }}
+                    />
+                  )}
+                </div>
                 <span
                   className="text-[10px] font-bold tracking-[0.01em]"
                   style={{ color: active ? 'var(--color-primary)' : 'var(--color-text3)' }}

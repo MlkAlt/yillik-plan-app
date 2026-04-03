@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Outfit:wght@700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap');
 
 @import "tailwindcss";
 
@@ -6,62 +6,69 @@
   --font-sans:    'Sora', sans-serif;
   --font-display: 'Outfit', sans-serif;
 
-  /* v6 Brand Colors */
-  --color-primary:  #4F6AF5;
-  --color-success:  #10b981;
-  --color-warning:  #f59e0b;
-  --color-danger:   #f43f5e;
-  --color-accent:   #7c3aed;
+  /* ── Warm Educational Premium ──────────────────────────
+     Dominant: derin lacivert mavi
+     Accent:   tek keskin turuncu (pop)
+     Nötr:     sıcak mürekkep tonları
+  ──────────────────────────────────────────────────────── */
 
-  /* v6 Brand Shades */
-  --color-primary-s: #f0f4ff;
-  --color-primary-b: #c7d2fe;
-  --color-success-s: #ecfdf5;
-  --color-success-b: #d1fae5;
-  --color-warning-s: #fffbeb;
-  --color-warning-b: #fde68a;
-  --color-danger-s:  #fff1f2;
+  --color-primary:  #2d44d4;   /* derin mürekkep mavisi */
+  --color-success:  #2d7a4f;   /* orman yeşili, muted */
+  --color-warning:  #c47c20;   /* koyu kehribar */
+  --color-danger:   #c43030;   /* derin kırmızı */
+  --color-accent:   #7c3aed;   /* violet — sheet/modal için */
+
+  /* Tek keskin vurgu — warm orange */
+  --color-pop:      #e06030;
+  --color-pop-s:    #fdf0eb;
+  --color-pop-b:    #f4c4a8;
+
+  /* Brand shades */
+  --color-primary-s: #eef0fd;
+  --color-primary-b: #b8c2f7;
+  --color-success-s: #edf5f1;
+  --color-success-b: #b6ddc8;
+  --color-warning-s: #fdf5e6;
+  --color-warning-b: #f0d090;
+  --color-danger-s:  #fdf0f0;
   --color-accent-s:  #f5f3ff;
 
-  /* v6 Semantic Tokens (Light — dark mode Görev #4'te) */
-  --color-bg:       #f5f5f2;
-  --color-bg2:      #ededea;
-  --color-surface:  #ffffff;
-  --color-surface2: #fafaf8;
-  --color-border:   #e6e6e3;
-  --color-border2:  #d4d4d0;
-  --color-text1:    #0f0f0e;
-  --color-text2:    #5f5f5d;
-  --color-text3:    #a0a09e;
+  /* ── Sıcak Zemin Sistemi (Light) ───────────────────── */
+  --color-bg:       #f5f2eb;   /* kağıt beyazı — hafif sarımsı */
+  --color-bg2:      #ede9e0;   /* ikincil zemin */
+  --color-surface:  #fffef8;   /* sıcak beyaz — kart yüzeyi */
+  --color-surface2: #f9f6ef;   /* biraz tintli */
+  --color-border:   #e5dfd4;   /* sıcak ayraç */
+  --color-border2:  #d4cdc0;   /* güçlü ayraç */
+  --color-text1:    #1c1814;   /* sıcak mürekkep siyahı */
+  --color-text2:    #5c5449;   /* sıcak orta gri */
+  --color-text3:    #9e9790;   /* sıcak açık gri */
 
-  /* Legacy aliases — mevcut componentlar bunları kullanıyor, değiştirme */
-  --color-ink:     #0f0f0e;
-  --color-sinir:   #e6e6e3;
-  --color-zemin:   #ffffff;
-  --color-icerik:  #0f0f0e;
-  --color-ikincil: #5f5f5d;
-  --color-aksiyon: #4F6AF5;
-  --color-aktif:   #f59e0b;
-  --color-basari:  #10b981;
+  /* Legacy aliases */
+  --color-ink:     #1c1814;
+  --color-sinir:   #e5dfd4;
+  --color-zemin:   #fffef8;
+  --color-icerik:  #1c1814;
+  --color-ikincil: #5c5449;
+  --color-aksiyon: #2d44d4;
+  --color-aktif:   #c47c20;
+  --color-basari:  #2d7a4f;
 
-  /* v6 Radius */
+  /* ── Radius ─────────────────────────────────────────── */
   --radius-sm:   4px;
   --radius-md:   12px;
   --radius-lg:   16px;
   --radius-xl:   20px;
   --radius-2xl:  24px;
   --radius-pill: 100px;
-
-  /* Legacy radius alias */
   --radius-card: 16px;
 
-  /* v6 Shadows */
-  --shadow-xs:   0 1px 3px rgba(0,0,0,.05);
-  --shadow-sm:   0 2px 8px rgba(0,0,0,.07);
-  --shadow-md:   0 4px 16px rgba(0,0,0,.09);
-
-  /* Legacy shadow alias */
-  --shadow-card: 0 1px 3px rgba(0,0,0,.05);
+  /* ── Sıcak Gölgeler (amber tint) ───────────────────── */
+  --shadow-xs:   0 1px 3px rgba(100,80,40,.07);
+  --shadow-sm:   0 2px 8px rgba(100,80,40,.10);
+  --shadow-md:   0 4px 16px rgba(100,80,40,.13);
+  --shadow-lg:   0 8px 32px rgba(100,80,40,.16);
+  --shadow-card: 0 1px 3px rgba(100,80,40,.07);
 
   /* Animations */
   --animate-fade-in:  fade-in  0.18s ease-out both;
@@ -69,6 +76,7 @@
   --animate-slide-up: slide-up 0.2s ease-out both;
 }
 
+/* ── Keyframes ──────────────────────────────────────────── */
 @keyframes fade-in {
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -95,7 +103,17 @@
   to   { opacity: 1; }
 }
 
-/* Dark mode — semantic token override'ları */
+@keyframes stagger-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes count-in {
+  from { opacity: 0; transform: scale(0.7) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ── Dark mode ──────────────────────────────────────────── */
 [data-theme="dark"] {
   --color-bg:       #111113;
   --color-bg2:      #1a1a1d;
@@ -107,35 +125,68 @@
   --color-text2:    #86868a;
   --color-text3:    #52525a;
 
-  /* Legacy aliases — dark */
   --color-ink:     #f0f0ee;
   --color-zemin:   #1e1e22;
   --color-sinir:   #2e2e34;
   --color-icerik:  #f0f0ee;
   --color-ikincil: #86868a;
 
-  /* Shadow — dark */
   --shadow-xs:   0 1px 3px rgba(0,0,0,.30);
   --shadow-sm:   0 2px 8px rgba(0,0,0,.40);
   --shadow-md:   0 4px 16px rgba(0,0,0,.50);
+  --shadow-lg:   0 8px 40px rgba(0,0,0,.60);
   --shadow-card: 0 1px 3px rgba(0,0,0,.30);
 }
 
-*, *::before, *::after {
-  box-sizing: border-box;
-}
+/* ── Reset ──────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
 
+/* ── Body & Root ────────────────────────────────────────── */
 body {
   margin: 0;
   font-family: 'Sora', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: var(--color-bg, #f5f5f2);
-  color: var(--color-text1, #0f0f0e);
+  background-color: var(--color-bg);
+  color: var(--color-text1);
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 #root {
   min-height: 100vh;
-  background-color: var(--color-bg, #f5f5f2);
+  background-color: var(--color-bg);
 }
+
+/* ── Paper noise overlay ────────────────────────────────── */
+/* Zemin üzerine hafif kağıt dokusu */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0.028;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+}
+[data-theme="dark"] body::after { opacity: 0.04; }
+
+/* ── Card hover utility ─────────────────────────────────── */
+.card-lift {
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  cursor: pointer;
+}
+.card-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.card-lift:active {
+  transform: translateY(0) scale(0.99);
+}
+
+/* ── Stagger helpers ────────────────────────────────────── */
+.stagger-1 { animation: stagger-up 0.35s ease-out 0.05s both; }
+.stagger-2 { animation: stagger-up 0.35s ease-out 0.12s both; }
+.stagger-3 { animation: stagger-up 0.35s ease-out 0.19s both; }
+.stagger-4 { animation: stagger-up 0.35s ease-out 0.26s both; }
+.stagger-5 { animation: stagger-up 0.35s ease-out 0.33s both; }

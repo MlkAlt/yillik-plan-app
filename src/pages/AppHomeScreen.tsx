@@ -158,8 +158,8 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
             {mesaj}{ogretmenAd ? '' : ' 👋'}
           </p>
           <p
-            className="text-xl font-bold tracking-tight leading-tight"
-            style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text1)' }}
+            className="font-bold tracking-tight leading-tight"
+            style={{ fontFamily: 'var(--font-display)', fontSize: '26px', color: 'var(--color-text1)', letterSpacing: '-.03em' }}
           >
             {ogretmenAd ? `${ogretmenAd} Hoca` : 'Öğretmen Yaver'}
           </p>
@@ -199,6 +199,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
       <div className="px-4 flex flex-col gap-3">
 
         {/* ── PLAN YOK → Onboarding overlay (portal, blur arkaplanlı) ── */}
+
         {planlar.length === 0 && (
           <BosdurumuEkrani
             onTamamla={entries => {
@@ -214,7 +215,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
           <>
             {/* ── ACİL KART ── */}
             <div
-              className="px-4 py-3.5 cursor-pointer transition-all active:opacity-80"
+              className="px-4 py-3.5 card-lift stagger-1"
               style={{
                 borderRadius: 'var(--radius-xl)',
                 backgroundColor: 'var(--color-warning-s)',
@@ -246,7 +247,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
 
             {/* ── TASARRUF KARTI ── */}
             <div
-              className="relative overflow-hidden"
+              className="relative overflow-hidden stagger-2"
               style={{
                 borderRadius: 'var(--radius-xl)',
                 backgroundColor: 'var(--color-surface)',
@@ -275,9 +276,10 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
                     className="font-bold leading-none mb-1"
                     style={{
                       fontFamily: 'var(--font-display)',
-                      fontSize: '42px',
-                      color: 'var(--color-text1)',
+                      fontSize: '48px',
+                      color: 'var(--color-pop)',
                       letterSpacing: '-.04em',
+                      animation: 'count-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both',
                     }}
                   >
                     {planlar.length > 0
@@ -343,7 +345,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
             </div>
 
             {/* ── BU HAFTA WİDGET ── */}
-            <div>
+            <div className="stagger-3">
               <p
                 className="text-[11px] font-bold uppercase tracking-[.1em] mb-2"
                 style={{ color: 'var(--color-text3)' }}
@@ -441,7 +443,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
             </div>
 
             {/* ── YAKLAŞAN ── */}
-            <div>
+            <div className="stagger-4">
               <p
                 className="text-[11px] font-bold uppercase tracking-[.1em] mb-2"
                 style={{ color: 'var(--color-text3)' }}
@@ -485,7 +487,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
             </div>
 
             {/* ── HIZLI ERİŞİM ── */}
-            <div>
+            <div className="stagger-5">
               <p
                 className="text-[11px] font-bold uppercase tracking-[.1em] mb-2"
                 style={{ color: 'var(--color-text3)' }}
@@ -495,7 +497,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
               <div className="flex flex-col gap-2">
                 <button
                   onClick={() => setPlanSelectorAcik(true)}
-                  className="flex items-center gap-3 px-3.5 py-3 transition-all active:scale-[0.98] cursor-pointer"
+                  className="flex items-center gap-3 px-3.5 py-3 card-lift w-full text-left"
                   style={{
                     borderRadius: 'var(--radius-lg)',
                     backgroundColor: 'var(--color-surface)',
@@ -524,7 +526,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
                 </button>
                 <button
                   onClick={() => navigate('/app/yukle')}
-                  className="flex items-center gap-3 px-3.5 py-3 transition-all active:scale-[0.98] cursor-pointer"
+                  className="flex items-center gap-3 px-3.5 py-3 card-lift w-full text-left"
                   style={{
                     borderRadius: 'var(--radius-lg)',
                     backgroundColor: 'var(--color-surface)',
