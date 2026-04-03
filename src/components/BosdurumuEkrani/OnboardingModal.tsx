@@ -53,7 +53,6 @@ export function OnboardingModal({ onTamamla }: OnboardingModalProps) {
         const { plan } = buildPlan(branch.lessonId, sinif, yil)
         return { sinif, ders: branch.lessonId, yil, tip: 'meb' as const, plan, rows: null }
       })
-      // Tebrik ekranını göster, sonra tamamla
       setTebrik({ ders: branch.label, siniflar: seciliSiniflar })
       setLoading(false)
       setTimeout(() => {
@@ -69,32 +68,57 @@ export function OnboardingModal({ onTamamla }: OnboardingModalProps) {
   const modal = (
     <div className="fixed inset-0 z-50 flex flex-col justify-end">
       {/* Overlay */}
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]" />
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
 
       {/* Sheet */}
-      <div className="relative z-10 w-full max-w-lg mx-auto bg-white rounded-t-3xl shadow-[0_-4px_32px_rgba(0,0,0,0.15)] animate-fade-in flex flex-col max-h-[92vh]">
+      <div
+        className="relative z-10 w-full max-w-lg mx-auto rounded-t-3xl animate-fade-in flex flex-col max-h-[92vh]"
+        style={{
+          backgroundColor: 'var(--color-surface)',
+          boxShadow: '0 -4px 32px rgba(0,0,0,0.15)',
+        }}
+      >
         {/* Tutamaç */}
         <div className="flex justify-center pt-3 pb-2 flex-shrink-0">
-          <div className="w-10 h-1 bg-gray-200 rounded-full" />
+          <div className="w-10 h-1 rounded-full" style={{ backgroundColor: 'var(--color-border)' }} />
         </div>
 
         {/* Başlık */}
         <div className="px-5 pb-4 flex-shrink-0">
-          <h2 className="text-xl font-bold text-[#1C1917]">Branşını seç</h2>
-          <p className="text-sm text-gray-400 mt-0.5">Sınıflarını belirle, planın hazır olsun.</p>
+          <h2
+            className="text-xl font-bold tracking-tight"
+            style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text1)' }}
+          >
+            Branşını seç
+          </h2>
+          <p className="text-sm mt-0.5" style={{ color: 'var(--color-text3)' }}>
+            Sınıflarını belirle, planın hazır olsun.
+          </p>
         </div>
 
         {/* Arama */}
         <div className="px-5 pb-3 flex-shrink-0">
           <div className="relative">
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <Search
+              size={15}
+              className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+              style={{ color: 'var(--color-text3)' }}
+            />
             <input
               type="text"
               placeholder="Branş ara..."
               value={query}
               onChange={e => { setQuery(e.target.value); setAcikBrans(null); setSeciliSiniflar([]) }}
               autoFocus
-              className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-[#E7E5E4] bg-[#FAFAF9] focus:outline-none focus:ring-2 focus:ring-[#2D5BE3]/30 focus:border-[#2D5BE3] text-sm text-[#1C1917] placeholder-gray-400 transition-all"
+              className="w-full pl-9 pr-4 py-2.5 text-sm font-medium transition-all outline-none"
+              style={{
+                borderRadius: 'var(--radius-pill)',
+                border: '1.5px solid var(--color-border)',
+                backgroundColor: 'var(--color-bg)',
+                color: 'var(--color-text1)',
+              }}
+              onFocus={e => { e.currentTarget.style.borderColor = 'var(--color-primary)' }}
+              onBlur={e => { e.currentTarget.style.borderColor = 'var(--color-border)' }}
             />
           </div>
         </div>
@@ -102,18 +126,23 @@ export function OnboardingModal({ onTamamla }: OnboardingModalProps) {
         {/* Tebrik ekranı */}
         {tebrik ? (
           <div className="flex-1 flex flex-col items-center justify-center px-5 py-12 text-center animate-fade-in">
-            <div className="text-6xl mb-4">🎉</div>
-            <h2 className="text-2xl font-bold text-[#1C1917] mb-2">Planın hazır!</h2>
-            <p className="text-sm text-gray-500 mb-6 leading-relaxed">
-              <span className="font-semibold text-[#1C1917]">{tebrik.ders}</span> için{' '}
+            <div className="text-6xl mb-4" style={{ animation: 'pop .4s ease-out' }}>🎉</div>
+            <h2
+              className="text-2xl font-bold mb-2 tracking-tight"
+              style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text1)' }}
+            >
+              Planın hazır!
+            </h2>
+            <p className="text-sm mb-6 leading-relaxed" style={{ color: 'var(--color-text2)' }}>
+              <span className="font-semibold" style={{ color: 'var(--color-text1)' }}>{tebrik.ders}</span> için{' '}
               {tebrik.siniflar.length === 1
-                ? <span className="font-semibold text-[#1C1917]">{tebrik.siniflar[0]}</span>
-                : <span className="font-semibold text-[#1C1917]">{tebrik.siniflar.length} sınıf</span>
+                ? <span className="font-semibold" style={{ color: 'var(--color-text1)' }}>{tebrik.siniflar[0]}</span>
+                : <span className="font-semibold" style={{ color: 'var(--color-text1)' }}>{tebrik.siniflar.length} sınıf</span>
               }{' '}
               yıllık planın oluşturuldu.
             </p>
-            <div className="flex items-center gap-2 text-xs text-gray-400">
-              <svg className="animate-spin text-[#2D5BE3]" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--color-text3)' }}>
+              <svg className="animate-spin" style={{ color: 'var(--color-primary)' }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path d="M21 12a9 9 0 1 1-6.219-8.56" />
               </svg>
               Plana yönlendiriliyorsun...
@@ -125,7 +154,12 @@ export function OnboardingModal({ onTamamla }: OnboardingModalProps) {
             <div className="flex-1 overflow-y-auto px-5 pb-4">
               {!query && popular.length > 0 && (
                 <div className="mb-4">
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Popüler</p>
+                  <p
+                    className="text-[10px] font-bold uppercase tracking-[.1em] mb-2"
+                    style={{ color: 'var(--color-text3)' }}
+                  >
+                    Popüler
+                  </p>
                   <BransList
                     branches={popular}
                     acikBrans={acikBrans}
@@ -138,7 +172,14 @@ export function OnboardingModal({ onTamamla }: OnboardingModalProps) {
 
               {rest.length > 0 && (
                 <div>
-                  {!query && <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Diğer Branşlar</p>}
+                  {!query && (
+                    <p
+                      className="text-[10px] font-bold uppercase tracking-[.1em] mb-2"
+                      style={{ color: 'var(--color-text3)' }}
+                    >
+                      Diğer Branşlar
+                    </p>
+                  )}
                   <BransList
                     branches={query ? filtered : rest}
                     acikBrans={acikBrans}
@@ -150,19 +191,27 @@ export function OnboardingModal({ onTamamla }: OnboardingModalProps) {
               )}
 
               {filtered.length === 0 && (
-                <p className="text-center text-sm text-gray-400 py-10">"{query}" için sonuç bulunamadı</p>
+                <p className="text-center text-sm py-10" style={{ color: 'var(--color-text3)' }}>
+                  "{query}" için sonuç bulunamadı
+                </p>
               )}
             </div>
 
             {/* CTA — branş seçilince görünür */}
             {acikBrans && seciliBrans && (
-              <div className="px-5 pb-8 pt-3 border-t border-[#E7E5E4] flex-shrink-0 bg-white">
+              <div
+                className="px-5 pb-8 pt-3 flex-shrink-0"
+                style={{
+                  borderTop: '1px solid var(--color-border)',
+                  backgroundColor: 'var(--color-surface)',
+                }}
+              >
                 <Button
                   onClick={handleOlustur}
                   disabled={loading || seciliSiniflar.length === 0}
                   loading={loading}
                   variant="primary"
-                  className="w-full text-base shadow-[0_2px_8px_rgba(245,158,11,0.3)]"
+                  className="w-full text-base"
                 >
                   {seciliSiniflar.length === 1
                     ? `${seciliBrans.label} · ${seciliSiniflar[0]} için Plan Oluştur →`
@@ -190,7 +239,7 @@ function BransList({
   onSinifToggle: (s: string) => void
 }) {
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1.5">
       {branches.map(branch => (
         <BransItem
           key={branch.id}
@@ -215,39 +264,68 @@ function BransItem({
   onSinifToggle: (s: string) => void
 }) {
   return (
-    <div className={`rounded-xl border transition-all overflow-hidden ${isOpen ? 'border-[#2D5BE3] bg-[#2D5BE3]/3' : 'border-[#E7E5E4] bg-white'}`}>
+    <div
+      className="overflow-hidden transition-all"
+      style={{
+        borderRadius: 'var(--radius-lg)',
+        border: `1px solid ${isOpen ? 'var(--color-primary)' : 'var(--color-border)'}`,
+        backgroundColor: isOpen ? 'color-mix(in srgb, var(--color-primary) 6%, transparent)' : 'var(--color-surface)',
+      }}
+    >
       {/* Branş satırı */}
       <button
         onClick={onToggle}
-        className="w-full flex items-center gap-3 px-5 py-3 text-left active:bg-gray-50 transition-colors"
+        className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors active:opacity-70"
       >
-        <branch.icon size={20} className="flex-shrink-0 text-[#2D5BE3]" />
-        <span className={`text-sm font-semibold flex-1 ${isOpen ? 'text-[#2D5BE3]' : 'text-[#1C1917]'}`}>
+        <branch.icon
+          size={20}
+          className="flex-shrink-0"
+          style={{ color: 'var(--color-primary)' }}
+        />
+        <span
+          className="text-sm font-semibold flex-1"
+          style={{ color: isOpen ? 'var(--color-primary)' : 'var(--color-text1)' }}
+        >
           {branch.label}
         </span>
-        <span className={`text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
-            <ChevronDown size={16} />
-          </span>
+        <span
+          className="transition-transform duration-200"
+          style={{
+            color: 'var(--color-text3)',
+            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+          }}
+        >
+          <ChevronDown size={16} />
+        </span>
       </button>
 
       {/* Sınıf seçimi — accordion */}
       {isOpen && (
-        <div className="px-5 pb-4 pt-2 border-t border-[#E7E5E4]/60">
-          <p className="text-xs text-gray-400 mb-2">Hangi sınıflar için?</p>
+        <div
+          className="px-4 pb-4 pt-2"
+          style={{ borderTop: '1px solid var(--color-border)' }}
+        >
+          <p className="text-xs mb-2" style={{ color: 'var(--color-text3)' }}>Hangi sınıflar için?</p>
           <div className="flex flex-wrap gap-2">
-            {branch.classes.map(sinif => (
-              <button
-                key={sinif}
-                onClick={() => onSinifToggle(sinif)}
-                className={`px-3.5 py-1.5 rounded-full text-sm font-bold border transition-all active:scale-95 ${
-                  seciliSiniflar.includes(sinif)
-                    ? 'bg-[#2D5BE3] text-white border-[#2D5BE3]'
-                    : 'bg-white text-gray-500 border-[#E7E5E4] hover:border-gray-300'
-                }`}
-              >
-                {sinif}
-              </button>
-            ))}
+            {branch.classes.map(sinif => {
+              const sel = seciliSiniflar.includes(sinif)
+              return (
+                <button
+                  key={sinif}
+                  onClick={() => onSinifToggle(sinif)}
+                  className="font-bold text-xs transition-all active:scale-95"
+                  style={{
+                    padding: '5px 12px',
+                    borderRadius: 'var(--radius-pill)',
+                    border: `1.5px solid ${sel ? 'var(--color-primary)' : 'var(--color-border)'}`,
+                    backgroundColor: sel ? 'var(--color-primary)' : 'var(--color-bg)',
+                    color: sel ? '#ffffff' : 'var(--color-text2)',
+                  }}
+                >
+                  {sinif}
+                </button>
+              )
+            })}
           </div>
         </div>
       )}
