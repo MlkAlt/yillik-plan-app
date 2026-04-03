@@ -14,6 +14,7 @@ export const StorageKeys = {
   OGRETMEN_AYARLARI:      'ogretmen-ayarlari',
   BILDIRIM_AKTIF:         'bildirim-aktif',
   BILDIRIM_SON_HAFTA:     'bildirim-son-hafta',
+  TEMA:                   'tema',
 } as const
 
 export type StorageKey = typeof StorageKeys[keyof typeof StorageKeys]

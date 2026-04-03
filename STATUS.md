@@ -22,8 +22,8 @@ Son güncelleme: 2026-04-03
 | 1 | v6 font sistemi kur (Sora + Outfit) | frontend-dev | **DONE** | `index.css` | Google Fonts CDN |
 | 2 | v6 design token'larını Tailwind'e ekle | frontend-dev | **DONE** | `index.css` | Renk, radius, gölge |
 | 3 | `tokens.ts` oluştur — JS sabitleri | frontend-dev | **DONE** | `src/lib/tokens.ts` | v6 HTML'den çıkar |
-| 4 | Dark mode sistemi kur | frontend-dev | **NEXT** | `index.css`, `App.tsx` | `useColorScheme` |
-| 5 | Bottom nav → 4 sekme (Ana/Planla/Dosyam/Üret) | frontend-dev | TODO | `AppLayout.tsx` | v6 mockup referans |
+| 4 | Dark mode sistemi kur | frontend-dev | **DONE** | `index.css`, `App.tsx` | `useColorScheme` |
+| 5 | Bottom nav → 4 sekme (Ana/Planla/Dosyam/Üret) | frontend-dev | **NEXT** | `AppLayout.tsx` | v6 mockup referans |
 | 6 | Ana ekran (Dashboard) v6'ya güncelle | frontend-dev | TODO | `AppHomeScreen.tsx` | Mevcut veriyi koru |
 | 7 | Onboarding flow v6'ya güncelle | frontend-dev | TODO | `OnboardingModal.tsx` | Branş→Dersler→Sınıflar |
 | 8 | Planla ekranı (yıllık plan görünümü) | frontend-dev | TODO | `PlanPage.tsx` yeni tasarım | |
@@ -85,6 +85,15 @@ Son güncelleme: 2026-04-03
 - `renkTokenlari.ts` dokunulmadı (legacy, çalışıyor)
 - TS tip hatası yok, 12 test geçiyor ✅
 - Sonraki: Görev #4 — Dark mode sistemi
+
+### 2026-04-03 — Görev #4: Dark mode sistemi
+- `StorageKeys.TEMA` eklendi
+- `src/hooks/useColorScheme.ts` oluşturuldu — system/light/dark, localStorage override, toggle
+- `index.css` — `[data-theme="dark"]` bloğu eklendi, semantic + legacy + shadow override
+- `body` / `#root` CSS var kullanımına geçirildi, 0.2s transition
+- `App.tsx` — minimal: `useColorScheme()` çağrısı eklendi
+- TS hata yok, 12 test geçiyor ✅
+- Sonraki: Görev #5 — Bottom nav 4 sekme
 
 ---
 

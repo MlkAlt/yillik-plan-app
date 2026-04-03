@@ -1,4 +1,5 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
+import { useColorScheme } from './hooks/useColorScheme'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { HomePage } from './pages/HomePage'
 import { PlanPage } from './pages/PlanPage'
@@ -15,6 +16,7 @@ import type { User } from './lib/auth'
 import { StorageKeys } from './lib/storageKeys'
 
 function AppInner() {
+  useColorScheme() // dark mode'u başlatır — data-theme'i document.documentElement'e uygular
   const userRef = useRef<User | null>(null)
 
   const [tamamlananlar, setTamamlananlar] = useState<Record<string, number[]>>(() => {
