@@ -20,8 +20,8 @@ Son güncelleme: 2026-04-03
 | # | Görev | Ajan | Durum | Çıktı | Notlar |
 |---|---|---|---|---|---|
 | 1 | v6 font sistemi kur (Sora + Outfit) | frontend-dev | **DONE** | `index.css` | Google Fonts CDN |
-| 2 | v6 design token'larını Tailwind'e ekle | frontend-dev | **NEXT** | `tailwind.config.ts` | Renk, radius, gölge |
-| 3 | `tokens.ts` oluştur — JS sabitleri | frontend-dev | TODO | `src/lib/tokens.ts` | v6 HTML'den çıkar |
+| 2 | v6 design token'larını Tailwind'e ekle | frontend-dev | **DONE** | `index.css` | Renk, radius, gölge |
+| 3 | `tokens.ts` oluştur — JS sabitleri | frontend-dev | **NEXT** | `src/lib/tokens.ts` | v6 HTML'den çıkar |
 | 4 | Dark mode sistemi kur | frontend-dev | TODO | `index.css`, `App.tsx` | `useColorScheme` |
 | 5 | Bottom nav → 4 sekme (Ana/Planla/Dosyam/Üret) | frontend-dev | TODO | `AppLayout.tsx` | v6 mockup referans |
 | 6 | Ana ekran (Dashboard) v6'ya güncelle | frontend-dev | TODO | `AppHomeScreen.tsx` | Mevcut veriyi koru |
@@ -71,11 +71,14 @@ Son güncelleme: 2026-04-03
 - Sprint 1 planı oluşturuldu
 - Sonraki: Frontend Dev → Görev #1 ile başla
 
-### 2026-04-03 — Görev #1: v6 Font Sistemi
-- `index.css`: Plus Jakarta Sans → Sora (UI) + Outfit (display) değiştirildi
-- Tailwind v4 `@theme` bloğuna `--font-display: 'Outfit'` eklendi
-- 12 test geçiyor ✅
-- Sonraki: Görev #2 — v6 design token'ları
+### 2026-04-03 — Görev #1 + #2: Font Sistemi + Design Token'lar
+- `index.css`: Plus Jakarta Sans → Sora (UI) + Outfit (display)
+- v6 renk token'ları: primary #4F6AF5, success #10b981, warning, danger, accent
+- Radius token'ları: sm/md/lg/xl/2xl/pill
+- Shadow token'ları: xs/sm/md
+- Legacy alias'lar korundu (mevcut componentlar etkilenmedi)
+- 12 test geçiyor ✅, build başarılı ✅
+- Sonraki: Görev #3 — tokens.ts JS sabitleri
 
 ---
 
