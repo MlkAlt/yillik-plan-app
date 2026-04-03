@@ -525,7 +525,7 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
         )}
       </div>
 
-      <AdBanner className="mb-4" style={{ borderRadius: 'var(--radius-lg)' }} />
+      <AdBanner className="mb-4 rounded-lg" />
 
       {/* Hafta Listesi — dönem bazlı collapse */}
       {isMeb && (() => {
