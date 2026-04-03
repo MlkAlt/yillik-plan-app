@@ -3,7 +3,7 @@
 > Claude Code her oturumda bu dosyayı okur ve günceller.
 > Durum: TODO → WIP → DONE | Engel: BLOCKED
 
-Son güncelleme: 2026-04-03
+Son güncelleme: 2026-04-03 (oturum 2)
 
 ---
 
@@ -26,8 +26,8 @@ Son güncelleme: 2026-04-03
 | 5 | Bottom nav → 4 sekme (Ana/Planla/Dosyam/Üret) | frontend-dev | **DONE** | `AppLayout.tsx` | v6 mockup referans |
 | 6 | Ana ekran (Dashboard) v6'ya güncelle | frontend-dev | **DONE** | `AppHomeScreen.tsx` | Mevcut veriyi koru |
 | 7 | Onboarding flow v6'ya güncelle | frontend-dev | **DONE** | `OnboardingModal.tsx` | Branş→Dersler→Sınıflar |
-| 8 | Planla ekranı (yıllık plan görünümü) | frontend-dev | **NEXT** | `PlanPage.tsx` yeni tasarım | |
-| 9 | Dosyam ekranı (yeni — öğretmen dosyası) | frontend-dev | TODO | `DosyamPage.tsx` | v6 mockup |
+| 8 | Planla ekranı (yıllık plan görünümü) | frontend-dev | **DONE** | `PlanPage.tsx` yeni tasarım | CSS vars, gradyan kart, dönem collapse |
+| 9 | Dosyam ekranı (yeni — öğretmen dosyası) | frontend-dev | **NEXT** | `DosyamPage.tsx` | v6 mockup |
 | 10 | Üret ekranı (yeni — sınav wizard) | frontend-dev | TODO | `UretPage.tsx` | Sprint 2 AI bağlantısı |
 | 11 | Jeton sistemi UI | frontend-dev | TODO | `JetonBadge.tsx` | Sadece UI, backend S2 |
 | 12 | Supabase yeni tablolar migration | backend-dev | TODO | `supabase_v6_migration.sql` | Sprint 2 başında |
@@ -123,6 +123,16 @@ Son güncelleme: 2026-04-03
 - Tüm mantık (handleBransToggle, handleSinifToggle, handleOlustur, tebrik flow) korundu
 - TS hata yok, 12 test geçiyor ✅
 - Sonraki: Görev #8 — Planla ekranı yeni tasarım
+
+### 2026-04-03 — Görev #8: Planla ekranı v6
+- `PlanPage.tsx`: tüm hardcoded hex → CSS var (dark mode uyumlu)
+- Üst özet: primary renk gradyan kart, progress bar, badge chip'ler
+- Araç çubuğu: export dropdown + Yazdır + Bu Hafta — v6 border/surface stilleri
+- `DonemGrubu`: collapse başlığı surface/border CSS vars, progress bar primary/success
+- Hafta kartları: isBuHafta / isTamamlandi / isTatil durumlarına göre CSS var renkleri
+- `Card` import kaldırıldı (artık kullanılmıyor)
+- TS hata yok, 12 test geçiyor ✅
+- Sonraki: Görev #9 — Dosyam ekranı
 
 ---
 
