@@ -27,8 +27,8 @@ Son güncelleme: 2026-04-03 (oturum 2)
 | 6 | Ana ekran (Dashboard) v6'ya güncelle | frontend-dev | **DONE** | `AppHomeScreen.tsx` | Mevcut veriyi koru |
 | 7 | Onboarding flow v6'ya güncelle | frontend-dev | **DONE** | `OnboardingModal.tsx` | Branş→Dersler→Sınıflar |
 | 8 | Planla ekranı (yıllık plan görünümü) | frontend-dev | **DONE** | `PlanPage.tsx` yeni tasarım | CSS vars, gradyan kart, dönem collapse |
-| 9 | Dosyam ekranı (yeni — öğretmen dosyası) | frontend-dev | **NEXT** | `DosyamPage.tsx` | v6 mockup |
-| 10 | Üret ekranı (yeni — sınav wizard) | frontend-dev | TODO | `UretPage.tsx` | Sprint 2 AI bağlantısı |
+| 9 | Dosyam ekranı (yeni — öğretmen dosyası) | frontend-dev | **DONE** | `DosyamPage.tsx` | Özet kart, belge grupları, uyarı bandı |
+| 10 | Üret ekranı (yeni — sınav wizard) | frontend-dev | **NEXT** | `UretPage.tsx` | Sprint 2 AI bağlantısı |
 | 11 | Jeton sistemi UI | frontend-dev | TODO | `JetonBadge.tsx` | Sadece UI, backend S2 |
 | 12 | Supabase yeni tablolar migration | backend-dev | TODO | `supabase_v6_migration.sql` | Sprint 2 başında |
 | 13 | QA — Sprint 1 tasarım review | qa | TODO | QA raporu | Tüm ekranlar bittikten sonra |
@@ -123,6 +123,16 @@ Son güncelleme: 2026-04-03 (oturum 2)
 - Tüm mantık (handleBransToggle, handleSinifToggle, handleOlustur, tebrik flow) korundu
 - TS hata yok, 12 test geçiyor ✅
 - Sonraki: Görev #8 — Planla ekranı yeni tasarım
+
+### 2026-04-03 — Görev #9: Dosyam ekranı v6
+- `DosyamPage.tsx` sıfırdan yazıldı — v6 mockup referans alındı
+- Özet kartı: violet→blue gradyan şerit, belge sayacı, durum listesi, PDF indir butonu (accent renk)
+- Uyarı bandı: eksik belge için amber uyarı
+- 3 belge grubu: Otomatik Oluşanlar / Tamamlanması Gereken (amber) / Manuel Eklenebilir (soluk)
+- `BelgeItem`: ikon (Lucide), renk (blue/green/amber/violet/muted), durum badge (hazir/uyari/ekle/yeni)
+- Tüm renkler CSS var — dark mode uyumlu
+- TS hata yok, 12 test geçiyor ✅
+- Sonraki: Görev #10 — Üret ekranı
 
 ### 2026-04-03 — Görev #8: Planla ekranı v6
 - `PlanPage.tsx`: tüm hardcoded hex → CSS var (dark mode uyumlu)
