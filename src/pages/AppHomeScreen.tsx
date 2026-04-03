@@ -212,6 +212,38 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
 
         {planlar.length > 0 && (
           <>
+            {/* ── ACİL KART ── */}
+            <div
+              className="px-4 py-3.5 cursor-pointer transition-all active:opacity-80"
+              style={{
+                borderRadius: 'var(--radius-xl)',
+                backgroundColor: 'var(--color-warning-s)',
+                border: '1px solid var(--color-warning-b)',
+              }}
+            >
+              <p
+                className="text-[10px] font-bold uppercase tracking-[.1em] mb-1"
+                style={{ color: 'var(--color-warning)' }}
+              >
+                Acil
+              </p>
+              <p className="text-[15px] font-bold mb-0.5" style={{ color: 'var(--color-text1)' }}>
+                Not girişi son gün yaklaşıyor
+              </p>
+              <p className="text-xs mb-2.5" style={{ color: 'var(--color-text2)' }}>
+                2 gün kaldı · Tamamlanmamış sınıflar var
+              </p>
+              <span
+                className="inline-flex items-center text-xs font-bold px-2.5 py-1 rounded-full"
+                style={{
+                  backgroundColor: 'color-mix(in srgb, var(--color-warning) 15%, transparent)',
+                  color: 'var(--color-warning)',
+                }}
+              >
+                Şimdi Tamamla →
+              </span>
+            </div>
+
             {/* ── TASARRUF KARTI ── */}
             <div
               className="relative overflow-hidden"

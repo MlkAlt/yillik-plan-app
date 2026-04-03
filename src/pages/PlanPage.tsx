@@ -339,10 +339,10 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
           className="text-[22px] font-bold tracking-tight mb-0.5"
           style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text1)' }}
         >
-          Yıllık Planım
+          Planlama
         </h1>
         <p className="text-sm" style={{ color: 'var(--color-text2)' }}>
-          {ders} · {sinifGercek || sinif}
+          Yıllık plan · Haftalık · {ders}
         </p>
       </div>
 
@@ -526,6 +526,60 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
       </div>
 
       <AdBanner className="mb-4 rounded-lg" />
+
+      {/* Ders Programı Grid */}
+      <div
+        className="mb-4"
+        style={{
+          borderRadius: 'var(--radius-lg)',
+          backgroundColor: 'var(--color-surface)',
+          border: '1px solid var(--color-border)',
+          boxShadow: 'var(--shadow-xs)',
+          padding: '14px',
+        }}
+      >
+        <div className="flex justify-between items-center mb-3">
+          <span className="text-sm font-bold" style={{ color: 'var(--color-text1)' }}>Haftalık Program</span>
+          <span className="text-xs font-bold" style={{ color: 'var(--color-primary)' }}>Düzenle</span>
+        </div>
+        {/* 5 sütun grid: Pzt–Cum */}
+        <div className="grid grid-cols-5 gap-1">
+          {['Pzt', 'Sal', 'Çar', 'Per', 'Cum'].map(gun => (
+            <div
+              key={gun}
+              className="text-center text-[9px] font-bold uppercase tracking-[.04em] py-1"
+              style={{ color: 'var(--color-text3)' }}
+            >
+              {gun}
+            </div>
+          ))}
+          {/* Hücre satırları — plan var ise ders adını göster, yoksa boş */}
+          {Array.from({ length: 15 }, (_, i) => {
+            const gunIndex = i % 5
+            // Planın ilk sınıfını Pzt'ye otomatik yerleştir (statik gösterim)
+            const doluMu = gunIndex === 0 || gunIndex === 2 || gunIndex === 4
+            return (
+              <div
+                key={i}
+                className="text-center text-[9px] font-semibold min-h-[32px] flex items-center justify-center rounded-[4px] cursor-pointer transition-all active:scale-95"
+                style={doluMu ? {
+                  backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
+                  color: 'var(--color-primary)',
+                  border: '1px solid color-mix(in srgb, var(--color-primary) 25%, transparent)',
+                  fontWeight: 700,
+                  lineHeight: '1.3',
+                  padding: '4px',
+                } : {
+                  backgroundColor: 'var(--color-bg2)',
+                  color: 'var(--color-border2)',
+                }}
+              >
+                {doluMu ? ders.split(' ')[0].slice(0, 5) : '—'}
+              </div>
+            )
+          })}
+        </div>
+      </div>
 
       {/* Hafta Listesi — dönem bazlı collapse */}
       {isMeb && (() => {
