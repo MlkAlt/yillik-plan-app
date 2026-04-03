@@ -12,10 +12,16 @@ const PADDING = {
   lg: 'p-6',
 }
 
-export function Card({ children, padding = 'md', className = '', ...props }: CardProps) {
+export function Card({ children, padding = 'md', className = '', style, ...props }: CardProps) {
   return (
     <div
-      className={`bg-white rounded-2xl border border-[#E7E5E4] shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${PADDING[padding]} ${className}`}
+      className={`rounded-2xl ${PADDING[padding]} ${className}`}
+      style={{
+        backgroundColor: 'var(--color-surface)',
+        border: '1px solid var(--color-border)',
+        boxShadow: 'var(--shadow-xs)',
+        ...style,
+      }}
       {...props}
     >
       {children}

@@ -24,8 +24,8 @@ Son güncelleme: 2026-04-03
 | 3 | `tokens.ts` oluştur — JS sabitleri | frontend-dev | **DONE** | `src/lib/tokens.ts` | v6 HTML'den çıkar |
 | 4 | Dark mode sistemi kur | frontend-dev | **DONE** | `index.css`, `App.tsx` | `useColorScheme` |
 | 5 | Bottom nav → 4 sekme (Ana/Planla/Dosyam/Üret) | frontend-dev | **DONE** | `AppLayout.tsx` | v6 mockup referans |
-| 6 | Ana ekran (Dashboard) v6'ya güncelle | frontend-dev | **NEXT** | `AppHomeScreen.tsx` | Mevcut veriyi koru |
-| 7 | Onboarding flow v6'ya güncelle | frontend-dev | TODO | `OnboardingModal.tsx` | Branş→Dersler→Sınıflar |
+| 6 | Ana ekran (Dashboard) v6'ya güncelle | frontend-dev | **DONE** | `AppHomeScreen.tsx` | Mevcut veriyi koru |
+| 7 | Onboarding flow v6'ya güncelle | frontend-dev | **NEXT** | `OnboardingModal.tsx` | Branş→Dersler→Sınıflar |
 | 8 | Planla ekranı (yıllık plan görünümü) | frontend-dev | TODO | `PlanPage.tsx` yeni tasarım | |
 | 9 | Dosyam ekranı (yeni — öğretmen dosyası) | frontend-dev | TODO | `DosyamPage.tsx` | v6 mockup |
 | 10 | Üret ekranı (yeni — sınav wizard) | frontend-dev | TODO | `UretPage.tsx` | Sprint 2 AI bağlantısı |
@@ -103,6 +103,17 @@ Son güncelleme: 2026-04-03
 - `App.tsx`'e `/app/dosyam` + `/app/uret` route'ları eklendi
 - TS hata yok, 12 test geçiyor ✅
 - Sonraki: Görev #6 — Ana ekran v6 güncelle
+
+### 2026-04-03 — Görev #6: Ana ekran v6
+- Topbar: karşılama metni + Outfit font başlık
+- BuHaftaKarti: tüm renkler CSS var'a geçirildi (primary, text1/2/3, border, warning)
+- ProgressRing: hardcoded hex → CSS var
+- Sınıf seçici butonları: CSS var inline style
+- Hızlı Erişim grid: v6 kart stili, ikonlu, surface/border token'ları
+- Card.tsx: bg-white + hardcoded border → CSS var (dark mode uyumlu)
+- Tüm mantık (effects, state, props) korundu
+- TS hata yok, 12 test geçiyor ✅
+- Sonraki: Görev #7 — Onboarding flow v6
 
 ---
 
