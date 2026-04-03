@@ -21,8 +21,8 @@ Son güncelleme: 2026-04-03
 |---|---|---|---|---|---|
 | 1 | v6 font sistemi kur (Sora + Outfit) | frontend-dev | **DONE** | `index.css` | Google Fonts CDN |
 | 2 | v6 design token'larını Tailwind'e ekle | frontend-dev | **DONE** | `index.css` | Renk, radius, gölge |
-| 3 | `tokens.ts` oluştur — JS sabitleri | frontend-dev | **NEXT** | `src/lib/tokens.ts` | v6 HTML'den çıkar |
-| 4 | Dark mode sistemi kur | frontend-dev | TODO | `index.css`, `App.tsx` | `useColorScheme` |
+| 3 | `tokens.ts` oluştur — JS sabitleri | frontend-dev | **DONE** | `src/lib/tokens.ts` | v6 HTML'den çıkar |
+| 4 | Dark mode sistemi kur | frontend-dev | **NEXT** | `index.css`, `App.tsx` | `useColorScheme` |
 | 5 | Bottom nav → 4 sekme (Ana/Planla/Dosyam/Üret) | frontend-dev | TODO | `AppLayout.tsx` | v6 mockup referans |
 | 6 | Ana ekran (Dashboard) v6'ya güncelle | frontend-dev | TODO | `AppHomeScreen.tsx` | Mevcut veriyi koru |
 | 7 | Onboarding flow v6'ya güncelle | frontend-dev | TODO | `OnboardingModal.tsx` | Branş→Dersler→Sınıflar |
@@ -79,6 +79,12 @@ Son güncelleme: 2026-04-03
 - Legacy alias'lar korundu (mevcut componentlar etkilenmedi)
 - 12 test geçiyor ✅, build başarılı ✅
 - Sonraki: Görev #3 — tokens.ts JS sabitleri
+
+### 2026-04-03 — Görev #3: tokens.ts
+- `src/lib/tokens.ts` oluşturuldu — brand/light/dark/radius/shadow/font sabitleri
+- `renkTokenlari.ts` dokunulmadı (legacy, çalışıyor)
+- TS tip hatası yok, 12 test geçiyor ✅
+- Sonraki: Görev #4 — Dark mode sistemi
 
 ---
 
