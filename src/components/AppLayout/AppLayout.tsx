@@ -1,120 +1,108 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
 import type { ReactNode } from 'react'
-import { Home, CalendarDays, User } from 'lucide-react'
-import { StorageKeys } from '../../lib/storageKeys'
+import { Home, CalendarDays, FolderOpen, Sparkles } from 'lucide-react'
 
 interface AppLayoutProps {
   children: ReactNode
   headerAction?: { label: string; onClick: () => void }
 }
 
+const TABS = [
+  { name: 'Ana',    path: '/app',         icon: Home,         exact: true  },
+  { name: 'Planla', path: '/app/plan',    icon: CalendarDays, exact: false },
+  { name: 'Dosyam', path: '/app/dosyam',  icon: FolderOpen,   exact: false },
+  { name: 'Üret',   path: '/app/uret',    icon: Sparkles,     exact: false },
+]
+
+function isTabActive(tab: typeof TABS[number], pathname: string) {
+  if (tab.path === '/app/plan') {
+    return pathname.startsWith('/app/plan') || pathname.startsWith('/app/hafta')
+  }
+  if (tab.exact) return pathname === tab.path
+  return pathname.startsWith(tab.path)
+}
+
 export function AppLayout({ children, headerAction }: AppLayoutProps) {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const [basharf] = useState<string | null>(() => {
-    try {
-      const ayarlarItem = localStorage.getItem(StorageKeys.OGRETMEN_AYARLARI)
-      if (ayarlarItem) {
-        const ayarlar = JSON.parse(ayarlarItem)
-        if (ayarlar.adSoyad) {
-          const ad = ayarlar.adSoyad.trim()
-          if (ad) return ad.charAt(0).toUpperCase()
-        }
-      }
-    } catch {
-      // localStorage okunamadı
-    }
-    return null
-  })
-
-  const tabs = [
-    { name: 'Ana', path: '/app', icon: Home },
-    { name: 'Planım', path: '/app/plan', icon: CalendarDays },
-  ]
-
   return (
-    <div className="min-h-screen bg-[#E7E5E4] font-sans flex justify-center">
-      {/* Container simulating a mobile device width on large screens */}
-      <div className="w-full max-w-lg bg-[#FAFAF9] min-h-screen relative shadow-[0_1px_3px_rgba(0,0,0,0.06)] flex flex-col">
+    <div className="min-h-screen font-sans flex justify-center" style={{ backgroundColor: 'var(--color-bg2, #ededea)' }}>
+      <div className="w-full max-w-lg min-h-screen relative flex flex-col" style={{ backgroundColor: 'var(--color-bg, #f5f5f2)', boxShadow: 'var(--shadow-md)' }}>
 
         {/* HEADER */}
-        <header className="sticky top-0 z-40 bg-white border-b border-[#E7E5E4] h-14 px-5 flex items-center justify-between shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+        <header
+          className="sticky top-0 z-40 h-14 px-5 flex items-center justify-between"
+          style={{
+            backgroundColor: 'var(--color-surface, #fff)',
+            borderBottom: '1px solid var(--color-border, #e6e6e3)',
+            boxShadow: 'var(--shadow-xs)',
+          }}
+        >
           <button
             onClick={() => navigate('/app')}
-            className="font-bold text-[#1C1917] text-lg tracking-tight active:opacity-70 transition-opacity"
+            className="font-bold text-lg tracking-tight active:opacity-70 transition-opacity"
+            style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text1)' }}
           >
-            Yıllık Plan
+            Öğretmen Yaver
           </button>
-          <div className="flex items-center gap-3">
-            {headerAction && (
-              <button
-                onClick={headerAction.onClick}
-                className="text-sm font-bold text-[#2D5BE3] active:scale-95 transition-all px-3 py-1.5 rounded-lg bg-[#2D5BE3]/8 hover:bg-[#2D5BE3]/15"
-              >
-                {headerAction.label}
-              </button>
-            )}
-          </div>
+          {headerAction && (
+            <button
+              onClick={headerAction.onClick}
+              className="text-sm font-bold px-3 py-1.5 rounded-full active:scale-95 transition-all"
+              style={{
+                color: 'var(--color-primary)',
+                backgroundColor: 'var(--color-primary-s)',
+              }}
+            >
+              {headerAction.label}
+            </button>
+          )}
         </header>
 
-        {/* MAIN CONTENT AREA */}
-        {/* pb-20 prevents content from hiding behind the fixed tab bar */}
-        {/* key prop ile her route değişiminde fade-in animasyonu tetiklenir */}
-        <main key={location.pathname} className="flex-1 overflow-y-auto pb-20 animate-fade-in">
+        {/* MAIN */}
+        <main key={location.pathname} className="flex-1 overflow-y-auto pb-[72px] animate-fade-in">
           {children}
         </main>
 
-        <nav className="fixed bottom-0 w-full max-w-lg bg-white border-t border-[#E7E5E4] z-50">
-          <div className="flex justify-around items-center px-5 py-2">
-            {tabs.map((tab) => {
-              const isActive = tab.path === '/app/plan'
-                ? location.pathname.startsWith('/app/plan') || location.pathname.startsWith('/app/hafta')
-                : location.pathname === tab.path
-              const Icon = tab.icon
-
-              return (
-                <button
-                  key={tab.path}
-                  onClick={() => navigate(tab.path, { replace: isActive })}
-                  className="flex flex-col items-center gap-1 min-w-[4rem] group relative pb-1"
-                >
-                  <Icon
-                    size={22}
-                    className={`transition-all duration-200 ${isActive ? 'text-[#2D5BE3] scale-110' : 'text-gray-400 group-hover:text-gray-600'}`}
-                    strokeWidth={isActive ? 2.5 : 1.8}
-                  />
-                  <span className={`text-xs font-bold transition-colors duration-200 ${isActive ? 'text-[#2D5BE3]' : 'text-gray-400 group-hover:text-gray-600'}`}>
-                    {tab.name}
-                  </span>
-                  <span className={`absolute bottom-0 rounded-full bg-[#2D5BE3] transition-all duration-300 ${isActive ? 'w-4 h-0.5 opacity-100' : 'w-0 h-0.5 opacity-0'}`} />
-                </button>
-              )
-            })}
-
-            {/* Profil / Ayarlar butonu */}
-            <button
-              onClick={() => navigate('/app/ayarlar')}
-              className="flex flex-col items-center gap-1 min-w-[4rem] group relative pb-1"
-            >
-              {basharf ? (
-                <div className={`w-7 h-7 rounded-full bg-[#2D5BE3] text-white flex items-center justify-center font-bold text-xs transition-all duration-200 ${location.pathname === '/app/ayarlar' ? 'scale-110' : 'opacity-70 group-hover:opacity-100'}`}>
-                  {basharf}
-                </div>
-              ) : (
-                <User
-                  size={22}
-                  className={`transition-all duration-200 ${location.pathname === '/app/ayarlar' ? 'text-[#2D5BE3] scale-110' : 'text-gray-400 group-hover:text-gray-600'}`}
-                  strokeWidth={location.pathname === '/app/ayarlar' ? 2.5 : 1.8}
+        {/* BOTTOM NAV — v6 4 sekme */}
+        <nav
+          className="fixed bottom-0 w-full max-w-lg z-50 flex items-center px-1"
+          style={{
+            height: '72px',
+            backgroundColor: 'var(--color-surface, #fff)',
+            borderTop: '1px solid var(--color-border, #e6e6e3)',
+            paddingBottom: '8px',
+          }}
+        >
+          {TABS.map((tab) => {
+            const active = isTabActive(tab, location.pathname)
+            const Icon = tab.icon
+            return (
+              <button
+                key={tab.path}
+                onClick={() => navigate(tab.path, { replace: active })}
+                className="flex-1 flex flex-col items-center gap-[3px] px-1 py-2 rounded-xl transition-all duration-150 active:scale-90"
+                style={{ borderRadius: '12px' }}
+              >
+                <Icon
+                  size={20}
+                  strokeWidth={active ? 2.5 : 1.8}
+                  style={{
+                    color: active ? 'var(--color-primary)' : 'var(--color-text3)',
+                    transform: active ? 'scale(1.1)' : 'scale(1)',
+                    transition: 'transform 0.15s, color 0.15s',
+                  }}
                 />
-              )}
-              <span className={`text-xs font-bold transition-colors duration-200 ${location.pathname === '/app/ayarlar' ? 'text-[#2D5BE3]' : 'text-gray-400 group-hover:text-gray-600'}`}>
-                Ayarlar
-              </span>
-              <span className={`absolute bottom-0 rounded-full bg-[#2D5BE3] transition-all duration-300 ${location.pathname === '/app/ayarlar' ? 'w-4 h-0.5 opacity-100' : 'w-0 h-0.5 opacity-0'}`} />
-            </button>
-          </div>
+                <span
+                  className="text-[10px] font-bold tracking-[0.01em]"
+                  style={{ color: active ? 'var(--color-primary)' : 'var(--color-text3)' }}
+                >
+                  {tab.name}
+                </span>
+              </button>
+            )
+          })}
         </nav>
 
       </div>

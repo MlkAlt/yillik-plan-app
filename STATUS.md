@@ -23,8 +23,8 @@ Son güncelleme: 2026-04-03
 | 2 | v6 design token'larını Tailwind'e ekle | frontend-dev | **DONE** | `index.css` | Renk, radius, gölge |
 | 3 | `tokens.ts` oluştur — JS sabitleri | frontend-dev | **DONE** | `src/lib/tokens.ts` | v6 HTML'den çıkar |
 | 4 | Dark mode sistemi kur | frontend-dev | **DONE** | `index.css`, `App.tsx` | `useColorScheme` |
-| 5 | Bottom nav → 4 sekme (Ana/Planla/Dosyam/Üret) | frontend-dev | **NEXT** | `AppLayout.tsx` | v6 mockup referans |
-| 6 | Ana ekran (Dashboard) v6'ya güncelle | frontend-dev | TODO | `AppHomeScreen.tsx` | Mevcut veriyi koru |
+| 5 | Bottom nav → 4 sekme (Ana/Planla/Dosyam/Üret) | frontend-dev | **DONE** | `AppLayout.tsx` | v6 mockup referans |
+| 6 | Ana ekran (Dashboard) v6'ya güncelle | frontend-dev | **NEXT** | `AppHomeScreen.tsx` | Mevcut veriyi koru |
 | 7 | Onboarding flow v6'ya güncelle | frontend-dev | TODO | `OnboardingModal.tsx` | Branş→Dersler→Sınıflar |
 | 8 | Planla ekranı (yıllık plan görünümü) | frontend-dev | TODO | `PlanPage.tsx` yeni tasarım | |
 | 9 | Dosyam ekranı (yeni — öğretmen dosyası) | frontend-dev | TODO | `DosyamPage.tsx` | v6 mockup |
@@ -94,6 +94,15 @@ Son güncelleme: 2026-04-03
 - `App.tsx` — minimal: `useColorScheme()` çağrısı eklendi
 - TS hata yok, 12 test geçiyor ✅
 - Sonraki: Görev #5 — Bottom nav 4 sekme
+
+### 2026-04-03 — Görev #5: Bottom nav 4 sekme
+- `AppLayout.tsx` v6 stiline güncellendi — 72px yükseklik, CSS var renkleri, dark mode uyumlu
+- Header: "Öğretmen Yaver" başlığı, Outfit font, v6 renk token'ları
+- 4 sekme: Ana / Planla / Dosyam / Üret (Home / CalendarDays / FolderOpen / Sparkles)
+- `DosyamPage.tsx` + `UretPage.tsx` placeholder sayfaları oluşturuldu
+- `App.tsx`'e `/app/dosyam` + `/app/uret` route'ları eklendi
+- TS hata yok, 12 test geçiyor ✅
+- Sonraki: Görev #6 — Ana ekran v6 güncelle
 
 ---
 
