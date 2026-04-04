@@ -147,8 +147,8 @@ export function PlanSelector({ yil, onComplete, onCancel, onStepChange }: PlanSe
     <div className="relative min-h-[480px]">
       {(loading || success) && (
         <div
-          className="absolute inset-0 z-20 flex items-center justify-center px-4"
-          style={{ backgroundColor: 'color-mix(in srgb, var(--color-surface) 90%, transparent)', backdropFilter: 'blur(10px)', animation: 'overlay-in 0.25s ease-out both' }}
+          className="fixed inset-0 z-50 flex items-center justify-center px-6"
+          style={{ backgroundColor: 'color-mix(in srgb, var(--color-bg) 94%, transparent)', backdropFilter: 'blur(18px)', animation: 'overlay-in 0.25s ease-out both' }}
         >
           <div className="w-full max-w-sm text-center" style={{ animation: 'splash-in 0.45s ease-out both' }}>
             <div

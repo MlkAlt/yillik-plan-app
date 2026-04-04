@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bell, CalendarDays, ChevronRight, FolderOpen, User } from 'lucide-react'
+import { Bell, ChevronRight } from 'lucide-react'
 import type { OlusturulmusPlan } from '../types/takvim'
 import type { PlanEntry } from '../types/planEntry'
 import { showKazanimBildirimi } from '../lib/notifications'
@@ -176,28 +176,15 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              aria-label="Bildirimler"
-              className="w-[40px] h-[40px] rounded-full flex items-center justify-center relative transition-all active:scale-95"
-              style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-xs)' }}
-            >
-              <Bell size={16} style={{ color: 'var(--color-text2)' }} />
-              <span className="absolute top-[8px] right-[8px] w-[7px] h-[7px] rounded-full" style={{ backgroundColor: 'var(--color-danger)', border: '1.5px solid var(--color-bg)' }} />
-            </button>
-
-            <button
-              type="button"
-              aria-label="Profil ve ayarlar"
-              onClick={() => navigate('/app/ayarlar')}
-              className="h-[40px] rounded-full flex items-center justify-center gap-2 px-3 transition-all active:scale-95"
-              style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-xs)' }}
-            >
-              <User size={15} style={{ color: 'var(--color-primary)' }} />
-              <span className="text-[12px] font-bold" style={{ color: 'var(--color-text1)' }}>Ayarlar</span>
-            </button>
-          </div>
+          <button
+            type="button"
+            aria-label="Bildirimler"
+            className="w-[40px] h-[40px] rounded-full flex items-center justify-center relative transition-all active:scale-95"
+            style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-xs)' }}
+          >
+            <Bell size={16} style={{ color: 'var(--color-text2)' }} />
+            <span className="absolute top-[8px] right-[8px] w-[7px] h-[7px] rounded-full" style={{ backgroundColor: 'var(--color-danger)', border: '1.5px solid var(--color-bg)' }} />
+          </button>
         </div>
       </div>
 
@@ -227,31 +214,21 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
                 {sonrakiGorev.sinif} - {sonrakiGorev.ders}
               </p>
               <p className="text-xs mb-3" style={{ color: 'var(--color-text2)' }}>{sonrakiGorev.tarih}</p>
-              <p className="text-sm leading-6 mb-4" style={{ color: 'var(--color-text1)' }}>{sonrakiGorev.kazanim}</p>
+              <p className="text-sm leading-6 mb-2" style={{ color: 'var(--color-text1)' }}>{sonrakiGorev.kazanim}</p>
 
-              <div className="flex items-center justify-between gap-3 px-3.5 py-3" style={{ borderRadius: 'var(--radius-lg)', backgroundColor: 'color-mix(in srgb, var(--color-primary) 6%, transparent)', border: '1px solid color-mix(in srgb, var(--color-primary) 14%, transparent)' }}>
-                <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[.08em]" style={{ color: 'var(--color-primary)' }}>
-                    Siradaki adim
-                  </p>
-                  <p className="text-sm font-semibold" style={{ color: 'var(--color-text1)' }}>
-                    {sonrakiGorev.tamamlandi ? 'Bugunluk hedef kapandi' : 'Bu kazanimi tamamla'}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    onSinifSec(sonrakiGorev.entry.sinif)
-                    if (sonrakiGorev.haftaNo) navigate(`/app/hafta/${sonrakiGorev.haftaNo}`)
-                    else navigate('/app/plan')
-                  }}
-                  className="inline-flex items-center gap-1 text-xs font-bold"
-                  style={{ color: 'var(--color-primary)' }}
-                >
-                  Detay
-                  <ChevronRight size={14} />
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  onSinifSec(sonrakiGorev.entry.sinif)
+                  if (sonrakiGorev.haftaNo) navigate(`/app/hafta/${sonrakiGorev.haftaNo}`)
+                  else navigate('/app/plan')
+                }}
+                className="inline-flex items-center gap-1 text-[11px] font-bold mt-1"
+                style={{ color: 'var(--color-primary)' }}
+              >
+                Haftanin detayina git
+                <ChevronRight size={12} />
+              </button>
             </section>
           )}
 
@@ -313,36 +290,6 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
             </div>
           </section>
 
-          <section className="stagger-4">
-            <SectionHeader title="Kisayollar" meta="Ihtiyac oldugunda" />
-            <div className="grid grid-cols-2 gap-2.5">
-              <button
-                type="button"
-                onClick={() => navigate('/app/plan')}
-                className="flex items-center gap-3 px-3.5 py-3 card-lift text-left"
-                style={{ borderRadius: 'var(--radius-lg)', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-xs)' }}
-              >
-                <CalendarDays size={16} style={{ color: 'var(--color-primary)' }} />
-                <div className="min-w-0">
-                  <p className="text-[12px] font-bold" style={{ color: 'var(--color-text1)' }}>Planim</p>
-                  <p className="text-[10px]" style={{ color: 'var(--color-text2)' }}>Tum haftalar</p>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => navigate('/app/dosyam')}
-                className="flex items-center gap-3 px-3.5 py-3 card-lift text-left"
-                style={{ borderRadius: 'var(--radius-lg)', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-xs)' }}
-              >
-                <FolderOpen size={16} style={{ color: 'var(--color-accent)' }} />
-                <div className="min-w-0">
-                  <p className="text-[12px] font-bold" style={{ color: 'var(--color-text1)' }}>Dosyam</p>
-                  <p className="text-[10px]" style={{ color: 'var(--color-text2)' }}>Belgeler</p>
-                </div>
-              </button>
-            </div>
-          </section>
         </div>
       )}
     </div>

@@ -72,6 +72,11 @@ Son guncelleme: 2026-04-04
 - `Planin hazirlaniyor` ekrani onboarding benzeri animasyonlu merkez katman olarak guncellendi.
 - Son degisiklikler production'a alindi: `https://ogretmen-yaver.vercel.app`
 
+### 2026-04-04 - UI sadeleştirme turu
+- `AppLayout.tsx`: Bottom nav'a kalici profil ikonu eklendi (5. tam tab degil, kucuk avatar circle); her ekrandan `/app/ayarlar`'a erisim saglaniyor.
+- `AppHomeScreen.tsx`: Header'dan `Ayarlar` butonu kaldirildi (profil artik nav'da). Hero karttan `Siradaki adim` nested blogu kaldirildi. `Kisayollar` grid section'i kaldirildi (Plan + Dosyam zaten bottom nav'da).
+- `PlanSelector/index.tsx`: Yukleme overlay'i `absolute inset-0` yerine `fixed inset-0 z-50` yapildi — artik tam ekran, onboarding gibi ortada goruniyor.
+
 ---
 
 ## Bilinen Notlar
