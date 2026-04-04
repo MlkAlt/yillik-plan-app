@@ -3,10 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import type { Hafta } from '../types/takvim'
 import type { ParsedRow } from '../lib/fileParser'
 import type { PlanEntry } from '../types/planEntry'
-import { exportPlanToExcel, exportPlanToWord, exportPlanToPrint } from '../lib/exportUtils'
 import { AdBanner } from '../components/AdBanner'
 import { Button } from '../components/Button'
-import { Download, FileSpreadsheet, FileText, Printer, MapPin, Check, CalendarDays, ChevronDown } from 'lucide-react'
+import { Check, CalendarDays, ChevronDown } from 'lucide-react'
 import { StorageKeys } from '../lib/storageKeys'
 import { SectionHeader } from '../components/UI/SectionHeader'
 import { EmptyState } from '../components/UI/EmptyState'
@@ -188,8 +187,6 @@ function formatTarih(isoTarih: string): string {
 export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
   const navigate = useNavigate()
   const [tamamlananlar, setTamamlananlar] = useState<number[]>([])
-  const [exportMenuAcik, setExportMenuAcik] = useState(false)
-  const [exporting, setExporting] = useState<'excel' | 'word' | null>(null)
   const [visibleYuzde, setVisibleYuzde] = useState(0)
   const [donemAcik, setDonemAcik] = useState<Record<number, boolean>>({ 1: true, 2: false })
   const bugunRef = useRef<HTMLDivElement>(null)
@@ -200,51 +197,6 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
   )?.haftaNo ?? entry?.plan?.haftalar.find(
     h => h.baslangicTarihi >= bugunStr
   )?.haftaNo ?? null
-
-  function scrollToBugunHafta() {
-    if (!entry?.plan || !bugunHaftaNo) return
-    const bugunDonem = entry.plan.haftalar.find(h => h.haftaNo === bugunHaftaNo)?.donem ?? 1
-    setDonemAcik(prev => ({ ...prev, [bugunDonem]: true }))
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        bugunRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      })
-    })
-  }
-
-  async function handleExcelIndir() {
-    if (!entry) return
-    setExporting('excel')
-    setExportMenuAcik(false)
-    try {
-      const ayarlar = localStorage.getItem(StorageKeys.OGRETMEN_AYARLARI)
-      const meta = ayarlar ? JSON.parse(ayarlar) : {}
-      await exportPlanToExcel(entry, { okulAdi: meta.okulAdi, ogretmenAdi: meta.adSoyad })
-    } finally {
-      setExporting(null)
-    }
-  }
-
-  function handleWordIndir() {
-    if (!entry) return
-    setExporting('word')
-    setExportMenuAcik(false)
-    try {
-      const ayarlar = localStorage.getItem(StorageKeys.OGRETMEN_AYARLARI)
-      const meta = ayarlar ? JSON.parse(ayarlar) : {}
-      exportPlanToWord(entry, { okulAdi: meta.okulAdi, ogretmenAdi: meta.adSoyad })
-    } finally {
-      setExporting(null)
-    }
-  }
-
-  function handleYazdir() {
-    if (!entry) return
-    setExportMenuAcik(false)
-    const ayarlar = localStorage.getItem(StorageKeys.OGRETMEN_AYARLARI)
-    const meta = ayarlar ? JSON.parse(ayarlar) : {}
-    exportPlanToPrint(entry, { okulAdi: meta.okulAdi, ogretmenAdi: meta.adSoyad })
-  }
 
   useEffect(() => {
     if (!entry?.plan) return
