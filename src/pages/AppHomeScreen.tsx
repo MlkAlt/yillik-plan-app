@@ -9,6 +9,8 @@ import { syncProgressToSupabase } from '../lib/planSync'
 import { exportPlanToExcel, exportPlanToWord, exportPlanToPrint } from '../lib/exportUtils'
 import { BosdurumuEkrani } from '../components/BosdurumuEkrani/BosdurumuEkrani'
 import { DonemGrubu } from '../components/DonemGrubu'
+import { AlertCard } from '../components/UI/AlertCard'
+import { AnalyticsCard } from '../components/UI/AnalyticsCard'
 import { StorageKeys } from '../lib/storageKeys'
 import { useToast } from '../lib/toast'
 
@@ -381,6 +383,29 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
 
       {planlar.length > 0 && (
         <div className="section-stack">
+
+          {/* ── Alert Card (v8) ─────────────────────────── */}
+          <AlertCard
+            status="acil"
+            title="Not girişi son günü"
+            subtitle="10-B sınıfı tamamlanmadı"
+            actionLabel="Şimdi Tamamla"
+            onAction={() => {
+              onSinifSec(planlar[0].sinif)
+              navigate(`/app/hafta/${aktifHafta?.haftaNo}`)
+            }}
+          />
+
+          {/* ── Analytics Card (v8) ────────────────────── */}
+          <AnalyticsCard
+            totalTime="6.5 saat"
+            breakdown={[
+              { label: 'Yazılı', value: '3.2s' },
+              { label: 'Evrak', value: '2.1s' },
+              { label: 'Plan', value: '1.2s' },
+            ]}
+            meta="BU AY TASARRUF"
+          />
 
           {/* ── Hero Kartı ─────────────────────────────── */}
           <section
