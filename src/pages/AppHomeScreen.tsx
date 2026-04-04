@@ -305,7 +305,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
             justifyContent: 'space-between',
           }}
         >
-          <p style={{ fontSize: '12px', fontWeight: 700, color: '#52524F' }}>Jeton</p>
+          <p style={{ fontSize: '12px', fontWeight: 700, color: '#52524F' }}>Üretim Hakkı</p>
           <p
             style={{
               fontFamily: "var(--font-display), 'Bricolage Grotesque', sans-serif",

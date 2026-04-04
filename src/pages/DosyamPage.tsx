@@ -28,6 +28,7 @@ interface Belge {
   aksiyonMetni: string
 }
 
+function DurumBadge({ durum, metin }: { durum: string; metin?: string }) {
   if (durum === 'hazir') {
     return (
       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1" style={{ color: 'var(--color-success)', backgroundColor: 'color-mix(in srgb, var(--color-success) 12%, transparent)' }}>
@@ -139,10 +140,10 @@ export function DosyamPage() {
     <div className="page-shell">
       <div className="page-header">
         <h1 className="text-[22px] font-bold tracking-tight mb-0.5" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text1)' }}>
-          Ogretmen Dosyasi
+          Öğretmen Dosyası
         </h1>
         <p className="text-sm" style={{ color: 'var(--color-text2)' }}>
-          Hazir belgeler, eksikler ve manuel eklenebilir alanlar
+          Hazır belgeler, eksikler ve manuel eklenebilir alanlar
         </p>
       </div>
 
