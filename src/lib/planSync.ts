@@ -39,7 +39,7 @@ export async function syncPlansToSupabase(userId: string, planlar: PlanEntry[]) 
   }))
   await supabase
     .from('plans')
-    .upsert(rows, { onConflict: 'user_id,sinif' })
+    .upsert(rows, { onConflict: 'user_id,sinif,ders' })
 }
 
 export async function fetchPlansFromSupabase(userId: string): Promise<PlanEntry[]> {

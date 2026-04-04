@@ -1,169 +1,120 @@
 import { ilkokulMufredatiniDonustur, type MufredatJson, type IlkokulMufredatJson } from './takvimUtils'
 
-// Hayat Bilgisi (ilkokul)
-import hb1 from '../data/mufredat/hayat-bilgisi-1.json'
-import hb2 from '../data/mufredat/hayat-bilgisi-2.json'
-import hb3 from '../data/mufredat/hayat-bilgisi-3.json'
-
-// Fen Bilimleri (ilkokul 3-4, ortaokul 5-8)
-import fen3 from '../data/mufredat/fen-bilimleri-3.json'
-import fen4 from '../data/mufredat/fen-bilimleri-4.json'
-import fen5 from '../data/mufredat/fen-bilimleri-5.json'
-import fen6 from '../data/mufredat/fen-bilimleri-6.json'
-import fen7 from '../data/mufredat/fen-bilimleri-7.json'
-import fen8 from '../data/mufredat/fen-bilimleri-8.json'
-
-// Matematik (ilkokul 3-4, ortaokul 5-8, lise 9-12)
-import mat3 from '../data/mufredat/matematik-3.json'
-import mat4 from '../data/mufredat/matematik-4.json'
-import mat5 from '../data/mufredat/matematik-5.json'
-import mat6 from '../data/mufredat/matematik-6.json'
-import mat7 from '../data/mufredat/matematik-7.json'
-import mat8 from '../data/mufredat/matematik-8.json'
-import mat9 from '../data/mufredat/matematik-9.json'
-import mat10 from '../data/mufredat/matematik-10.json'
-import mat11 from '../data/mufredat/matematik-11.json'
-import mat12 from '../data/mufredat/matematik-12.json'
-
-// Türkçe (ilkokul 3-4, ortaokul 5-8)
-import turkce3 from '../data/mufredat/turkce-3.json'
-import turkce4 from '../data/mufredat/turkce-4.json'
-import turkce5 from '../data/mufredat/turkce-5.json'
-import turkce6 from '../data/mufredat/turkce-6.json'
-import turkce7 from '../data/mufredat/turkce-7.json'
-import turkce8 from '../data/mufredat/turkce-8.json'
-
-// Sosyal Bilgiler (4-7)
-import sosyal4 from '../data/mufredat/sosyal-bilgiler-4.json'
-import sosyal5 from '../data/mufredat/sosyal-bilgiler-5.json'
-import sosyal6 from '../data/mufredat/sosyal-bilgiler-6.json'
-import sosyal7 from '../data/mufredat/sosyal-bilgiler-7.json'
-
-// İngilizce (5-12)
-import ing5 from '../data/mufredat/ingilizce-5.json'
-import ing6 from '../data/mufredat/ingilizce-6.json'
-import ing7 from '../data/mufredat/ingilizce-7.json'
-import ing8 from '../data/mufredat/ingilizce-8.json'
-import ing9 from '../data/mufredat/ingilizce-9.json'
-import ing10 from '../data/mufredat/ingilizce-10.json'
-import ing11 from '../data/mufredat/ingilizce-11.json'
-import ing12 from '../data/mufredat/ingilizce-12.json'
-
-// Fizik (9-12)
-import fizik9 from '../data/mufredat/fizik-9.json'
-import fizik10 from '../data/mufredat/fizik-10.json'
-import fizik11 from '../data/mufredat/fizik-11.json'
-import fizik12 from '../data/mufredat/fizik-12.json'
-
-// Kimya (9-12)
-import kimya9 from '../data/mufredat/kimya-9.json'
-import kimya10 from '../data/mufredat/kimya-10.json'
-import kimya11 from '../data/mufredat/kimya-11.json'
-import kimya12 from '../data/mufredat/kimya-12.json'
-
-// Biyoloji (9-12)
-import biyoloji9 from '../data/mufredat/biyoloji-9.json'
-import biyoloji10 from '../data/mufredat/biyoloji-10.json'
-import biyoloji11 from '../data/mufredat/biyoloji-11.json'
-import biyoloji12 from '../data/mufredat/biyoloji-12.json'
-
-// Tarih (9-12)
-import tarih9 from '../data/mufredat/tarih-9.json'
-import tarih10 from '../data/mufredat/tarih-10.json'
-import tarih11 from '../data/mufredat/tarih-11.json'
-import tarih12 from '../data/mufredat/tarih-12.json'
-
-// Coğrafya (9-12)
-import cografya9 from '../data/mufredat/cografya-9.json'
-import cografya10 from '../data/mufredat/cografya-10.json'
-import cografya11 from '../data/mufredat/cografya-11.json'
-import cografya12 from '../data/mufredat/cografya-12.json'
-
-// Türk Dili ve Edebiyatı (9-12)
-import tde9 from '../data/mufredat/turk-dili-edebiyat-9.json'
-import tde10 from '../data/mufredat/turk-dili-edebiyat-10.json'
-import tde11 from '../data/mufredat/turk-dili-edebiyat-11.json'
-import tde12 from '../data/mufredat/turk-dili-edebiyat-12.json'
-
-// Ilkokul dosyaları (IlkokulMufredatJson formatında)
-const ILKOKUL_MAP: Record<string, IlkokulMufredatJson> = {
-  'Hayat Bilgisi-1. Sınıf': hb1 as IlkokulMufredatJson,
-  'Hayat Bilgisi-2. Sınıf': hb2 as IlkokulMufredatJson,
-  'Hayat Bilgisi-3. Sınıf': hb3 as IlkokulMufredatJson,
-  'Fen Bilimleri-3. Sınıf': fen3 as IlkokulMufredatJson,
-  'Fen Bilimleri-4. Sınıf': fen4 as IlkokulMufredatJson,
-  'Matematik-3. Sınıf': mat3 as IlkokulMufredatJson,
-  'Matematik-4. Sınıf': mat4 as IlkokulMufredatJson,
-  'Türkçe-3. Sınıf': turkce3 as IlkokulMufredatJson,
-  'Türkçe-4. Sınıf': turkce4 as IlkokulMufredatJson,
-  'Sosyal Bilgiler-4. Sınıf': sosyal4 as IlkokulMufredatJson,
+// Ders-sınıf → dosya adı eşlemesi (dynamic import için)
+// İlkokul formatı (IlkokulMufredatJson) ayrı işleniyor
+const ILKOKUL_DOSYALAR: Record<string, string> = {
+  'Hayat Bilgisi-1. Sınıf': 'hayat-bilgisi-1',
+  'Hayat Bilgisi-2. Sınıf': 'hayat-bilgisi-2',
+  'Hayat Bilgisi-3. Sınıf': 'hayat-bilgisi-3',
+  'Fen Bilimleri-3. Sınıf': 'fen-bilimleri-3',
+  'Fen Bilimleri-4. Sınıf': 'fen-bilimleri-4',
+  'Matematik-3. Sınıf':     'matematik-3',
+  'Matematik-4. Sınıf':     'matematik-4',
+  'Türkçe-3. Sınıf':        'turkce-3',
+  'Türkçe-4. Sınıf':        'turkce-4',
+  'Sosyal Bilgiler-4. Sınıf': 'sosyal-bilgiler-4',
 }
 
-// Ortaokul/lise dosyaları (MufredatJson formatında)
-const MUFREDAT_MAP: Record<string, MufredatJson> = {
-  'Fen Bilimleri-5. Sınıf': fen5 as MufredatJson,
-  'Fen Bilimleri-6. Sınıf': fen6 as MufredatJson,
-  'Fen Bilimleri-7. Sınıf': fen7 as MufredatJson,
-  'Fen Bilimleri-8. Sınıf': fen8 as MufredatJson,
-  'Matematik-5. Sınıf': mat5 as MufredatJson,
-  'Matematik-6. Sınıf': mat6 as MufredatJson,
-  'Matematik-7. Sınıf': mat7 as MufredatJson,
-  'Matematik-8. Sınıf': mat8 as MufredatJson,
-  'Matematik-9. Sınıf': mat9 as MufredatJson,
-  'Matematik-10. Sınıf': mat10 as MufredatJson,
-  'Matematik-11. Sınıf': mat11 as MufredatJson,
-  'Matematik-12. Sınıf': mat12 as MufredatJson,
-  'Türkçe-5. Sınıf': turkce5 as MufredatJson,
-  'Türkçe-6. Sınıf': turkce6 as MufredatJson,
-  'Türkçe-7. Sınıf': turkce7 as MufredatJson,
-  'Türkçe-8. Sınıf': turkce8 as MufredatJson,
-  'Sosyal Bilgiler-5. Sınıf': sosyal5 as MufredatJson,
-  'Sosyal Bilgiler-6. Sınıf': sosyal6 as MufredatJson,
-  'Sosyal Bilgiler-7. Sınıf': sosyal7 as MufredatJson,
-  'İngilizce-5. Sınıf': ing5 as MufredatJson,
-  'İngilizce-6. Sınıf': ing6 as MufredatJson,
-  'İngilizce-7. Sınıf': ing7 as MufredatJson,
-  'İngilizce-8. Sınıf': ing8 as MufredatJson,
-  'İngilizce-9. Sınıf': ing9 as MufredatJson,
-  'İngilizce-10. Sınıf': ing10 as MufredatJson,
-  'İngilizce-11. Sınıf': ing11 as MufredatJson,
-  'İngilizce-12. Sınıf': ing12 as MufredatJson,
-  'Fizik-9. Sınıf': fizik9 as MufredatJson,
-  'Fizik-10. Sınıf': fizik10 as MufredatJson,
-  'Fizik-11. Sınıf': fizik11 as MufredatJson,
-  'Fizik-12. Sınıf': fizik12 as MufredatJson,
-  'Kimya-9. Sınıf': kimya9 as MufredatJson,
-  'Kimya-10. Sınıf': kimya10 as MufredatJson,
-  'Kimya-11. Sınıf': kimya11 as MufredatJson,
-  'Kimya-12. Sınıf': kimya12 as MufredatJson,
-  'Biyoloji-9. Sınıf': biyoloji9 as MufredatJson,
-  'Biyoloji-10. Sınıf': biyoloji10 as MufredatJson,
-  'Biyoloji-11. Sınıf': biyoloji11 as MufredatJson,
-  'Biyoloji-12. Sınıf': biyoloji12 as MufredatJson,
-  'Tarih-9. Sınıf': tarih9 as MufredatJson,
-  'Tarih-10. Sınıf': tarih10 as MufredatJson,
-  'Tarih-11. Sınıf': tarih11 as MufredatJson,
-  'Tarih-12. Sınıf': tarih12 as MufredatJson,
-  'Coğrafya-9. Sınıf': cografya9 as MufredatJson,
-  'Coğrafya-10. Sınıf': cografya10 as MufredatJson,
-  'Coğrafya-11. Sınıf': cografya11 as MufredatJson,
-  'Coğrafya-12. Sınıf': cografya12 as MufredatJson,
-  'Türk Dili ve Edebiyatı-9. Sınıf': tde9 as MufredatJson,
-  'Türk Dili ve Edebiyatı-10. Sınıf': tde10 as MufredatJson,
-  'Türk Dili ve Edebiyatı-11. Sınıf': tde11 as MufredatJson,
-  'Türk Dili ve Edebiyatı-12. Sınıf': tde12 as MufredatJson,
+const MUFREDAT_DOSYALAR: Record<string, string> = {
+  'Fen Bilimleri-5. Sınıf': 'fen-bilimleri-5',
+  'Fen Bilimleri-6. Sınıf': 'fen-bilimleri-6',
+  'Fen Bilimleri-7. Sınıf': 'fen-bilimleri-7',
+  'Fen Bilimleri-8. Sınıf': 'fen-bilimleri-8',
+  'Matematik-5. Sınıf':  'matematik-5',
+  'Matematik-6. Sınıf':  'matematik-6',
+  'Matematik-7. Sınıf':  'matematik-7',
+  'Matematik-8. Sınıf':  'matematik-8',
+  'Matematik-9. Sınıf':  'matematik-9',
+  'Matematik-10. Sınıf': 'matematik-10',
+  'Matematik-11. Sınıf': 'matematik-11',
+  'Matematik-12. Sınıf': 'matematik-12',
+  'Türkçe-5. Sınıf': 'turkce-5',
+  'Türkçe-6. Sınıf': 'turkce-6',
+  'Türkçe-7. Sınıf': 'turkce-7',
+  'Türkçe-8. Sınıf': 'turkce-8',
+  'Sosyal Bilgiler-5. Sınıf': 'sosyal-bilgiler-5',
+  'Sosyal Bilgiler-6. Sınıf': 'sosyal-bilgiler-6',
+  'Sosyal Bilgiler-7. Sınıf': 'sosyal-bilgiler-7',
+  'İngilizce-5. Sınıf':  'ingilizce-5',
+  'İngilizce-6. Sınıf':  'ingilizce-6',
+  'İngilizce-7. Sınıf':  'ingilizce-7',
+  'İngilizce-8. Sınıf':  'ingilizce-8',
+  'İngilizce-9. Sınıf':  'ingilizce-9',
+  'İngilizce-10. Sınıf': 'ingilizce-10',
+  'İngilizce-11. Sınıf': 'ingilizce-11',
+  'İngilizce-12. Sınıf': 'ingilizce-12',
+  'Fizik-9. Sınıf':  'fizik-9',
+  'Fizik-10. Sınıf': 'fizik-10',
+  'Fizik-11. Sınıf': 'fizik-11',
+  'Fizik-12. Sınıf': 'fizik-12',
+  'Kimya-9. Sınıf':  'kimya-9',
+  'Kimya-10. Sınıf': 'kimya-10',
+  'Kimya-11. Sınıf': 'kimya-11',
+  'Kimya-12. Sınıf': 'kimya-12',
+  'Biyoloji-9. Sınıf':  'biyoloji-9',
+  'Biyoloji-10. Sınıf': 'biyoloji-10',
+  'Biyoloji-11. Sınıf': 'biyoloji-11',
+  'Biyoloji-12. Sınıf': 'biyoloji-12',
+  'Tarih-9. Sınıf':  'tarih-9',
+  'Tarih-10. Sınıf': 'tarih-10',
+  'Tarih-11. Sınıf': 'tarih-11',
+  'Tarih-12. Sınıf': 'tarih-12',
+  'Coğrafya-9. Sınıf':  'cografya-9',
+  'Coğrafya-10. Sınıf': 'cografya-10',
+  'Coğrafya-11. Sınıf': 'cografya-11',
+  'Coğrafya-12. Sınıf': 'cografya-12',
+  'Türk Dili ve Edebiyatı-9. Sınıf':  'turk-dili-edebiyat-9',
+  'Türk Dili ve Edebiyatı-10. Sınıf': 'turk-dili-edebiyat-10',
+  'Türk Dili ve Edebiyatı-11. Sınıf': 'turk-dili-edebiyat-11',
+  'Türk Dili ve Edebiyatı-12. Sınıf': 'turk-dili-edebiyat-12',
+}
+
+// Bellek içi önbellek — aynı müfredatı tekrar yüklememek için
+const cache = new Map<string, MufredatJson>()
+
+/**
+ * Ders ve sınıf için müfredat verisini async olarak yükler.
+ * İlk çağrıda JSON dosyasını dinamik import eder, sonraki çağrılarda önbellekten döner.
+ * Müfredat verisi yoksa null döner.
+ */
+export async function getMufredat(ders: string, sinif: string): Promise<MufredatJson | null> {
+  const key = `${ders}-${sinif}`
+
+  if (cache.has(key)) return cache.get(key)!
+
+  // İlkokul formatı
+  const ilkokulDosya = ILKOKUL_DOSYALAR[key]
+  if (ilkokulDosya) {
+    try {
+      const mod = await import(`../data/mufredat/${ilkokulDosya}.json`)
+      const donusturulmus = ilkokulMufredatiniDonustur(mod.default as IlkokulMufredatJson)
+      cache.set(key, donusturulmus)
+      return donusturulmus
+    } catch {
+      return null
+    }
+  }
+
+  // Ortaokul/lise formatı
+  const dosya = MUFREDAT_DOSYALAR[key]
+  if (!dosya) return null
+
+  try {
+    const mod = await import(`../data/mufredat/${dosya}.json`)
+    const mufredat = mod.default as MufredatJson
+    cache.set(key, mufredat)
+    return mufredat
+  } catch {
+    return null
+  }
 }
 
 /**
- * Ders ve sınıf için müfredat verisini döndürür.
- * İlkokul formatını otomatik olarak MufredatJson'a dönüştürür.
- * Müfredat verisi yoksa null döner (planOlustur() kullanılmalı).
+ * Belirli bir ders için tüm sınıf seçeneklerini döndürür.
  */
-export function getMufredat(ders: string, sinif: string): MufredatJson | null {
-  const key = `${ders}-${sinif}`
-
-  const ilkokul = ILKOKUL_MAP[key]
-  if (ilkokul) return ilkokulMufredatiniDonustur(ilkokul)
-
-  return MUFREDAT_MAP[key] ?? null
+export function getMufredatSiniflar(ders: string): string[] {
+  const tumAnahtarlar = [...Object.keys(ILKOKUL_DOSYALAR), ...Object.keys(MUFREDAT_DOSYALAR)]
+  return tumAnahtarlar
+    .filter(k => k.startsWith(`${ders}-`))
+    .map(k => k.replace(`${ders}-`, ''))
 }

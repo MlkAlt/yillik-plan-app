@@ -73,7 +73,7 @@ export function PlanSelector({ yil, onComplete, onCancel, onStepChange }: PlanSe
     setSelectedClasses(prev => prev.includes(cls) ? (prev.length > 1 ? prev.filter(c => c !== cls) : prev) : [...prev, cls])
   }
 
-  function handleConfirm() {
+  async function handleConfirm() {
     if (!selectedBranch) return
     setLoading(true)
     setLoadingMesajIndex(0)
@@ -85,10 +85,12 @@ export function PlanSelector({ yil, onComplete, onCancel, onStepChange }: PlanSe
       let eksikDersler: string[] = []
 
       if (selectedBranch.mode === 'sinif-ogretmeni') {
-        const results = selectedLessons.map(ders => {
-          const { plan, hasMufredat } = buildPlan(ders, selectedClass, yil)
-          return { ders, plan, hasMufredat }
-        })
+        const results = await Promise.all(
+          selectedLessons.map(async ders => {
+            const { plan, hasMufredat } = await buildPlan(ders, selectedClass, yil)
+            return { ders, plan, hasMufredat }
+          })
+        )
         eksikDersler = results.filter(r => !r.hasMufredat).map(r => r.ders)
         entries = results.map(r => ({
           sinif: `${selectedClass}-${r.ders}`,
@@ -109,10 +111,12 @@ export function PlanSelector({ yil, onComplete, onCancel, onStepChange }: PlanSe
           sinifGercek: selectedClass,
         }))
       } else {
-        const results = selectedClasses.map(sinif => {
-          const { plan, hasMufredat } = buildPlan(selectedBranch.lessonId, sinif, yil)
-          return { sinif, plan, hasMufredat }
-        })
+        const results = await Promise.all(
+          selectedClasses.map(async sinif => {
+            const { plan, hasMufredat } = await buildPlan(selectedBranch.lessonId, sinif, yil)
+            return { sinif, plan, hasMufredat }
+          })
+        )
         eksikDersler = results.filter(r => !r.hasMufredat).map(r => r.sinif)
         entries = results.map(r => ({
           sinif: r.sinif,

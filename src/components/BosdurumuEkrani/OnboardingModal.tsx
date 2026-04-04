@@ -44,15 +44,17 @@ export function OnboardingModal({ onTamamla }: OnboardingModalProps) {
     )
   }
 
-  function handleOlustur() {
+  async function handleOlustur() {
     const branch = BRANCHES.find(b => b.id === acikBrans)
     if (!branch || seciliSiniflar.length === 0) return
     setLoading(true)
     try {
-      const entries: PlanEntry[] = seciliSiniflar.map(sinif => {
-        const { plan } = buildPlan(branch.lessonId, sinif, yil)
-        return { sinif, ders: branch.lessonId, yil, tip: 'meb' as const, plan, rows: null }
-      })
+      const entries: PlanEntry[] = await Promise.all(
+        seciliSiniflar.map(async sinif => {
+          const { plan } = await buildPlan(branch.lessonId, sinif, yil)
+          return { sinif, ders: branch.lessonId, yil, tip: 'meb' as const, plan, rows: null }
+        })
+      )
       setTebrik({ ders: branch.label, siniflar: seciliSiniflar })
       setLoading(false)
       setTimeout(() => {
