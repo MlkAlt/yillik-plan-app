@@ -7,6 +7,17 @@ Son guncelleme: 2026-04-04
 
 ---
 
+## Son Yapılanlar: v8 Design Migration (4 Commit - 2026-04-04)
+
+**Sprint 0 — v8 Design Refresh (COMPLETED)**
+- **Phase 1:** Fonts (Bricolage Grotesque + DM Sans) + Navy color palette (#1B2E5E)
+- **Phase 2:** AlertCard + AnalyticsCard on AppHomeScreen
+- **Phase 3:** NavyCard, PricingCard, StatusBadge, GlassSheet components
+- **Phase 4:** UretPage improvements (dropdowns, sık kullanılanlar)
+- Build ✅ Tests 12/12 ✅ Production ready
+
+---
+
 ## Aktif Sprint: Sprint 1 - v6 Tasarim Gecisi
 
 **Hedef:** v6 tasarimini mevcut React + Vite projesine uygulamak  
