@@ -51,13 +51,13 @@ function DonemGrubu({
         style={{ backgroundColor: 'var(--color-surface)' }}
       >
         <div className="flex items-center gap-3">
-          <span className="text-sm font-bold" style={{ color: 'var(--color-text1)' }}>{donemNo}. Donem</span>
+          <span className="text-sm font-bold" style={{ color: 'var(--color-text1)' }}>{donemNo}. Dönem</span>
           {tamamlandi && (
             <span
               className="flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full"
               style={{ color: 'var(--color-success)', backgroundColor: 'color-mix(in srgb, var(--color-success) 12%, transparent)' }}
             >
-              <Check size={10} strokeWidth={3} /> Tamamlandi
+              <Check size={10} strokeWidth={3} /> Tamamlandı
             </span>
           )}
         </div>
@@ -367,26 +367,42 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
       )}
 
       {/* Haftalık Program grid */}
-      <div style={{ margin: '0 16px 12px', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: '16px', padding: '14px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-          <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-text1)' }}>Haftalık Program</p>
-          <button style={{ fontSize: '13px', fontWeight: 700, color: '#4F6AF5', background: 'none', border: 'none', cursor: 'pointer' }}>Düzenle</button>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: '4px' }}>
-          {['Pzt','Sal','Çar','Per','Cum'].map(g => (
-            <div key={g} style={{ textAlign: 'center', fontSize: '10px', fontWeight: 700, color: 'var(--color-text3)', paddingBottom: '4px' }}>{g}</div>
-          ))}
-          {Array.from({ length: 15 }, (_, i) => {
-            const col = i % 5
-            const dolu = col === 0 || col === 1 || col === 2 || col === 4
-            return (
-              <div key={i} style={{ minHeight: '32px', borderRadius: '6px', background: dolu ? 'color-mix(in srgb,#4F6AF5 10%,transparent)' : 'var(--color-bg)', border: dolu ? '1px solid color-mix(in srgb,#4F6AF5 25%,transparent)' : '1px solid transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', fontWeight: 700, color: dolu ? '#4F6AF5' : 'transparent', padding: '2px', lineHeight: '1.2', textAlign: 'center' }}>
-                {dolu ? ders.split(' ')[0].slice(0,4) : ''}
-              </div>
-            )
-          })}
-        </div>
-      </div>
+      {(() => {
+        const gunSirasi = ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma'] as const
+        const gunKisa = ['Pzt','Sal','Çar','Per','Cum']
+        const maxSaat = Math.max(1, ...program.saatler.map(s => s.saat))
+        const satirSayisi = Math.min(maxSaat, 8)
+        return (
+          <div style={{ margin: '0 16px 12px', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: '16px', padding: '14px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-text1)' }}>Haftalık Program</p>
+              <button onClick={() => navigate('/app/planla/ders-programi')} style={{ fontSize: '13px', fontWeight: 700, color: '#4F6AF5', background: 'none', border: 'none', cursor: 'pointer' }}>Düzenle</button>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: '4px' }}>
+              {gunKisa.map(g => (
+                <div key={g} style={{ textAlign: 'center', fontSize: '10px', fontWeight: 700, color: 'var(--color-text3)', paddingBottom: '4px' }}>{g}</div>
+              ))}
+              {Array.from({ length: satirSayisi * 5 }, (_, i) => {
+                const col = i % 5
+                const row = Math.floor(i / 5)
+                const saatNo = row + 1
+                const gun = gunSirasi[col]
+                const hucre = program.saatler.find(s => s.gun === gun && s.saat === saatNo)
+                const dolu = hucre?.sinif != null
+                const label = dolu ? (hucre!.ders?.split(' ')[0].slice(0, 4) ?? hucre!.sinif!.slice(0, 4)) : ''
+                return (
+                  <div key={i} style={{ minHeight: '32px', borderRadius: '6px', background: dolu ? 'color-mix(in srgb,#4F6AF5 10%,transparent)' : 'var(--color-bg)', border: dolu ? '1px solid color-mix(in srgb,#4F6AF5 25%,transparent)' : '1px solid transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', fontWeight: 700, color: dolu ? '#4F6AF5' : 'transparent', padding: '2px', lineHeight: '1.2', textAlign: 'center' }}>
+                    {label}
+                  </div>
+                )
+              })}
+            </div>
+            {!program.saatler.some(s => s.sinif !== null) && (
+              <p style={{ fontSize: '11px', color: 'var(--color-text3)', textAlign: 'center', marginTop: '8px' }}>Henüz ders programı eklenmemiş</p>
+            )}
+          </div>
+        )
+      })()}
 
       {/* Alt Sekmeler */}
       <PlanAltSekmeler aktif={aktifSekme} onChange={setAktifSekme} />
@@ -426,7 +442,7 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
 
         {isMeb && (
           <div>
-            <SectionHeader title="Donem Gruplari" meta="Ana takip alani" />
+            <SectionHeader title="Dönem Grupları" meta="Ana takip alanı" />
             <div className="flex flex-col gap-4">
               {[1, 2].map(donemNo => {
                 const donemHaftalar = plan!.haftalar.filter(h => h.donem === donemNo)
@@ -458,7 +474,7 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
 
         {isUploaded && (
           <div>
-            <SectionHeader title="Yuklenen Plan" meta={`${rows!.length} satir`} />
+            <SectionHeader title="Yüklenen Plan" meta={`${rows!.length} satır`} />
             <div className="flex flex-col gap-3">
               {rows!.map((r: ParsedRow, i: number) => {
                 const isTamamlandi = r.haftaNo ? tamamlananlar.includes(r.haftaNo) : false

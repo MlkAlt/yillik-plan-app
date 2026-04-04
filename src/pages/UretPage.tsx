@@ -2,6 +2,7 @@
 import { useLocation } from 'react-router-dom'
 import { ArrowLeft, BarChart2, BookOpen, FileText, Target } from 'lucide-react'
 import { StorageKeys } from '../lib/storageKeys'
+import { useToast } from '../lib/toast'
 
 const ARACLAR = [
   { id: 'sinav',    ikon: FileText,  ad: 'Yazılı Sınav',    alt: 'Kazanım bazlı, cevap anahtarlı',  renk: '#4F6AF5' },
@@ -25,6 +26,7 @@ export function UretPage() {
   const [soruTuru, setSoruTuru]     = useState('Karma')
   const [zorluk, setZorluk]         = useState('Orta')
   const [bakiye, setBakiye] = useState(0)
+  const { goster } = useToast()
   const selectedTool = useMemo(() => ARACLAR.find(a => a.id === selectedId) ?? null, [selectedId])
   const zorluklar = [{ id: 'Kolay', emoji: '🌱' }, { id: 'Orta', emoji: '⚡' }, { id: 'Zor', emoji: '🔥' }]
 
@@ -62,38 +64,52 @@ export function UretPage() {
               {SINIFLAR.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
-          <div>
-            <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text2)', marginBottom: '6px' }}>Soru Sayısı</p>
-            <div style={{ display: 'flex', alignItems: 'center', background: 'var(--color-surface)', border: '1.5px solid var(--color-border)', borderRadius: '12px', overflow: 'hidden', height: '44px' }}>
-              <button onClick={() => setSoruSayisi(s => Math.max(1, s - 1))} style={{ width: '44px', height: '100%', background: 'none', border: 'none', fontSize: '22px', color: '#4F6AF5', cursor: 'pointer' }}>-</button>
-              <div style={{ flex: 1, textAlign: 'center', fontFamily: "var(--font-display),'Bricolage Grotesque',sans-serif", fontSize: '20px', fontWeight: 700, color: 'var(--color-text1)', borderLeft: '1px solid var(--color-border)', borderRight: '1px solid var(--color-border)' }}>{soruSayisi}</div>
-              <button onClick={() => setSoruSayisi(s => Math.min(30, s + 1))} style={{ width: '44px', height: '100%', background: 'none', border: 'none', fontSize: '22px', color: '#4F6AF5', cursor: 'pointer' }}>+</button>
+          {selectedId === 'sinav' && (
+            <div>
+              <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text2)', marginBottom: '6px' }}>Soru Sayısı</p>
+              <div style={{ display: 'flex', alignItems: 'center', background: 'var(--color-surface)', border: '1.5px solid var(--color-border)', borderRadius: '12px', overflow: 'hidden', height: '44px' }}>
+                <button onClick={() => setSoruSayisi(s => Math.max(1, s - 1))} style={{ width: '44px', height: '100%', background: 'none', border: 'none', fontSize: '22px', color: '#4F6AF5', cursor: 'pointer' }}>-</button>
+                <div style={{ flex: 1, textAlign: 'center', fontFamily: "var(--font-display),'Bricolage Grotesque',sans-serif", fontSize: '20px', fontWeight: 700, color: 'var(--color-text1)', borderLeft: '1px solid var(--color-border)', borderRight: '1px solid var(--color-border)' }}>{soruSayisi}</div>
+                <button onClick={() => setSoruSayisi(s => Math.min(30, s + 1))} style={{ width: '44px', height: '100%', background: 'none', border: 'none', fontSize: '22px', color: '#4F6AF5', cursor: 'pointer' }}>+</button>
+              </div>
             </div>
-          </div>
-          <div>
-            <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text2)', marginBottom: '6px' }}>Soru Türü</p>
-            <select value={soruTuru} onChange={e => setSoruTuru(e.target.value)} style={{ width: '100%', height: '44px', padding: '0 14px', borderRadius: '12px', border: '1.5px solid var(--color-border)', background: 'var(--color-surface)', fontSize: '15px', color: 'var(--color-text1)', outline: 'none', appearance: 'none', fontFamily: 'inherit' }}>
-              <option>Karma</option>
-              <option>Sadece Çoktan Seçmeli</option>
-              <option>Sadece Açık Uçlu</option>
-            </select>
-          </div>
-          <div>
-            <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text2)', marginBottom: '6px' }}>Zorluk</p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-              {zorluklar.map(z => (
-                <button key={z.id} type="button" onClick={() => setZorluk(z.id)} style={{ padding: '12px 8px', borderRadius: '12px', border: zorluk === z.id ? '1.5px solid #4F6AF5' : '1.5px solid var(--color-border)', background: zorluk === z.id ? '#EEF1FE' : 'var(--color-surface)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                  <span style={{ fontSize: '20px' }}>{z.emoji}</span>
-                  <span style={{ fontSize: '12px', fontWeight: 700, color: zorluk === z.id ? '#4F6AF5' : 'var(--color-text2)' }}>{z.id}</span>
-                </button>
-              ))}
+          )}
+          {selectedId === 'sinav' && (
+            <div>
+              <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text2)', marginBottom: '6px' }}>Soru Türü</p>
+              <select value={soruTuru} onChange={e => setSoruTuru(e.target.value)} style={{ width: '100%', height: '44px', padding: '0 14px', borderRadius: '12px', border: '1.5px solid var(--color-border)', background: 'var(--color-surface)', fontSize: '15px', color: 'var(--color-text1)', outline: 'none', appearance: 'none', fontFamily: 'inherit' }}>
+                <option>Karma</option>
+                <option>Sadece Çoktan Seçmeli</option>
+                <option>Sadece Açık Uçlu</option>
+              </select>
             </div>
-          </div>
+          )}
+          {(selectedId === 'sinav' || selectedId === 'etkinlik' || selectedId === 'materyal') && (
+            <div>
+              <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text2)', marginBottom: '6px' }}>Zorluk</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                {zorluklar.map(z => (
+                  <button key={z.id} type="button" onClick={() => setZorluk(z.id)} style={{ padding: '12px 8px', borderRadius: '12px', border: zorluk === z.id ? '1.5px solid #4F6AF5' : '1.5px solid var(--color-border)', background: zorluk === z.id ? '#EEF1FE' : 'var(--color-surface)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                    <span style={{ fontSize: '20px' }}>{z.emoji}</span>
+                    <span style={{ fontSize: '12px', fontWeight: 700, color: zorluk === z.id ? '#4F6AF5' : 'var(--color-text2)' }}>{z.id}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '12px', padding: '12px 14px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
             <span style={{ fontSize: '14px', flexShrink: 0 }}>!</span>
             <p style={{ fontSize: '13px', color: '#92400E', fontWeight: 500 }}>Bu üretim 1 üretim hakkı kullanacak. Bakiyeniz: {bakiye} üretim hakkı.</p>
           </div>
-          <button style={{ width: '100%', height: '52px', borderRadius: '100px', background: '#4F6AF5', color: '#fff', border: 'none', fontSize: '16px', fontWeight: 700, cursor: 'pointer' }}>
+          <button
+            onClick={() => {
+              if (!kazanim.trim()) { goster('Konu / kazanım girin', 'uyari'); return }
+              if (!sinif) { goster('Sınıf seçin', 'uyari'); return }
+              if (bakiye <= 0) { goster('Üretim hakkınız kalmadı', 'hata'); return }
+              goster('AI üretimi yakında aktif olacak', 'bilgi')
+            }}
+            style={{ width: '100%', height: '52px', borderRadius: '100px', background: '#4F6AF5', color: '#fff', border: 'none', fontSize: '16px', fontWeight: 700, cursor: 'pointer' }}
+          >
             {selectedTool.ad} Üret — 1 Üretim Hakkı
           </button>
         </div>

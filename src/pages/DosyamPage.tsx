@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { getEvrakSablonlari, isPremiumKategori, tespitEksikAlanlar } from '../lib/evrakService'
 import { PremiumKilit } from '../components/Evrak/PremiumKilit'
 import { StorageKeys } from '../lib/storageKeys'
+import { useToast } from '../lib/toast'
 import type { OgretmenAyarlari } from '../types/ogretmenAyarlari'
 import type { EvrakKategori } from '../types/evrak'
 
@@ -53,7 +54,7 @@ function DurumBadge({ durum, metin }: { durum: string; metin?: string }) {
   return <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: 'var(--color-primary)' }} />
 }
 
-function BelgeItem({ belge, soluk = false }: { belge: Belge; soluk?: boolean }) {
+function BelgeItem({ belge, soluk = false, onIndir }: { belge: Belge; soluk?: boolean; onIndir?: () => void }) {
   const uyari = belge.durum === 'uyari'
   const aksiyonRengi = uyari ? 'var(--color-warning)' : belge.durum === 'hazir' ? 'var(--color-primary)' : 'var(--color-text2)'
 
@@ -90,6 +91,7 @@ function BelgeItem({ belge, soluk = false }: { belge: Belge; soluk?: boolean }) 
         <DurumBadge durum={belge.durum} metin={belge.durumMetin} />
         <button
           type="button"
+          onClick={onIndir}
           className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-full"
           style={{
             color: aksiyonRengi,
@@ -112,6 +114,7 @@ function BelgeItem({ belge, soluk = false }: { belge: Belge; soluk?: boolean }) 
 
 export function DosyamPage() {
   const navigate = useNavigate()
+  const { goster } = useToast()
   const sablonlar = getEvrakSablonlari()
   const isPremium = false // TODO: gerçek premium kontrolü
 
@@ -194,6 +197,7 @@ export function DosyamPage() {
           </div>
         </div>
         <button
+          onClick={() => goster('PDF indirme yakında aktif olacak', 'bilgi')}
           className="w-full flex items-center justify-center gap-2 py-3 text-sm font-bold text-white transition-all active:scale-[0.97] relative z-10"
           style={{
             borderRadius: 'var(--radius-pill)',
@@ -245,8 +249,12 @@ export function DosyamPage() {
                           alt: sablon.aciklama,
                           durum: eksik.length > 0 ? 'uyari' : 'hazir',
                           durumMetin: eksik.length > 0 ? 'Eksik' : 'Hazır',
-                          aksiyonMetni: 'İndir',
+                          aksiyonMetni: eksik.length > 0 ? 'Tamamla' : 'İndir',
                         }}
+                        onIndir={eksik.length > 0
+                          ? () => navigate('/app/profil')
+                          : () => goster(`${sablon.ad} indirme yakında aktif olacak`, 'bilgi')
+                        }
                       />
                     )
                   })}

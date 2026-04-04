@@ -12,7 +12,7 @@ import { Card } from '../components/UI/Card'
 import { SectionHeader } from '../components/UI/SectionHeader'
 
 function formatTarih(isoTarih: string): string {
-  const aylar = ['Ocak', 'Subat', 'Mart', 'Nisan', 'Mayis', 'Haziran', 'Temmuz', 'Agustos', 'Eylul', 'Ekim', 'Kasim', 'Aralik']
+  const aylar = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık']
   const d = new Date(isoTarih)
   return `${d.getDate()} ${aylar[d.getMonth()]} ${d.getFullYear()}`
 }
@@ -155,8 +155,8 @@ export function HaftaDetayPage({ entry, onTamamlaToggle }: HaftaDetayPageProps) 
     } catch { /* ignore */ }
   }
 
-  const altBaslik = ders ? `${ders}${sinif ? ` · ${sinif}` : ''}` : 'Haftalik plan ayrintisi'
-  const durumMetni = hafta?.tatilMi ? 'Tatil haftasi' : tamamlandi ? 'Tamamlandi' : 'Devam ediyor'
+  const altBaslik = ders ? `${ders}${sinif ? ` · ${sinif}` : ''}` : 'Haftalık plan ayrıntısı'
+  const durumMetni = hafta?.tatilMi ? 'Tatil haftası' : tamamlandi ? 'Tamamlandı' : 'Devam ediyor'
 
   return (
     <div className="page-shell">
@@ -177,7 +177,7 @@ export function HaftaDetayPage({ entry, onTamamlaToggle }: HaftaDetayPageProps) 
             <ChevronLeft size={18} strokeWidth={2.5} />
           </button>
           <div className="flex-1 min-w-0">
-            <p className="text-[11px] font-bold uppercase tracking-[.12em] mb-1" style={{ color: 'var(--color-text3)' }}>Hafta Detayi</p>
+            <p className="text-[11px] font-bold uppercase tracking-[.12em] mb-1" style={{ color: 'var(--color-text3)' }}>Hafta Detayı</p>
             <h1 className="text-[24px] font-bold tracking-tight mb-1" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text1)' }}>
               {no}. Hafta
             </h1>
@@ -204,17 +204,17 @@ export function HaftaDetayPage({ entry, onTamamlaToggle }: HaftaDetayPageProps) 
             <div className="w-12 h-12 flex items-center justify-center mx-auto mb-3" style={{ borderRadius: '999px', backgroundColor: 'color-mix(in srgb, var(--color-warning) 14%, transparent)', color: 'var(--color-warning)' }}>
               <Sparkles size={18} />
             </div>
-            <p className="text-sm font-bold mb-1" style={{ color: 'var(--color-warning)' }}>Tatil Haftasi</p>
+            <p className="text-sm font-bold mb-1" style={{ color: 'var(--color-warning)' }}>Tatil Haftası</p>
             <p className="text-[18px] font-bold tracking-tight" style={{ color: 'var(--color-text1)', fontFamily: 'var(--font-display)' }}>{hafta.tatilAdi}</p>
           </div>
         )}
 
         {hafta && !hafta.tatilMi && (
           <Card style={{ borderRadius: 'var(--radius-xl)' }}>
-            <SectionHeader title="Haftanin Icerigi" meta={`${hafta.donem}. donem`} />
+            <SectionHeader title="Haftanın İçeriği" meta={`${hafta.donem}. dönem`} />
             <div className="flex items-center justify-between gap-3 mb-4 pb-3" style={{ borderBottom: '1px solid var(--color-border)' }}>
               <span className="text-[11px] font-bold uppercase tracking-[.1em] px-2.5 py-1 rounded-full" style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', color: 'var(--color-primary)' }}>
-                {hafta.donem}. Donem
+                {hafta.donem}. Dönem
               </span>
               <span className="text-xs font-medium" style={{ color: 'var(--color-text3)' }}>
                 {formatTarih(hafta.baslangicTarihi)} - {formatTarih(hafta.bitisTarihi)}
@@ -241,7 +241,7 @@ export function HaftaDetayPage({ entry, onTamamlaToggle }: HaftaDetayPageProps) 
 
         {uploadedRow && (
           <Card style={{ borderRadius: 'var(--radius-xl)' }}>
-            <SectionHeader title="Yuklenen Satir" meta={uploadedRow.donem || 'Ekstra'} />
+            <SectionHeader title="Yüklenen Satır" meta={uploadedRow.donem || 'Ekstra'} />
             {uploadedRow.tarihAraligi && <p className="text-xs font-medium mb-3" style={{ color: 'var(--color-text3)' }}>{uploadedRow.tarihAraligi}</p>}
             <p className="text-[17px] font-bold leading-snug" style={{ color: 'var(--color-text1)' }}>{uploadedRow.kazanim}</p>
           </Card>
@@ -261,17 +261,17 @@ export function HaftaDetayPage({ entry, onTamamlaToggle }: HaftaDetayPageProps) 
             }}
           >
             <Check size={16} strokeWidth={3} />
-            {tamamlandi ? 'Tamamlandi - geri al' : 'Haftayi Tamamladim'}
+            {tamamlandi ? 'Tamamlandı — geri al' : 'Haftayı Tamamladım'}
           </button>
           {!tamamlandi && (
             <p className="text-center text-xs mt-2" style={{ color: 'var(--color-text3)' }}>
-              Once haftayi gozden gecir, sonra tamamlandi olarak isaretle.
+              Önce haftayı gözden geçir, sonra tamamlandı olarak işaretle.
             </p>
           )}
         </div>
 
         <Card style={{ borderRadius: 'var(--radius-xl)' }}>
-          <SectionHeader title="Ogretmen Notu" meta={kaydedildi ? 'Kaydedildi' : 'Otomatik kayit'} />
+          <SectionHeader title="Öğretmen Notu" meta={kaydedildi ? 'Kaydedildi' : 'Otomatik kayıt'} />
           <div className="flex items-start gap-2 mb-3">
             <div className="w-8 h-8 flex items-center justify-center" style={{ borderRadius: 'var(--radius-md)', backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', color: 'var(--color-primary)' }}>
               <NotebookPen size={15} />
@@ -303,7 +303,7 @@ export function HaftaDetayPage({ entry, onTamamlaToggle }: HaftaDetayPageProps) 
           const next = idx < sorted.length - 1 ? sorted[idx + 1] : null
           return (
             <div>
-              <SectionHeader title="Hafta Gecisi" meta="Ikincil gezinti" />
+              <SectionHeader title="Hafta Geçişi" meta="İkincil gezinti" />
               <div className="flex gap-3">
                 {prev !== null ? <GecisButonu hedefNo={prev} yon="onceki" onClick={() => navigate(`/app/hafta/${prev}`)} /> : <div className="flex-1" />}
                 {next !== null ? <GecisButonu hedefNo={next} yon="sonraki" onClick={() => navigate(`/app/hafta/${next}`)} /> : <div className="flex-1" />}

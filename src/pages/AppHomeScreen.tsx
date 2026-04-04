@@ -5,6 +5,7 @@ import type { PlanEntry } from '../types/planEntry'
 import { StorageKeys } from '../lib/storageKeys'
 import { BosdurumuEkrani } from '../components/BosdurumuEkrani/BosdurumuEkrani'
 import { getEvrakSablonlari, tespitEksikAlanlar } from '../lib/evrakService'
+import { useDersProgrami } from '../hooks/useDersProgrami'
 import type { OgretmenAyarlari } from '../types/ogretmenAyarlari'
 
 interface AppHomeScreenProps {
@@ -45,6 +46,9 @@ export function AppHomeScreen({
   const [eksikAyarlar, setEksikAyarlar] = useState(false)
   // Optimistik UI: tamamlananlar yerel kopyası
   const [localTamamlananlar, setLocalTamamlananlar] = useState<Record<string, number[]>>(tamamlananlar)
+
+  const { program: dersProgrami } = useDersProgrami()
+  const dersProgramiDolu = dersProgrami.saatler.some(s => s.sinif !== null)
 
   const freeBelgeler = getEvrakSablonlari().filter(s => !s.premium)
   const belgeSayisi = freeBelgeler.length
@@ -134,9 +138,6 @@ export function AppHomeScreen({
         }}
       >
         <div>
-          <p style={{ fontSize: '12px', color: '#9B9B97', fontWeight: 500, marginBottom: '2px' }}>
-            {selamMesaji()}
-          </p>
           <p
             style={{
               fontFamily: "var(--font-display), 'Bricolage Grotesque', sans-serif",
@@ -148,11 +149,14 @@ export function AppHomeScreen({
           >
             {ogretmenAd ? `${selamMesaji()}, ${ogretmenAd}` : selamMesaji()}
           </p>
+          <p style={{ fontSize: '12px', color: '#9B9B97', fontWeight: 500, marginTop: '2px' }}>
+            Bugün neler yapacaksın?
+          </p>
         </div>
 
         <div style={{ display: 'flex', gap: '8px' }}>
           <button
-            onClick={() => navigate('/app/ayarlar')}
+            onClick={() => navigate('/app/profil')}
             style={{
               width: '44px', height: '44px', borderRadius: '50%',
               background: 'rgba(255,255,255,0.75)', border: '1px solid rgba(0,0,0,0.07)',
@@ -417,24 +421,26 @@ export function AppHomeScreen({
           <p style={{ fontSize: '10px', color: 'var(--color-text3)', fontWeight: 600 }}>kalan hak</p>
         </div>
 
-        {/* Ders Programı Prompt */}
-        <div
-          onClick={() => navigate('/app/planla/ders-programi')}
-          style={{
-            gridColumn: '1 / -1',
-            background: '#EEF1FE', border: '1px solid #C7D2FD',
-            borderRadius: '16px', padding: '12px 16px',
-            display: 'flex', alignItems: 'center', gap: '12px',
-            cursor: 'pointer',
-          }}
-        >
-          <Calendar size={18} style={{ color: '#4F6AF5', flexShrink: 0 }} />
-          <div style={{ flex: 1 }}>
-            <p style={{ fontSize: '13px', fontWeight: 700, color: '#0C0C0B' }}>Ders programını ekle</p>
-            <p style={{ fontSize: '11px', color: '#52524F' }}>Yıllık plan otomatik hazırlanır</p>
+        {/* Ders Programı Prompt — sadece dolmamışsa göster */}
+        {!dersProgramiDolu && (
+          <div
+            onClick={() => navigate('/app/planla/ders-programi')}
+            style={{
+              gridColumn: '1 / -1',
+              background: '#EEF1FE', border: '1px solid #C7D2FD',
+              borderRadius: '16px', padding: '12px 16px',
+              display: 'flex', alignItems: 'center', gap: '12px',
+              cursor: 'pointer',
+            }}
+          >
+            <Calendar size={18} style={{ color: '#4F6AF5', flexShrink: 0 }} />
+            <div style={{ flex: 1 }}>
+              <p style={{ fontSize: '13px', fontWeight: 700, color: '#0C0C0B' }}>Ders programını ekle</p>
+              <p style={{ fontSize: '11px', color: '#52524F' }}>Yıllık plan otomatik hazırlanır</p>
+            </div>
+            <ChevronRight size={14} style={{ color: '#4F6AF5', flexShrink: 0 }} />
           </div>
-          <ChevronRight size={14} style={{ color: '#4F6AF5', flexShrink: 0 }} />
-        </div>
+        )}
       </div>
 
       <style>{`
