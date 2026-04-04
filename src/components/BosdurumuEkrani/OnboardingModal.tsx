@@ -1,5 +1,4 @@
 import { useState, useRef } from 'react'
-import { createPortal } from 'react-dom'
 import { Search } from 'lucide-react'
 import { BRANCHES, type Branch } from '../../lib/branchConfig'
 import { buildPlan } from '../../lib/planBuilder'
@@ -69,8 +68,8 @@ export function OnboardingModal({ onTamamla }: OnboardingModalProps) {
 
   // ── Tebrik ekranı ─────────────────────────────────────────────────────────
   if (tebrik) {
-    return createPortal(
-      <div style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'var(--color-bg)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 24px', textAlign: 'center' }}>
+    return (
+      <div style={{ position: 'absolute', inset: 0, zIndex: 60, background: 'var(--color-bg)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 24px', textAlign: 'center' }}>
         <div style={{ fontSize: '72px', marginBottom: '24px', animation: 'celebrate 0.8s cubic-bezier(0.34,1.56,0.64,1) both' }}>🎉</div>
         <h2 style={{ fontFamily: "var(--font-display),'Bricolage Grotesque',sans-serif", fontSize: '28px', fontWeight: 800, color: 'var(--color-text1)', letterSpacing: '-0.04em', marginBottom: '12px', animation: 'stagger-up 0.5s 0.2s ease-out both' }}>
           Hazırsınız!
@@ -89,22 +88,13 @@ export function OnboardingModal({ onTamamla }: OnboardingModalProps) {
           Ders programını daha sonra ekleyebilirsiniz.<br />
           Eklenince yıllık planınız otomatik hazırlanır.
         </p>
-        <style>{`
-          @keyframes celebrate {
-            0%   { transform: scale(0.3) rotate(-20deg); opacity: 0; }
-            60%  { transform: scale(1.2) rotate(5deg); }
-            80%  { transform: scale(0.95) rotate(-2deg); }
-            100% { transform: scale(1) rotate(0deg); opacity: 1; }
-          }
-        `}</style>
-      </div>,
-      document.body
+      </div>
     )
   }
 
   // ── Ana onboarding ekranı ─────────────────────────────────────────────────
-  return createPortal(
-    <div style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'var(--color-bg)', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+  return (
+    <div style={{ position: 'absolute', inset: 0, zIndex: 60, background: 'var(--color-bg)', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
 
       {/* Header — progress dots + Atla */}
       <div style={{ padding: '16px 20px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
@@ -248,7 +238,6 @@ export function OnboardingModal({ onTamamla }: OnboardingModalProps) {
       )}
 
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-    </div>,
-    document.body
+    </div>
   )
 }

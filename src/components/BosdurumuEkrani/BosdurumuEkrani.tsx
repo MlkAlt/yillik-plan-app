@@ -5,7 +5,6 @@ interface BosdurumuEkraniProps {
   onTamamla: (entries: PlanEntry[]) => void
 }
 
-// v8: Onboarding doğrudan tam ekran açılır, splash card yok
 export function BosdurumuEkrani({ onTamamla }: BosdurumuEkraniProps) {
   return (
     <OnboardingModal
