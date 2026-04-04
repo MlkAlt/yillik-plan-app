@@ -28,22 +28,6 @@ interface Belge {
   aksiyonMetni: string
 }
 
-const otomatikBelgeler: Belge[] = [
-  { id: 'yillik-plan', ikon: <CalendarDays size={18} />, renk: 'blue', ad: 'Yillik Plan - 2025/26', alt: '3 ders - Tum subeler - PDF hazir', durum: 'hazir', durumMetin: 'Hazir', aksiyonMetni: 'Indir' },
-  { id: 'zha', ikon: <ClipboardList size={18} />, renk: 'violet', ad: 'ZHA Tutanaklari', alt: '3 toplanti - Ekim, Kasim, Ocak', durum: 'hazir', durumMetin: '3 belge', aksiyonMetni: 'Gor' },
-  { id: 'veli', ikon: <Users size={18} />, renk: 'green', ad: 'Veli Gorusme Kayitlari', alt: '5 gorusme - Tarih sirali', durum: 'yeni', aksiyonMetni: 'Duzenle' },
-  { id: 'gunluk-plan', ikon: <BookOpen size={18} />, renk: 'amber', ad: 'Gunluk Plan Ornekleri', alt: 'Son 5 hafta - 12 ders plani', durum: 'hazir', durumMetin: 'Hazir', aksiyonMetni: 'Ac' },
-]
-
-const eksikBelgeler: Belge[] = [
-  { id: 'nobet', ikon: <Moon size={18} />, renk: 'amber', ad: 'Nobet Dokumu', alt: 'Henuz girilmedi - Takibi baslat', durum: 'uyari', durumMetin: 'Ekle', aksiyonMetni: 'Tamamla' },
-]
-
-const manuelBelgeler: Belge[] = [
-  { id: 'gozlem', ikon: <Eye size={18} />, renk: 'muted', ad: 'Ders Gozlem Formu', alt: 'Mudurluk veya denetmen ziyareti icin', durum: 'ekle', durumMetin: 'Ekle +', aksiyonMetni: 'Ekle' },
-]
-
-function DurumBadge({ durum, metin }: { durum: Belge['durum']; metin?: string }) {
   if (durum === 'hazir') {
     return (
       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1" style={{ color: 'var(--color-success)', backgroundColor: 'color-mix(in srgb, var(--color-success) 12%, transparent)' }}>
@@ -124,19 +108,6 @@ function BelgeItem({ belge, soluk = false }: { belge: Belge; soluk?: boolean }) 
   )
 }
 
-function BelgeGrubu({ baslik, sayi, sayiRenk, belgeler, soluk = false }: { baslik: string; sayi?: string; sayiRenk?: string; belgeler: Belge[]; soluk?: boolean }) {
-  return (
-    <div>
-      <SectionHeader title={baslik} meta={sayi} />
-      <div className="flex flex-col gap-2">
-        {belgeler.map(b => (
-          <BelgeItem key={b.id} belge={b} soluk={soluk} />
-        ))}
-      </div>
-      {sayi && sayiRenk && <div className="hidden" style={{ color: sayiRenk }} />}
-    </div>
-  )
-}
 
 export function DosyamPage() {
   const navigate = useNavigate()
