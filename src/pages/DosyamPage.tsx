@@ -148,37 +148,34 @@ export function DosyamPage() {
         className="page-hero relative overflow-hidden"
         style={{
           borderRadius: 'var(--radius-xl)',
-          border: '1px solid var(--color-border)',
-          backgroundColor: 'var(--color-surface)',
-          boxShadow: 'var(--shadow-sm)',
+          border: '1px solid rgba(255,255,255,.08)',
+          background: 'linear-gradient(145deg,#1B2E5E,#243A78)',
+          boxShadow: '0 8px 24px rgba(0,0,0,.12)',
           padding: '18px',
         }}
       >
         <div
-          className="absolute top-0 left-0 right-0 h-[3px]"
-          style={{
-            background: 'linear-gradient(90deg, var(--color-accent), var(--color-primary))',
-            borderRadius: 'var(--radius-xl) var(--radius-xl) 0 0',
-          }}
+          className="absolute pointer-events-none"
+          style={{ top: '-30px', right: '-30px', width: '100px', height: '100px', background: 'radial-gradient(circle,rgba(79,106,245,.22),transparent 70%)', borderRadius: '50%' }}
         />
-        <div className="flex justify-between items-start gap-4 mb-4 mt-1">
+        <div className="flex justify-between items-start gap-4 mb-4 mt-1 relative z-10">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[.1em] mb-1" style={{ color: 'var(--color-text3)' }}>
-              Birincil Gorev
+            <p className="text-[10px] font-bold uppercase tracking-[.1em] mb-1" style={{ color: 'rgba(255,255,255,.55)' }}>
+              Toplam Belge
             </p>
-            <p className="text-[28px] font-bold leading-none" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text1)', letterSpacing: '-.03em' }}>
+            <p className="text-[28px] font-bold leading-none" style={{ fontFamily: 'var(--font-display)', color: '#ffffff', letterSpacing: '-.03em' }}>
               14
             </p>
-            <p className="text-[12px] mt-1" style={{ color: 'var(--color-text2)' }}>
-              Toplam belge - Son guncelleme bugun
+            <p className="text-[12px] mt-1" style={{ color: 'rgba(255,255,255,.55)' }}>
+              belge hazır
             </p>
           </div>
           <div className="flex flex-col gap-1 items-end">
             {[
-              { metin: 'Yillik plan hazir', renk: 'var(--color-success)' },
-              { metin: '3 ZHA tutanagi', renk: 'var(--color-success)' },
-              { metin: '5 veli gorusmesi', renk: 'var(--color-success)' },
-              { metin: 'Nobet eksik', renk: 'var(--color-warning)' },
+              { metin: '✓ Yıllık Plan hazır', renk: '#34d399' },
+              { metin: '✓ 3 ZHA tutanağı', renk: '#34d399' },
+              { metin: '✓ 5 Veli görüşmesi', renk: '#34d399' },
+              { metin: '⚠ Nöbet eksik', renk: '#FCD34D' },
             ].map(item => (
               <span key={item.metin} className="text-[11px] font-semibold" style={{ color: item.renk }}>
                 {item.metin}
@@ -187,15 +184,14 @@ export function DosyamPage() {
           </div>
         </div>
         <button
-          className="w-full flex items-center justify-center gap-2 py-3 text-sm font-bold text-white transition-all active:scale-[0.97]"
+          className="w-full flex items-center justify-center gap-2 py-3 text-sm font-bold text-white transition-all active:scale-[0.97] relative z-10"
           style={{
             borderRadius: 'var(--radius-pill)',
-            backgroundColor: 'var(--color-accent)',
-            boxShadow: 'var(--shadow-sm)',
-            border: 'none',
+            backgroundColor: 'rgba(255,255,255,.15)',
+            border: '1px solid rgba(255,255,255,.2)',
           }}
         >
-          <Download size={16} /> Tum Dosyayi Indir - PDF
+          <Download size={16} /> Tüm Dosyayı İndir · PDF
         </button>
       </div>
 

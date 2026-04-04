@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ÖğretmenAI — v8</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+/* ════════════════════════════════════════
+   TOKENS — 8-point grid
+════════════════════════════════════════ */
+:root {
+  --navy:    #1B2E5E;
+  --navy-m:  #243A78;
+  --blue:    #4F6AF5;
+  --blue-s:  #EEF1FE;
+  --blue-b:  #C7D2FD;
+  --ok:      #059669; --ok-s:   #ECFDF5; --ok-b:   #A7F3D0;
+  --warn:    #D97706; --warn-s: #FFFBEB; --warn-b: #FDE68A;
+  --danger:  #DC2626; --danger-s:#FEF2F2;
+  --violet:  #6D28D9; --violet-s:#F5F3FF;
+
+  --f-display: 'Bricolage Grotesque', sans-serif;
+  --f-body:    'DM Sans', sans-serif;
+
+  --touch: 44px;
+  --r-xs:4px; --r-sm:10px; --r-md:14px; --r-lg:18px; --r-xl:24px; --r-2xl:32px; --r-pill:100px;
+
+  --sp1:4px; --sp2:8px; --sp3:12px; --sp4:16px; --sp5:20px;
+  --sp6:24px; --sp8:32px; --sp10:40px; --sp12:48px;
+
+  /* Spring easing */
+  --spring:    cubic-bezier(.34,1.56,.64,1);
+  --spring-sm: cubic-bezier(.22,1,.36,1);
+  --ease-out:  cubic-bezier(.16,1,.3,1);
+}
+
+[data-theme="light"] {
+  --bg:      #F4F3F0;
+  --bg2:     #ECEAE6;
+  --surface: #FFFFFF;
+  --surf2:   #F9F8F6;
+  --glass:   rgba(255,255,255,.75);
+  --g-brd:   rgba(255,255,255,.6);
+  --border:  rgba(0,0,0,.07);
+  --brd2:    rgba(0,0,0,.11);
+  --t1: #0C0C0B; --t2: #52524F; --t3: #9B9B97;
+  --el1: 0 1px 2px rgba(0,0,0,.04),0 2px 6px rgba(0,0,0,.03);
+  --el2: 0 2px 8px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04);
+  --el3: 0 8px 24px rgba(0,0,0,.08),0 16px 48px rgba(0,0,0,.05);
+  --elg: 0 8px 32px rgba(0,0,0,.10),inset 0 1px 0 rgba(255,255,255,.6);
+  --grain-opacity: .025;
+}
+[data-theme="dark"] {
+  --bg:      #0E0F12;
+  --bg2:     #161820;
+  --surface: #1C1E26;
+  --surf2:   #22242E;
+  --glass:   rgba(28,30,38,.82);
+  --g-brd:   rgba(255,255,255,.09);
+  --border:  rgba(255,255,255,.07);
+  --brd2:    rgba(255,255,255,.12);
+  --t1: #F0F0ED; --t2: #8A8A86; --t3: #4A4A48;
+  --el1: 0 1px 2px rgba(0,0,0,.3),0 2px 6px rgba(0,0,0,.2);
+  --el2: 0 2px 8px rgba(0,0,0,.35),0 4px 16px rgba(0,0,0,.25);
+  --el3: 0 8px 24px rgba(0,0,0,.45),0 16px 48px rgba(0,0,0,.3);
+  --elg: 0 8px 32px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.06);
+  --blue-s:  rgba(79,106,245,.12); --blue-b: rgba(79,106,245,.25);
+  --ok-s:    rgba(5,150,105,.12);  --ok-b:   rgba(5,150,105,.25);
+  --warn-s:  rgba(217,119,6,.12);  --warn-b: rgba(217,119,6,.25);
+  --violet-s:rgba(109,40,217,.12);
+  --grain-opacity: .04;
+}
+
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+body {
+  font-family: var(--f-body);
+  background: #09090B;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--sp8) var(--sp4) var(--sp12);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ════════════════════════════════════════
+   GRAIN TEXTURE OVERLAY
+════════════════════════════════════════ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  opacity: .03;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ════════════════════════════════════════
+   STUDIO CHROME
+════════════════════════════════════════ */
+.hd { text-align:center; margin-bottom:var(--sp6); animation: hd-in .8s var(--ease-out) both; }
+@keyframes hd-in { from { opacity:0; transform:translateY(-12px); } to { opacity:1; transform:none; } }
+.hd-eye { font-size:10px; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:rgba(79,106,245,.65); margin-bottom:var(--sp2); }
+.hd-name { font-family:var(--f-display); font-size:28px; font-weight:800; color:#F4F3F0; letter-spacing:-.04em; line-height:32px; }
+.hd-sub { font-size:11px; color:rgba(244,243,240,.25); margin-top:var(--sp1); }
+
+.ctrl { display:flex; align-items:center; gap:var(--sp4); margin-bottom:var(--sp4); flex-wrap:wrap; justify-content:center; }
+.tog-r { display:flex; align-items:center; gap:var(--sp2); }
+.tog-l { font-size:11px; font-weight:600; color:rgba(244,243,240,.3); }
+.tog { width:40px; height:22px; background:rgba(244,243,240,.08); border-radius:var(--r-pill); cursor:pointer; position:relative; transition:background .25s var(--ease-out); border:1.5px solid rgba(244,243,240,.1); }
+.tog.on { background:var(--blue); border-color:var(--blue); }
+.tog-t { width:16px; height:16px; background:white; border-radius:50%; position:absolute; top:2px; left:2px; transition:left .25s var(--spring); box-shadow:0 1px 4px rgba(0,0,0,.25); }
+.tog.on .tog-t { left:20px; }
+
+.snav { display:flex; gap:var(--sp1); flex-wrap:wrap; justify-content:center; margin-bottom:var(--sp5); max-width:700px; animation: hd-in .8s .1s var(--ease-out) both; }
+.np { font-size:10px; font-weight:700; padding:5px 11px; border-radius:var(--r-pill); border:1.5px solid rgba(244,243,240,.09); color:rgba(244,243,240,.28); background:transparent; cursor:pointer; transition:all .2s var(--ease-out); min-height:32px; display:flex; align-items:center; }
+.np:hover { border-color:var(--blue); color:var(--blue); }
+.np.active { background:var(--blue); border-color:var(--blue); color:white; }
+
+/* ════════════════════════════════════════
+   HEROICONS SVG SYSTEM
+   All icons are inline SVG — consistent rendering
+════════════════════════════════════════ */
+.ico { display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
+.ico svg { display:block; }
+
+/* ════════════════════════════════════════
+   PHONE SHELL
+════════════════════════════════════════ */
+.pw { width:375px; filter:drop-shadow(0 40px 80px rgba(0,0,0,.65)); animation: phone-in 1s .2s var(--spring) both; }
+@keyframes phone-in { from { opacity:0; transform:translateY(24px) scale(.96); } to { opacity:1; transform:none; } }
+.ps { width:375px; background:#080808; border-radius:54px; padding:13px; box-shadow:inset 0 0 0 1px rgba(255,255,255,.07); position:relative; }
+.ps::before { content:''; position:absolute; top:13px; left:50%; transform:translateX(-50%); width:120px; height:34px; background:#080808; border-radius:0 0 20px 20px; z-index:20; }
+.psc {
+  width:100%; background:var(--bg); border-radius:42px; overflow:hidden; min-height:800px; position:relative; transition:background .3s;
+}
+/* Grain on phone screen */
+.psc::after {
+  content:''; position:absolute; inset:0; pointer-events:none; z-index:100; border-radius:42px;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: var(--grain-opacity);
+}
+
+/* Status bar */
+.sb { height:48px; padding:14px var(--sp6) 0; display:flex; justify-content:space-between; align-items:center; background:transparent; position:relative; z-index:5; }
+.sb-time { font-family:var(--f-display); font-size:15px; font-weight:700; color:var(--t1); letter-spacing:-.02em; }
+.sb-icons { display:flex; gap:var(--sp1); align-items:center; color:var(--t2); }
+
+/* Screen system */
+.scr { display:none; flex-direction:column; min-height:800px; background:var(--bg); transition:background .3s; }
+.scr.active { display:flex; }
+
+/* Screen entry animations */
+.scr.active .scr-content > * { animation: stagger-in .4s var(--ease-out) both; }
+.scr.active .scr-content > *:nth-child(1) { animation-delay:.03s; }
+.scr.active .scr-content > *:nth-child(2) { animation-delay:.07s; }
+.scr.active .scr-content > *:nth-child(3) { animation-delay:.11s; }
+.scr.active .scr-content > *:nth-child(4) { animation-delay:.15s; }
+.scr.active .scr-content > *:nth-child(5) { animation-delay:.19s; }
+.scr.active .scr-content > *:nth-child(6) { animation-delay:.23s; }
+@keyframes stagger-in {
+  from { opacity:0; transform:translateY(10px); }
+  to   { opacity:1; transform:none; }
+}
+
+.sa { flex:1; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+.sa::-webkit-scrollbar { display:none; }
+.scr-content { padding-bottom:var(--sp4); }
+
+/* ════════════════════════════════════════
+   BOTTOM NAV — Glassmorphism
+════════════════════════════════════════ */
+.bn {
+  height:80px;
+  background: var(--glass);
+  border-top:1px solid var(--g-brd);
+  backdrop-filter:blur(24px) saturate(180%);
+  -webkit-backdrop-filter:blur(24px) saturate(180%);
+  display:flex; align-items:center;
+  padding:0 var(--sp2) var(--sp3);
+  flex-shrink:0;
+  box-shadow:0 -1px 0 var(--border);
+}
+.bni {
+  flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+  min-height:var(--touch); padding:var(--sp2) var(--sp1);
+  cursor:pointer; border-radius:var(--r-sm);
+  transition:transform .2s var(--spring-sm);
+  position:relative;
+}
+.bni:active { transform:scale(.88); }
+.bni-ico { transition:transform .25s var(--spring); color:var(--t3); }
+.bni.active .bni-ico { color:var(--blue); transform:scale(1.1) translateY(-1px); }
+.bni-lbl { font-size:10px; font-weight:700; color:var(--t3); letter-spacing:.01em; line-height:12px; transition:color .2s; }
+.bni.active .bni-lbl { color:var(--blue); }
+/* Active pill */
+.bni.active::before {
+  content:''; position:absolute; top:6px;
+  width:32px; height:3px;
+  background:var(--blue); border-radius:var(--r-pill);
+  animation:pill-in .3s var(--spring) both;
+}
+@keyframes pill-in { from { width:0; opacity:0; } to { width:32px; opacity:1; } }
+
+/* ════════════════════════════════════════
+   OVERLAY + GLASS SHEET
+════════════════════════════════════════ */
+.ov { position:absolute; inset:0; background:rgba(0,0,0,.45); z-index:50; display:none; border-radius:42px; backdrop-filter:blur(6px); transition:opacity .25s; }
+.ov.vis { display:block; animation:ov-in .25s ease both; }
+@keyframes ov-in { from { opacity:0; } to { opacity:1; } }
+
+.sheet {
+  position:absolute; bottom:0; left:0; right:0;
+  background:var(--glass);
+  backdrop-filter:blur(36px) saturate(200%);
+  -webkit-backdrop-filter:blur(36px) saturate(200%);
+  border:1px solid var(--g-brd);
+  border-radius:28px 28px 0 0;
+  padding:var(--sp5) var(--sp5) var(--sp10);
+  z-index:51;
+  box-shadow:var(--elg);
+  transform:translateY(100%);
+  transition:transform .36s var(--ease-out);
+}
+.sheet.open { transform:translateY(0); }
+.sh-handle { width:36px; height:4px; background:var(--brd2); border-radius:var(--r-pill); margin:0 auto var(--sp5); }
+.sh-title { font-family:var(--f-display); font-size:20px; font-weight:700; color:var(--t1); letter-spacing:-.03em; margin-bottom:var(--sp1); }
+.sh-sub { font-size:13px; color:var(--t2); margin-bottom:var(--sp4); }
+.sh-grid { display:grid; grid-template-columns:1fr 1fr; gap:var(--sp2); }
+.shi {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r-md); padding:var(--sp4);
+  cursor:pointer; transition:all .2s var(--spring-sm);
+  display:flex; flex-direction:column; gap:var(--sp2);
+  box-shadow:var(--el1);
+}
+.shi:hover { transform:translateY(-2px); box-shadow:var(--el2); }
+.shi:active { transform:scale(.95); box-shadow:none; }
+.shi.hi { background:var(--blue-s); border-color:var(--blue-b); }
+.shi-badge { font-size:9px; font-weight:800; background:var(--blue); color:white; padding:2px var(--sp2); border-radius:var(--r-pill); align-self:flex-start; letter-spacing:.05em; text-transform:uppercase; }
+.shi-nm { font-size:13px; font-weight:700; color:var(--t1); }
+.shi-cr { font-size:11px; font-weight:600; color:var(--warn); }
+
+/* ════════════════════════════════════════
+   ATOMS
+════════════════════════════════════════ */
+.card { background:var(--surface); border-radius:var(--r-lg); border:1px solid var(--border); box-shadow:var(--el1); transition:background .3s,border-color .3s; }
+.card-navy {
+  background:linear-gradient(145deg,var(--navy),var(--navy-m));
+  border-radius:var(--r-xl); border:1px solid rgba(255,255,255,.08);
+  box-shadow:var(--el3); position:relative; overflow:hidden;
+}
+.card-navy::before { content:''; position:absolute; top:-40px; right:-40px; width:140px; height:140px; background:radial-gradient(circle,rgba(79,106,245,.22),transparent 70%); border-radius:50%; }
+.card-navy::after  { content:''; position:absolute; bottom:-20px; left:-20px; width:100px; height:100px; background:radial-gradient(circle,rgba(255,255,255,.05),transparent 70%); border-radius:50%; }
+
+.tag { display:inline-flex; align-items:center; gap:var(--sp1); font-size:11px; font-weight:700; padding:3px var(--sp2); border-radius:var(--r-pill); white-space:nowrap; border:1px solid transparent; }
+.t-ok   { background:var(--ok-s);     color:var(--ok);    border-color:var(--ok-b); }
+.t-warn { background:var(--warn-s);   color:var(--warn);  border-color:var(--warn-b); }
+.t-info { background:var(--blue-s);   color:var(--navy);  border-color:var(--blue-b); }
+.t-mute { background:var(--bg2);      color:var(--t3); }
+[data-theme="dark"] .t-ok   { color:#34d399; }
+[data-theme="dark"] .t-info { color:#818cf8; }
+
+.sec-lbl { font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--t3); }
+
+/* Buttons — with press animation */
+.btn {
+  font-family:var(--f-body); font-size:15px; font-weight:600;
+  padding:0 var(--sp6); height:var(--touch);
+  border-radius:var(--r-pill); border:none; cursor:pointer; width:100%;
+  display:flex; align-items:center; justify-content:center; gap:var(--sp2);
+  transition:transform .15s var(--spring), box-shadow .15s, opacity .15s;
+  letter-spacing:-.01em;
+  position:relative; overflow:hidden;
+}
+.btn::after { content:''; position:absolute; inset:0; background:rgba(255,255,255,0); transition:background .15s; border-radius:inherit; }
+.btn:active { transform:scale(.96); }
+.btn:active::after { background:rgba(255,255,255,.1); }
+.btn-p { background:var(--blue); color:white; box-shadow:0 4px 16px rgba(79,106,245,.32),0 1px 0 rgba(255,255,255,.15) inset; }
+.btn-p:hover { box-shadow:0 6px 20px rgba(79,106,245,.42); }
+.btn-p:active { box-shadow:0 2px 8px rgba(79,106,245,.2); }
+.btn-o { background:transparent; color:var(--blue); border:1.5px solid var(--blue-b); }
+.btn-g { background:transparent; color:var(--t2); font-size:14px; }
+.btn-violet { background:var(--violet); color:white; box-shadow:0 4px 16px rgba(109,40,217,.28); }
+.btn-sm { height:36px; font-size:13px; padding:0 var(--sp4); width:auto; }
+
+/* Inputs */
+.ig { margin-bottom:var(--sp4); }
+.il { font-size:11px; font-weight:700; color:var(--t2); margin-bottom:var(--sp1); letter-spacing:.05em; text-transform:uppercase; }
+.inp {
+  background:var(--surface); border:1.5px solid var(--brd2);
+  border-radius:var(--r-md); padding:0 var(--sp4); height:var(--touch);
+  font-family:var(--f-body); font-size:15px; font-weight:500;
+  color:var(--t1); width:100%; outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+.inp:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(79,106,245,.12); }
+.sel {
+  background:var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5l5 5 5-5' stroke='%239B9B97' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 14px center;
+  border:1.5px solid var(--brd2); border-radius:var(--r-md);
+  padding:0 36px 0 var(--sp4); height:var(--touch);
+  font-family:var(--f-body); font-size:15px; font-weight:500;
+  color:var(--t1); width:100%; outline:none; appearance:none; cursor:pointer;
+  transition:border-color .2s;
+}
+
+/* Stepper */
+.stpr { display:flex; align-items:center; background:var(--surface); border:1.5px solid var(--brd2); border-radius:var(--r-md); overflow:hidden; height:var(--touch); }
+.stpr-b {
+  width:var(--touch); height:100%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px; color:var(--blue); cursor:pointer; background:transparent; border:none;
+  transition:background .15s, transform .15s var(--spring);
+}
+.stpr-b:active { background:var(--bg2); transform:scale(.9); }
+.stpr-v {
+  flex:1; text-align:center; font-family:var(--f-display); font-size:20px;
+  font-weight:700; color:var(--t1); letter-spacing:-.03em;
+  border-left:1px solid var(--border); border-right:1px solid var(--border);
+  transition:transform .2s var(--spring);
+}
+.stpr-v.bump { animation:val-bump .25s var(--spring); }
+@keyframes val-bump { 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
+
+/* Progress */
+.pg { height:4px; background:var(--brd2); border-radius:var(--r-pill); overflow:hidden; }
+.pg-b { height:100%; background:linear-gradient(90deg,var(--blue),#818cf8); border-radius:var(--r-pill); transition:width .6s var(--ease-out); }
+
+/* Diff selector */
+.diff-r { display:flex; gap:var(--sp2); }
+.diff-b {
+  flex:1; background:var(--surface); border:1.5px solid var(--brd2);
+  border-radius:var(--r-md); padding:var(--sp3) var(--sp2);
+  text-align:center; cursor:pointer; min-height:var(--touch);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:var(--sp1);
+  transition:all .2s var(--spring-sm); box-shadow:var(--el1);
+}
+.diff-b:hover { transform:translateY(-2px); box-shadow:var(--el2); }
+.diff-b:active { transform:scale(.94); box-shadow:none; }
+.diff-b.sel { border-color:var(--blue); background:var(--blue-s); transform:translateY(-2px); box-shadow:var(--el2); }
+.db-ic { font-size:18px; }
+.db-lb { font-size:11px; font-weight:700; color:var(--t1); }
+.diff-b.sel .db-lb { color:var(--blue); }
+
+/* ════════════════════════════════════════
+   ONBOARDING — Energetic animations
+════════════════════════════════════════ */
+#s-ob .sa { padding:var(--sp6) var(--sp5) var(--sp8); }
+.ob-hdr { display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp8); }
+.ob-dots { display:flex; gap:var(--sp2); }
+.ob-d { height:3px; border-radius:var(--r-pill); background:var(--brd2); transition:width .4s var(--spring), background .3s; width:20px; }
+.ob-d.done { background:var(--blue); }
+.ob-d.active { background:var(--blue); width:40px; opacity:.5; }
+.ob-skip { font-size:14px; font-weight:600; color:var(--t3); cursor:pointer; transition:color .2s; }
+.ob-skip:hover { color:var(--t2); }
+
+.ob-q { font-family:var(--f-display); font-size:26px; font-weight:800; color:var(--t1); line-height:32px; margin-bottom:var(--sp1); letter-spacing:-.04em; }
+.ob-hint { font-size:14px; color:var(--t2); line-height:20px; margin-bottom:var(--sp5); }
+
+/* Search — morphing border */
+.srch { position:relative; margin-bottom:var(--sp3); }
+.srch-ic { position:absolute; left:var(--sp4); top:50%; transform:translateY(-50%); color:var(--t3); pointer-events:none; }
+.srch-inp {
+  background:var(--surface); border:1.5px solid var(--brd2);
+  border-radius:var(--r-pill); padding:0 var(--sp4) 0 var(--sp10); height:var(--touch);
+  font-family:var(--f-body); font-size:15px; font-weight:500;
+  color:var(--t1); width:100%; outline:none; box-shadow:var(--el1);
+  transition:border-color .2s, box-shadow .2s;
+}
+.srch-inp:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(79,106,245,.12),var(--el2); }
+
+/* Chips — spring bounce on select */
+.chips { display:flex; flex-wrap:wrap; gap:var(--sp2); margin-bottom:var(--sp5); }
+.chip {
+  background:var(--surface); border:1.5px solid var(--brd2);
+  border-radius:var(--r-pill); padding:0 var(--sp4); height:var(--touch);
+  display:flex; align-items:center; gap:var(--sp2);
+  font-size:14px; font-weight:600; color:var(--t2);
+  cursor:pointer; transition:all .2s var(--spring-sm); box-shadow:var(--el1);
+}
+.chip:hover { transform:translateY(-2px); box-shadow:var(--el2); }
+.chip:active { transform:scale(.94); }
+.chip.sel { border-color:var(--blue); background:var(--blue-s); color:var(--navy); transform:translateY(-2px); box-shadow:0 4px 12px rgba(79,106,245,.2); }
+
+/* Ders cards */
+.ders-list { display:flex; flex-direction:column; gap:var(--sp2); margin-bottom:var(--sp5); }
+.ders-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); padding:var(--sp4); box-shadow:var(--el1); transition:box-shadow .2s; }
+.ders-nm { font-size:14px; font-weight:700; color:var(--t1); margin-bottom:var(--sp3); letter-spacing:-.01em; }
+.sinif-row { display:flex; flex-wrap:wrap; gap:var(--sp2); }
+.sc {
+  background:var(--bg2); border:1.5px solid var(--brd2);
+  border-radius:var(--r-pill); padding:0 var(--sp3); height:36px;
+  display:flex; align-items:center;
+  font-size:13px; font-weight:700; color:var(--t2);
+  cursor:pointer; transition:all .2s var(--spring-sm);
+}
+.sc:active { transform:scale(.92); }
+.sc.sel { background:var(--blue); border-color:var(--blue); color:white; transform:scale(1.05); box-shadow:0 3px 10px rgba(79,106,245,.3); }
+
+/* Onboarding transition — ENERGETIC */
+.ob-tr {
+  display:flex; flex-direction:column; align-items:center;
+  justify-content:center; padding:var(--sp10) var(--sp6);
+  text-align:center; min-height:500px;
+}
+.ob-tr-icon {
+  font-size:64px; margin-bottom:var(--sp6);
+  animation: celebrate .8s var(--spring) both;
+}
+@keyframes celebrate {
+  0%   { transform:scale(.3) rotate(-20deg); opacity:0; }
+  60%  { transform:scale(1.2) rotate(5deg); }
+  80%  { transform:scale(.95) rotate(-2deg); }
+  100% { transform:scale(1) rotate(0deg); opacity:1; }
+}
+.ob-tr-rings {
+  position:absolute; width:120px; height:120px;
+  border-radius:50%;
+  animation:rings 1s var(--ease-out) both;
+  pointer-events:none;
+}
+@keyframes rings {
+  0%   { box-shadow:0 0 0 0 rgba(79,106,245,.4),0 0 0 0 rgba(79,106,245,.2); opacity:1; }
+  100% { box-shadow:0 0 0 30px rgba(79,106,245,0),0 0 0 60px rgba(79,106,245,0); opacity:0; }
+}
+.ob-tr-title { font-family:var(--f-display); font-size:28px; font-weight:800; color:var(--t1); letter-spacing:-.04em; line-height:36px; margin-bottom:var(--sp3); animation:stagger-in .5s .2s var(--ease-out) both; }
+.ob-tr-detail { font-size:14px; color:var(--t2); line-height:24px; margin-bottom:var(--sp8); animation:stagger-in .5s .3s var(--ease-out) both; }
+.ob-tr-cta { animation:stagger-in .5s .4s var(--ease-out) both; width:100%; max-width:280px; }
+.ob-tr-note { font-size:12px; color:var(--t3); line-height:20px; margin-top:var(--sp4); animation:stagger-in .5s .5s var(--ease-out) both; }
+
+/* ════════════════════════════════════════
+   ANA EKRAN — Bento Grid
+════════════════════════════════════════ */
+#s-ana .sa { }
+.topbar { padding:var(--sp3) var(--sp5) var(--sp3); display:flex; justify-content:space-between; align-items:center; }
+.tb-g { font-size:12px; color:var(--t3); font-weight:500; margin-bottom:2px; }
+.tb-n { font-family:var(--f-display); font-size:22px; font-weight:800; color:var(--t1); letter-spacing:-.04em; }
+.tb-acts { display:flex; gap:var(--sp2); }
+.tb-btn {
+  width:var(--touch); height:var(--touch); border-radius:50%;
+  background:var(--glass); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; backdrop-filter:blur(12px); box-shadow:var(--el1);
+  transition:all .2s var(--spring-sm); color:var(--t2);
+}
+.tb-btn:hover { transform:scale(1.06); box-shadow:var(--el2); }
+.tb-btn:active { transform:scale(.92); }
+.ndot { position:absolute; top:8px; right:8px; width:8px; height:8px; border-radius:50%; background:var(--danger); border:2px solid var(--bg); animation:ndot-pulse 2s ease-in-out infinite; }
+@keyframes ndot-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.4)} 50%{box-shadow:0 0 0 4px rgba(220,38,38,0)} }
+
+/* Bento */
+.bento { padding:0 var(--sp4) var(--sp4); display:grid; grid-template-columns:1fr 1fr; gap:var(--sp2); }
+.b-full { grid-column:1/-1; }
+
+/* Acil card — pulsing amber border */
+.b-acil {
+  grid-column:1/-1;
+  background:var(--warn-s); border:1px solid var(--warn-b);
+  border-radius:var(--r-xl); padding:var(--sp4) var(--sp5);
+  cursor:pointer; transition:all .2s var(--spring-sm);
+  position:relative; overflow:hidden;
+}
+.b-acil::before { content:''; position:absolute; inset:0; border-radius:inherit; border:1.5px solid var(--warn); opacity:0; animation:acil-pulse 2s ease-in-out infinite; }
+@keyframes acil-pulse { 0%,100%{opacity:0;transform:scale(1)} 50%{opacity:.25;transform:scale(1.01)} }
+.b-acil:hover { transform:translateY(-2px); box-shadow:var(--el2); }
+.b-acil:active { transform:scale(.98); }
+.ba-lbl { font-size:10px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--warn); margin-bottom:var(--sp1); display:flex; align-items:center; gap:var(--sp1); }
+.ba-t { font-family:var(--f-display); font-size:16px; font-weight:700; color:var(--t1); letter-spacing:-.02em; margin-bottom:var(--sp1); }
+.ba-s { font-size:13px; color:var(--t2); margin-bottom:var(--sp3); }
+
+/* Tasarruf */
+.b-sav { grid-column:1/-1; padding:var(--sp5); position:relative; overflow:hidden; border-radius:var(--r-xl) !important; }
+.b-sav::after { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--blue),#818cf8,var(--blue)); background-size:200%; border-radius:var(--r-xl) var(--r-xl) 0 0; animation:shimmer 3s linear infinite; }
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+.bs-lbl { font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--t3); margin-bottom:var(--sp2); }
+.bs-n { font-family:var(--f-display); font-size:52px; font-weight:800; color:var(--t1); letter-spacing:-.06em; line-height:56px; }
+.bs-u { font-size:14px; color:var(--t2); font-weight:500; margin-bottom:var(--sp4); }
+.bs-row { display:flex; border-top:1px solid var(--border); padding-top:var(--sp4); }
+.bs-it { flex:1; text-align:center; }
+.bs-it+.bs-it { border-left:1px solid var(--border); }
+.bs-in { font-family:var(--f-display); font-size:18px; font-weight:700; color:var(--t1); letter-spacing:-.03em; }
+.bs-il { font-size:10px; color:var(--t3); font-weight:600; margin-top:2px; }
+
+/* Kazanım widget */
+.b-kaz { grid-column:1/-1; overflow:hidden; }
+.bk-hd { padding:var(--sp4) var(--sp4) var(--sp3); display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); }
+.bk-t { font-family:var(--f-display); font-size:15px; font-weight:700; color:var(--t1); letter-spacing:-.02em; }
+.bk-w { font-size:12px; font-weight:700; color:var(--blue); }
+.kaz-r {
+  display:flex; align-items:flex-start; gap:var(--sp3);
+  padding:var(--sp3) var(--sp4); border-bottom:1px solid var(--border);
+  cursor:pointer; transition:background .15s;
+}
+.kaz-r:last-child { border-bottom:none; }
+.kaz-r:active { background:var(--bg2); }
+.kaz-day { min-width:32px; }
+.kd-n { font-size:10px; font-weight:700; letter-spacing:.04em; color:var(--t3); text-transform:uppercase; }
+.kd-num { font-family:var(--f-display); font-size:18px; font-weight:700; color:var(--t1); letter-spacing:-.03em; line-height:24px; }
+.kaz-inf { flex:1; }
+.kaz-l { font-size:13px; font-weight:700; color:var(--t1); letter-spacing:-.01em; margin-bottom:2px; }
+.kaz-t { font-size:11px; color:var(--t2); line-height:16px; }
+.kaz-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:6px; }
+.kd-ok   { background:var(--ok); }
+.kd-miss { background:var(--warn); animation:dot-blink 1.5s ease-in-out infinite; }
+@keyframes dot-blink { 0%,100%{opacity:1} 50%{opacity:.4} }
+.kd-fut  { background:var(--brd2); }
+
+/* Small bento */
+.b-sm {
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg);
+  padding:var(--sp4); cursor:pointer; box-shadow:var(--el1);
+  transition:all .2s var(--spring-sm);
+  display:flex; flex-direction:column; justify-content:space-between; min-height:100px;
+}
+.b-sm:hover { transform:translateY(-2px); box-shadow:var(--el2); }
+.b-sm:active { transform:scale(.95); box-shadow:none; }
+.bsm-lbl { font-size:12px; font-weight:700; color:var(--t2); letter-spacing:-.01em; }
+.bsm-val { font-family:var(--f-display); font-size:24px; font-weight:800; color:var(--t1); letter-spacing:-.04em; }
+.bsm-sub { font-size:10px; color:var(--t3); font-weight:600; }
+
+/* Deadline strip */
+.dl-strip { display:flex; gap:var(--sp2); overflow-x:auto; padding:0 var(--sp4) var(--sp1); scrollbar-width:none; }
+.dl-strip::-webkit-scrollbar { display:none; }
+.dlc {
+  min-width:88px; background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r-lg); padding:var(--sp3) var(--sp3); flex-shrink:0;
+  box-shadow:var(--el1); cursor:pointer; transition:all .2s var(--spring-sm);
+}
+.dlc:hover { transform:translateY(-2px); box-shadow:var(--el2); }
+.dlc:active { transform:scale(.95); }
+.dlc-n { font-size:11px; font-weight:600; color:var(--t3); margin-bottom:var(--sp1); }
+.dlc-num { font-family:var(--f-display); font-size:24px; font-weight:800; letter-spacing:-.04em; line-height:28px; }
+.dlc-u { font-size:10px; color:var(--t3); font-weight:600; }
+.dn-r { color:var(--danger); }
+.dn-a { color:var(--warn); }
+.dn-g { color:var(--ok); }
+
+/* Ders programı prompt */
+.dp-p {
+  grid-column:1/-1;
+  background:var(--blue-s); border:1px solid var(--blue-b);
+  border-radius:var(--r-lg); padding:var(--sp3) var(--sp4);
+  display:flex; align-items:center; gap:var(--sp3);
+  cursor:pointer; transition:all .2s var(--spring-sm); min-height:var(--touch);
+}
+.dp-p:hover { transform:translateY(-2px); box-shadow:var(--el2); }
+.dp-p:active { transform:scale(.98); }
+.dp-ic { width:36px; height:36px; border-radius:50%; background:rgba(79,106,245,.1); border:2px dashed var(--blue-b); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.dp-inf { flex:1; }
+.dp-t { font-size:13px; font-weight:700; color:var(--navy); letter-spacing:-.01em; }
+.dp-s { font-size:11px; color:var(--blue); }
+[data-theme="dark"] .dp-t { color:#818cf8; }
+
+/* ════════════════════════════════════════
+   PLANLA
+════════════════════════════════════════ */
+#s-planla .sa { padding:0 var(--sp4) var(--sp6); }
+.scr-hd { padding:var(--sp4) 0 var(--sp5); }
+.scr-t { font-family:var(--f-display); font-size:24px; font-weight:800; color:var(--t1); letter-spacing:-.04em; line-height:32px; }
+.scr-s { font-size:13px; color:var(--t2); margin-top:2px; }
+
+.yp { padding:var(--sp5); cursor:pointer; transition:all .2s var(--spring-sm); margin-bottom:var(--sp3); }
+.yp:hover { filter:brightness(1.05); }
+.yp:active { transform:scale(.98); }
+.yp-eye { font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:rgba(255,255,255,.4); margin-bottom:var(--sp2); position:relative; z-index:1; }
+.yp-t { font-family:var(--f-display); font-size:20px; font-weight:800; color:white; letter-spacing:-.03em; margin-bottom:var(--sp1); position:relative; z-index:1; }
+.yp-s { font-size:13px; color:rgba(255,255,255,.55); margin-bottom:var(--sp4); position:relative; z-index:1; }
+.yp-meta { display:flex; gap:var(--sp2); margin-bottom:var(--sp3); position:relative; z-index:1; }
+.yp-tag { background:rgba(255,255,255,.12); color:rgba(255,255,255,.8); font-size:11px; font-weight:700; padding:3px var(--sp3); border-radius:var(--r-pill); }
+.yp-pg { background:rgba(255,255,255,.18); border-radius:var(--r-pill); height:4px; overflow:hidden; position:relative; z-index:1; }
+.yp-pgb { height:100%; background:rgba(255,255,255,.65); border-radius:var(--r-pill); }
+
+.week-list { display:flex; flex-direction:column; gap:var(--sp2); margin-bottom:var(--sp4); }
+.wp {
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg);
+  padding:var(--sp3) var(--sp4); display:flex; align-items:center; gap:var(--sp3);
+  cursor:pointer; box-shadow:var(--el1); transition:all .2s var(--spring-sm); min-height:var(--touch);
+}
+.wp:hover { transform:translateX(4px); box-shadow:var(--el2); }
+.wp:active { transform:scale(.98); }
+.wp-day { font-family:var(--f-display); font-size:24px; font-weight:800; color:var(--t1); min-width:36px; letter-spacing:-.04em; }
+.wp-inf { flex:1; }
+.wp-l { font-size:14px; font-weight:700; color:var(--t1); letter-spacing:-.01em; margin-bottom:2px; }
+.wp-k { font-size:11px; color:var(--t2); }
+
+/* Ders prog grid */
+.dpg-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); padding:var(--sp4); box-shadow:var(--el1); margin-bottom:var(--sp3); }
+.dpg-hd { display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp3); }
+.dpg-t { font-size:14px; font-weight:700; color:var(--t1); letter-spacing:-.01em; }
+.dpg-edit { font-size:13px; font-weight:700; color:var(--blue); cursor:pointer; min-height:var(--touch); display:flex; align-items:center; }
+.dpg { display:grid; grid-template-columns:repeat(5,1fr); gap:var(--sp1); }
+.dpg-ch { font-size:9px; font-weight:700; text-align:center; color:var(--t3); padding:var(--sp1) 0; letter-spacing:.04em; text-transform:uppercase; }
+.dpg-cell {
+  background:var(--bg2); border-radius:var(--r-xs); padding:var(--sp1);
+  text-align:center; font-size:9px; font-weight:700; color:var(--t2);
+  min-height:32px; display:flex; align-items:center; justify-content:center;
+  cursor:pointer; transition:all .15s var(--spring-sm); line-height:1.3;
+}
+.dpg-cell:hover { transform:scale(1.08); z-index:1; position:relative; }
+.dpg-cell.f { background:var(--blue-s); color:var(--navy); border:1px solid var(--blue-b); }
+.dpg-cell.e { color:var(--border); }
+
+/* ════════════════════════════════════════
+   DOSYAM
+════════════════════════════════════════ */
+#s-dosyam .sa { padding:0 var(--sp4) var(--sp6); }
+.dosya-hero { margin-bottom:var(--sp4); padding:var(--sp5); }
+.dh-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:var(--sp5); position:relative; z-index:1; }
+.dh-num { font-family:var(--f-display); font-size:52px; font-weight:800; color:white; letter-spacing:-.06em; line-height:56px; }
+.dh-unit { font-size:14px; color:rgba(255,255,255,.5); margin-top:var(--sp1); }
+.dh-status { display:flex; flex-direction:column; gap:var(--sp1); align-items:flex-end; }
+.dh-st { font-size:12px; font-weight:600; color:rgba(255,255,255,.5); }
+.dh-st.ok { color:#6ee7b7; }
+.dh-st.warn { color:#fde68a; }
+.dosya-dl {
+  width:100%; background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.2); border-radius:var(--r-pill);
+  height:var(--touch); font-family:var(--f-body); font-size:14px; font-weight:700;
+  color:white; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:var(--sp2);
+  transition:all .2s var(--spring-sm); backdrop-filter:blur(8px);
+  position:relative; z-index:1;
+}
+.dosya-dl:hover { background:rgba(255,255,255,.2); transform:translateY(-2px); }
+.dosya-dl:active { transform:scale(.97); }
+
+.bg { margin-bottom:var(--sp4); }
+.bg-hd { display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp2); }
+.bg-t { font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--t3); }
+.bg-ct { font-size:12px; font-weight:700; color:var(--t2); }
+.belge-l { display:flex; flex-direction:column; gap:var(--sp2); }
+.bi {
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg);
+  padding:var(--sp3) var(--sp4); display:flex; align-items:center; gap:var(--sp3);
+  cursor:pointer; box-shadow:var(--el1); transition:all .2s var(--spring-sm); min-height:var(--touch);
+}
+.bi:hover { transform:translateX(4px); box-shadow:var(--el2); }
+.bi:active { transform:scale(.98); }
+.bi.warn-card { background:var(--warn-s); border-color:var(--warn-b); }
+.bi-ic { width:40px; height:40px; border-radius:var(--r-md); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.bic-b { background:var(--blue-s); }
+.bic-g { background:var(--ok-s); }
+.bic-a { background:var(--warn-s); }
+.bic-v { background:var(--violet-s); }
+.bic-s { background:var(--bg2); }
+.bi-inf { flex:1; }
+.bi-n { font-size:13px; font-weight:700; color:var(--t1); letter-spacing:-.01em; margin-bottom:2px; }
+.bi-s { font-size:11px; color:var(--t2); }
+.bi-r { display:flex; align-items:center; gap:var(--sp2); }
+.bi-new { width:8px; height:8px; border-radius:50%; background:var(--blue); animation:ndot-pulse 2s infinite; }
+
+/* ════════════════════════════════════════
+   ÜRET + JETON
+════════════════════════════════════════ */
+#s-uret .sa { padding:0 var(--sp4) var(--sp6); }
+.jeton-c {
+  margin-bottom:var(--sp4);
+  background:linear-gradient(145deg,#151230,#1e1b50);
+  border-radius:var(--r-xl); padding:var(--sp5);
+  border:1px solid rgba(255,255,255,.08); box-shadow:var(--el3);
+  position:relative; overflow:hidden;
+}
+.jeton-c::before { content:''; position:absolute; top:-40px; right:-40px; width:140px; height:140px; background:radial-gradient(circle,rgba(129,140,248,.18),transparent 70%); border-radius:50%; }
+.jeton-c::after  { content:''; position:absolute; bottom:-30px; left:-20px; width:100px; height:100px; background:radial-gradient(circle,rgba(79,106,245,.12),transparent 70%); border-radius:50%; }
+.jc-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:var(--sp4); position:relative; z-index:1; }
+.jc-lbl { font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:rgba(255,255,255,.38); margin-bottom:var(--sp2); }
+.jc-num { font-family:var(--f-display); font-size:40px; font-weight:800; color:white; letter-spacing:-.05em; line-height:44px; }
+.jc-u { font-size:12px; color:rgba(255,255,255,.4); margin-top:2px; }
+.jc-buy {
+  background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.18);
+  border-radius:var(--r-pill); height:36px; padding:0 var(--sp4);
+  font-family:var(--f-body); font-size:13px; font-weight:700; color:white;
+  cursor:pointer; transition:all .2s var(--spring-sm); white-space:nowrap;
+}
+.jc-buy:hover { background:rgba(255,255,255,.18); transform:scale(1.04); }
+.jc-buy:active { transform:scale(.96); }
+.jc-pg { background:rgba(255,255,255,.12); border-radius:var(--r-pill); height:4px; overflow:hidden; position:relative; z-index:1; margin-bottom:var(--sp2); }
+.jc-pgb { height:100%; background:linear-gradient(90deg,rgba(129,140,248,.8),rgba(255,255,255,.5)); border-radius:var(--r-pill); }
+.jc-hint { font-size:11px; color:rgba(255,255,255,.3); position:relative; z-index:1; }
+
+.arac-g { display:grid; grid-template-columns:1fr 1fr; gap:var(--sp2); margin-bottom:var(--sp4); }
+.arac {
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg);
+  padding:var(--sp4); cursor:pointer; transition:all .2s var(--spring-sm);
+  box-shadow:var(--el1); display:flex; flex-direction:column; gap:var(--sp1);
+}
+.arac:hover { transform:translateY(-3px); box-shadow:var(--el2); }
+.arac:active { transform:scale(.95); box-shadow:none; }
+.arac-ic { font-size:24px; margin-bottom:var(--sp1); }
+.arac-n { font-size:13px; font-weight:700; color:var(--t1); letter-spacing:-.01em; }
+.arac-d { font-size:11px; color:var(--t2); line-height:16px; }
+.arac-cr { font-size:11px; font-weight:700; color:var(--warn); margin-top:var(--sp1); }
+.sub-c { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); padding:var(--sp4); text-align:center; box-shadow:var(--el1); }
+.sub-t { font-size:14px; font-weight:700; color:var(--t1); letter-spacing:-.01em; margin-bottom:var(--sp1); }
+.sub-s { font-size:12px; color:var(--t2); margin-bottom:var(--sp3); }
+
+/* ════════════════════════════════════════
+   JETON AL
+════════════════════════════════════════ */
+#s-jeton .sa { padding:var(--sp5) var(--sp5) var(--sp8); }
+.jp-list { display:flex; flex-direction:column; gap:var(--sp2); margin-bottom:var(--sp4); }
+.jp {
+  background:var(--surface); border:1.5px solid var(--border); border-radius:var(--r-lg);
+  padding:var(--sp4); display:flex; align-items:center; gap:var(--sp3);
+  cursor:pointer; box-shadow:var(--el1); position:relative; min-height:var(--touch);
+  transition:all .2s var(--spring-sm);
+}
+.jp:hover { transform:translateY(-3px); box-shadow:var(--el3); }
+.jp:active { transform:scale(.97); }
+.jp.pop { border-color:var(--blue); }
+.jp-pt { position:absolute; top:-10px; right:var(--sp4); background:var(--blue); color:white; font-size:9px; font-weight:800; padding:2px var(--sp2); border-radius:var(--r-pill); letter-spacing:.05em; text-transform:uppercase; }
+.jp-ic { font-size:24px; flex-shrink:0; }
+.jp-inf { flex:1; }
+.jp-n { font-size:14px; font-weight:700; color:var(--t1); letter-spacing:-.01em; margin-bottom:2px; }
+.jp-d { font-size:12px; color:var(--t2); }
+.jp-pr { text-align:right; }
+.jp-a { font-family:var(--f-display); font-size:22px; font-weight:800; color:var(--t1); letter-spacing:-.03em; }
+.jp-p { font-size:10px; color:var(--t3); font-weight:600; }
+
+/* ════════════════════════════════════════
+   WIZARD — Subtle animations
+════════════════════════════════════════ */
+#s-sinav .sa, #s-sonuc .sa { padding:var(--sp5) var(--sp5) var(--sp8); }
+.wiz-hdr { display:flex; align-items:center; gap:var(--sp3); margin-bottom:var(--sp4); }
+.bk {
+  width:var(--touch); height:var(--touch); border-radius:50%;
+  background:var(--surface); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; box-shadow:var(--el1); transition:all .2s var(--spring-sm); color:var(--t2);
+}
+.bk:hover { transform:scale(1.08); box-shadow:var(--el2); }
+.bk:active { transform:scale(.92); }
+.wiz-t { font-family:var(--f-display); font-size:18px; font-weight:800; color:var(--t1); letter-spacing:-.03em; }
+.wiz-st { display:flex; gap:var(--sp1); margin-bottom:var(--sp6); }
+.ws { flex:1; height:3px; border-radius:var(--r-pill); background:var(--brd2); transition:background .4s var(--ease-out); }
+.ws.d { background:var(--blue); }
+.ws.a { background:var(--blue); opacity:.4; }
+
+/* Jeton notice */
+.jn {
+  background:var(--warn-s); border:1px solid var(--warn-b);
+  border-radius:var(--r-md); padding:var(--sp3) var(--sp4);
+  display:flex; align-items:center; gap:var(--sp2); margin-bottom:var(--sp4);
+}
+.jn-t { font-size:12px; font-weight:600; color:var(--warn); }
+
+/* Result */
+.edit-bar { display:flex; gap:var(--sp2); margin-bottom:var(--sp3); }
+.eb {
+  flex:1; background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r-md); padding:var(--sp2);
+  text-align:center; cursor:pointer; min-height:var(--touch);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+  transition:all .2s var(--spring-sm); box-shadow:var(--el1);
+}
+.eb:hover { transform:translateY(-2px); box-shadow:var(--el2); }
+.eb:active { transform:scale(.95); }
+.eb.pr { background:var(--blue-s); border-color:var(--blue-b); }
+.eb-ic { color:var(--t2); }
+.eb.pr .eb-ic { color:var(--blue); }
+.eb-lb { font-size:10px; font-weight:700; color:var(--t2); }
+.eb.pr .eb-lb { color:var(--blue); }
+
+.res-card { overflow:hidden; margin-bottom:var(--sp3); box-shadow:var(--el2); border-radius:var(--r-lg) !important; }
+.res-hd { background:var(--blue); padding:var(--sp3) var(--sp4); display:flex; align-items:center; gap:var(--sp2); }
+.res-ttl { font-size:14px; font-weight:700; color:white; flex:1; letter-spacing:-.01em; }
+.res-body { padding:var(--sp4); background:var(--surface); }
+.q-it { padding:var(--sp3) 0; border-bottom:1px solid var(--border); }
+.q-it:last-child { border-bottom:none; }
+.q-num { font-size:10px; font-weight:700; color:var(--blue); letter-spacing:.08em; text-transform:uppercase; margin-bottom:var(--sp1); }
+.q-txt { font-size:13px; font-weight:500; color:var(--t1); line-height:20px; margin-bottom:var(--sp2); }
+.q-os { display:flex; flex-direction:column; gap:2px; margin-bottom:var(--sp2); }
+.q-o { font-size:12px; color:var(--t2); }
+.q-o.ok { color:var(--ok); font-weight:700; }
+[data-theme="dark"] .q-o.ok { color:#34d399; }
+.q-acts { display:flex; gap:var(--sp2); }
+.qa {
+  flex:1; background:var(--bg2); border:1px solid var(--border); border-radius:var(--r-xs);
+  padding:var(--sp2); font-family:var(--f-body); font-size:11px; font-weight:700;
+  color:var(--t2); cursor:pointer; text-align:center; min-height:32px;
+  display:flex; align-items:center; justify-content:center;
+  transition:all .15s var(--spring-sm);
+}
+.qa:hover { background:var(--border); }
+.qa:active { transform:scale(.95); }
+.qa.pr { background:var(--blue-s); color:var(--blue); border-color:var(--blue-b); }
+.q-more { text-align:center; font-size:12px; color:var(--t3); font-weight:600; padding:var(--sp3) 0; }
+
+/* Time saved — WOW animation */
+.ts-card {
+  background:var(--ok-s); border:1px solid var(--ok-b);
+  border-radius:var(--r-lg); padding:var(--sp3) var(--sp4);
+  display:flex; align-items:center; gap:var(--sp3); margin-bottom:var(--sp4);
+  animation:ts-pop .5s var(--spring) both;
+}
+@keyframes ts-pop { from{transform:scale(.9);opacity:0} to{transform:scale(1);opacity:1} }
+.ts-ic { color:var(--ok); }
+.ts-h { font-size:14px; font-weight:700; color:var(--ok); letter-spacing:-.01em; }
+[data-theme="dark"] .ts-h { color:#34d399; }
+.ts-p { font-size:11px; color:var(--ok); opacity:.75; }
+
+/* ════════════════════════════════════════
+   DS PANEL
+════════════════════════════════════════ */
+.dsp { max-width:375px; width:100%; margin-top:var(--sp10); animation:hd-in .8s .3s var(--ease-out) both; }
+.dsp-t { font-size:10px; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:rgba(79,106,245,.6); margin-bottom:var(--sp4); text-align:center; }
+.dsp-b { background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); border-radius:14px; padding:var(--sp4); margin-bottom:var(--sp2); }
+.dsp-l { font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:rgba(244,243,240,.2); margin-bottom:var(--sp3); }
+.sw-r { display:flex; gap:var(--sp2); flex-wrap:wrap; }
+.sw { width:40px; height:40px; border-radius:9px; display:flex; align-items:flex-end; padding:var(--sp1); }
+.swl { font-size:8px; font-weight:800; }
+.ty-r { display:flex; flex-direction:column; gap:var(--sp2); }
+.ty { background:rgba(255,255,255,.03); border-radius:8px; padding:var(--sp3); }
+.tym { font-size:10px; color:rgba(244,243,240,.2); margin-bottom:3px; }
+.notes { display:flex; flex-direction:column; gap:4px; font-size:11px; color:rgba(244,243,240,.38); line-height:20px; }
+.notes .law { color:rgba(79,106,245,.7); font-weight:700; }
+</style>
+</head>
+<body>
+
+<!-- STUDIO -->
+<div class="hd">
+  <div class="hd-eye">Cognitive UX · Heroicons · Spring Physics · v8</div>
+  <div class="hd-name">ÖğretmenAI</div>
+  <div class="hd-sub">Grain texture · Glass morphism · Spring animations · Heroicons SVG · 8-point grid</div>
+</div>
+<div class="ctrl">
+  <div class="tog-r">
+    <span class="tog-l">☀️</span>
+    <div class="tog" id="thm" onclick="toggleTheme()"><div class="tog-t"></div></div>
+    <span class="tog-l">🌙</span>
+  </div>
+</div>
+<div class="snav">
+  <button class="np active" onclick="go('ob')">1 · Onboarding</button>
+  <button class="np" onclick="go('tr')">2 · Geçiş</button>
+  <button class="np" onclick="go('ana')">3 · Ana</button>
+  <button class="np" onclick="go('planla')">4 · Planla</button>
+  <button class="np" onclick="go('dosyam')">5 · Dosyam</button>
+  <button class="np" onclick="go('uret')">6 · Üret</button>
+  <button class="np" onclick="go('jeton')">7 · Jeton Al</button>
+  <button class="np" onclick="go('sinav')">8 · Wizard</button>
+  <button class="np" onclick="go('sonuc')">9 · Sonuç</button>
+</div>
+
+<!-- PHONE -->
+<div class="pw"><div class="ps"><div class="psc" id="psc">
+<div class="sb">
+  <span class="sb-time" id="sbt">09:41</span>
+  <div class="sb-icons">
+    <!-- Heroicon: signal -->
+    <svg width="16" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M1.371 8.143c.185-.185.484-.184.67.002a8.25 8.25 0 0111.918 0 .473.473 0 01.001.668l-.94.94a.332.332 0 01-.47-.001 6.75 6.75 0 00-9.77 0 .332.332 0 01-.47.001l-.94-.94a.473.473 0 010-.67zM12 15.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm-3.75-2.03a.473.473 0 01.667.001 3.75 3.75 0 005.166 0 .473.473 0 01.668-.001l.94.94a.332.332 0 01-.002.471 5.25 5.25 0 01-8.378 0 .332.332 0 01-.001-.47l.94-.941z"/></svg>
+    <!-- Heroicon: wifi -->
+    <svg width="16" height="12" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M1.371 8.143c.185-.185.484-.184.67.002a8.25 8.25 0 0011.918 0 .473.473 0 01.001.668l-.94.94a.332.332 0 01-.47-.001 6.75 6.75 0 00-9.77 0 .332.332 0 01-.47.001l-.94-.94a.473.473 0 010-.67zM12 15.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" clip-rule="evenodd"/></svg>
+    <!-- Battery -->
+    <svg width="22" height="12" viewBox="0 0 24 12" fill="currentColor" style="opacity:.7"><rect x="0" y="1" width="20" height="10" rx="2.5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M21 4.5v3a1.5 1.5 0 000-3z"/><rect x="2" y="3" width="14" height="6" rx="1.5" fill="currentColor" opacity=".7"/></svg>
+  </div>
+</div>
+
+<!-- OVERLAY + SHEET -->
+<div class="ov" id="ov" onclick="closeSheet()"></div>
+<div class="sheet" id="sh">
+  <div class="sh-handle"></div>
+  <div class="sh-title">Ne üretelim?</div>
+  <div class="sh-sub">Her araç ayrı iş akışı · Jeton ile</div>
+  <div class="sh-grid">
+    <div class="shi hi" onclick="closeSheet();go('sinav')">
+      <div class="shi-badge">En Çok</div>
+      <!-- Heroicon: document-text -->
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4F6AF5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+      <div class="shi-nm">Yazılı Sınav</div>
+      <div class="shi-cr">🪙 1 jeton</div>
+    </div>
+    <div class="shi" onclick="closeSheet();go('sinav')">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--t2)"><path d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6"/></svg>
+      <div class="shi-nm">Sınıf Etkinliği</div>
+      <div class="shi-cr">🪙 1 jeton</div>
+    </div>
+    <div class="shi" onclick="closeSheet();go('sinav')">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--t2)"><path d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
+      <div class="shi-nm">Ders Materyali</div>
+      <div class="shi-cr">🪙 1 jeton</div>
+    </div>
+    <div class="shi" onclick="closeSheet();go('sinav')">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--t2)"><path d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
+      <div class="shi-nm">Rubrik</div>
+      <div class="shi-cr">🪙 1 jeton</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 1 ONBOARDING ══ -->
+<div class="scr active" id="s-ob">
+  <div class="sa"><div class="scr-content" style="padding:var(--sp6) var(--sp5) var(--sp8)">
+    <div class="ob-hdr">
+      <div class="ob-dots"><div class="ob-d done"></div><div class="ob-d active"></div><div class="ob-d"></div></div>
+      <span class="ob-skip" onclick="go('tr')">Atla</span>
+    </div>
+    <div>
+      <div class="ob-q">Branşınızı seçin</div>
+      <div class="ob-hint">Dersleriniz otomatik listelenecek.</div>
+    </div>
+    <div class="srch">
+      <span class="srch-ic">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+      </span>
+      <input class="srch-inp" type="text" value="Muhasebe" placeholder="Branş ara…">
+    </div>
+    <div class="chips">
+      <div class="chip sel" onclick="toggleChip(this)">💼 Muhasebe</div>
+      <div class="chip" onclick="toggleChip(this)">📐 Matematik</div>
+      <div class="chip" onclick="toggleChip(this)">📝 Türkçe</div>
+      <div class="chip" onclick="toggleChip(this)">🔬 Fen</div>
+      <div class="chip" onclick="toggleChip(this)">⚡ Fizik</div>
+    </div>
+    <div>
+      <div class="ob-q" style="font-size:20px;line-height:24px;margin-bottom:var(--sp1)">Sınıflarınızı seçin</div>
+      <div class="ob-hint">Seçilen branşa göre dersler listelendi.</div>
+    </div>
+    <div class="ders-list">
+      <div class="ders-card">
+        <div class="ders-nm">Finansal Muhasebe</div>
+        <div class="sinif-row">
+          <div class="sc sel" onclick="toggleSinif(this)">9-A</div>
+          <div class="sc sel" onclick="toggleSinif(this)">9-B</div>
+          <div class="sc" onclick="toggleSinif(this)">9-C</div>
+          <div class="sc" onclick="toggleSinif(this)">9-D</div>
+        </div>
+      </div>
+      <div class="ders-card">
+        <div class="ders-nm">Maliyet Muhasebesi</div>
+        <div class="sinif-row">
+          <div class="sc" onclick="toggleSinif(this)">10-A</div>
+          <div class="sc sel" onclick="toggleSinif(this)">10-B</div>
+          <div class="sc" onclick="toggleSinif(this)">10-C</div>
+        </div>
+      </div>
+      <div class="ders-card">
+        <div class="ders-nm">Şirketler Muhasebesi</div>
+        <div class="sinif-row">
+          <div class="sc sel" onclick="toggleSinif(this)">11-C</div>
+          <div class="sc sel" onclick="toggleSinif(this)">11-D</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-p" onclick="go('tr')">Devam Et</button>
+  </div></div>
+</div>
+
+<!-- ══ 2 GEÇİŞ — ENERGETIC ══ -->
+<div class="scr" id="s-tr">
+  <div class="sa"><div class="scr-content">
+    <div class="ob-tr" style="position:relative">
+      <div class="ob-tr-rings" style="position:absolute"></div>
+      <div class="ob-tr-icon">🎉</div>
+      <div class="ob-tr-title">Hazırsınız!</div>
+      <div class="ob-tr-detail">Muhasebe branşı · 5 sınıf<br>9-A, 9-B, 10-B, 11-C, 11-D</div>
+      <div class="ob-tr-cta">
+        <button class="btn btn-p" onclick="go('ana')">Ana Ekrana Git</button>
+      </div>
+      <div class="ob-tr-note">Ders programını daha sonra ekleyebilirsiniz.<br>Eklenince yıllık planınız otomatik hazırlanır.</div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ══ 3 ANA EKRAN ══ -->
+<div class="scr" id="s-ana">
+  <div class="sa"><div class="scr-content">
+    <div class="topbar">
+      <div>
+        <div class="tb-g">Günaydın</div>
+        <div class="tb-n">Melik Hoca</div>
+      </div>
+      <div class="tb-acts">
+        <div class="tb-btn" style="position:relative">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
+          <div class="ndot"></div>
+        </div>
+        <div class="tb-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+        </div>
+      </div>
+    </div>
+    <div class="bento">
+      <!-- Acil -->
+      <div class="b-acil" onclick="go('dosyam')">
+        <div class="ba-lbl">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--warn)"><path fill-rule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/></svg>
+          Acil · 2 gün kaldı
+        </div>
+        <div class="ba-t">Not girişi son günü</div>
+        <div class="ba-s">10-B sınıfı tamamlanmadı</div>
+        <span class="tag t-warn">Şimdi Tamamla →</span>
+      </div>
+
+      <!-- Tasarruf -->
+      <div class="b-sav card b-full">
+        <div class="bs-lbl">Bu Ay Tasarruf</div>
+        <div class="bs-n">6.5</div>
+        <div class="bs-u">saat geri aldınız</div>
+        <div class="bs-row">
+          <div class="bs-it"><div class="bs-in">3.2s</div><div class="bs-il">Yazılı</div></div>
+          <div class="bs-it"><div class="bs-in">2.1s</div><div class="bs-il">Evrak</div></div>
+          <div class="bs-it"><div class="bs-in">1.2s</div><div class="bs-il">Plan</div></div>
+        </div>
+      </div>
+
+      <!-- Kazanım widget -->
+      <div class="b-kaz card b-full">
+        <div class="bk-hd">
+          <div class="bk-t">Bu Hafta · Kazanımlar</div>
+          <span class="bk-w">12. Hafta</span>
+        </div>
+        <div class="kaz-r" onclick="go('planla')">
+          <div class="kaz-day"><div class="kd-n">Pzt</div><div class="kd-num">31</div></div>
+          <div class="kaz-inf"><div class="kaz-l">Şirketler Muh. · 11-C</div><div class="kaz-t">Sermaye artırımı ve azaltımı</div></div>
+          <div class="kaz-dot kd-ok"></div>
+        </div>
+        <div class="kaz-r" onclick="go('planla')">
+          <div class="kaz-day"><div class="kd-n">Sal</div><div class="kd-num">1</div></div>
+          <div class="kaz-inf"><div class="kaz-l">Maliyet Muh. · 10-B</div><div class="kaz-t">Direkt ilk madde malzeme maliyeti</div></div>
+          <div class="kaz-dot kd-miss"></div>
+        </div>
+        <div class="kaz-r" onclick="go('planla')">
+          <div class="kaz-day"><div class="kd-n">Çar</div><div class="kd-num">2</div></div>
+          <div class="kaz-inf"><div class="kaz-l">Finansal Muh. · 9-A</div><div class="kaz-t">Banka kredileri muhasebeleştirilmesi</div></div>
+          <div class="kaz-dot kd-fut"></div>
+        </div>
+      </div>
+
+      <!-- Small bento -->
+      <div class="b-sm" onclick="go('dosyam')">
+        <div>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:var(--sp2)"><path d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z"/></svg>
+          <div class="bsm-lbl">Dosyam</div>
+        </div>
+        <div><div class="bsm-val">14</div><div class="bsm-sub">belge hazır</div></div>
+      </div>
+      <div class="b-sm" onclick="go('uret')">
+        <div>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--warn)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:var(--sp2)"><path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z"/></svg>
+          <div class="bsm-lbl">Jeton</div>
+        </div>
+        <div><div class="bsm-val">7</div><div class="bsm-sub">üretim hakkı</div></div>
+      </div>
+
+      <!-- Deadlines -->
+      <div class="b-full">
+        <div class="sec-lbl" style="padding:0 0 var(--sp2)">Yaklaşan</div>
+        <div class="dl-strip">
+          <div class="dlc"><div class="dlc-n">Not Girişi</div><div class="dlc-num dn-r">2</div><div class="dlc-u">gün</div></div>
+          <div class="dlc"><div class="dlc-n">ZHA Tutanak</div><div class="dlc-num dn-a">5</div><div class="dlc-u">gün</div></div>
+          <div class="dlc"><div class="dlc-n">Yazılı</div><div class="dlc-num dn-g">12</div><div class="dlc-u">gün</div></div>
+          <div class="dlc"><div class="dlc-n">Karne</div><div class="dlc-num dn-g">28</div><div class="dlc-u">gün</div></div>
+        </div>
+      </div>
+
+      <!-- Ders programı teşvik -->
+      <div class="dp-p b-full" onclick="go('planla')">
+        <div class="dp-ic">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
+        </div>
+        <div class="dp-inf">
+          <div class="dp-t">Ders programını ekle</div>
+          <div class="dp-s">Yıllık plan otomatik hazırlanır</div>
+        </div>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+      </div>
+    </div>
+  </div></div>
+  <div class="bn">
+    <div class="bni active" onclick="go('ana')"><div class="bni-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg></div><div class="bni-lbl">Ana</div></div>
+    <div class="bni" onclick="go('planla')"><div class="bni-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z"/></svg></div><div class="bni-lbl">Planla</div></div>
+    <div class="bni" onclick="go('dosyam')"><div class="bni-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z"/></svg></div><div class="bni-lbl">Dosyam</div></div>
+    <div class="bni" onclick="go('uret')"><div class="bni-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z"/></svg></div><div class="bni-lbl">Üret</div></div>
+  </div>
+</div>
+
+<!-- ══ 4 PLANLA ══ -->
+<div class="scr" id="s-planla">
+  <div class="sa"><div class="scr-content" style="padding:0 var(--sp4) var(--sp6)">
+    <div class="scr-hd"><div class="scr-t">Planlama</div><div class="scr-s">Yıllık · Haftalık · Ders Programı</div></div>
+    <div class="card-navy yp" onclick="go('sinav')">
+      <div class="yp-eye">Yıllık Plan · 2025–2026</div>
+      <div class="yp-t">Şirketler Muhasebesi</div>
+      <div class="yp-s">11-C · 11-D · 40 hafta · Haftada 4 saat</div>
+      <div class="yp-meta"><span class="yp-tag">12. Hafta</span><span class="yp-tag">%28 tamamlandı</span></div>
+      <div class="yp-pg"><div class="yp-pgb" style="width:28%"></div></div>
+    </div>
+    <div class="sec-lbl" style="margin:var(--sp4) 0 var(--sp2)">Bu Hafta</div>
+    <div class="week-list">
+      <div class="wp"><div class="wp-day">31</div><div class="wp-inf"><div class="wp-l">Şirketler Muh. · 11-C</div><div class="wp-k">Sermaye artırımı ve azaltımı</div></div><span class="tag t-ok">Hazır</span></div>
+      <div class="wp"><div class="wp-day">1</div><div class="wp-inf"><div class="wp-l">Maliyet Muh. · 10-B</div><div class="wp-k">Direkt ilk madde malzeme</div></div><span class="tag t-warn">Eksik</span></div>
+      <div class="wp"><div class="wp-day">2</div><div class="wp-inf"><div class="wp-l">Finansal Muh. · 9-A</div><div class="wp-k">Banka kredileri kaydı</div></div><span class="tag t-mute">Gelecek</span></div>
+    </div>
+    <div class="sec-lbl" style="margin:var(--sp4) 0 var(--sp2)">Ders Programı</div>
+    <div class="dpg-card">
+      <div class="dpg-hd"><div class="dpg-t">Haftalık Program</div><span class="dpg-edit">Düzenle</span></div>
+      <div class="dpg">
+        <div class="dpg-ch">Pzt</div><div class="dpg-ch">Sal</div><div class="dpg-ch">Çar</div><div class="dpg-ch">Per</div><div class="dpg-ch">Cum</div>
+        <div class="dpg-cell f">11-C Şkt</div><div class="dpg-cell f">10-B Mal</div><div class="dpg-cell f">9-A Fin</div><div class="dpg-cell e">—</div><div class="dpg-cell f">11-D Şkt</div>
+        <div class="dpg-cell e">—</div><div class="dpg-cell f">11-D Şkt</div><div class="dpg-cell f">9-B Fin</div><div class="dpg-cell f">10-B Mal</div><div class="dpg-cell e">—</div>
+        <div class="dpg-cell f">11-C Şkt</div><div class="dpg-cell e">—</div><div class="dpg-cell e">—</div><div class="dpg-cell f">9-A Fin</div><div class="dpg-cell e">—</div>
+      </div>
+    </div>
+  </div></div>
+  <div class="bn">
+    <div class="bni" onclick="go('ana')"><div class="bni-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg></div><div class="bni-lbl">Ana</div></div>
+    <div class="bni active" onclick="go('planla')"><div class="bni-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg></div><div class="bni-lbl">Planla</div></div>
+    <div class="bni" onclick="go('dosyam')"><div class="bni-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z"/></svg></div><div class="bni-lbl">Dosyam</div></div>
+    <div class="bni" onclick="go('uret')"><div class="bni-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg></div><div class="bni-lbl">Üret</div></div>
+  </div>
+</div>
+
+<!-- ══ 5 DOSYAM ══ -->
+<div class="scr" id="s-dosyam">
+  <div class="sa"><div class="scr-content" style="padding:0 var(--sp4) var(--sp6)">
+    <div class="scr-hd"><div class="scr-t">Öğretmen Dosyası</div><div class="scr-s">Müfettiş hazırlığı · Tek tıkla indir</div></div>
+    <div class="card-navy dosya-hero">
+      <div class="dh-top">
+        <div><div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.38);margin-bottom:var(--sp2)">Toplam Belge</div><div class="dh-num">14</div><div class="dh-unit">belge hazır</div></div>
+        <div class="dh-status"><div class="dh-st ok">✓ Yıllık Plan</div><div class="dh-st ok">✓ 3 ZHA</div><div class="dh-st ok">✓ 5 Veli</div><div class="dh-st warn">⚠ Nöbet eksik</div></div>
+      </div>
+      <button class="dosya-dl">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+        Tüm Dosyayı İndir · PDF
+      </button>
+    </div>
+    <div class="bg"><div class="bg-hd"><span class="bg-t">Otomatik Oluşanlar</span><span class="bg-ct">9 belge</span></div>
+      <div class="belge-l">
+        <div class="bi"><div class="bi-ic bic-b"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5"/></svg></div><div class="bi-inf"><div class="bi-n">Yıllık Plan — 2025/26</div><div class="bi-s">3 ders · Tüm şubeler</div></div><div class="bi-r"><span class="tag t-ok" style="font-size:10px">Hazır</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg></div></div>
+        <div class="bi"><div class="bi-ic bic-v"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--violet)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg></div><div class="bi-inf"><div class="bi-n">ZHA Tutanakları</div><div class="bi-s">3 toplantı</div></div><div class="bi-r"><span class="tag t-ok" style="font-size:10px">3 belge</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg></div></div>
+        <div class="bi"><div class="bi-ic bic-g"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg></div><div class="bi-inf"><div class="bi-n">Veli Görüşme Kayıtları</div><div class="bi-s">5 görüşme</div></div><div class="bi-r"><div class="bi-new"></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg></div></div>
+        <div class="bi"><div class="bi-ic bic-a"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--warn)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15z"/></svg></div><div class="bi-inf"><div class="bi-n">Günlük Plan Örnekleri</div><div class="bi-s">Son 5 hafta · 12 plan</div></div><div class="bi-r"><span class="tag t-ok" style="font-size:10px">Hazır</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg></div></div>
+      </div>
+    </div>
+    <div class="bg"><div class="bg-hd"><span class="bg-t">Tamamlanması Gereken</span><span class="bg-ct" style="color:var(--warn)">1 eksik</span></div>
+      <div class="belge-l">
+        <div class="bi warn-card"><div class="bi-ic bic-a"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--warn)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"/></svg></div><div class="bi-inf"><div class="bi-n">Nöbet Dökümü</div><div class="bi-s">Henüz girilmedi</div></div><div class="bi-r"><span class="tag t-warn" style="font-size:10px">Ekle</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg></div></div>
+      </div>
+    </div>
+  </div></div>
+  <div class="bn">
+    <div class="bni" onclick="go('ana')"><div class="bni-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg></div><div class="bni-lbl">Ana</div></div>
+    <div class="bni" onclick="go('planla')"><div class="bni-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5"/></svg></div><div class="bni-lbl">Planla</div></div>
+    <div class="bni active" onclick="go('dosyam')"><div class="bni-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z"/></svg></div><div class="bni-lbl">Dosyam</div></div>
+    <div class="bni" onclick="go('uret')"><div class="bni-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg></div><div class="bni-lbl">Üret</div></div>
+  </div>
+</div>
+
+<!-- ══ 6 ÜRET ══ -->
+<div class="scr" id="s-uret">
+  <div class="sa"><div class="scr-content" style="padding:0 var(--sp4) var(--sp6)">
+    <div class="scr-hd"><div class="scr-t">Üret</div><div class="scr-s">AI destekli · Jeton ile</div></div>
+    <div class="jeton-c">
+      <div class="jc-top"><div><div class="jc-lbl">Jeton Bakiyesi</div><div class="jc-num">7</div><div class="jc-u">üretim hakkı kaldı</div></div><button class="jc-buy" onclick="go('jeton')">+ Jeton Al</button></div>
+      <div class="jc-pg"><div class="jc-pgb" style="width:70%"></div></div>
+      <div class="jc-hint">Bu ay 3 ücretsiz jeton hediye edildi</div>
+    </div>
+    <div class="sec-lbl" style="margin-bottom:var(--sp2)">Araçlar</div>
+    <div class="arac-g">
+      <div class="arac" onclick="go('sinav')"><div class="arac-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg></div><div class="arac-n">Yazılı Sınav</div><div class="arac-d">Kazanım bazlı, cevap anahtarlı</div><div class="arac-cr">🪙 1 jeton</div></div>
+      <div class="arac" onclick="go('sinav')"><div class="arac-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6"/></svg></div><div class="arac-n">Sınıf Etkinliği</div><div class="arac-d">Grup, bireysel, oyun bazlı</div><div class="arac-cr">🪙 1 jeton</div></div>
+      <div class="arac" onclick="go('sinav')"><div class="arac-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--violet)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg></div><div class="arac-n">Ders Materyali</div><div class="arac-d">Çalışma yaprağı, kavram haritası</div><div class="arac-cr">🪙 1 jeton</div></div>
+      <div class="arac" onclick="go('sinav')"><div class="arac-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--warn)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg></div><div class="arac-n">Rubrik</div><div class="arac-d">Performans, proje, sunum</div><div class="arac-cr">🪙 1 jeton</div></div>
+    </div>
+    <div class="sub-c"><div class="sub-t">Sınırsız mı istiyorsunuz?</div><div class="sub-s">149 TL/ay ile tüm araçlar sınırsız.</div><button class="btn btn-p btn-sm" style="width:100%">Premium'a Geç</button></div>
+  </div></div>
+  <div class="bn">
+    <div class="bni" onclick="go('ana')"><div class="bni-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg></div><div class="bni-lbl">Ana</div></div>
+    <div class="bni" onclick="go('planla')"><div class="bni-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5"/></svg></div><div class="bni-lbl">Planla</div></div>
+    <div class="bni" onclick="go('dosyam')"><div class="bni-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z"/></svg></div><div class="bni-lbl">Dosyam</div></div>
+    <div class="bni active" onclick="go('uret')"><div class="bni-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg></div><div class="bni-lbl">Üret</div></div>
+  </div>
+</div>
+
+<!-- ══ 7 JETON AL ══ -->
+<div class="scr" id="s-jeton">
+  <div class="sa"><div class="scr-content" style="padding:var(--sp5) var(--sp5) var(--sp8)">
+    <div class="wiz-hdr"><div class="bk" onclick="go('uret')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15.75 19.5L8.25 12l7.5-7.5"/></svg></div><div class="wiz-t">Jeton Al</div></div>
+    <p style="font-size:13px;color:var(--t2);margin-bottom:var(--sp5);line-height:20px;">Her jeton 1 AI üretim hakkı. Süresizdir, biriktirilebilir.</p>
+    <div class="jp-list">
+      <div class="jp"><div class="jp-ic">🪙</div><div class="jp-inf"><div class="jp-n">10 Jeton</div><div class="jp-d">10 yazılı sınav ya da materyal</div></div><div class="jp-pr"><div class="jp-a">49₺</div><div class="jp-p">4.9₺/jeton</div></div></div>
+      <div class="jp pop" style="position:relative"><div class="jp-pt">En Popüler</div><div class="jp-ic">🪙🪙</div><div class="jp-inf"><div class="jp-n">30 Jeton</div><div class="jp-d">%19 daha ucuz</div></div><div class="jp-pr"><div class="jp-a">119₺</div><div class="jp-p">3.97₺/jeton</div></div></div>
+      <div class="jp"><div class="jp-ic">🪙🪙🪙</div><div class="jp-inf"><div class="jp-n">100 Jeton</div><div class="jp-d">%39 daha ucuz · Zümre için</div></div><div class="jp-pr"><div class="jp-a">299₺</div><div class="jp-p">2.99₺/jeton</div></div></div>
+    </div>
+    <div style="height:1px;background:var(--border);margin:var(--sp4) 0"></div>
+    <div class="sub-c"><div class="sub-t">Ya da Premium'a Geçin</div><div class="sub-s">Sınırsız üretim · 149₺/ay · 990₺/yıl</div><button class="btn btn-p" style="margin-top:var(--sp3)">Sınırsız Üretim →</button></div>
+    <p style="font-size:11px;color:var(--t3);text-align:center;margin-top:var(--sp3)">Jetonlar süresizdir · Güvenli ödeme · Fatura e-posta</p>
+  </div></div>
+</div>
+
+<!-- ══ 8 WIZARD ══ -->
+<div class="scr" id="s-sinav">
+  <div class="sa"><div class="scr-content" style="padding:var(--sp5) var(--sp5) var(--sp8)">
+    <div class="wiz-hdr"><div class="bk" onclick="go('uret')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15.75 19.5L8.25 12l7.5-7.5"/></svg></div><div class="wiz-t">Yazılı Sınav Üret</div></div>
+    <div class="wiz-st"><div class="ws d"></div><div class="ws a"></div><div class="ws"></div><div class="ws"></div></div>
+    <div class="ig"><div class="il">Konu / Kazanım</div><input class="inp" type="text" value="Anonim şirket kuruluş kayıtları"></div>
+    <div class="ig"><div class="il">Sınıf</div><select class="sel"><option>11-C · Şirketler Muhasebesi</option><option>10-B · Maliyet Muhasebesi</option></select></div>
+    <div class="ig"><div class="il">Soru Sayısı</div><div class="stpr"><button class="stpr-b" onclick="sc(-1)">−</button><div class="stpr-v" id="sv">10</div><button class="stpr-b" onclick="sc(1)">+</button></div></div>
+    <div class="ig"><div class="il">Soru Türü</div><select class="sel"><option>Karma (ÇS + Açık Uçlu)</option><option>Sadece Çoktan Seçmeli</option></select></div>
+    <div class="ig"><div class="il">Zorluk</div><div class="diff-r"><div class="diff-b" onclick="sd(this)"><div class="db-ic">🌱</div><div class="db-lb">Kolay</div></div><div class="diff-b sel" onclick="sd(this)"><div class="db-ic">⚡</div><div class="db-lb">Orta</div></div><div class="diff-b" onclick="sd(this)"><div class="db-ic">🔥</div><div class="db-lb">Zor</div></div></div></div>
+    <div class="jn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--warn)"><path fill-rule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/></svg>
+      <div class="jn-t">Bu üretim <strong>1 jeton</strong> kullanacak. Bakiyeniz: 7 jeton.</div>
+    </div>
+    <button class="btn btn-p" onclick="go('sonuc')">Sınavı Üret · 1 Jeton Harca</button>
+  </div></div>
+  <div class="bn">
+    <div class="bni" onclick="go('ana')"><div class="bni-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg></div><div class="bni-lbl">Ana</div></div>
+    <div class="bni" onclick="go('planla')"><div class="bni-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5"/></svg></div><div class="bni-lbl">Planla</div></div>
+    <div class="bni" onclick="go('dosyam')"><div class="bni-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z"/></svg></div><div class="bni-lbl">Dosyam</div></div>
+    <div class="bni active" onclick="go('uret')"><div class="bni-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg></div><div class="bni-lbl">Üret</div></div>
+  </div>
+</div>
+
+<!-- ══ 9 SONUÇ ══ -->
+<div class="scr" id="s-sonuc">
+  <div class="sa"><div class="scr-content" style="padding:var(--sp5) var(--sp5) var(--sp8)">
+    <div class="wiz-hdr"><div class="bk" onclick="go('sinav')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15.75 19.5L8.25 12l7.5-7.5"/></svg></div><div class="wiz-t">Sınav Hazır</div></div>
+    <div class="edit-bar">
+      <div class="eb pr"><div class="eb-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125"/></svg></div><div class="eb-lb">Düzenle</div></div>
+      <div class="eb"><div class="eb-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--t2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg></div><div class="eb-lb">Yeniden</div></div>
+      <div class="eb"><div class="eb-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--t2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5v15m7.5-7.5h-15"/></svg></div><div class="eb-lb">Ekle</div></div>
+      <div class="eb"><div class="eb-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--t2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div><div class="eb-lb">Ayarlar</div></div>
+    </div>
+    <div class="card res-card">
+      <div class="res-hd"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path fill-rule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0016.5 9h-1.875a1.875 1.875 0 01-1.875-1.875V5.25A3.75 3.75 0 009 1.5H5.625zM7.5 15a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5A.75.75 0 017.5 15zm.75 2.25a.75.75 0 000 1.5H12a.75.75 0 000-1.5H8.25z" clip-rule="evenodd"/><path d="M12.971 1.816A5.23 5.23 0 0114.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 013.434 1.279 9.768 9.768 0 00-6.963-6.963z"/></svg><div class="res-ttl">Şirketler Muhasebesi · 11-C</div><span class="tag t-ok">Hazır</span></div>
+      <div class="res-body">
+        <div class="q-it"><div class="q-num">Soru 1 · 5 puan</div><div class="q-txt">Anonim şirket kuruluşunda sermaye taahhüdü kaydı hangi hesaplara yapılır?</div><div class="q-os"><div class="q-o">A) 102 Bankalar / 501 Ödenmiş Sermaye</div><div class="q-o ok">B) 103 Verilen Çekler / 500 Sermaye ✓</div><div class="q-o">C) 501 Ödenmiş / 500 Sermaye</div></div><div class="q-acts"><div class="qa pr">Düzenle</div><div class="qa">Yeniden üret</div><div class="qa">Sil</div></div></div>
+        <div class="q-it"><div class="q-num">Soru 2 · 10 puan</div><div class="q-txt">Hisse senedi ihraç priminin kaydında hangi hesap kullanılır?</div><div class="q-os"><div class="q-o">A) 500 Sermaye</div><div class="q-o ok">B) 520 Hisse Senedi İhraç Primleri ✓</div><div class="q-o">C) 502 Sermaye Taahhütleri</div></div><div class="q-acts"><div class="qa pr">Düzenle</div><div class="qa">Yeniden üret</div><div class="qa">Sil</div></div></div>
+        <div class="q-more">+ 8 soru · Cevap anahtarı dahil</div>
+      </div>
+    </div>
+    <div class="ts-card">
+      <div class="ts-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+      <div><div class="ts-h">45 dakika tasarruf</div><div class="ts-p">28 saniyede üretildi · 1 jeton harcandı</div></div>
+    </div>
+    <button class="btn btn-p" style="margin-bottom:var(--sp2)">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+      PDF Olarak İndir
+    </button>
+    <button class="btn btn-o">e-Okul Formatında Kaydet</button>
+  </div></div>
+  <div class="bn">
+    <div class="bni" onclick="go('ana')"><div class="bni-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg></div><div class="bni-lbl">Ana</div></div>
+    <div class="bni" onclick="go('planla')"><div class="bni-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5"/></svg></div><div class="bni-lbl">Planla</div></div>
+    <div class="bni" onclick="go('dosyam')"><div class="bni-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z"/></svg></div><div class="bni-lbl">Dosyam</div></div>
+    <div class="bni active" onclick="go('uret')"><div class="bni-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg></div><div class="bni-lbl">Üret</div></div>
+  </div>
+</div>
+
+</div></div></div>
+
+<!-- DS PANEL -->
+<div class="dsp">
+  <div class="dsp-t">Design System v8 · Motion + Icons</div>
+  <div class="dsp-b">
+    <div class="dsp-l">Palette — WCAG 2.2</div>
+    <div class="sw-r">
+      <div class="sw" style="background:#1B2E5E"><span class="swl" style="color:white">Navy</span></div>
+      <div class="sw" style="background:#4F6AF5"><span class="swl" style="color:white">Blue</span></div>
+      <div class="sw" style="background:#059669"><span class="swl" style="color:white">OK</span></div>
+      <div class="sw" style="background:#D97706"><span class="swl" style="color:white">Warn</span></div>
+      <div class="sw" style="background:#DC2626"><span class="swl" style="color:white">Err</span></div>
+      <div class="sw" style="background:#6D28D9"><span class="swl" style="color:white">Vio</span></div>
+      <div class="sw" style="background:#F4F3F0;border:1px solid rgba(255,255,255,.06)"><span class="swl" style="color:#9B9B97">BG</span></div>
+    </div>
+  </div>
+  <div class="dsp-b">
+    <div class="dsp-l">Typography — Bricolage + DM Sans</div>
+    <div class="ty-r">
+      <div class="ty"><div class="tym">Bricolage Grotesque 800</div><div style="font-family:'Bricolage Grotesque',sans-serif;font-size:22px;font-weight:800;color:#F4F3F0;letter-spacing:-.04em">Öğretmen<span style="color:#818cf8">AI</span></div></div>
+      <div class="ty"><div class="tym">DM Sans 500 — min 12px label</div><div style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:#F4F3F0">Sınav Üret · Dosyam · Planla</div></div>
+    </div>
+  </div>
+  <div class="dsp-b">
+    <div class="dsp-l">Motion System</div>
+    <div class="notes">
+      <div><span class="law">spring</span> cubic-bezier(.34,1.56,.64,1) — chip select, pill active</div>
+      <div><span class="law">spring-sm</span> cubic-bezier(.22,1,.36,1) — card hover, button press</div>
+      <div><span class="law">ease-out</span> cubic-bezier(.16,1,.3,1) — screen entry, stagger</div>
+      <div><span class="law">Onboarding</span> celebrate keyframe + ring burst — energetic</div>
+      <div><span class="law">Functional</span> stagger-in .03s increments — subtle reveal</div>
+      <div><span class="law">Shimmer</span> gradient animation on savings card accent</div>
+      <div><span class="law">Grain texture</span> SVG feTurbulence — phone screen + body</div>
+      <div><span class="law">Glass nav</span> backdrop-filter blur(24px) — bottom nav + sheet</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const TM={ob:'09:41',tr:'09:43',ana:'07:32',planla:'07:34',dosyam:'21:08',uret:'21:12',jeton:'21:13',sinav:'07:38',sonuc:'07:40'};
+const OR=['ob','tr','ana','planla','dosyam','uret','jeton','sinav','sonuc'];
+let sv=10;
+
+function go(id){
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('active'));
+  const sc=document.getElementById('s-'+id);
+  if(sc){
+    sc.classList.add('active');
+    const sa=sc.querySelector('.sa');
+    if(sa)sa.scrollTop=0;
+  }
+  document.querySelectorAll('.np').forEach((p,i)=>p.classList.toggle('active',OR[i]===id));
+  const t=document.getElementById('sbt');
+  if(t&&TM[id])t.textContent=TM[id];
+  closeSheet();
+}
+function openSheet(){
+  document.getElementById('ov').classList.add('vis');
+  document.getElementById('sh').classList.add('open');
+}
+function closeSheet(){
+  document.getElementById('ov').classList.remove('vis');
+  document.getElementById('sh').classList.remove('open');
+}
+function toggleTheme(){
+  const h=document.documentElement;
+  const t=document.getElementById('thm');
+  const d=h.getAttribute('data-theme')==='dark';
+  h.setAttribute('data-theme',d?'light':'dark');
+  t.classList.toggle('on',!d);
+}
+function toggleChip(el){el.classList.toggle('sel');}
+function toggleSinif(el){el.classList.toggle('sel');}
+function sd(el){
+  document.querySelectorAll('.diff-b').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+}
+function sc(d){
+  sv=Math.min(25,Math.max(5,sv+d));
+  const v=document.getElementById('sv');
+  v.textContent=sv;
+  v.classList.add('bump');
+  setTimeout(()=>v.classList.remove('bump'),300);
+}
+
+go('ob');
+</script>
+</body>
+</html>

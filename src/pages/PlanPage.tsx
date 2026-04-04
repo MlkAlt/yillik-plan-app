@@ -313,210 +313,110 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
   const toplamDers = isMeb ? plan!.haftalar.filter(h => !h.tatilMi).length : dataLength
   const yuzde = toplamDers > 0 ? Math.round((tamamlananSayi / toplamDers) * 100) : 0
 
+  // Bu haftanın günleri
+  const bugunHafta = entry?.plan?.haftalar.find(h => h.haftaNo === bugunHaftaNo)
+  const gunler = ['Paz','Pzt','Sal','Çar','Per','Cum','Cmt']
+  const buHaftaGunler = bugunHafta ? [0,1,2].map(i => {
+    const d = new Date(bugunHafta.baslangicTarihi)
+    d.setDate(d.getDate() + i)
+    const dStr = d.toISOString().split('T')[0]
+    const durum = dStr < bugunStr ? 'hazir' : dStr === bugunStr ? 'eksik' : 'gelecek'
+    return { gun: gunler[d.getDay()], gunNo: d.getDate(), ders, sinif: sinifGercek || sinif, kazanim: bugunHafta.kazanim || '', durum }
+  }) : []
+
   return (
     <div className="page-shell">
       <div className="page-header">
-        <h1
-          className="text-[22px] font-bold tracking-tight mb-0.5"
-          style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text1)' }}
-        >
+        <h1 className="text-[22px] font-bold tracking-tight mb-0.5" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text1)' }}>
           Planlama
         </h1>
-        <p className="text-sm" style={{ color: 'var(--color-text2)' }}>
-          Yillik plan · Haftalik takip · {ders}
-        </p>
+        <p className="text-sm" style={{ color: 'var(--color-text2)' }}>Yıllık · Haftalık · Ders Programı</p>
       </div>
 
-      <div
-        className="page-hero relative overflow-hidden"
-        style={{
-          borderRadius: 'var(--radius-xl)',
-          backgroundColor: 'var(--color-primary)',
-          padding: '18px',
-        }}
-      >
-        <div
-          className="absolute"
-          style={{
-            top: '-30px', right: '-30px',
-            width: '100px', height: '100px',
-            backgroundColor: 'rgba(255,255,255,0.08)',
-            borderRadius: '50%',
-          }}
-        />
-        <p className="text-[10px] font-bold uppercase tracking-[.12em] mb-1.5 relative z-10" style={{ color: 'rgba(255,255,255,0.55)' }}>
-          Ana Ozet
+      {/* Navy hero card — v8 */}
+      <div style={{ margin: '0 16px 12px', borderRadius: '20px', background: 'linear-gradient(145deg,#1B2E5E,#243A78)', padding: '18px', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: '100px', height: '100px', background: 'radial-gradient(circle,rgba(79,106,245,.22),transparent 70%)', borderRadius: '50%' }} />
+        <p style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,.55)', marginBottom: '6px' }}>
+          Yıllık Plan · {entry.yil}
         </p>
-        <p className="text-[19px] font-bold mb-1 relative z-10 tracking-tight" style={{ fontFamily: 'var(--font-display)', color: '#ffffff' }}>
-          {ders}
+        <p style={{ fontFamily: "var(--font-display),'Bricolage Grotesque',sans-serif", fontSize: '20px', fontWeight: 800, color: '#fff', letterSpacing: '-0.03em', marginBottom: '4px' }}>{ders}</p>
+        <p style={{ fontSize: '12px', color: 'rgba(255,255,255,.6)', marginBottom: '12px' }}>
+          {sinifGercek || sinif} · {dataLength} hafta · Haftada 4 saat
         </p>
-        <p className="text-xs mb-3 relative z-10" style={{ color: 'rgba(255,255,255,0.6)' }}>
-          {sinifGercek || sinif}
-        </p>
-        <div className="flex gap-2 relative z-10 mb-3">
-          <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ backgroundColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.85)' }}>
-            {dataLength} hafta
-          </span>
-          <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ backgroundColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.85)' }}>
-            %{yuzde} tamamlandi
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+          {bugunHaftaNo && (
+            <span style={{ fontSize: '12px', fontWeight: 700, padding: '4px 12px', borderRadius: '100px', background: 'rgba(255,255,255,.15)', color: 'rgba(255,255,255,.85)' }}>
+              {bugunHaftaNo}. Hafta
+            </span>
+          )}
+          <span style={{ fontSize: '12px', fontWeight: 700, padding: '4px 12px', borderRadius: '100px', background: 'rgba(255,255,255,.15)', color: 'rgba(255,255,255,.85)' }}>
+            %{yuzde} tamamlandı
           </span>
         </div>
-        <div className="relative z-10 h-1 rounded-full overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}>
-          <div className="h-full rounded-full transition-all duration-700 ease-out" style={{ width: `${visibleYuzde}%`, backgroundColor: 'rgba(255,255,255,0.75)' }} />
+        <div style={{ height: '4px', background: 'rgba(255,255,255,.2)', borderRadius: '100px', overflow: 'hidden' }}>
+          <div style={{ height: '100%', width: `${visibleYuzde}%`, background: 'rgba(255,255,255,.75)', borderRadius: '100px', transition: 'width 0.7s ease-out' }} />
         </div>
       </div>
 
+      {/* Sınıf seçici */}
       {planlar && planlar.length > 1 && (
-        <div className="page-hero">
-          <SectionHeader title="Aktif Plan" meta="Sinif secimi" />
-          <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
-            {planlar.map(p => (
-              <button
-                key={p.sinif}
-                onClick={() => onSinifSec?.(p.sinif)}
-                className="whitespace-nowrap flex-shrink-0 text-sm font-bold transition-all active:scale-95"
-                style={{
-                  padding: '6px 14px',
-                  borderRadius: 'var(--radius-pill)',
-                  border: `1.5px solid ${p.sinif === entry.sinif ? 'var(--color-primary)' : 'var(--color-border)'}`,
-                  backgroundColor: p.sinif === entry.sinif ? 'var(--color-primary)' : 'var(--color-bg)',
-                  color: p.sinif === entry.sinif ? '#ffffff' : 'var(--color-text2)',
-                }}
-              >
-                {p.label || p.sinif}
-              </button>
+        <div style={{ padding: '0 16px 8px', display: 'flex', gap: '8px', overflowX: 'auto', scrollbarWidth: 'none' }}>
+          {planlar.map(p => (
+            <button key={p.sinif} onClick={() => onSinifSec?.(p.sinif)}
+              style={{ whiteSpace: 'nowrap', flexShrink: 0, fontSize: '13px', fontWeight: 700, padding: '6px 14px', borderRadius: '100px', border: `1.5px solid ${p.sinif === entry.sinif ? '#4F6AF5' : 'var(--color-border)'}`, background: p.sinif === entry.sinif ? '#4F6AF5' : 'var(--color-bg)', color: p.sinif === entry.sinif ? '#fff' : 'var(--color-text2)', cursor: 'pointer' }}>
+              {p.label || p.sinif}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Bu Hafta */}
+      {buHaftaGunler.length > 0 && (
+        <div style={{ margin: '0 16px 12px' }}>
+          <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--color-text3)', marginBottom: '8px' }}>Bu Hafta</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {buHaftaGunler.map((g, i) => (
+              <div key={i} onClick={() => navigate(`/app/hafta/${bugunHaftaNo}`)}
+                style={{ display: 'flex', alignItems: 'center', gap: '14px', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: '14px', padding: '12px 14px', cursor: 'pointer' }}>
+                <p style={{ fontFamily: "var(--font-display),'Bricolage Grotesque',sans-serif", fontSize: '22px', fontWeight: 800, color: 'var(--color-text1)', letterSpacing: '-0.03em', minWidth: '28px' }}>{g.gunNo}</p>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--color-text1)', marginBottom: '2px' }}>{g.ders} · {g.sinif}</p>
+                  <p style={{ fontSize: '11px', color: 'var(--color-text2)', lineHeight: '15px' }}>{g.kazanim || 'Kazanım yok'}</p>
+                </div>
+                <span style={{ fontSize: '11px', fontWeight: 700, padding: '3px 10px', borderRadius: '100px', background: g.durum === 'hazir' ? '#ECFDF5' : g.durum === 'eksik' ? '#FFFBEB' : 'var(--color-bg)', color: g.durum === 'hazir' ? '#059669' : g.durum === 'eksik' ? '#D97706' : 'var(--color-text3)', border: `1px solid ${g.durum === 'hazir' ? '#A7F3D0' : g.durum === 'eksik' ? '#FDE68A' : 'var(--color-border)'}` }}>
+                  {g.durum === 'hazir' ? 'Hazır' : g.durum === 'eksik' ? 'Eksik' : 'Gelecek'}
+                </span>
+              </div>
             ))}
           </div>
         </div>
       )}
 
-      <div className="sticky-action-bar mb-4">
-        <div className="glass-surface px-3 py-3" style={{ borderRadius: 'var(--radius-xl)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-sm)' }}>
-          <SectionHeader title="Araclar" meta="Ikincil aksiyonlar" />
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <button
-                onClick={() => setExportMenuAcik(p => !p)}
-                disabled={!!exporting}
-                className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-bold transition-all active:scale-95 disabled:opacity-60"
-                style={{
-                  borderRadius: 'var(--radius-lg)',
-                  border: '1px solid var(--color-border)',
-                  backgroundColor: 'var(--color-surface)',
-                  color: 'var(--color-primary)',
-                }}
-              >
-                {exporting ? <span className="animate-pulse text-xs">Hazirlaniyor...</span> : <><Download size={16} /> Indir</>}
-              </button>
-              {exportMenuAcik && (
-                <>
-                  <div className="fixed inset-0 z-10" onClick={() => setExportMenuAcik(false)} />
-                  <div
-                    className="absolute top-full left-0 right-0 mt-1 z-20 overflow-hidden"
-                    style={{
-                      borderRadius: 'var(--radius-lg)',
-                      border: '1px solid var(--color-border)',
-                      backgroundColor: 'var(--color-surface)',
-                      boxShadow: 'var(--shadow-md)',
-                    }}
-                  >
-                    <button onClick={handleExcelIndir} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold active:opacity-70" style={{ color: 'var(--color-text1)', borderBottom: '1px solid var(--color-border)' }}>
-                      <FileSpreadsheet size={16} style={{ color: 'var(--color-success)' }} /> Excel (.xlsx)
-                    </button>
-                    <button onClick={handleWordIndir} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold active:opacity-70" style={{ color: 'var(--color-text1)', borderBottom: '1px solid var(--color-border)' }}>
-                      <FileText size={16} style={{ color: 'var(--color-primary)' }} /> Word (.doc)
-                    </button>
-                    <button onClick={handleYazdir} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold active:opacity-70" style={{ color: 'var(--color-text1)' }}>
-                      <Printer size={16} style={{ color: 'var(--color-text2)' }} /> Yazdir / PDF
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-
-            <button
-              onClick={handleYazdir}
-              className="flex items-center gap-1.5 text-sm font-bold transition-all active:scale-95 whitespace-nowrap"
-              style={{
-                padding: '0 14px',
-                borderRadius: 'var(--radius-lg)',
-                border: '1px solid var(--color-border)',
-                backgroundColor: 'var(--color-surface)',
-                color: 'var(--color-text2)',
-              }}
-            >
-              <Printer size={16} /> Yazdir
-            </button>
-
-            {bugunHaftaNo && (
-              <button
-                onClick={scrollToBugunHafta}
-                className="flex items-center gap-1.5 text-sm font-bold transition-all active:scale-95 whitespace-nowrap"
-                style={{
-                  padding: '0 14px',
-                  borderRadius: 'var(--radius-lg)',
-                  border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)',
-                  backgroundColor: 'color-mix(in srgb, var(--color-primary) 6%, transparent)',
-                  color: 'var(--color-primary)',
-                }}
-              >
-                <MapPin size={15} /> Bu Hafta
-              </button>
-            )}
-          </div>
+      {/* Haftalık Program grid */}
+      <div style={{ margin: '0 16px 12px', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: '16px', padding: '14px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+          <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-text1)' }}>Haftalık Program</p>
+          <button style={{ fontSize: '13px', fontWeight: 700, color: '#4F6AF5', background: 'none', border: 'none', cursor: 'pointer' }}>Düzenle</button>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: '4px' }}>
+          {['Pzt','Sal','Çar','Per','Cum'].map(g => (
+            <div key={g} style={{ textAlign: 'center', fontSize: '10px', fontWeight: 700, color: 'var(--color-text3)', paddingBottom: '4px' }}>{g}</div>
+          ))}
+          {Array.from({ length: 15 }, (_, i) => {
+            const col = i % 5
+            const dolu = col === 0 || col === 1 || col === 2 || col === 4
+            return (
+              <div key={i} style={{ minHeight: '32px', borderRadius: '6px', background: dolu ? 'color-mix(in srgb,#4F6AF5 10%,transparent)' : 'var(--color-bg)', border: dolu ? '1px solid color-mix(in srgb,#4F6AF5 25%,transparent)' : '1px solid transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', fontWeight: 700, color: dolu ? '#4F6AF5' : 'transparent', padding: '2px', lineHeight: '1.2', textAlign: 'center' }}>
+                {dolu ? ders.split(' ')[0].slice(0,4) : ''}
+              </div>
+            )
+          })}
         </div>
       </div>
 
-      <div className="section-stack">
+      {/* Dönem grupları ve export araçları */}
+      <div className="section-stack" style={{ padding: '0 16px 16px' }}>
         <AdBanner className="rounded-lg" />
-
-        <div>
-          <SectionHeader title="Haftalik Program" meta="Bilgi gorunumu" />
-          <div
-            style={{
-              borderRadius: 'var(--radius-lg)',
-              backgroundColor: 'var(--color-surface)',
-              border: '1px solid var(--color-border)',
-              boxShadow: 'var(--shadow-xs)',
-              padding: '14px',
-            }}
-          >
-            <div className="flex justify-between items-center mb-3">
-              <span className="text-sm font-bold" style={{ color: 'var(--color-text1)' }}>Ders dagilimi</span>
-              <span className="text-xs font-bold" style={{ color: 'var(--color-text3)' }}>Salt okunur</span>
-            </div>
-            <div className="grid grid-cols-5 gap-1">
-              {['Pzt', 'Sal', 'Car', 'Per', 'Cum'].map(gun => (
-                <div key={gun} className="text-center text-[9px] font-bold uppercase tracking-[.04em] py-1" style={{ color: 'var(--color-text3)' }}>
-                  {gun}
-                </div>
-              ))}
-              {Array.from({ length: 15 }, (_, i) => {
-                const gunIndex = i % 5
-                const doluMu = gunIndex === 0 || gunIndex === 2 || gunIndex === 4
-                return (
-                  <div
-                    key={i}
-                    className="text-center text-[9px] font-semibold min-h-[32px] flex items-center justify-center rounded-[4px]"
-                    style={doluMu ? {
-                      backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
-                      color: 'var(--color-primary)',
-                      border: '1px solid color-mix(in srgb, var(--color-primary) 25%, transparent)',
-                      fontWeight: 700,
-                      lineHeight: '1.3',
-                      padding: '4px',
-                    } : {
-                      backgroundColor: 'var(--color-bg2)',
-                      color: 'var(--color-border2)',
-                    }}
-                  >
-                    {doluMu ? ders.split(' ')[0].slice(0, 5) : '-'}
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        </div>
 
         {isMeb && (
           <div>

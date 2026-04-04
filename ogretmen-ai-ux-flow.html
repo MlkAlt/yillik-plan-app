@@ -1,0 +1,1672 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ÖğretmenAI — UX Akış Planı</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap');
+
+  :root {
+    --ink: #0f0e0c;
+    --paper: #f7f4ef;
+    --paper2: #edeae3;
+    --accent: #2a5c45;
+    --accent2: #e8c547;
+    --accent3: #c94a2e;
+    --muted: #7a7670;
+    --border: #d4d0c8;
+    --card: #ffffff;
+    --phase1: #2a5c45;
+    --phase2: #1a3d6b;
+    --phase3: #7b3fa0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 60px 48px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 320px; height: 320px;
+    background: var(--accent2);
+    border-radius: 50%;
+    opacity: 0.08;
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; left: 30%;
+    width: 200px; height: 200px;
+    background: var(--accent);
+    border-radius: 50%;
+    opacity: 0.12;
+  }
+  .header-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 1;
+  }
+  h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(36px, 5vw, 64px);
+    font-weight: 400;
+    line-height: 1.1;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 20px;
+  }
+  h1 em {
+    font-style: italic;
+    color: var(--accent2);
+  }
+  .header-meta {
+    font-size: 14px;
+    color: rgba(247,244,239,0.55);
+    position: relative;
+    z-index: 1;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .header-meta span::before { content: '— '; }
+
+  /* NAV */
+  nav {
+    background: var(--ink);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding: 0 48px;
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+  }
+  nav a {
+    color: rgba(247,244,239,0.5);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 14px 20px;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+  nav a:hover, nav a.active {
+    color: var(--accent2);
+    border-bottom-color: var(--accent2);
+  }
+
+  /* MAIN */
+  main { max-width: 1200px; margin: 0 auto; padding: 48px 48px 80px; }
+
+  /* SECTION HEADERS */
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-num {
+    font-family: 'Instrument Serif', serif;
+    font-size: 48px;
+    font-weight: 400;
+    color: var(--border);
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 28px;
+    font-weight: 400;
+  }
+  .section-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  section { margin-bottom: 72px; }
+
+  /* PRINCIPLE CARDS */
+  .principle-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 32px;
+  }
+  .principle-card {
+    background: var(--card);
+    padding: 28px;
+  }
+  .principle-icon {
+    font-size: 24px;
+    margin-bottom: 12px;
+  }
+  .principle-card h3 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .principle-card p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .principle-card .metric {
+    margin-top: 16px;
+    font-size: 22px;
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+    color: var(--accent);
+  }
+
+  /* FLOW DIAGRAM */
+  .flow-container {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 40px;
+    margin-bottom: 32px;
+  }
+  .flow-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 32px;
+  }
+  .flow-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    margin-bottom: 24px;
+  }
+  .flow-step {
+    flex: 1;
+    text-align: center;
+    position: relative;
+  }
+  .flow-step::after {
+    content: '→';
+    position: absolute;
+    right: -12px;
+    top: 16px;
+    font-size: 20px;
+    color: var(--border);
+    z-index: 1;
+  }
+  .flow-step:last-child::after { display: none; }
+  .flow-node {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    max-width: 140px;
+  }
+  .flow-circle {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .flow-circle.onboard { background: #fff3cd; }
+  .flow-circle.dashboard { background: #d4edda; }
+  .flow-circle.action { background: #cce5ff; }
+  .flow-circle.ai { background: #f3e5ff; }
+  .flow-circle.output { background: #fce8e8; }
+  .flow-label {
+    font-size: 12px;
+    font-weight: 500;
+    text-align: center;
+    line-height: 1.3;
+  }
+  .flow-sub {
+    font-size: 10px;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  /* SCREEN DESIGNS */
+  .screens-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+  .screen-card {
+    border: 1px solid var(--border);
+    background: var(--card);
+    overflow: hidden;
+  }
+  .screen-header {
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    background: var(--paper2);
+  }
+  .screen-name {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .screen-badge {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 2px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .badge-mvp { background: #d4edda; color: #1a5c2a; }
+  .badge-v2 { background: #cce5ff; color: #1a3d6b; }
+  .badge-premium { background: #f3e5ff; color: #5a1a80; }
+  .screen-body { padding: 20px; }
+
+  /* MOCK PHONE */
+  .phone-mockup {
+    width: 220px;
+    background: var(--ink);
+    border-radius: 28px;
+    padding: 8px;
+    margin: 0 auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  }
+  .phone-screen {
+    background: var(--paper);
+    border-radius: 22px;
+    overflow: hidden;
+    min-height: 380px;
+  }
+  .phone-status {
+    background: var(--ink);
+    padding: 6px 16px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    color: white;
+    align-items: center;
+    border-radius: 22px 22px 0 0;
+  }
+  .phone-content { padding: 12px; }
+
+  /* MOCKUP COMPONENTS */
+  .mock-header {
+    background: var(--accent);
+    color: white;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+  }
+  .mock-header-label { font-size: 9px; opacity: 0.7; margin-bottom: 2px; }
+  .mock-header-text { font-size: 13px; font-weight: 600; }
+  .mock-header-sub { font-size: 10px; opacity: 0.8; margin-top: 2px; }
+
+  .mock-card {
+    background: white;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 8px;
+    border: 1px solid var(--border);
+  }
+  .mock-card-label { font-size: 8px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+  .mock-card-text { font-size: 11px; font-weight: 500; }
+  .mock-card-sub { font-size: 9px; color: var(--muted); margin-top: 2px; }
+  .mock-card-row { display: flex; justify-content: space-between; align-items: center; }
+
+  .mock-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    width: 100%;
+    margin-bottom: 6px;
+    cursor: pointer;
+    text-align: center;
+  }
+  .mock-btn-outline {
+    background: transparent;
+    color: var(--accent);
+    border: 1.5px solid var(--accent);
+  }
+  .mock-tag {
+    display: inline-block;
+    font-size: 8px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: 600;
+    margin-right: 4px;
+  }
+  .tag-urgent { background: #fce8e8; color: var(--accent3); }
+  .tag-today { background: #d4edda; color: #1a5c2a; }
+  .tag-ai { background: #f3e5ff; color: #5a1a80; }
+
+  .mock-progress {
+    height: 4px;
+    background: var(--paper2);
+    border-radius: 2px;
+    margin-top: 6px;
+    overflow: hidden;
+  }
+  .mock-progress-bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  .mock-stat {
+    text-align: center;
+    padding: 8px;
+  }
+  .mock-stat-num {
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    color: var(--accent);
+  }
+  .mock-stat-label { font-size: 8px; color: var(--muted); }
+
+  .mock-nav {
+    display: flex;
+    background: white;
+    border-top: 1px solid var(--border);
+    padding: 6px 0 2px;
+    margin-top: 8px;
+    border-radius: 0 0 22px 22px;
+  }
+  .mock-nav-item {
+    flex: 1;
+    text-align: center;
+    font-size: 8px;
+    color: var(--muted);
+    padding: 4px;
+  }
+  .mock-nav-item.active { color: var(--accent); }
+  .mock-nav-icon { font-size: 14px; display: block; margin-bottom: 2px; }
+
+  .mock-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 8px 0;
+  }
+
+  /* ONBOARDING FLOW */
+  .onboard-steps {
+    display: flex;
+    gap: 0;
+    margin-bottom: 24px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    overflow: hidden;
+  }
+  .onboard-step {
+    flex: 1;
+    padding: 24px 20px;
+    border-right: 1px solid var(--border);
+    position: relative;
+  }
+  .onboard-step:last-child { border-right: none; }
+  .onboard-step-num {
+    font-family: 'Instrument Serif', serif;
+    font-size: 36px;
+    color: var(--border);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .onboard-step h4 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .onboard-step p {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .onboard-step .fields {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .field-chip {
+    background: var(--paper2);
+    border: 1px solid var(--border);
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: var(--ink);
+  }
+  .onboard-step .time-label {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-size: 10px;
+    color: var(--muted);
+    background: var(--paper2);
+    padding: 2px 8px;
+    border-radius: 3px;
+  }
+
+  /* FEATURE LIST */
+  .feature-section {
+    margin-bottom: 16px;
+  }
+  .feature-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .feature-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--paper2);
+  }
+  .feature-row:last-child { border-bottom: none; }
+  .feature-icon-box {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+    background: var(--paper2);
+  }
+  .feature-info { flex: 1; }
+  .feature-name { font-size: 14px; font-weight: 500; margin-bottom: 3px; }
+  .feature-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .feature-meta {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+  }
+  .meta-chip {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+  .chip-save { background: #d4edda; color: #1a5c2a; }
+    .chip-ai { background: #f3e5ff; color: #5a1a80; }
+  .chip-free { background: var(--paper2); color: var(--muted); }
+  .chip-premium { background: #fff3cd; color: #7a5a00; }
+
+  /* UX PRINCIPLES */
+  .rule-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .rule-card {
+    background: var(--card);
+    padding: 24px;
+  }
+  .rule-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .rule-label.do { color: var(--accent); }
+  .rule-label.dont { color: var(--accent3); }
+  .rule-card h4 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+  .rule-card p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* JOURNEY MAP */
+  .journey {
+    background: var(--card);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .journey-header {
+    display: grid;
+    grid-template-columns: 140px repeat(5, 1fr);
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .journey-cell {
+    padding: 12px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    border-right: 1px solid rgba(255,255,255,0.08);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .journey-cell:first-child { color: var(--accent2); }
+  .journey-row {
+    display: grid;
+    grid-template-columns: 140px repeat(5, 1fr);
+    border-bottom: 1px solid var(--border);
+  }
+  .journey-row:last-child { border-bottom: none; }
+  .journey-row-cell {
+    padding: 14px 16px;
+    font-size: 12px;
+    border-right: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  .journey-row-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: var(--paper2);
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+  }
+  .emotion-high { color: #1a5c2a; font-weight: 600; }
+  .emotion-mid { color: #7a5a00; font-weight: 600; }
+  .emotion-low { color: var(--accent3); font-weight: 600; }
+  .opportunity { background: #f0f9f4; }
+  .pain { background: #fff8f8; }
+
+  /* NOTIFICATION */
+  .insight-box {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 24px 28px;
+    margin-bottom: 32px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .insight-icon { font-size: 24px; flex-shrink: 0; margin-top: 2px; }
+  .insight-text h4 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+  .insight-text p { font-size: 13px; color: rgba(247,244,239,0.65); line-height: 1.6; }
+
+  /* PHASE TIMELINE */
+  .timeline {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 32px;
+  }
+  .timeline-phase {
+    background: var(--card);
+    padding: 28px;
+  }
+  .phase-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    padding: 3px 0;
+    border-bottom: 2px solid;
+    display: inline-block;
+    padding-right: 8px;
+  }
+  .phase-label.p1 { color: var(--phase1); border-color: var(--phase1); }
+  .phase-label.p2 { color: var(--phase2); border-color: var(--phase2); }
+  .phase-label.p3 { color: var(--phase3); border-color: var(--phase3); }
+  .timeline-phase h3 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    font-weight: 400;
+    margin: 12px 0 16px;
+  }
+  .timeline-items { list-style: none; }
+  .timeline-items li {
+    font-size: 13px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--paper2);
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    line-height: 1.5;
+  }
+  .timeline-items li:last-child { border-bottom: none; }
+  .timeline-items li::before { content: '·'; color: var(--border); font-size: 20px; line-height: 1; flex-shrink: 0; }
+  .timeline-duration {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* FOOTER */
+  footer {
+    background: var(--ink);
+    color: rgba(247,244,239,0.4);
+    padding: 24px 48px;
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  footer strong { color: var(--accent2); }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    header, nav, main, footer { padding-left: 20px; padding-right: 20px; }
+    .rule-grid { grid-template-columns: 1fr; }
+    .timeline { grid-template-columns: 1fr; }
+    .journey-header, .journey-row { grid-template-columns: 100px repeat(5, 1fr); }
+    .onboard-steps { flex-direction: column; }
+    .onboard-step { border-right: none; border-bottom: 1px solid var(--border); }
+    h1 { font-size: 32px; }
+    .screens-grid { grid-template-columns: 1fr; }
+  }
+
+  /* SMOOTH SCROLL */
+  html { scroll-behavior: smooth; }
+  
+  /* STICKY TOC */
+  .toc-float {
+    position: fixed;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 100;
+  }
+  .toc-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .toc-dot:hover { background: var(--accent); transform: scale(1.5); }
+  .toc-dot .toc-tooltip {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .toc-dot:hover .toc-tooltip { opacity: 1; }
+
+  @media (max-width: 1100px) { .toc-float { display: none; } }
+</style>
+</head>
+<body>
+
+<!-- Floating TOC -->
+<div class="toc-float">
+  <div class="toc-dot" onclick="document.getElementById('s1').scrollIntoView()"><span class="toc-tooltip">Temel İlkeler</span></div>
+  <div class="toc-dot" onclick="document.getElementById('s2').scrollIntoView()"><span class="toc-tooltip">Kullanıcı Akışı</span></div>
+  <div class="toc-dot" onclick="document.getElementById('s3').scrollIntoView()"><span class="toc-tooltip">Onboarding</span></div>
+  <div class="toc-dot" onclick="document.getElementById('s4').scrollIntoView()"><span class="toc-tooltip">Dashboard</span></div>
+  <div class="toc-dot" onclick="document.getElementById('s5').scrollIntoView()"><span class="toc-tooltip">Ekranlar</span></div>
+  <div class="toc-dot" onclick="document.getElementById('s6').scrollIntoView()"><span class="toc-tooltip">Journey Map</span></div>
+  <div class="toc-dot" onclick="document.getElementById('s7').scrollIntoView()"><span class="toc-tooltip">Geliştirme Sırası</span></div>
+  <div class="toc-dot" onclick="document.getElementById('s8').scrollIntoView()"><span class="toc-tooltip">UX Kuralları</span></div>
+</div>
+
+<header>
+  <div class="header-label">UX Akış Planı · Senior Review · Nisan 2026</div>
+  <h1>ÖğretmenAI<br><em>Yıllık Plan</em> + Premium</h1>
+  <div class="header-meta">
+    <span>Türkiye MVP → Tier 1 Ölçekleme</span>
+    <span>Mobil Öncelikli</span>
+    <span>Solo Geliştirici Optimize</span>
+    <span>Freemium → Premium</span>
+  </div>
+</header>
+
+<nav>
+  <a href="#s1" class="active">İlkeler</a>
+  <a href="#s2">Kullanıcı Akışı</a>
+  <a href="#s3">Onboarding</a>
+  <a href="#s4">Dashboard</a>
+  <a href="#s5">Tüm Ekranlar</a>
+  <a href="#s6">Journey Map</a>
+  <a href="#s7">Geliştirme Sırası</a>
+  <a href="#s8">UX Kuralları</a>
+</nav>
+
+<main>
+
+<!-- ================================ -->
+<!-- SECTION 1: TEMEL İLKELER -->
+<!-- ================================ -->
+<section id="s1">
+  <div class="section-header">
+    <div class="section-num">01</div>
+    <div>
+      <div class="section-title">Tasarımı Yönlendiren 4 Temel Gerçek</div>
+      <div class="section-sub">Araştırma bulgularından damıtılan tasarım prensipleri</div>
+    </div>
+  </div>
+
+  <div class="principle-grid">
+    <div class="principle-card">
+      <div class="principle-icon">⚡</div>
+      <h3>30 Saniye Kuralı</h3>
+      <p>Bir görevi tamamlamak 30 saniyeden uzun sürerse öğretmen uygulamayı kapatır. Kağıda veya başka bir araca geçer. Her akış bu kurala göre test edilmeli.</p>
+      <div class="metric">≤ 30sn</div>
+    </div>
+    <div class="principle-card">
+      <div class="principle-icon">🧠</div>
+      <h3>Sıfır Boş Sayfa</h3>
+      <p>Öğretmene hiçbir zaman boş form gösterme. Her ekran ya dolu gelsin ya da AI'ın tamamlayacağı taslakla gelsin. Boş input alanı görmek üretimi öldürür.</p>
+      <div class="metric">Always Pre-filled</div>
+    </div>
+    <div class="principle-card">
+      <div class="principle-icon">📱</div>
+      <h3>Teneffüs Modası</h3>
+      <p>Uygulama teneffüste açılır, 10 dakikada kapanır. Karmaşık ayar yok, menü yok. Birincil eylem her zaman ekranın başında, erişilebilir ve tek dokunuşla başlatılabilir.</p>
+      <div class="metric">10dk Session</div>
+    </div>
+    <div class="principle-card">
+      <div class="principle-icon">🏆</div>
+      <h3>İlk Çıktı = Bağlılık</h3>
+      <p>Öğretmen ilk oturumda somut bir çıktı almalı (yazılı sorusu, plan veya PDF). Değeri görmeden premium teklifle karşılaşmamalı. "Dene, sonra öde" mantığı.</p>
+      <div class="metric">Value First</div>
+    </div>
+  </div>
+
+  <div class="insight-box">
+    <div class="insight-icon">💡</div>
+    <div class="insight-text">
+      <h4>Kritik UX İçgörüsü: İki Farklı Öğretmen Modu</h4>
+      <p>Araştırma iki ayrı kullanım anı gösteriyor. <strong>Teneffüs modu</strong> (5-10 dk, telefonda, acil ihtiyaç, hızlı üretim) ve <strong>Evrak modu</strong> (akşam/hafta sonu, tablet/bilgisayarda, uzun oturum, toplu üretim). Arayüz bu iki modu desteklemelidir. Teneffüste 3 dokunuştan fazla gerektiren hiçbir işlem olmamalı. Evrak modunda ise derin bir "flow" deneyimi sunulmalı.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================================ -->
+<!-- SECTION 2: KULLANICI AKIŞI -->
+<!-- ================================ -->
+<section id="s2">
+  <div class="section-header">
+    <div class="section-num">02</div>
+    <div>
+      <div class="section-title">Uçtan Uca Kullanıcı Akışı</div>
+      <div class="section-sub">İlk açılıştan günlük kullanıma tam yol haritası</div>
+    </div>
+  </div>
+
+  <!-- Ana Akış -->
+  <div class="flow-container">
+    <div class="flow-title">A — İlk Kullanım Akışı (Yeni Kullanıcı)</div>
+    <div class="flow-row">
+      <div class="flow-step">
+        <div class="flow-node">
+          <div class="flow-circle onboard">📲</div>
+          <div class="flow-label">İndir & Aç</div>
+          <div class="flow-sub">Store'dan indir, açılış animasyonu</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-node">
+          <div class="flow-circle onboard">👤</div>
+          <div class="flow-label">Hızlı Kayıt</div>
+          <div class="flow-sub">E-posta veya Google (tek ekran)</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-node">
+          <div class="flow-circle onboard">🎯</div>
+          <div class="flow-label">Profil Sihirbazı</div>
+          <div class="flow-sub">3 soru: ders, sınıf, okul türü</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-node">
+          <div class="flow-circle ai">✨</div>
+          <div class="flow-label">İlk WOW Anı</div>
+          <div class="flow-sub">Anında bir yazılı sorusu üret</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-node">
+          <div class="flow-circle output">📄</div>
+          <div class="flow-label">Dashboard'a Giriş</div>
+          <div class="flow-sub">Kişiselleştirilmiş ana ekran</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-container">
+    <div class="flow-title">B — Günlük Kullanım Akışı (Teneffüs Modu)</div>
+    <div class="flow-row">
+      <div class="flow-step">
+        <div class="flow-node">
+          <div class="flow-circle dashboard">🏠</div>
+          <div class="flow-label">Dashboard</div>
+          <div class="flow-sub">Bugünün özeti görünür</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-node">
+          <div class="flow-circle action">⚡</div>
+          <div class="flow-label">Hızlı Eylem</div>
+          <div class="flow-sub">FAB butonu: Ne üreteyim?</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-node">
+          <div class="flow-circle ai">🤖</div>
+          <div class="flow-label">AI Üretim</div>
+          <div class="flow-sub">15-30 saniye bekleme</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-node">
+          <div class="flow-circle action">✏️</div>
+          <div class="flow-label">Hızlı Düzenleme</div>
+          <div class="flow-sub">Onay veya ince ayar</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-node">
+          <div class="flow-circle output">💾</div>
+          <div class="flow-label">Kaydet / PDF</div>
+          <div class="flow-sub">Paylaş veya indir</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-container">
+    <div class="flow-title">C — Freemium → Premium Dönüşüm Akışı</div>
+    <div class="flow-row">
+      <div class="flow-step">
+        <div class="flow-node">
+          <div class="flow-circle dashboard">🆓</div>
+          <div class="flow-label">Ücretsiz Kullanım</div>
+          <div class="flow-sub">3 AI üretim / ay, 2 PDF</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-node">
+          <div class="flow-circle action">🔔</div>
+          <div class="flow-label">Yumuşak Paywall</div>
+          <div class="flow-sub">"4. soru üretimi premium"</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-node">
+          <div class="flow-circle ai">💎</div>
+          <div class="flow-label">Değer Ekranı</div>
+          <div class="flow-sub">Ne kazandınız + ne kazanırsınız</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-node">
+          <div class="flow-circle output">💳</div>
+          <div class="flow-label">Ödeme</div>
+          <div class="flow-sub">Aylık / Yıllık seçimi</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-node">
+          <div class="flow-circle output">🎉</div>
+          <div class="flow-label">Premium Aktif</div>
+          <div class="flow-sub">Tüm kilitler açılır</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================ -->
+<!-- SECTION 3: ONBOARDING -->
+<!-- ================================ -->
+<section id="s3">
+  <div class="section-header">
+    <div class="section-num">03</div>
+    <div>
+      <div class="section-title">Onboarding: İlk 3 Dakika</div>
+      <div class="section-sub">Kayıt → Profil → İlk WOW → Dashboard</div>
+    </div>
+  </div>
+
+  <div class="insight-box">
+    <div class="insight-icon">🎯</div>
+    <div class="insight-text">
+      <h4>Onboarding Tasarım Kararı</h4>
+      <p>Geleneksel onboarding hatası: Önce 10 soru sor, sonra değer göster. Biz tersini yapıyoruz. <strong>2 zorunlu soru</strong> (ders + sınıf), hemen ardından AI üretimi. Diğer profil bilgileri zamanla, kullanım esnasında toplanır. Aktivasyon metriki: "İlk oturumda PDF çıktısı alan öğretmen sayısı."</p>
+    </div>
+  </div>
+
+  <div class="onboard-steps">
+    <div class="onboard-step">
+      <span class="time-label">~30sn</span>
+      <div class="onboard-step-num">1</div>
+      <h4>Karşılama</h4>
+      <p>Sadece e-posta + şifre veya tek dokunuşla Google ile giriş. Telefon numarası, okul adı yok — sürtünmeyi minimize et.</p>
+      <div class="fields">
+        <div class="field-chip">📧 E-posta adresi</div>
+        <div class="field-chip">🔑 Şifre</div>
+        <div class="field-chip" style="background:#d4edda; border-color:#9fc5aa;">veya G Google ile devam et</div>
+      </div>
+    </div>
+    <div class="onboard-step">
+      <span class="time-label">~45sn</span>
+      <div class="onboard-step-num">2</div>
+      <h4>Sadece 2 Soru</h4>
+      <p>Chip/kartlarla seçim — text girişi yok. Seçim anında sonraki adıma geçer, "İleri" butonu bile yok.</p>
+      <div class="fields">
+        <div class="field-chip">📚 Hangi dersi okutuyorsunuz?</div>
+        <div class="field-chip">🎓 Hangi sınıf seviyesi?</div>
+      </div>
+    </div>
+    <div class="onboard-step">
+      <span class="time-label">~30sn</span>
+      <div class="onboard-step-num">3</div>
+      <h4>İlk WOW Anı</h4>
+      <p>Seçimlerine göre AI anında bir yazılı sorusu üretir. "İşte sizin için bir örnek" — ürünün değerini <em>söylemek</em> değil <em>göstermek.</em></p>
+      <div class="fields">
+        <div class="field-chip" style="background:#f3e5ff; border-color:#c5a0e8;">✨ AI örnek soru oluşturuluyor...</div>
+        <div class="field-chip">📄 PDF olarak kaydet</div>
+      </div>
+    </div>
+    <div class="onboard-step">
+      <span class="time-label">Sürekli</span>
+      <div class="onboard-step-num">4</div>
+      <h4>Progressive Profil</h4>
+      <p>Okul adı, zümre, nöbet günü gibi bilgiler kullanıcı ilerledikçe, ilgili özelliği açtıkça istenir. Asla ilk oturumda değil.</p>
+      <div class="fields">
+        <div class="field-chip">🏫 Okul bilgisi (Yıllık Plan'da sor)</div>
+        <div class="field-chip">📅 Ders programı (Dashboard'da sor)</div>
+        <div class="field-chip">👥 Sınıf listesi (Not defterinde sor)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================ -->
+<!-- SECTION 4: DASHBOARD TASARIMI -->
+<!-- ================================ -->
+<section id="s4">
+  <div class="section-header">
+    <div class="section-num">04</div>
+    <div>
+      <div class="section-title">Dashboard Mimarisi</div>
+      <div class="section-sub">Her öğretmenin her sabah görmek istediği ekran</div>
+    </div>
+  </div>
+
+  <div class="screens-grid">
+    <!-- SABAH MODU -->
+    <div class="screen-card">
+      <div class="screen-header">
+        <span class="screen-name">Sabah Modu (07:30)</span>
+        <span class="screen-badge badge-mvp">MVP</span>
+      </div>
+      <div class="screen-body">
+        <div class="phone-mockup">
+          <div class="phone-screen">
+            <div class="phone-status">
+              <span>07:42</span>
+              <span>●●●</span>
+            </div>
+            <div class="phone-content">
+              <div class="mock-header">
+                <div class="mock-header-label">BUGÜN · Salı 2 Nisan</div>
+                <div class="mock-header-text">Günaydın, Melik Hoca 👋</div>
+                <div class="mock-header-sub">4 dersiniz var · Not girişine 3 gün</div>
+              </div>
+              <div class="mock-card">
+                <div class="mock-card-label">Ders Programı</div>
+                <div class="mock-card-row">
+                  <div>
+                    <div class="mock-card-text">1. Ders — 9A Muhasebe</div>
+                    <div class="mock-card-sub">08:30 · Günlük plan hazır ✓</div>
+                  </div>
+                  <span class="mock-tag tag-today">Hazır</span>
+                </div>
+                <div class="mock-divider"></div>
+                <div class="mock-card-row">
+                  <div>
+                    <div class="mock-card-text">3. Ders — 10B Muhasebe</div>
+                    <div class="mock-card-sub">10:20 · Plan eksik</div>
+                  </div>
+                  <span class="mock-tag tag-urgent">Eksik</span>
+                </div>
+              </div>
+              <div class="mock-card">
+                <div class="mock-card-label">Yaklaşan Görev</div>
+                <div class="mock-card-text">📝 Yazılı sınav — 4 gün kaldı</div>
+                <div class="mock-progress"><div class="mock-progress-bar" style="width:60%"></div></div>
+                <div class="mock-card-sub" style="margin-top:4px">6/10 soru hazır</div>
+              </div>
+              <div class="mock-btn">⚡ Hızlı Üret</div>
+            </div>
+            <div class="mock-nav">
+              <div class="mock-nav-item active"><span class="mock-nav-icon">🏠</span>Ana</div>
+              <div class="mock-nav-item"><span class="mock-nav-icon">✨</span>Üret</div>
+              <div class="mock-nav-item"><span class="mock-nav-icon">📋</span>Evrak</div>
+              <div class="mock-nav-item"><span class="mock-nav-icon">👥</span>Sınıf</div>
+            </div>
+          </div>
+        </div>
+        <p style="font-size:12px; color:var(--muted); margin-top:16px; text-align:center">Öğretmen açar açmaz durumunu görür.<br>Acil olan vurgulanır, tamamlananlar gri.</p>
+      </div>
+    </div>
+
+    <!-- AKŞAM MODU -->
+    <div class="screen-card">
+      <div class="screen-header">
+        <span class="screen-name">Akşam Evrak Modu (21:00)</span>
+        <span class="screen-badge badge-mvp">MVP</span>
+      </div>
+      <div class="screen-body">
+        <div class="phone-mockup">
+          <div class="phone-screen">
+            <div class="phone-status">
+              <span>21:03</span>
+              <span>●●●</span>
+            </div>
+            <div class="phone-content">
+              <div class="mock-header" style="background:#1a3d6b">
+                <div class="mock-header-label">BU HAFTA ÖZET</div>
+                <div class="mock-header-text">12 saat → 7.5 saat 🎉</div>
+                <div class="mock-header-sub">4.5 saat tasarruf ettiniz</div>
+              </div>
+              <div class="mock-card">
+                <div class="mock-card-label">Bekleyen Evraklar</div>
+                <div class="mock-card-row" style="margin-bottom:6px">
+                  <div class="mock-card-text">ZHA Toplantı Tutanağı</div>
+                  <span class="mock-tag tag-urgent">Bugün</span>
+                </div>
+                <div class="mock-card-row">
+                  <div class="mock-card-text">Veli Görüşme Formu (3x)</div>
+                  <span class="mock-tag tag-today">Bu hafta</span>
+                </div>
+              </div>
+              <div class="mock-card">
+                <div class="mock-card-label">AI ile Tamamla</div>
+                <div class="mock-card-text">Hızlı Oluştur:</div>
+                <div style="display:flex; gap:4px; flex-wrap:wrap; margin-top:6px">
+                  <div class="mock-tag tag-ai" style="font-size:9px; padding:3px 6px">Yazılı soru</div>
+                  <div class="mock-tag tag-ai" style="font-size:9px; padding:3px 6px">Günlük plan</div>
+                  <div class="mock-tag tag-ai" style="font-size:9px; padding:3px 6px">Rubrik</div>
+                </div>
+              </div>
+              <div class="mock-btn">📋 Evrak Merkezine Git</div>
+              <div class="mock-btn mock-btn-outline">✨ AI ile Üret</div>
+            </div>
+            <div class="mock-nav">
+              <div class="mock-nav-item active"><span class="mock-nav-icon">🏠</span>Ana</div>
+              <div class="mock-nav-item"><span class="mock-nav-icon">✨</span>Üret</div>
+              <div class="mock-nav-item"><span class="mock-nav-icon">📋</span>Evrak</div>
+              <div class="mock-nav-item"><span class="mock-nav-icon">👥</span>Sınıf</div>
+            </div>
+          </div>
+        </div>
+        <p style="font-size:12px; color:var(--muted); margin-top:16px; text-align:center">Akşam modunda bekleyenler öne çıkar.<br>Zaman tasarrufu sayacı motivasyon sağlar.</p>
+      </div>
+    </div>
+
+    <!-- HAFTA SONU MODU -->
+    <div class="screen-card">
+      <div class="screen-header">
+        <span class="screen-name">Hafta Sonu Toplu Üretim</span>
+        <span class="screen-badge badge-v2">v2</span>
+      </div>
+      <div class="screen-body">
+        <div class="phone-mockup">
+          <div class="phone-screen">
+            <div class="phone-status">
+              <span>Cumartesi</span>
+              <span>●●●</span>
+            </div>
+            <div class="phone-content">
+              <div class="mock-header" style="background:#7b3fa0">
+                <div class="mock-header-label">HAFTALIK HAZIRLIK</div>
+                <div class="mock-header-text">Gelecek hafta planla 🗓</div>
+                <div class="mock-header-sub">5 konu · 3 sınıf · 2 yazılı</div>
+              </div>
+              <div class="mock-card">
+                <div class="mock-card-label">Toplu Üretim Modu</div>
+                <div class="mock-card-text">Tüm haftayı tek seferde oluştur</div>
+                <div class="mock-card-sub">AI 5 günlük planı 2 dakikada üretir</div>
+              </div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px">
+                <div class="mock-stat">
+                  <div class="mock-stat-num">5</div>
+                  <div class="mock-stat-label">Hazırlanacak ders</div>
+                </div>
+                <div class="mock-stat">
+                  <div class="mock-stat-num">~12dk</div>
+                  <div class="mock-stat-label">Tahmini süre</div>
+                </div>
+              </div>
+              <div class="mock-btn" style="background:#7b3fa0">🚀 Toplu Haftalık Plan</div>
+              <div class="mock-btn mock-btn-outline" style="color:#7b3fa0; border-color:#7b3fa0">📊 Geçen Haftayı Gör</div>
+            </div>
+            <div class="mock-nav">
+              <div class="mock-nav-item"><span class="mock-nav-icon">🏠</span>Ana</div>
+              <div class="mock-nav-item"><span class="mock-nav-icon">✨</span>Üret</div>
+              <div class="mock-nav-item active"><span class="mock-nav-icon">📋</span>Evrak</div>
+              <div class="mock-nav-item"><span class="mock-nav-icon">👥</span>Sınıf</div>
+            </div>
+          </div>
+        </div>
+        <p style="font-size:12px; color:var(--muted); margin-top:16px; text-align:center">Hafta sonu modunda toplu üretim öne çıkar.<br>Premium özellik — haftalık zaman yatırımı.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard Bileşenleri -->
+  <div class="flow-container">
+    <div class="flow-title">Dashboard Bileşen Hiyerarşisi — Görsel Ağırlık Sırası</div>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-top:16px;">
+      <div style="border-left: 3px solid var(--accent3); padding-left:16px;">
+        <div style="font-size:10px; font-weight:700; color:var(--accent3); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:8px">Zorunlu — Her Zaman Görünür</div>
+        <div style="font-size:13px; line-height:2;">📅 Bugünün tarihi + ders sayısı<br>⚠️ Acil görevler (kırmızı badge)<br>📚 Bugünkü ders programı<br>⚡ Hızlı Üret FAB butonu</div>
+      </div>
+      <div style="border-left: 3px solid var(--accent2); padding-left:16px;">
+        <div style="font-size:10px; font-weight:700; color:#7a5a00; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:8px">Önemli — Scroll ile Görünür</div>
+        <div style="font-size:13px; line-height:2;">📆 Yaklaşan tarih sayacı<br>📝 Bekleyen evraklar<br>💡 AI önerileri (bugün ne yapsam?)<br>⏱ Haftalık zaman tasarrufu</div>
+      </div>
+      <div style="border-left: 3px solid var(--border); padding-left:16px;">
+        <div style="font-size:10px; font-weight:700; color:var(--muted); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:8px">Destekleyici — İsteğe Bağlı</div>
+        <div style="font-size:13px; line-height:2;">👥 Dikkat gereken öğrenciler<br>📊 Sınıf not ortalaması<br>🏆 Tamamlanan görevler<br>🔔 Sistem bildirimleri</div>
+      </div>
+      <div style="border-left: 3px solid var(--accent3); padding-left:16px; opacity:0.4;">
+        <div style="font-size:10px; font-weight:700; color:var(--accent3); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:8px">❌ Dashboard'a Ekleme</div>
+        <div style="font-size:13px; line-height:2;">📰 Eğitim haberleri feed<br>💬 Sosyal/paylaşım alanı<br>📈 Karmaşık grafikler<br>🎮 Gamification rozetleri</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================ -->
+<!-- SECTION 5: TÜM EKRANLAR -->
+<!-- ================================ -->
+<section id="s5">
+  <div class="section-header">
+    <div class="section-num">05</div>
+    <div>
+      <div class="section-title">Tüm Ekranlar ve Özellikler</div>
+      <div class="section-sub">4 ana sekme + modal'lar + AI akışı</div>
+    </div>
+  </div>
+
+  <!-- TAB 1: ÜRET -->
+  <div class="screen-card" style="margin-bottom:24px">
+    <div class="screen-header">
+      <span class="screen-name">✨ Üret Sekmesi — AI Üretim Merkezi</span>
+      <span class="screen-badge badge-mvp">MVP Kalbi</span>
+    </div>
+    <div class="screen-body">
+      <div class="feature-section">
+        <div class="feature-section-title">
+          🤖 AI Üretim Araçları
+          <span class="screen-badge badge-mvp" style="margin-left:8px">MVP'de Bunlar</span>
+        </div>
+        <div class="feature-row">
+          <div class="feature-icon-box">📝</div>
+          <div class="feature-info">
+            <div class="feature-name">Yazılı Sınav Üretici</div>
+            <div class="feature-desc">Ders + sınıf + kazanımları gir → Cevap anahtarıyla yazılı sınav çık. Soru türü (çoktan seçmeli, boşluk doldurma, açık uçlu) ve zorluk seviyesi seçilebilir. Şablon olarak e-Okul formatıyla uyumlu çıktı.</div>
+            <div class="feature-meta">
+              <span class="meta-chip chip-save">⏱ 45dk → 3dk</span>
+              <span class="meta-chip chip-ai">AI</span>
+              <span class="meta-chip chip-free">3x ücretsiz</span>
+            </div>
+          </div>
+        </div>
+        <div class="feature-row">
+          <div class="feature-icon-box">📅</div>
+          <div class="feature-info">
+            <div class="feature-name">Yıllık Plan Motoru</div>
+            <div class="feature-desc">MEB müfredat kazanımlarını haftalara otomatik dağıt. Tatil günleri, sınav dönemleri otomatik hesaplanır. Tek seferde akademik yılın tamamı hazır. Word ve PDF çıktısı.</div>
+            <div class="feature-meta">
+              <span class="meta-chip chip-save">⏱ 3 saat → 8dk</span>
+              <span class="meta-chip chip-ai">AI</span>
+              <span class="meta-chip chip-premium">Premium</span>
+            </div>
+          </div>
+        </div>
+        <div class="feature-row">
+          <div class="feature-icon-box">🗓</div>
+          <div class="feature-info">
+            <div class="feature-name">Günlük / Ders Planı</div>
+            <div class="feature-desc">Yıllık plandan otomatik türetilir. O günün kazanımını alır, etkinlik + materyal + değerlendirme ile tam ders planı üretir. "Bu haftanın hepsini üret" toplu seçeneği de var.</div>
+            <div class="feature-meta">
+              <span class="meta-chip chip-save">⏱ 30dk → 2dk</span>
+              <span class="meta-chip chip-ai">AI</span>
+              <span class="meta-chip chip-premium">Premium</span>
+            </div>
+          </div>
+        </div>
+        <div class="feature-row">
+          <div class="feature-icon-box">🎯</div>
+          <div class="feature-info">
+            <div class="feature-name">Ders Materyali Üretici</div>
+            <div class="feature-desc">Konu + süre + araç gir → Grup etkinliği, çalışma yaprağı, kavram haritası şablonu, soru-cevap kartları üretir. Farklılaştırılmış versiyon seçeneği (temel / orta / ileri).</div>
+            <div class="feature-meta">
+              <span class="meta-chip chip-save">⏱ 40dk → 4dk</span>
+              <span class="meta-chip chip-ai">AI</span>
+              <span class="meta-chip chip-premium">Premium</span>
+            </div>
+          </div>
+        </div>
+        <div class="feature-row">
+          <div class="feature-icon-box">📊</div>
+          <div class="feature-info">
+            <div class="feature-name">Değerlendirme Rubrikleri</div>
+            <div class="feature-desc">Performans görevi, proje ödevi, sözlü sunum için rubrik otomatik oluşturur. MEB değerlendirme kriterlerine uyumlu. Tüm sütunlar özelleştirilebilir.</div>
+            <div class="feature-meta">
+              <span class="meta-chip chip-save">⏱ 20dk → 2dk</span>
+              <span class="meta-chip chip-ai">AI</span>
+              <span class="meta-chip chip-premium">Premium</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: EVRAK -->
+  <div class="screen-card" style="margin-bottom:24px">
+    <div class="screen-header">
+      <span class="screen-name">📋 Evrak Merkezi</span>
+      <span class="screen-badge badge-mvp">MVP + V2</span>
+    </div>
+    <div class="screen-body">
+      <div class="feature-section">
+        <div class="feature-section-title">📁 Hızlı Doldur & PDF Al</div>
+        <div class="feature-row">
+          <div class="feature-icon-box">📑</div>
+          <div class="feature-info">
+            <div class="feature-name">ZHA Toplantı Tutanağı</div>
+            <div class="feature-desc">Tarih, katılımcılar, gündem maddeleri gir → Resmi tutanak formatında PDF. Okul müdürüne gönderilmeye hazır. İmza alanları dahil.</div>
+            <div class="feature-meta">
+              <span class="meta-chip chip-save">⏱ 25dk → 3dk</span>
+              <span class="meta-chip chip-premium">Premium</span>
+            </div>
+          </div>
+        </div>
+        <div class="feature-row">
+          <div class="feature-icon-box">👨‍👩‍👧</div>
+          <div class="feature-info">
+            <div class="feature-name">Veli Görüşme Tutanağı</div>
+            <div class="feature-desc">Öğrenci seç → görüşme notlarını yaz → resmi tutanak PDF. Tarih, imza, veli adı otomatik doldurulur. MEBİM şikayetlerine karşı kanıt arşivi oluşturur.</div>
+            <div class="feature-meta">
+              <span class="meta-chip chip-save">⏱ 15dk → 2dk</span>
+              <span class="meta-chip chip-premium">Premium</span>
+            </div>
+          </div>
+        </div>
+        <div class="feature-row">
+          <div class="feature-icon-box">🌙</div>
+          <div class="feature-info">
+            <div class="feature-name">Nöbet Formu & Takibi</div>
+            <div class="feature-desc">Nöbet takvimini gör, olay kaydı tut, ay sonu dökümünü PDF'e aktar. Adil dağılım şikayetleri için görsel nöbet analizi.</div>
+            <div class="feature-meta">
+              <span class="meta-chip chip-premium">Premium</span>
+            </div>
+          </div>
+        </div>
+        <div class="feature-row">
+          <div class="feature-icon-box">👁</div>
+          <div class="feature-info">
+            <div class="feature-name">Ders Gözlem Formu</div>
+            <div class="feature-desc">Müdür/idareci dersi ziyaret ettiğinde kullanılacak form. Gözlem kriterleri, güçlü/geliştirilecek alanlar, hedefler. Hem öğretmen hem idareci için.</div>
+            <div class="feature-meta">
+              <span class="meta-chip chip-v2">v2</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: SINIF -->
+  <div class="screen-card" style="margin-bottom:24px">
+    <div class="screen-header">
+      <span class="screen-name">👥 Sınıf Sekmesi</span>
+      <span class="screen-badge badge-v2">V2</span>
+    </div>
+    <div class="screen-body">
+      <div class="feature-section">
+        <div class="feature-section-title">📊 Not ve Öğrenci Takibi</div>
+        <div class="feature-row">
+          <div class="feature-icon-box">📒</div>
+          <div class="feature-info">
+            <div class="feature-name">Dijital Not Defteri</div>
+            <div class="feature-desc">Yazılı, sözlü, performans ödevi ayrı ayrı. MEB not sistemiyle uyumlu ağırlıklı ortalama otomatik. Dönem sonu hazır.</div>
+            <div class="feature-meta">
+              <span class="meta-chip chip-save">⏱ e-Okul'a giriş süresini 0'a indir</span>
+              <span class="meta-chip chip-premium">Premium</span>
+            </div>
+          </div>
+        </div>
+        <div class="feature-row">
+          <div class="feature-icon-box">⚠️</div>
+          <div class="feature-info">
+            <div class="feature-name">Dikkat Gereken Öğrenciler</div>
+            <div class="feature-desc">Not ortalaması düşen, devamsızlık artan, davranış notu kötüleşen öğrencileri otomatik tespit et. Veli iletişimi için tek dokunuşla hazır mesaj şablonu çıkar.</div>
+            <div class="feature-meta">
+              <span class="meta-chip chip-ai">AI Analiz</span>
+              <span class="meta-chip chip-premium">Premium</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV AÇIKLAMASI -->
+  <div class="flow-container">
+    <div class="flow-title">Alt Navigasyon Mimarisi — Neden 4 Sekme?</div>
+    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:16px; margin-top:16px;">
+      <div style="text-align:center; padding:16px;">
+        <div style="font-size:28px; margin-bottom:8px">🏠</div>
+        <div style="font-size:13px; font-weight:600; margin-bottom:6px">Ana</div>
+        <div style="font-size:11px; color:var(--muted); line-height:1.6">Her şeyin özeti, bugünün akışı. Sabah ilk bu açılır.</div>
+      </div>
+      <div style="text-align:center; padding:16px; background:var(--paper2);">
+        <div style="font-size:28px; margin-bottom:8px">✨</div>
+        <div style="font-size:13px; font-weight:600; margin-bottom:6px">Üret</div>
+        <div style="font-size:11px; color:var(--muted); line-height:1.6">AI üretim merkezi. En çok kullanılacak sekme — ortada olmalı.</div>
+      </div>
+      <div style="text-align:center; padding:16px;">
+        <div style="font-size:28px; margin-bottom:8px">📋</div>
+        <div style="font-size:13px; font-weight:600; margin-bottom:6px">Evrak</div>
+        <div style="font-size:11px; color:var(--muted); line-height:1.6">Resmi formlar, tutanaklar, arşiv. Akşam ve hafta sonu modu.</div>
+      </div>
+      <div style="text-align:center; padding:16px;">
+        <div style="font-size:28px; margin-bottom:8px">👥</div>
+        <div style="font-size:13px; font-weight:600; margin-bottom:6px">Sınıf</div>
+        <div style="font-size:11px; color:var(--muted); line-height:1.6">Not defteri, öğrenci takibi. V2'de açılır, premium.</div>
+      </div>
+    </div>
+    <div style="padding:16px; background:var(--paper2); margin-top:0; font-size:12px; color:var(--muted);">
+      💡 <strong>Neden 5. sekme yok?</strong> Profil/ayarlar alt navigasyona girmez — sağ üstteki avatar ikonuna tıklanır. Alt nav sadece ana görevler içindir. Her yeni sekme ekleme kararı "bu günde 3 kez mi kullanılır?" sorusuyla test edilmeli.
+    </div>
+  </div>
+</section>
+
+<!-- ================================ -->
+<!-- SECTION 6: JOURNEY MAP -->
+<!-- ================================ -->
+<section id="s6">
+  <div class="section-header">
+    <div class="section-num">06</div>
+    <div>
+      <div class="section-title">Kullanıcı Journey Map</div>
+      <div class="section-sub">Öğretmenin duygusal deneyim yolculuğu</div>
+    </div>
+  </div>
+
+  <div class="journey">
+    <div class="journey-header">
+      <div class="journey-cell">Boyut</div>
+      <div class="journey-cell">1. Keşif</div>
+      <div class="journey-cell">2. Kayıt & Onboard</div>
+      <div class="journey-cell">3. İlk Hafta</div>
+      <div class="journey-cell">4. Aylık Kullanıcı</div>
+      <div class="journey-cell">5. Premium Karar</div>
+    </div>
+    <div class="journey-row">
+      <div class="journey-row-label">Ne Yapıyor</div>
+      <div class="journey-row-cell">Öğretmen WhatsApp grubunda paylaşım görür, linke tıklar. Store'da puanları inceler.</div>
+      <div class="journey-row-cell">Google ile giriş. Ders + sınıf seçer. İlk AI yazılı sorusunu görür, PDF alır.</div>
+      <div class="journey-row-cell">Teneffüslerde açar. 2-3 yazılı soru üretir. Dashboard'u keşfeder. Bir evrak PDF'i indirir.</div>
+      <div class="journey-row-cell">Her hafta yıllık plandan günlük plan üretir. ZHA tutanakları burada hazırlanıyor.</div>
+      <div class="journey-row-cell">"Ayda 3 üretim doldu" mesajını görür. Haftalık tasarruf sayacına bakar. Karar verir.</div>
+    </div>
+    <div class="journey-row pain">
+      <div class="journey-row-label">Pain Points</div>
+      <div class="journey-row-cell">Store yorumlarında sahte yorum şüphesi. "Bunu gerçekten deniyor mu?" endişesi.</div>
+      <div class="journey-row-cell">Eğer 5+ soru sorulursa kayıt terk edilir. Çok adım = güven kaybı.</div>
+      <div class="journey-row-cell">3 ücretsiz limiti erken dolarsa kızgınlık. "Sadece 3 mi?" hissi.</div>
+      <div class="journey-row-cell">Alışkanlık henüz oluşmamış. Başka araçlarla rekabet. Unutma riski.</div>
+      <div class="journey-row-cell">Ödeme güvensizliği (Türkiye). "Aylık mı kesecek, iptal edebildim mi?"</div>
+    </div>
+    <div class="journey-row">
+      <div class="journey-row-label">Duygu</div>
+      <div class="journey-row-cell"><span class="emotion-mid">😐 Meraklı ama şüpheci</span></div>
+      <div class="journey-row-cell"><span class="emotion-high">😲 Şaşkın — WOW anı</span></div>
+      <div class="journey-row-cell"><span class="emotion-high">😊 Memnun, keşfediyor</span></div>
+      <div class="journey-row-cell"><span class="emotion-high">😌 Güvende, alışkanlık</span></div>
+      <div class="journey-row-cell"><span class="emotion-mid">🤔 Hesaplıyor, tartıyor</span></div>
+    </div>
+    <div class="journey-row opportunity">
+      <div class="journey-row-label">Fırsatlar</div>
+      <div class="journey-row-cell">Gerçek öğretmen referansları, "Melik Hoca kullandı" sosyal kanıt. Okul paylaşım mekanizması.</div>
+      <div class="journey-row-cell">İlk WOW anı kritik. 2 soruda profil tamamla, anında değer göster. Kayıt öncesi demo modu.</div>
+      <div class="journey-row-cell">Limit 5'e çıkarılabilir. Push bildirim: "Bu hafta 3 saat tasarruf ettiniz." Sosyal paylaşım.</div>
+      <div class="journey-row-cell">Haftalık özet e-postası. "Bu ay yaptıklarınız" raporu. Alışkanlık pekiştirme bildirimleri.</div>
+      <div class="journey-row-cell">Yıllık fiyat öne çık. Türkiye güvence: "İstediğinizde iptal" garantisi. Eğitim sendikaları indirim.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================ -->
+<!-- SECTION 7: GELİŞTİRME SIRASI -->
+<!-- ================================ -->
+<section id="s7">
+  <div class="section-header">
+    <div class="section-num">07</div>
+    <div>
+      <div class="section-title">Solo Geliştirici Geliştirme Sırası</div>
+      <div class="section-sub">Yıllık Plan'a eklenecek premium özellikler — öncelik sırasıyla</div>
+    </div>
+  </div>
+
+  <div class="timeline">
+    <div class="timeline-phase">
+      <div class="phase-label p1">Faz 1 · MVP Premium</div>
+      <h3>Mevcut Uygulamayı Parasallaştır</h3>
+      <ul class="timeline-items">
+        <li>Yıllık Plan → Premium abonelik ekle</li>
+        <li>Yazılı sınav üretici (MVP özelliği)</li>
+        <li>PDF export motoru (tüm çıktılar için)</li>
+        <li>Dashboard — bugün + yaklaşan tarihler</li>
+        <li>Freemium limiti sistemi (3 ücretsiz)</li>
+        <li>RevenueCat ödeme entegrasyonu</li>
+      </ul>
+      <div class="timeline-duration">⏱ 4-6 hafta · Hedef: İlk gelir</div>
+    </div>
+    <div class="timeline-phase">
+      <div class="phase-label p2">Faz 2 · Core Expansion</div>
+      <h3>Evrak Merkezi + Sınıf</h3>
+      <ul class="timeline-items">
+        <li>Günlük/ders planı üretici</li>
+        <li>Ders materyali üretici (etkinlik, çalışma yaprağı)</li>
+        <li>ZHA + Veli görüşme tutanakları</li>
+        <li>Nöbet takvim sistemi</li>
+        <li>Dijital not defteri (basit)</li>
+        <li>Toplu haftalık plan modu</li>
+      </ul>
+      <div class="timeline-duration">⏱ 6-8 hafta · Hedef: Churn azalt</div>
+    </div>
+    <div class="timeline-phase">
+      <div class="phase-label p3">Faz 3 · Moat</div>
+      <h3>Rakipler Taklit Edemez</h3>
+      <ul class="timeline-items">
+        <li>e-Okul not senkronizasyonu</li>
+        <li>Dikkat gereken öğrenci AI analizi</li>
+        <li>Okul/zümre grup lisansı (B2B)</li>
+        <li>Veli iletişim merkezi</li>
+        <li>Tier 1 lokalizasyonu (İngilizce)</li>
+        <li>Öğretmen topluluğu (materyal paylaşım)</li>
+      </ul>
+      <div class="timeline-duration">⏱ 3-4 ay · Hedef: Network effect</div>
+    </div>
+  </div>
+
+  <div class="insight-box">
+    <div class="insight-icon">⚠️</div>
+    <div class="insight-text">
+      <h4>Solo Geliştirici için Kritik UX Kararı: "Feature Flag" Stratejisi</h4>
+      <p>Tüm ekranları baştan tasarla ama sadece Faz 1'i geliştir. Premium kilitli özellikler UI'da görünür ama tıklandığında "Yakında" veya paywall gösterir. Bu hem yol haritanı kullanıcıya gösterir hem de hangi özelliğin daha çok ilgi gördüğünü analitiklerle anlarsın. Bir özelliği "gizlemek" yerine "kilitlemeyi" tercih et — görünürlük talep oluşturur.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================================ -->
+<!-- SECTION 8: UX KURALLARI -->
+<!-- ================================ -->
+<section id="s8">
+  <div class="section-header">
+    <div class="section-num">08</div>
+    <div>
+      <div class="section-title">Kesinleşmiş UX Kuralları</div>
+      <div class="section-sub">Bu kurallara uymayan her karar yeniden değerlendirmeyi hak eder</div>
+    </div>
+  </div>
+
+  <div class="rule-grid">
+    <div class="rule-card">
+      <div class="rule-label do">✓ YAPILACAK</div>
+      <h4>Öğretmen adıyla kişisel selamlama</h4>
+      <p>"Günaydın, Melik Hoca" — küçük dokunuş, büyük etki. Öğretmenler öğrencilerine isimleriyle hitap eder. Uygulamanın da onlara aynı saygıyı göstermesi güven inşa eder.</p>
+    </div>
+    <div class="rule-card">
+      <div class="rule-label dont">✗ YAPILMAYACAK</div>
+      <h4>Üretim öncesi çok soru sormak</h4>
+      <p>"Önce 8 parametre girin, sonra oluşturun" akışı kabul edilemez. Maksimum 3 input, sonra üret. Kullanıcı çıktıyı görünce isteğe bağlı detayları ekleyebilir.</p>
+    </div>
+    <div class="rule-card">
+      <div class="rule-label do">✓ YAPILACAK</div>
+      <h4>Zaman tasarrufu somut göster</h4>
+      <p>"Bu yazılı soruyu oluşturmak normalde 45 dakika alırdı. Siz 2 dakikada aldınız." — soyut tasarrufu somut hale getir. Bu hem motivasyon hem premium için güçlü bir argümandır.</p>
+    </div>
+    <div class="rule-card">
+      <div class="rule-label dont">✗ YAPILMAYACAK</div>
+      <h4>Agresif paywall göstermek</h4>
+      <p>İlk limit aşıldığında "Hemen satın al!" popup'ı gösterme. Bunun yerine: "Bu özelliği çok kullandınız — premium ile sınırsız." Değer vurgusu, satış baskısı değil.</p>
+    </div>
+    <div class="rule-card">
+      <div class="rule-label do">✓ YAPILACAK</div>
+      <h4>Çıktıyı paylaşılabilir yap</h4>
+      <p>Her üretilen içeriğin yanında "WhatsApp'ta paylaş" veya "Zümreye gönder" seçeneği. Öğretmenler birbirlerine tavsiye eder — bu en güçlü büyüme kanalı.</p>
+    </div>
+    <div class="rule-card">
+      <div class="rule-label dont">✗ YAPILMAYACAK</div>
+      <h4>Hata mesajını teknik göstermek</h4>
+      <p>"Error 503: API timeout" yerine "Şu an biraz yoğunuz, 10 saniye sonra tekrar deneyin 🙏" — Türkiye'de öğretmenler teknik dil görmek istemiyor. Sıcak, insan dili.</p>
+    </div>
+    <div class="rule-card">
+      <div class="rule-label do">✓ YAPILACAK</div>
+      <h4>MEB takvimini koduna göm</h4>
+      <p>Karne günleri, sınav dönemleri, YKS, LGS tarihleri uygulamada sabit olmalı. "Not girişine 3 gün kaldı" bildirimi öğretmen hiçbir şey yapmasına gerek kalmadan çalışmalı.</p>
+    </div>
+    <div class="rule-card">
+      <div class="rule-label dont">✗ YAPILMAYACAK</div>
+      <h4>Onboarding'i uzatmak</h4>
+      <p>5+ ekranlı onboarding, video tutorial, zorunlu profil doldurma — hepsi aktivasyon düşmanı. 2 soru maksimum. Değeri önce göster, profili sonra tamamlat.</p>
+    </div>
+  </div>
+
+  <!-- Premium Paywall UX -->
+  <div class="flow-container" style="margin-top:24px">
+    <div class="flow-title">Premium Paywall UX — Psikolojik Sıralama</div>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:0; background:var(--border);">
+      <div style="background:var(--card); padding:20px; border-right:1px solid var(--border);">
+        <div style="font-size:10px; font-weight:700; color:var(--muted); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:8px">Adım 1</div>
+        <div style="font-size:24px; margin-bottom:8px">⏱</div>
+        <div style="font-size:13px; font-weight:600; margin-bottom:6px">Tasarrufu Göster</div>
+        <div style="font-size:12px; color:var(--muted);">"Bu ay 6.5 saat tasarruf ettiniz" — önce verilen değeri hatırlat</div>
+      </div>
+      <div style="background:var(--card); padding:20px; border-right:1px solid var(--border);">
+        <div style="font-size:10px; font-weight:700; color:var(--muted); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:8px">Adım 2</div>
+        <div style="font-size:24px; margin-bottom:8px">🔒</div>
+        <div style="font-size:13px; font-weight:600; margin-bottom:6px">Kilitliyi Göster</div>
+        <div style="font-size:12px; color:var(--muted);">Premium ile neler açılır — somut liste, abartısız</div>
+      </div>
+      <div style="background:var(--card); padding:20px; border-right:1px solid var(--border);">
+        <div style="font-size:10px; font-weight:700; color:var(--muted); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:8px">Adım 3</div>
+        <div style="font-size:24px; margin-bottom:8px">💬</div>
+        <div style="font-size:13px; font-weight:600; margin-bottom:6px">Sosyal Kanıt</div>
+        <div style="font-size:12px; color:var(--muted);">1-2 gerçek öğretmen yorumu. İsim + okul.</div>
+      </div>
+      <div style="background:var(--card); padding:20px; border-right:1px solid var(--border);">
+        <div style="font-size:10px; font-weight:700; color:var(--muted); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:8px">Adım 4</div>
+        <div style="font-size:24px; margin-bottom:8px">💰</div>
+        <div style="font-size:13px; font-weight:600; margin-bottom:6px">Fiyat (Yıllığı Öne Çıkar)</div>
+        <div style="font-size:12px; color:var(--muted);">Aylık seçenek var ama yıllık daha büyük göster. "Günde 4 TL" hesaplamasını ekle.</div>
+      </div>
+      <div style="background:var(--card); padding:20px;">
+        <div style="font-size:10px; font-weight:700; color:var(--muted); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:8px">Adım 5</div>
+        <div style="font-size:24px; margin-bottom:8px">✅</div>
+        <div style="font-size:13px; font-weight:600; margin-bottom:6px">Güvence Ver</div>
+        <div style="font-size:12px; color:var(--muted);">"İstediğinizde iptal · Kart bilgisi güvende · Fatura e-posta ile"</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div>ÖğretmenAI · UX Akış Planı · <strong>Nisan 2026</strong></div>
+  <div>Solo Geliştirici Optimize · Türkiye MVP → Tier 1</div>
+</footer>
+
+</body>
+</html>
