@@ -3,7 +3,7 @@
 > Her oturumda bu dosya okunur ve yalnizca gerekli bilgiler guncellenir.
 > Durum: TODO -> WIP -> DONE | Engel: BLOCKED
 
-Son guncelleme: 2026-04-04
+Son guncelleme: 2026-04-05
 
 ---
 
@@ -118,6 +118,18 @@ Son guncelleme: 2026-04-04
 - 5 madde by-design Sprint 2'ye ertelendi (form submit, hardcoded belgeler, storage normalizasyon).
 - QA raporu: `QA_SPRINT1_RAPORU.md`
 - Sprint 1 **KAPANDI** — tüm görevler DONE.
+
+### 2026-04-05 — UX/UI eleştiri turu: 8 madde tamamlandı
+
+- **Madde 1:** `HaftaDetayPage.tsx` — Türkçe karakter düzeltmeleri (formatTarih ay isimleri, tüm statik metinler)
+- **Madde 2:** `PlanPage.tsx` — Türkçe karakter düzeltmeleri ("Dönem", "Tamamlandı", SectionHeader metinleri)
+- **Madde 3:** `AppHomeScreen.tsx` — Zil butonu `/app/ayarlar` → `/app/profil` olarak güncellendi
+- **Madde 4:** `DosyamPage.tsx` — "İndir" ve "Tüm Dosyayı İndir" butonları toast + navigate ile işlevsel hale getirildi
+- **Madde 5:** `UretPage.tsx` — "Üret" butonu validasyon (konu/sınıf/bakiye) + toast mesajlarıyla işlevsel
+- **Madde 6:** `UretPage.tsx` — Form alanları seçilen araca göre koşullu gösterim (sinav / etkinlik / materyal)
+- **Madde 7:** `AppHomeScreen.tsx` — Selamlama mesajı deduplication kaldırıldı; ders programı kartı zaten dolu ise gizleniyor
+- **Madde 8:** `PlanPage.tsx` — Haftalık program grid, hardcoded 3×5'ten `useDersProgrami` hook ile gerçek veriye bağlandı; "Düzenle" butonu `/app/planla/ders-programi` rotasına yönlendiriyor
+- Build: ✅ Tests: 12/12 ✅
 
 ### 2026-04-04 - UI sadeleştirme turu
 - `AppLayout.tsx`: Bottom nav'a kalici profil ikonu eklendi (5. tam tab degil, kucuk avatar circle); her ekrandan `/app/ayarlar`'a erisim saglaniyor.
