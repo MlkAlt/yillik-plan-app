@@ -1,6 +1,7 @@
-﻿import { useMemo, useState } from 'react'
+﻿import { useEffect, useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { ArrowLeft, BarChart2, BookOpen, FileText, Target } from 'lucide-react'
+import { StorageKeys } from '../lib/storageKeys'
 
 const ARACLAR = [
   { id: 'sinav',    ikon: FileText,  ad: 'Yazılı Sınav',    alt: 'Kazanım bazlı, cevap anahtarlı',  renk: '#4F6AF5' },
@@ -10,8 +11,7 @@ const ARACLAR = [
 ]
 
 const SINIFLAR = ['9-A','9-B','9-C','10-A','10-B','10-C','11-A','11-B','11-C','11-D','12-A','12-B']
-const BAKIYE = 7
-const MAKS   = 10
+const MAKS = 10
 
 interface UretBaglami { sinif?: string; ders?: string; haftaNo?: number; kazanim?: string }
 
@@ -24,8 +24,19 @@ export function UretPage() {
   const [soruSayisi, setSoruSayisi] = useState(10)
   const [soruTuru, setSoruTuru]     = useState('Karma')
   const [zorluk, setZorluk]         = useState('Orta')
+  const [bakiye, setBakiye] = useState(0)
   const selectedTool = useMemo(() => ARACLAR.find(a => a.id === selectedId) ?? null, [selectedId])
   const zorluklar = [{ id: 'Kolay', emoji: '🌱' }, { id: 'Orta', emoji: '⚡' }, { id: 'Zor', emoji: '🔥' }]
+
+  useEffect(() => {
+    try {
+      const jeton = localStorage.getItem(StorageKeys.JETON_DURUMU)
+      if (jeton) {
+        const parsed = JSON.parse(jeton)
+        setBakiye(typeof parsed === 'number' ? parsed : (parsed.bakiye ?? 0))
+      }
+    } catch { /* ignore */ }
+  }, [])
 
   if (selectedTool) {
     return (
@@ -80,7 +91,7 @@ export function UretPage() {
           </div>
           <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '12px', padding: '12px 14px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
             <span style={{ fontSize: '14px', flexShrink: 0 }}>!</span>
-            <p style={{ fontSize: '13px', color: '#92400E', fontWeight: 500 }}>Bu üretim 1 üretim hakkı kullanacak. Bakiyeniz: {BAKIYE} üretim hakkı.</p>
+            <p style={{ fontSize: '13px', color: '#92400E', fontWeight: 500 }}>Bu üretim 1 üretim hakkı kullanacak. Bakiyeniz: {bakiye} üretim hakkı.</p>
           </div>
           <button style={{ width: '100%', height: '52px', borderRadius: '100px', background: '#4F6AF5', color: '#fff', border: 'none', fontSize: '16px', fontWeight: 700, cursor: 'pointer' }}>
             {selectedTool.ad} Üret — 1 Üretim Hakkı
@@ -102,13 +113,13 @@ export function UretPage() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
             <div>
               <p style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,.55)', marginBottom: '4px' }}>Üretim Hakkı</p>
-              <p style={{ fontFamily: "var(--font-display),'Bricolage Grotesque',sans-serif", fontSize: '36px', fontWeight: 800, color: '#fff', letterSpacing: '-0.04em', lineHeight: '40px' }}>{BAKIYE}</p>
-              <p style={{ fontSize: '12px', color: 'rgba(255,255,255,.55)', marginTop: '2px' }}>uretim hakki kaldi</p>
+              <p style={{ fontFamily: "var(--font-display),'Bricolage Grotesque',sans-serif", fontSize: '36px', fontWeight: 800, color: '#fff', letterSpacing: '-0.04em', lineHeight: '40px' }}>{bakiye}</p>
+              <p style={{ fontSize: '12px', color: 'rgba(255,255,255,.55)', marginTop: '2px' }}>üretim hakkı kaldı</p>
             </div>
             <button style={{ height: '36px', padding: '0 14px', borderRadius: '100px', background: 'rgba(255,255,255,.12)', border: '1px solid rgba(255,255,255,.16)', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>+ Hak Al</button>
           </div>
           <div style={{ height: '4px', background: 'rgba(255,255,255,.16)', borderRadius: '100px', overflow: 'hidden', marginBottom: '8px' }}>
-            <div style={{ height: '100%', width: `${(BAKIYE / MAKS) * 100}%`, background: 'linear-gradient(90deg,rgba(255,255,255,.95),rgba(255,255,255,.58))', borderRadius: '100px' }} />
+            <div style={{ height: '100%', width: `${Math.min((bakiye / MAKS) * 100, 100)}%`, background: 'linear-gradient(90deg,rgba(255,255,255,.95),rgba(255,255,255,.58))', borderRadius: '100px' }} />
           </div>
           <p style={{ fontSize: '11px', color: 'rgba(255,255,255,.45)' }}>Bu ay 3 ücretsiz üretim hakkı hediye edildi</p>
         </div>

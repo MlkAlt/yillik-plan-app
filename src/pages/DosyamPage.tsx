@@ -128,6 +128,18 @@ export function DosyamPage() {
   const kritikSablon = sablonlar.find(s => !s.premium)
   const eksikAlanlar = kritikSablon ? tespitEksikAlanlar(kritikSablon, ayarlar) : []
 
+  // Hero istatistikleri
+  const freeSablonlar = sablonlar.filter(s => !s.premium)
+  const hazirSablonlar = freeSablonlar.filter(s => tespitEksikAlanlar(s, ayarlar).length === 0)
+  const eksikSablonlar = freeSablonlar.filter(s => tespitEksikAlanlar(s, ayarlar).length > 0)
+  const toplamBelge = freeSablonlar.length
+
+  // Durum satırları: hazır olanlar ✓, eksik olanlar ⚠
+  const durumSatirlari = [
+    ...hazirSablonlar.slice(0, 3).map(s => ({ metin: `✓ ${s.ad}`, renk: '#34d399' })),
+    ...eksikSablonlar.slice(0, 2).map(s => ({ metin: `⚠ ${s.ad} eksik`, renk: '#FCD34D' })),
+  ].slice(0, 4)
+
   const kategoriler: EvrakKategori[] = ['ogretmen-dosyasi', 'zumre-tutanaklari', 'genel-burokratik', 'kulup-evraklari', 'sinif-rehberlik']
   const kategoriAd: Record<EvrakKategori, string> = {
     'ogretmen-dosyasi': 'Öğretmen Dosyası',
@@ -167,19 +179,14 @@ export function DosyamPage() {
               Toplam Belge
             </p>
             <p className="text-[28px] font-bold leading-none" style={{ fontFamily: 'var(--font-display)', color: '#ffffff', letterSpacing: '-.03em' }}>
-              14
+              {toplamBelge}
             </p>
             <p className="text-[12px] mt-1" style={{ color: 'rgba(255,255,255,.55)' }}>
-              belge hazır
+              {hazirSablonlar.length} hazır · {eksikSablonlar.length} eksik
             </p>
           </div>
           <div className="flex flex-col gap-1 items-end">
-            {[
-              { metin: '✓ Yıllık Plan hazır', renk: '#34d399' },
-              { metin: '✓ 3 ZHA tutanağı', renk: '#34d399' },
-              { metin: '✓ 5 Veli görüşmesi', renk: '#34d399' },
-              { metin: '⚠ Nöbet eksik', renk: '#FCD34D' },
-            ].map(item => (
+            {durumSatirlari.map(item => (
               <span key={item.metin} className="text-[11px] font-semibold" style={{ color: item.renk }}>
                 {item.metin}
               </span>
