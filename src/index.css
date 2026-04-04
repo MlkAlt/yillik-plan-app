@@ -139,6 +139,11 @@
   to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 
+@keyframes pill-in {
+  from { width: 0; opacity: 0; }
+  to   { width: 32px; opacity: 1; }
+}
+
 /* ── Dark mode ──────────────────────────────────────────── */
 [data-theme="dark"] {
   --color-navy:     #0f1929;   /* darker navy for dark mode */
