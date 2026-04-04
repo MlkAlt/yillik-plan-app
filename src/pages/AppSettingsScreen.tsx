@@ -188,7 +188,7 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
               </div>
               <div className="flex flex-col gap-2">
                 {zumreOgretmenleri.map((isim, index) => (
-                  <div key={`${index}-${isim}`} className="flex items-center gap-2">
+                  <div key={index} className="flex items-center gap-2">
                     <input type="text" placeholder={`Zumre ogretmeni ${index + 1}`} value={isim} onChange={e => handleZumreDegistir(index, e.target.value)} className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-surface)', color: 'var(--color-text1)', outline: 'none' }} />
                     <button type="button" onClick={() => handleZumreSil(index)} className="w-10 h-10 flex items-center justify-center" style={{ borderRadius: '999px', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text3)' }}>
                       <X size={14} />

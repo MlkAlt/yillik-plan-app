@@ -30,7 +30,7 @@ Son guncelleme: 2026-04-04
 | 10 | Uret ekrani | frontend-dev | **DONE** | `UretPage.tsx` | Gorev seciminden dogrudan forma gecis |
 | 11 | Uretim hakki UI | frontend-dev | **DONE** | `UretimHakkiBadge.tsx` | `jeton` dili kaldirildi |
 | 12 | Supabase yeni tablolar migration | backend-dev | **NEXT** | `supabase_v6_migration.sql` | Sprint 2 basi |
-| 13 | Sprint 1 QA / tasarim review | qa | TODO | QA raporu | Tum ekranlar bittikten sonra |
+| 13 | Sprint 1 QA / tasarim review | qa | **DONE** | `QA_SPRINT1_RAPORU.md` | 2 bug fix, 5 madde Sprint 2'ye |
 
 ---
 
@@ -71,6 +71,14 @@ Son guncelleme: 2026-04-04
 - Ana ekran yeniden sadeleştirildi; `Bugunun odagi`, `Bugunku kazanımlar` ve gorunur `Ayarlar` erisimi onceliklendirildi.
 - `Planin hazirlaniyor` ekrani onboarding benzeri animasyonlu merkez katman olarak guncellendi.
 - Son degisiklikler production'a alindi: `https://ogretmen-yaver.vercel.app`
+
+### 2026-04-04 - Sprint 1 QA tamamlandi
+- Sprint 1 tum ekranlar incelendi: AppHomeScreen, AppLayout, OnboardingModal, PlanPage, DosyamPage, UretPage, UretimHakkiBadge, PlanSelector, AppSettingsScreen.
+- BUG-01: OnboardingModal arama sırasında seçim kaybı düzeltildi (`onChange` basitleştirildi).
+- BUG-02: AppSettingsScreen zümre listesi key stratejisi düzeltildi (`${index}-${isim}` → `{index}`).
+- 5 madde by-design Sprint 2'ye ertelendi (form submit, hardcoded belgeler, storage normalizasyon).
+- QA raporu: `QA_SPRINT1_RAPORU.md`
+- Sprint 1 **KAPANDI** — tüm görevler DONE.
 
 ### 2026-04-04 - UI sadeleştirme turu
 - `AppLayout.tsx`: Bottom nav'a kalici profil ikonu eklendi (5. tam tab degil, kucuk avatar circle); her ekrandan `/app/ayarlar`'a erisim saglaniyor.

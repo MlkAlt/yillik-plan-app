@@ -108,7 +108,7 @@ export function OnboardingModal({ onTamamla }: OnboardingModalProps) {
               type="text"
               placeholder="Branş ara..."
               value={query}
-              onChange={e => { setQuery(e.target.value); setAcikBrans(null); setSeciliSiniflar([]) }}
+              onChange={e => setQuery(e.target.value)}
               autoFocus
               className="w-full pl-9 pr-4 py-2.5 text-sm font-medium transition-all outline-none"
               style={{
