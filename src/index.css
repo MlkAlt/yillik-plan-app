@@ -6,71 +6,47 @@
   --font-sans:    'DM Sans', sans-serif;
   --font-display: 'Bricolage Grotesque', sans-serif;
 
-  /* ── v8 Navy Premium ────────────────────────────────────
-     Dominant: Navy #1B2E5E + Bright Blue #4F6AF5
-     Accent:   warm orange #e06030
-     Nötr:     ink tonları
-  ──────────────────────────────────────────────────────── */
-
-  --color-navy:     #1B2E5E;   /* v8 dark hero backgrounds */
-  --color-primary:  #4F6AF5;   /* v8 bright blue */
-  --color-success:  #10b981;   /* green */
-  --color-warning:  #f59e0b;   /* amber */
-  --color-danger:   #f43f5e;   /* rose */
-  --color-accent:   #7c3aed;   /* violet */
-
-  /* Tek keskin vurgu — warm orange */
-  --color-pop:      #e06030;
-  --color-pop-s:    #fdf0eb;
-  --color-pop-b:    #f4c4a8;
-
-  /* Navy shades */
-  --color-navy-s:   #e8ecf5;
-  --color-navy-b:   #4a5f8f;
+  /* Brand colors — exact from v8 HTML */
+  --color-navy:     #1B2E5E;
+  --color-navy-m:   #243A78;
+  --color-primary:  #4F6AF5;   /* blue */
+  --color-success:  #059669;   /* ok */
+  --color-warning:  #D97706;   /* warn */
+  --color-danger:   #DC2626;
+  --color-accent:   #6D28D9;   /* violet */
 
   /* Brand shades */
-  --color-primary-s: #f0f4ff;
-  --color-primary-b: #c7d2fe;
-  --color-success-s: #ecfdf5;
-  --color-success-b: #d1fae5;
-  --color-warning-s: #fffbeb;
-  --color-warning-b: #fde68a;
-  --color-danger-s:  #fff1f2;
-  --color-accent-s:  #f5f3ff;
+  --color-primary-s: #EEF1FE;
+  --color-primary-b: #C7D2FD;
+  --color-success-s: #ECFDF5;
+  --color-success-b: #A7F3D0;
+  --color-warning-s: #FFFBEB;
+  --color-warning-b: #FDE68A;
+  --color-danger-s:  #FEF2F2;
+  --color-accent-s:  #F5F3FF;
 
-  /* Alert/Status */
-  --color-alert-warn: #fef3c7;
-  --color-alert-warn-dark: #78350f;
+  /* ── Light Mode Zemin (v8 exact) ───────────────────── */
+  --color-bg:       #F4F3F0;
+  --color-bg2:      #ECEAE6;
+  --color-surface:  #FFFFFF;
+  --color-surface2: #F9F8F6;
+  --color-border:   rgba(0,0,0,.07);
+  --color-border2:  rgba(0,0,0,.11);
+  --color-text1:    #0C0C0B;
+  --color-text2:    #52524F;
+  --color-text3:    #9B9B97;
 
-  /* ── Temiz Zemin Sistemi (Light) ───────────────────── */
-  --color-bg:       #f5f5f2;   /* v6 temiz gri-beyaz */
-  --color-bg2:      #ededea;   /* v6 ikincil zemin */
-  --color-surface:  #ffffff;   /* v6 saf beyaz */
-  --color-surface2: #fafaf8;   /* v6 hafif tint */
-  --color-border:   #e6e6e3;   /* v6 nötr ayraç */
-  --color-border2:  #d4d4d0;   /* v6 güçlü ayraç */
-  --color-text1:    #0f0f0e;   /* v6 saf siyah */
-  --color-text2:    #5f5f5d;   /* v6 orta gri */
-  --color-text3:    #a0a09e;   /* v6 açık gri */
+  /* ── Radius — v8 8-point grid ─────────────────────── */
+  --radius-xs:   4px;
+  --radius-sm:   10px;
+  --radius-md:   14px;
+  --radius-lg:   18px;
+  --radius-xl:   24px;
+  --radius-2xl:  32px;
+  --radius-pill: 100px;
 
   /* Legacy aliases */
-  --color-ink:     #0f0f0e;
-  --color-sinir:   #e6e6e3;
-  --color-zemin:   #ffffff;
-  --color-icerik:  #0f0f0e;
-  --color-ikincil: #5f5f5d;
-  --color-aksiyon: #4F6AF5;
-  --color-aktif:   #f59e0b;
-  --color-basari:  #10b981;
-
-  /* ── Radius ─────────────────────────────────────────── */
-  --radius-sm:   4px;
-  --radius-md:   12px;
-  --radius-lg:   16px;
-  --radius-xl:   20px;
-  --radius-2xl:  24px;
-  --radius-pill: 100px;
-  --radius-card: 16px;
+  --radius-card: 18px;
 
   /* Layout rhythm */
   --space-1: 4px;
@@ -88,12 +64,12 @@
   --line-tight: 20px;
   --line-body: 24px;
 
-  /* ── Nötr Gölgeler ──────────────────────────────────── */
-  --shadow-xs:   0 1px 3px rgba(0,0,0,.05);
-  --shadow-sm:   0 2px 8px rgba(0,0,0,.07);
-  --shadow-md:   0 4px 16px rgba(0,0,0,.09);
-  --shadow-lg:   0 8px 32px rgba(0,0,0,.12);
-  --shadow-card: 0 1px 3px rgba(0,0,0,.05);
+  /* ── Shadows — v8 elevation system ────────────────── */
+  --shadow-xs:   0 1px 2px rgba(0,0,0,.04), 0 2px 6px rgba(0,0,0,.03);
+  --shadow-sm:   0 2px 8px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
+  --shadow-md:   0 8px 24px rgba(0,0,0,.08), 0 16px 48px rgba(0,0,0,.05);
+  --shadow-lg:   0 8px 32px rgba(0,0,0,.10), inset 0 1px 0 rgba(255,255,255,.6);
+  --shadow-card: 0 1px 2px rgba(0,0,0,.04), 0 2px 6px rgba(0,0,0,.03);
 
   /* Animations — v8 Spring Easing */
   --animate-fade-in:  fade-in  0.18s ease-out both;
@@ -144,33 +120,31 @@
   to   { width: 32px; opacity: 1; }
 }
 
-/* ── Dark mode ──────────────────────────────────────────── */
+/* ── Dark mode — v8 exact ──────────────────────────────── */
 [data-theme="dark"] {
-  --color-navy:     #0f1929;   /* darker navy for dark mode */
-  --color-navy-s:   #1a2847;
-  --color-navy-b:   #3d4f7f;
+  --color-bg:       #0E0F12;
+  --color-bg2:      #161820;
+  --color-surface:  #1C1E26;
+  --color-surface2: #22242E;
+  --color-border:   rgba(255,255,255,.07);
+  --color-border2:  rgba(255,255,255,.12);
+  --color-text1:    #F0F0ED;
+  --color-text2:    #8A8A86;
+  --color-text3:    #4A4A48;
 
-  --color-bg:       #0a0e1a;
-  --color-bg2:      #0f1429;
-  --color-surface:  #131829;
-  --color-surface2: #1a2137;
-  --color-border:   #22304d;
-  --color-border2:  #2a3a5c;
-  --color-text1:    #f5f7fc;
-  --color-text2:    #a0a9b8;
-  --color-text3:    #6b7589;
+  --shadow-xs:   0 1px 2px rgba(0,0,0,.3), 0 2px 6px rgba(0,0,0,.2);
+  --shadow-sm:   0 2px 8px rgba(0,0,0,.35), 0 4px 16px rgba(0,0,0,.25);
+  --shadow-md:   0 8px 24px rgba(0,0,0,.45), 0 16px 48px rgba(0,0,0,.3);
+  --shadow-lg:   0 8px 32px rgba(0,0,0,.5);
+  --shadow-card: 0 1px 2px rgba(0,0,0,.3);
 
-  --color-ink:     #f5f7fc;
-  --color-zemin:   #131829;
-  --color-sinir:   #22304d;
-  --color-icerik:  #f5f7fc;
-  --color-ikincil: #a0a9b8;
-
-  --shadow-xs:   0 1px 3px rgba(0,0,0,.40);
-  --shadow-sm:   0 2px 8px rgba(0,0,0,.50);
-  --shadow-md:   0 4px 16px rgba(0,0,0,.60);
-  --shadow-lg:   0 8px 40px rgba(0,0,0,.70);
-  --shadow-card: 0 1px 3px rgba(0,0,0,.40);
+  --color-primary-s: rgba(79,106,245,.12);
+  --color-primary-b: rgba(79,106,245,.25);
+  --color-success-s: rgba(5,150,105,.12);
+  --color-success-b: rgba(5,150,105,.25);
+  --color-warning-s: rgba(217,119,6,.12);
+  --color-warning-b: rgba(217,119,6,.25);
+  --color-accent-s:  rgba(109,40,217,.12);
 }
 
 /* ── Reset ──────────────────────────────────────────────── */
