@@ -21,6 +21,10 @@ const ARACLAR = [
   { id: 'rubrik', ikon: BarChart2, ad: 'Rubrik', alt: 'Performans, sunum ve proje icin sade degerlendirme olcegi.', renk: 'var(--color-warning)', etiket: 'Olcme destegi', varsayilanSure: '1 etkinlik' },
 ]
 
+const SINIFLAR = ['1A', '1B', '2A', '2B', '3A', '3B', '4A', '4B', '5A', '5B', '6A', '6B', '7A', '7B', '8A', '8B', '9A', '9B', '10A', '10B', '11A', '11B', '12A', '12B']
+
+const DERSLER = ['Matematik', 'Türkçe', 'Fen Bilimleri', 'Sosyal Bilgiler', 'İngilizce', 'Tarih', 'Coğrafya', 'Biyoloji', 'Fizik', 'Kimya', 'Türk Dili ve Edebiyatı', 'Hayat Bilgisi']
+
 const URETIM_HAKKI_BAKIYE = 7
 const URETIM_HAKKI_MAKS = 10
 
@@ -42,12 +46,35 @@ export function UretPage() {
   const [sure, setSure] = useState('')
   const [zorluk, setZorluk] = useState('Orta')
 
+  // Sık kullanılan araçları localStorage'dan al
+  const sikKullanilan = useMemo(() => {
+    try {
+      const item = localStorage.getItem('frecuent_tools')
+      if (item) {
+        const data = JSON.parse(item) as Record<string, number>
+        return Object.entries(data)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 2)
+          .map(([id]) => id)
+      }
+    } catch { /* ignore */ }
+    return []
+  }, [])
+
   const selectedTool = useMemo(() => ARACLAR.find(arac => arac.id === selectedToolId) ?? null, [selectedToolId])
 
   function handleToolSelect(toolId: string) {
     const tool = ARACLAR.find(arac => arac.id === toolId)
     setSelectedToolId(toolId)
     setSure(tool?.varsayilanSure ?? '')
+
+    // Sık kullanılanları güncelle
+    try {
+      const item = localStorage.getItem('frecuent_tools')
+      const data = item ? JSON.parse(item) : {}
+      data[toolId] = (data[toolId] ?? 0) + 1
+      localStorage.setItem('frecuent_tools', JSON.stringify(data))
+    } catch { /* ignore */ }
   }
 
   return (
@@ -88,9 +115,42 @@ export function UretPage() {
         <UretimHakkiBadge bakiye={URETIM_HAKKI_BAKIYE} maksimum={URETIM_HAKKI_MAKS} aylikHediye={3} />
 
         {!selectedTool && (
-          <section style={{ borderRadius: 'var(--radius-xl)', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-sm)', padding: '18px' }}>
-            <SectionHeader title="Gorev sec" meta="Dogrudan forma gececek" />
-            <div className="flex flex-col gap-3">
+          <>
+            {sikKullanilan.length > 0 && (
+              <section style={{ borderRadius: 'var(--radius-xl)', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-sm)', padding: '18px' }}>
+                <SectionHeader title="Sık Kullanılanlar" meta={`${sikKullanilan.length} görev`} />
+                <div className="flex flex-col gap-3">
+                  {sikKullanilan.map(toolId => {
+                    const arac = ARACLAR.find(a => a.id === toolId)
+                    if (!arac) return null
+                    const Icon = arac.ikon
+                    return (
+                      <button
+                        key={arac.id}
+                        type="button"
+                        onClick={() => handleToolSelect(arac.id)}
+                        className="w-full text-left transition-all active:scale-[0.99]"
+                        style={{ minHeight: 'var(--touch-target)', borderRadius: 'var(--radius-lg)', padding: '14px', backgroundColor: `color-mix(in srgb, ${arac.renk} 8%, var(--color-surface2))`, border: `2px solid ${arac.renk}33` }}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="w-11 h-11 flex items-center justify-center shrink-0" style={{ borderRadius: 'var(--radius-md)', backgroundColor: `color-mix(in srgb, ${arac.renk} 10%, transparent)`, color: arac.renk }}>
+                            <Icon size={20} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold" style={{ color: 'var(--color-text1)' }}>{arac.ad}</p>
+                            <p className="text-xs leading-5 mt-1" style={{ color: 'var(--color-text2)' }}>{arac.alt}</p>
+                          </div>
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+              </section>
+            )}
+
+            <section style={{ borderRadius: 'var(--radius-xl)', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-sm)', padding: '18px' }}>
+              <SectionHeader title="Gorev sec" meta="Dogrudan forma gececek" />
+              <div className="flex flex-col gap-3">
               {ARACLAR.map(arac => {
                 const Icon = arac.ikon
                 return (
@@ -121,6 +181,7 @@ export function UretPage() {
               })}
             </div>
           </section>
+          </>
         )}
 
         {selectedTool && (
@@ -143,11 +204,17 @@ export function UretPage() {
             <div className="flex flex-col gap-3">
               <div>
                 <p className="text-[11px] font-bold mb-1" style={{ color: 'var(--color-text2)' }}>Sinif</p>
-                <input value={sinif} onChange={e => setSinif(e.target.value)} placeholder="Orn. 6A" className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text1)', outline: 'none' }} />
+                <select value={sinif} onChange={e => setSinif(e.target.value)} className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text1)', outline: 'none' }}>
+                  <option value="">Sinif sec</option>
+                  {SINIFLAR.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
               </div>
               <div>
                 <p className="text-[11px] font-bold mb-1" style={{ color: 'var(--color-text2)' }}>Ders</p>
-                <input value={ders} onChange={e => setDers(e.target.value)} placeholder="Orn. Fen Bilimleri" className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text1)', outline: 'none' }} />
+                <select value={ders} onChange={e => setDers(e.target.value)} className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text1)', outline: 'none' }}>
+                  <option value="">Ders sec</option>
+                  {DERSLER.map(d => <option key={d} value={d}>{d}</option>)}
+                </select>
               </div>
               <div>
                 <p className="text-[11px] font-bold mb-1" style={{ color: 'var(--color-text2)' }}>Kazanim / konu</p>
@@ -156,7 +223,7 @@ export function UretPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <p className="text-[11px] font-bold mb-1" style={{ color: 'var(--color-text2)' }}>Sure / kapsam</p>
-                  <input value={sure} onChange={e => setSure(e.target.value)} placeholder={selectedTool.varsayilanSure} className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text1)', outline: 'none' }} />
+                  <input value={sure} onChange={e => setSure(e.target.value)} placeholder={selectedTool?.varsayilanSure} className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text1)', outline: 'none' }} />
                 </div>
                 <div>
                   <p className="text-[11px] font-bold mb-1" style={{ color: 'var(--color-text2)' }}>Zorluk</p>

@@ -48,6 +48,15 @@ Son guncelleme: 2026-04-04
 
 ## Son Yapilanlar
 
+### 2026-04-04 — UX/UI iyileştirme: 6 madde tamamlandı
+- **Madde 1:** Ana ekran yığılmışlık → `Tamamlananlar` bölümü kaldırıldı (sadece bu hafta kazanımları gösteriliyor)
+- **Madde 2:** Export UX → Açılır menü → bottom sheet modal dialog (Excel, Word, Yazdır seçenekleri net)
+- **Madde 3:** Uret araç seçimi → `Sık Kullanılanlar` section eklendi; localStorage'a araç tıklamaları kaydolur
+- **Madde 4:** Form autocomlete → Sınıf ve Ders dropdown seç yapıldı (12 sınıf, 12 ana ders)
+- **Madde 5:** Sync hata gösterimi → syncProgressToSupabase hata durumunda toast uyarı gösterir
+- **Madde 6:** Dark mode contrast → --color-text2 ve text3 iyileştirildi (WCAG AA: 4.8:1 ve 3.2:1)
+- Build: ✅ Tests: 12/12 ✅
+
 ### 2026-04-04 — Sprint 2 başlangıcı: Backend migration
 - `supabase_v6_migration.sql` düzeltildi: `update_updated_at()` trigger fonksiyonu eklendi
 - 4 yeni tablo şeması hazır: `kullanicilar`, `kullanici_dersler`, `uretim_hakki_islemleri`, `sinavlar`

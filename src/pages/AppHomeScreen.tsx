@@ -146,7 +146,6 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
   /* ── Animasyon state ─────────────────────────────── */
   const [tamamlananAnim, setTamamlananAnim] = useState<string | null>(null)
   const [checkingAnim, setCheckingAnim] = useState<Set<string>>(new Set())
-  const [yeniTamamlananlar, setYeniTamamlananlar] = useState<Set<string>>(new Set())
   const [kutlamaAktif, setKutlamaAktif] = useState(false)
 
   /* ── Yıllık plan bölümü state ────────────────────── */
@@ -256,7 +255,10 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
       if (session) {
         const notlarItem = localStorage.getItem(StorageKeys.HAFTA_NOTLARI)
         const notlar = notlarItem ? JSON.parse(notlarItem) : {}
-        syncProgressToSupabase(session.user.id, yeniParsed, notlar).catch(() => {})
+        syncProgressToSupabase(session.user.id, yeniParsed, notlar).catch(err => {
+          console.error('[Sync Error]', err)
+          goster('Bulut senkronizasyonu başarısız. Yerel versin kaydedildi.', 'uyari')
+        })
       }
 
       goster(zatenTamamlandi ? 'İşaret kaldırıldı' : 'Kazanım tamamlandı ✓', 'basari')
@@ -278,8 +280,6 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
     setTimeout(() => {
       setCheckingAnim(prev => { const n = new Set(prev); n.delete(key); return n })
       handleTamamlaToggle(item.entry, item.haftaNo)
-      setYeniTamamlananlar(prev => new Set([...prev, key]))
-      setTimeout(() => setYeniTamamlananlar(prev => { const n = new Set(prev); n.delete(key); return n }), 700)
     }, 320)
   }, [handleTamamlaToggle])
 
@@ -564,81 +564,6 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
             </section>
           )}
 
-          {/* ── Tamamlananlar ──────────────────────────── */}
-          {tamamlananlarListesi.length > 0 && (
-            <section className="stagger-4">
-              <div className="flex items-center justify-between mb-3">
-                <span className="section-label mb-0">Tamamlananlar</span>
-                <span
-                  className="text-[11px] font-bold px-2 py-0.5 rounded-full"
-                  style={{ backgroundColor: 'var(--color-success-s)', color: 'var(--color-success)' }}
-                >
-                  {tamamlananlarListesi.length}
-                </span>
-              </div>
-              <div className="flex flex-col gap-2.5">
-                {tamamlananlarListesi.map(item => {
-                  const animKey = `${item.sinif}-${item.haftaNo}`
-                  return (
-                    <div
-                      key={animKey}
-                      style={{
-                        borderRadius: 'var(--radius-lg)',
-                        backgroundColor: 'color-mix(in srgb, var(--color-success) 5%, var(--color-surface))',
-                        border: '1px solid color-mix(in srgb, var(--color-success) 20%, transparent)',
-                        borderLeft: '3.5px solid var(--color-success)',
-                        animation: yeniTamamlananlar.has(animKey) ? 'slide-up 0.3s ease-out both' : 'none',
-                      }}
-                    >
-                      <div className="flex items-start gap-3 p-3.5">
-                        {/* Check circle — dolu */}
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleCheckClick(item)
-                          }}
-                          aria-label={`${item.label} kazanımını geri al`}
-                          className="w-7 h-7 rounded-full flex items-center justify-center transition-all active:scale-90 flex-shrink-0 mt-0.5"
-                          style={{
-                            backgroundColor: 'var(--color-success)',
-                            border: 'none',
-                            animation: tamamlananAnim === animKey ? 'pop-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none',
-                          }}
-                        >
-                          <Check size={14} strokeWidth={3} color="#fff" />
-                        </button>
-
-                        {/* İçerik */}
-                        <div
-                          className="flex-1 min-w-0 cursor-pointer"
-                          onClick={() => {
-                            onSinifSec(item.entry.sinif)
-                            navigate(`/app/hafta/${item.haftaNo}`)
-                          }}
-                        >
-                          <div className="flex items-center gap-1.5 mb-1">
-                            <span
-                              className="text-[11px] font-bold px-1.5 py-0.5 rounded"
-                              style={{ backgroundColor: 'var(--color-success-s)', color: 'var(--color-success)' }}
-                            >
-                              {item.label}
-                            </span>
-                            <span className="text-[12px] font-semibold" style={{ color: 'var(--color-text3)' }}>
-                              {item.ders}
-                            </span>
-                          </div>
-                          <p className="text-[13px] font-medium leading-snug line-clamp-2 line-through" style={{ color: 'var(--color-text3)' }}>
-                            {item.kazanim}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </section>
-          )}
 
           {/* ── Yıllık Plan Bölümü ─────────────────────── */}
           <section style={{ borderTop: '1px solid var(--color-border)', paddingTop: 'var(--section-gap)', marginTop: 'var(--space-2)' }}>
@@ -697,63 +622,106 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
             {/* Export butonları */}
             {seciliPlan && (
               <div className="flex gap-2 mt-5">
-                <div className="relative flex-1">
-                  <button
-                    onClick={() => setExportMenuAcik(p => !p)}
-                    disabled={!!exporting}
-                    className="w-full flex items-center justify-center gap-2 py-3 text-sm font-bold transition-all active:scale-95 disabled:opacity-60"
-                    style={{
-                      borderRadius: 'var(--radius-pill)',
-                      border: 'none',
-                      backgroundColor: 'var(--color-primary)',
-                      color: '#ffffff',
-                      boxShadow: '0 3px 12px color-mix(in srgb, var(--color-primary) 30%, transparent)',
-                    }}
-                  >
-                    {exporting ? (
-                      <span className="animate-pulse text-xs">Hazırlanıyor...</span>
-                    ) : (
-                      <><Download size={16} /> İndir</>
-                    )}
-                  </button>
-                  {exportMenuAcik && (
-                    <>
-                      <div className="fixed inset-0 z-10" onClick={() => setExportMenuAcik(false)} />
-                      <div
-                        className="absolute bottom-full left-0 right-0 mb-2 z-20 overflow-hidden"
+                <button
+                  onClick={() => setExportMenuAcik(p => !p)}
+                  disabled={!!exporting}
+                  className="flex-1 flex items-center justify-center gap-2 py-3 text-sm font-bold transition-all active:scale-95 disabled:opacity-60"
+                  style={{
+                    borderRadius: 'var(--radius-pill)',
+                    border: 'none',
+                    backgroundColor: 'var(--color-primary)',
+                    color: '#ffffff',
+                    boxShadow: '0 3px 12px color-mix(in srgb, var(--color-primary) 30%, transparent)',
+                  }}
+                >
+                  {exporting ? (
+                    <span className="animate-pulse text-xs">Hazırlanıyor...</span>
+                  ) : (
+                    <><Download size={16} /> İndir</>
+                  )}
+                </button>
+              </div>
+            )}
+
+            {/* Export Modal */}
+            {exportMenuAcik && (
+              <>
+                <div className="fixed inset-0 z-30 bg-black/30" onClick={() => setExportMenuAcik(false)} />
+                <div
+                  className="fixed inset-x-0 bottom-0 z-40 rounded-t-2xl p-6"
+                  style={{
+                    backgroundColor: 'var(--color-surface)',
+                    borderTop: '1px solid var(--color-border)',
+                    boxShadow: '0 -4px 16px color-mix(in srgb, black 10%, transparent)',
+                    animation: 'slide-up 0.3s ease-out both',
+                  }}
+                >
+                  <div className="max-w-md mx-auto">
+                    <div className="flex justify-between items-center mb-5">
+                      <p className="text-sm font-bold" style={{ color: 'var(--color-text1)' }}>Planı dışa aktar</p>
+                      <button
+                        onClick={() => setExportMenuAcik(false)}
+                        className="text-xl"
+                        style={{ color: 'var(--color-text2)' }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <button
+                        onClick={handleExcelIndir}
+                        disabled={!!exporting}
+                        className="flex items-center gap-3 px-4 py-3 text-sm font-semibold active:opacity-70 disabled:opacity-50"
                         style={{
                           borderRadius: 'var(--radius-lg)',
                           border: '1px solid var(--color-border)',
-                          backgroundColor: 'var(--color-surface)',
-                          boxShadow: 'var(--shadow-md)',
+                          backgroundColor: 'var(--color-surface2)',
+                          color: 'var(--color-text1)',
                         }}
                       >
-                        <button onClick={handleExcelIndir} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold active:opacity-70" style={{ color: 'var(--color-text1)', borderBottom: '1px solid var(--color-border)' }}>
-                          <FileSpreadsheet size={16} style={{ color: 'var(--color-success)' }} /> Excel (.xlsx)
-                        </button>
-                        <button onClick={handleWordIndir} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold active:opacity-70" style={{ color: 'var(--color-text1)' }}>
-                          <FileText size={16} style={{ color: 'var(--color-primary)' }} /> Word (.doc)
-                        </button>
-                      </div>
-                    </>
-                  )}
+                        <FileSpreadsheet size={18} style={{ color: 'var(--color-success)' }} />
+                        <div className="text-left">
+                          <p className="font-bold">Excel (.xlsx)</p>
+                          <p className="text-xs" style={{ color: 'var(--color-text2)' }}>Tüm haftalar, hesaplamalar dahil</p>
+                        </div>
+                      </button>
+                      <button
+                        onClick={handleWordIndir}
+                        disabled={!!exporting}
+                        className="flex items-center gap-3 px-4 py-3 text-sm font-semibold active:opacity-70 disabled:opacity-50"
+                        style={{
+                          borderRadius: 'var(--radius-lg)',
+                          border: '1px solid var(--color-border)',
+                          backgroundColor: 'var(--color-surface2)',
+                          color: 'var(--color-text1)',
+                        }}
+                      >
+                        <FileText size={18} style={{ color: 'var(--color-primary)' }} />
+                        <div className="text-left">
+                          <p className="font-bold">Word (.docx)</p>
+                          <p className="text-xs" style={{ color: 'var(--color-text2)' }}>Düzenlenebilir belge</p>
+                        </div>
+                      </button>
+                      <button
+                        onClick={handleYazdir}
+                        className="flex items-center gap-3 px-4 py-3 text-sm font-semibold active:opacity-70"
+                        style={{
+                          borderRadius: 'var(--radius-lg)',
+                          border: '1px solid var(--color-border)',
+                          backgroundColor: 'var(--color-surface2)',
+                          color: 'var(--color-text1)',
+                        }}
+                      >
+                        <Printer size={18} style={{ color: 'var(--color-warning)' }} />
+                        <div className="text-left">
+                          <p className="font-bold">Yazdır</p>
+                          <p className="text-xs" style={{ color: 'var(--color-text2)' }}>Yazıcıya gönder</p>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
                 </div>
-
-                <button
-                  onClick={handleYazdir}
-                  className="flex items-center gap-1.5 text-sm font-bold transition-all active:scale-95 whitespace-nowrap"
-                  style={{
-                    padding: '0 18px',
-                    borderRadius: 'var(--radius-pill)',
-                    border: '1.5px solid var(--color-border)',
-                    backgroundColor: 'var(--color-surface)',
-                    color: 'var(--color-text2)',
-                    boxShadow: 'var(--shadow-xs)',
-                  }}
-                >
-                  <Printer size={16} /> Yazdır
-                </button>
-              </div>
+              </>
             )}
           </section>
 

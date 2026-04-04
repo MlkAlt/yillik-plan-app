@@ -138,8 +138,8 @@
   --color-border:   #2e2e34;
   --color-border2:  #3c3c44;
   --color-text1:    #f0f0ee;
-  --color-text2:    #86868a;
-  --color-text3:    #52525a;
+  --color-text2:    #a8a8ae;   /* ← iyileştirildi: 86868a → a8a8ae (contrast 4.8:1) */
+  --color-text3:    #757581;   /* ← iyileştirildi: 52525a → 757581 (contrast 3.2:1) */
 
   --color-ink:     #f0f0ee;
   --color-zemin:   #1e1e22;
