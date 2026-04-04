@@ -29,8 +29,7 @@ export function AppLayout({ children }: AppLayoutProps) {
     <div
       className="min-h-screen font-sans flex justify-center"
       style={{
-        background:
-          'radial-gradient(circle at top, color-mix(in srgb, var(--color-primary) 8%, transparent) 0%, transparent 34%), var(--color-bg2, #ededea)',
+        background: 'var(--color-bg2, #ededea)',
       }}
     >
       <div
