@@ -145,6 +145,8 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
 
   /* ── Animasyon state ─────────────────────────────── */
   const [tamamlananAnim, setTamamlananAnim] = useState<string | null>(null)
+  const [checkingAnim, setCheckingAnim] = useState<Set<string>>(new Set())
+  const [yeniTamamlananlar, setYeniTamamlananlar] = useState<Set<string>>(new Set())
   const [kutlamaAktif, setKutlamaAktif] = useState(false)
 
   /* ── Yıllık plan bölümü state ────────────────────── */
@@ -263,6 +265,23 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [normalKazanimlar, toplamKazanim, goster])
+
+  /* ── Check click: önce bounce animasyonu, sonra state ─ */
+
+  const handleCheckClick = useCallback((item: KazanimSatiri) => {
+    const key = `${item.sinif}-${item.haftaNo}`
+    if (item.tamamlandi) {
+      handleTamamlaToggle(item.entry, item.haftaNo)
+      return
+    }
+    setCheckingAnim(prev => new Set([...prev, key]))
+    setTimeout(() => {
+      setCheckingAnim(prev => { const n = new Set(prev); n.delete(key); return n })
+      handleTamamlaToggle(item.entry, item.haftaNo)
+      setYeniTamamlananlar(prev => new Set([...prev, key]))
+      setTimeout(() => setYeniTamamlananlar(prev => { const n = new Set(prev); n.delete(key); return n }), 700)
+    }, 320)
+  }, [handleTamamlaToggle])
 
   /* ── Export handlers ──────────────────────────────── */
 
@@ -477,27 +496,42 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
                         borderLeft: '3.5px solid var(--color-primary)',
                         boxShadow: 'var(--shadow-xs)',
                         opacity: isAnimating ? 0 : 1,
-                        transform: isAnimating ? 'translateY(-8px) scale(0.97)' : 'none',
+                        transform: isAnimating ? 'translateY(-6px) scale(0.97)' : 'none',
                         maxHeight: isAnimating ? '0px' : '200px',
                         marginBottom: isAnimating ? '-8px' : '0',
+                        transition: isAnimating ? 'opacity 0.28s ease-out, transform 0.28s ease-out, max-height 0.28s ease-out 0.1s, margin 0.28s ease-out 0.1s' : 'none',
                         animation: `stagger-up 0.35s ease-out ${0.05 + idx * 0.07}s both`,
                       }}
                     >
                       <div className="flex items-start gap-3 p-3.5">
                         {/* Check circle */}
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleTamamlaToggle(item.entry, item.haftaNo)
-                          }}
-                          aria-label={`${item.label} kazanımı tamamla`}
-                          className="w-7 h-7 rounded-full flex items-center justify-center transition-all active:scale-90 flex-shrink-0 mt-0.5"
-                          style={{
-                            border: '2px solid var(--color-primary)',
-                            backgroundColor: 'var(--color-primary-s)',
-                          }}
-                        />
+                        {(() => {
+                          const isChecking = checkingAnim.has(animKey)
+                          return (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleCheckClick(item)
+                              }}
+                              aria-label={`${item.label} kazanımı tamamla`}
+                              className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
+                              style={{
+                                border: isChecking ? 'none' : '2px solid var(--color-primary)',
+                                backgroundColor: isChecking ? 'var(--color-success)' : 'var(--color-primary-s)',
+                                transition: 'background-color 0.15s, border-color 0.15s',
+                                animation: isChecking ? 'pop-in 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both' : 'none',
+                                transform: 'translateZ(0)',
+                              }}
+                            >
+                              {isChecking ? (
+                                <Check size={13} strokeWidth={3.5} color="#fff" />
+                              ) : (
+                                <Check size={11} strokeWidth={2.5} style={{ color: 'var(--color-primary)', opacity: 0.35 }} />
+                              )}
+                            </button>
+                          )
+                        })()}
 
                         {/* İçerik */}
                         <div
@@ -553,6 +587,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
                         backgroundColor: 'color-mix(in srgb, var(--color-success) 5%, var(--color-surface))',
                         border: '1px solid color-mix(in srgb, var(--color-success) 20%, transparent)',
                         borderLeft: '3.5px solid var(--color-success)',
+                        animation: yeniTamamlananlar.has(animKey) ? 'slide-up 0.3s ease-out both' : 'none',
                       }}
                     >
                       <div className="flex items-start gap-3 p-3.5">
@@ -561,7 +596,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation()
-                            handleTamamlaToggle(item.entry, item.haftaNo)
+                            handleCheckClick(item)
                           }}
                           aria-label={`${item.label} kazanımını geri al`}
                           className="w-7 h-7 rounded-full flex items-center justify-center transition-all active:scale-90 flex-shrink-0 mt-0.5"

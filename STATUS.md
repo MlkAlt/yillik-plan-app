@@ -29,7 +29,7 @@ Son guncelleme: 2026-04-04
 | 9 | Dosyam ekrani | frontend-dev | **DONE** | `DosyamPage.tsx` | Belge gruplari ve ozet |
 | 10 | Uret ekrani | frontend-dev | **DONE** | `UretPage.tsx` | Gorev seciminden dogrudan forma gecis |
 | 11 | Uretim hakki UI | frontend-dev | **DONE** | `UretimHakkiBadge.tsx` | `jeton` dili kaldirildi |
-| 12 | Supabase yeni tablolar migration | backend-dev | **NEXT** | `supabase_v6_migration.sql` | Sprint 2 basi |
+| 12 | Supabase yeni tablolar migration | backend-dev | **DONE** | `supabase_v6_migration.sql` | kullanicilar, dersler, uretim_hakki, sinavlar |
 | 13 | Sprint 1 QA / tasarim review | qa | **DONE** | `QA_SPRINT1_RAPORU.md` | 2 bug fix, 5 madde Sprint 2'ye |
 
 ---
@@ -48,7 +48,11 @@ Son guncelleme: 2026-04-04
 
 ## Son Yapilanlar
 
-### 2026-04-04 - UX duzeltme turu
+### 2026-04-04 — Sprint 2 başlangıcı: Backend migration
+- `supabase_v6_migration.sql` düzeltildi: `update_updated_at()` trigger fonksiyonu eklendi
+- 4 yeni tablo şeması hazır: `kullanicilar`, `kullanici_dersler`, `uretim_hakki_islemleri`, `sinavlar`
+- RLS politikaları ve indexler tamamlandı
+- Task #12 DONE — Sprint 2 başlangıcı başarılı
 - `AppHomeScreen.tsx` tekrar sadeleştirildi; ana ekran `Bugunun odagi` ve `Bugunku kazanımlar` etrafinda toplandi.
 - Profil erisimi daha gorunur bir `Ayarlar` butonuna cevrildi.
 - `PlanSelector/index.tsx` icindeki `Planin hazirlaniyor` katmani yeniden kuruldu; onboarding benzeri animasyon ve donen durum mesajlari eklendi.
