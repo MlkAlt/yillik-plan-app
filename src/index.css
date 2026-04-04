@@ -120,6 +120,17 @@
   to   { width: 32px; opacity: 1; }
 }
 
+@keyframes celebrate {
+  0%   { transform: scale(0.3) rotate(-20deg); opacity: 0; }
+  60%  { transform: scale(1.2) rotate(5deg); }
+  80%  { transform: scale(0.95) rotate(-2deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 /* ── Dark mode — v8 exact ──────────────────────────────── */
 [data-theme="dark"] {
   --color-bg:       #0E0F12;

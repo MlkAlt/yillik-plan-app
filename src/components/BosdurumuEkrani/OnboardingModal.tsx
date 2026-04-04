@@ -1,38 +1,43 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { createPortal } from 'react-dom'
+import { Search } from 'lucide-react'
 import { BRANCHES, type Branch } from '../../lib/branchConfig'
 import { buildPlan } from '../../lib/planBuilder'
 import { getYilSecenekleri } from '../../lib/dersSinifMap'
 import type { PlanEntry } from '../../types/planEntry'
-import { Button } from '../Button'
-import { Search, ChevronDown } from 'lucide-react'
 
 interface OnboardingModalProps {
   onTamamla: (entries: PlanEntry[]) => void
 }
 
 export function OnboardingModal({ onTamamla }: OnboardingModalProps) {
-  const [query, setQuery] = useState('')
-  const [acikBrans, setAcikBrans] = useState<string | null>(null)
+  const [query, setQuery]                   = useState('')
+  const [seciliBransId, setSeciliBransId]   = useState<string | null>(null)
   const [seciliSiniflar, setSeciliSiniflar] = useState<string[]>([])
-  const [loading, setLoading] = useState(false)
-  const [tebrik, setTebrik] = useState<{ ders: string; siniflar: string[] } | null>(null)
+  const [loading, setLoading]               = useState(false)
+  const [tebrik, setTebrik]                 = useState<{ ders: string; siniflar: string[] } | null>(null)
   const yil = getYilSecenekleri()[0]
+  const sinifSecRef = useRef<HTMLDivElement>(null)
 
   const filtered = query
     ? BRANCHES.filter(b => b.label.toLowerCase().includes(query.toLowerCase()))
     : BRANCHES
 
   const popular = filtered.filter(b => b.popular)
-  const rest = filtered.filter(b => !b.popular)
+  const rest    = filtered.filter(b => !b.popular)
+  const seciliBrans = BRANCHES.find(b => b.id === seciliBransId) ?? null
 
   function handleBransToggle(branch: Branch) {
-    if (acikBrans === branch.id) {
-      setAcikBrans(null)
+    if (seciliBransId === branch.id) {
+      setSeciliBransId(null)
       setSeciliSiniflar([])
     } else {
-      setAcikBrans(branch.id)
+      setSeciliBransId(branch.id)
       setSeciliSiniflar([branch.classes[0]])
+      // Sınıf seçimine scroll
+      setTimeout(() => {
+        sinifSecRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 120)
     }
   }
 
@@ -45,292 +50,205 @@ export function OnboardingModal({ onTamamla }: OnboardingModalProps) {
   }
 
   async function handleOlustur() {
-    const branch = BRANCHES.find(b => b.id === acikBrans)
-    if (!branch || seciliSiniflar.length === 0) return
+    if (!seciliBrans || seciliSiniflar.length === 0) return
     setLoading(true)
     try {
       const entries: PlanEntry[] = await Promise.all(
         seciliSiniflar.map(async sinif => {
-          const { plan } = await buildPlan(branch.lessonId, sinif, yil)
-          return { sinif, ders: branch.lessonId, yil, tip: 'meb' as const, plan, rows: null }
+          const { plan } = await buildPlan(seciliBrans.lessonId, sinif, yil)
+          return { sinif, ders: seciliBrans.lessonId, yil, tip: 'meb' as const, plan, rows: null }
         })
       )
-      setTebrik({ ders: branch.label, siniflar: seciliSiniflar })
+      setTebrik({ ders: seciliBrans.label, siniflar: seciliSiniflar })
       setLoading(false)
-      setTimeout(() => {
-        onTamamla(entries)
-      }, 2200)
+      setTimeout(() => onTamamla(entries), 2400)
     } catch {
       setLoading(false)
     }
   }
 
-  const seciliBrans = BRANCHES.find(b => b.id === acikBrans)
+  // ── Tebrik ekranı ─────────────────────────────────────────────────────────
+  if (tebrik) {
+    return createPortal(
+      <div style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'var(--color-bg)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 24px', textAlign: 'center' }}>
+        <div style={{ fontSize: '72px', marginBottom: '24px', animation: 'celebrate 0.8s cubic-bezier(0.34,1.56,0.64,1) both' }}>🎉</div>
+        <h2 style={{ fontFamily: "var(--font-display),'Bricolage Grotesque',sans-serif", fontSize: '28px', fontWeight: 800, color: 'var(--color-text1)', letterSpacing: '-0.04em', marginBottom: '12px', animation: 'stagger-up 0.5s 0.2s ease-out both' }}>
+          Hazırsınız!
+        </h2>
+        <p style={{ fontSize: '15px', color: 'var(--color-text2)', lineHeight: '24px', marginBottom: '32px', animation: 'stagger-up 0.5s 0.3s ease-out both' }}>
+          {tebrik.ders} branşı · {tebrik.siniflar.length} sınıf<br />
+          <span style={{ color: 'var(--color-text3)', fontSize: '13px' }}>{tebrik.siniflar.join(', ')}</span>
+        </p>
+        <button
+          onClick={() => onTamamla([])}
+          style={{ width: '100%', maxWidth: '280px', height: '52px', borderRadius: '100px', background: '#4F6AF5', color: '#fff', border: 'none', fontSize: '16px', fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 20px rgba(79,106,245,.35)', animation: 'stagger-up 0.5s 0.4s ease-out both' }}
+        >
+          Ana Ekrana Git
+        </button>
+        <p style={{ fontSize: '12px', color: 'var(--color-text3)', marginTop: '16px', lineHeight: '20px', animation: 'stagger-up 0.5s 0.5s ease-out both' }}>
+          Ders programını daha sonra ekleyebilirsiniz.<br />
+          Eklenince yıllık planınız otomatik hazırlanır.
+        </p>
+        <style>{`
+          @keyframes celebrate {
+            0%   { transform: scale(0.3) rotate(-20deg); opacity: 0; }
+            60%  { transform: scale(1.2) rotate(5deg); }
+            80%  { transform: scale(0.95) rotate(-2deg); }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+          }
+        `}</style>
+      </div>,
+      document.body
+    )
+  }
 
-  const modal = (
-    <div className="fixed inset-0 z-50 flex flex-col justify-end">
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
+  // ── Ana onboarding ekranı ─────────────────────────────────────────────────
+  return createPortal(
+    <div style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'var(--color-bg)', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
 
-      {/* Sheet */}
-      <div
-        className="relative z-10 w-full max-w-lg mx-auto rounded-t-3xl animate-fade-in flex flex-col max-h-[92vh]"
-        style={{
-          backgroundColor: 'var(--color-surface)',
-          boxShadow: '0 -4px 32px rgba(0,0,0,0.15)',
-        }}
-      >
-        {/* Tutamaç */}
-        <div className="flex justify-center pt-3 pb-2 flex-shrink-0">
-          <div className="w-10 h-1 rounded-full" style={{ backgroundColor: 'var(--color-border)' }} />
+      {/* Header — progress dots + Atla */}
+      <div style={{ padding: '16px 20px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+          {[0, 1, 2].map(i => (
+            <div key={i} style={{ height: '3px', borderRadius: '100px', background: i === 0 ? '#4F6AF5' : i === 1 ? 'rgba(79,106,245,.4)' : 'var(--color-border)', width: i === 0 ? '40px' : '20px', transition: 'all 0.4s cubic-bezier(0.34,1.56,0.64,1)' }} />
+          ))}
         </div>
-
-        {/* Başlık */}
-        <div className="px-5 pb-4 flex-shrink-0">
-          <h2
-            className="text-xl font-bold tracking-tight"
-            style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text1)' }}
-          >
-            Branşını seç
-          </h2>
-          <p className="text-sm mt-0.5" style={{ color: 'var(--color-text3)' }}>
-            Sınıflarını belirle, planın hazır olsun.
-          </p>
-        </div>
-
-        {/* Arama */}
-        <div className="px-5 pb-3 flex-shrink-0">
-          <div className="relative">
-            <Search
-              size={15}
-              className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
-              style={{ color: 'var(--color-text3)' }}
-            />
-            <input
-              type="text"
-              placeholder="Branş ara..."
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              autoFocus
-              className="w-full pl-9 pr-4 py-2.5 text-sm font-medium transition-all outline-none"
-              style={{
-                borderRadius: 'var(--radius-pill)',
-                border: '1.5px solid var(--color-border)',
-                backgroundColor: 'var(--color-bg)',
-                color: 'var(--color-text1)',
-              }}
-              onFocus={e => { e.currentTarget.style.borderColor = 'var(--color-primary)' }}
-              onBlur={e => { e.currentTarget.style.borderColor = 'var(--color-border)' }}
-            />
-          </div>
-        </div>
-
-        {/* Tebrik ekranı */}
-        {tebrik ? (
-          <div className="flex-1 flex flex-col items-center justify-center px-5 py-12 text-center animate-fade-in">
-            <div className="text-6xl mb-4" style={{ animation: 'pop .4s ease-out' }}>🎉</div>
-            <h2
-              className="text-2xl font-bold mb-2 tracking-tight"
-              style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text1)' }}
-            >
-              Planın hazır!
-            </h2>
-            <p className="text-sm mb-6 leading-relaxed" style={{ color: 'var(--color-text2)' }}>
-              <span className="font-semibold" style={{ color: 'var(--color-text1)' }}>{tebrik.ders}</span> için{' '}
-              {tebrik.siniflar.length === 1
-                ? <span className="font-semibold" style={{ color: 'var(--color-text1)' }}>{tebrik.siniflar[0]}</span>
-                : <span className="font-semibold" style={{ color: 'var(--color-text1)' }}>{tebrik.siniflar.length} sınıf</span>
-              }{' '}
-              yıllık planın oluşturuldu.
-            </p>
-            <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--color-text3)' }}>
-              <svg className="animate-spin" style={{ color: 'var(--color-primary)' }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-              </svg>
-              Plana yönlendiriliyorsun...
-            </div>
-          </div>
-        ) : (
-          <>
-            {/* Branş listesi */}
-            <div className="flex-1 overflow-y-auto px-5 pb-4">
-              {!query && popular.length > 0 && (
-                <div className="mb-4">
-                  <p
-                    className="text-[10px] font-bold uppercase tracking-[.1em] mb-2"
-                    style={{ color: 'var(--color-text3)' }}
-                  >
-                    Popüler
-                  </p>
-                  <BransList
-                    branches={popular}
-                    acikBrans={acikBrans}
-                    seciliSiniflar={seciliSiniflar}
-                    onBransToggle={handleBransToggle}
-                    onSinifToggle={handleSinifToggle}
-                  />
-                </div>
-              )}
-
-              {rest.length > 0 && (
-                <div>
-                  {!query && (
-                    <p
-                      className="text-[10px] font-bold uppercase tracking-[.1em] mb-2"
-                      style={{ color: 'var(--color-text3)' }}
-                    >
-                      Diğer Branşlar
-                    </p>
-                  )}
-                  <BransList
-                    branches={query ? filtered : rest}
-                    acikBrans={acikBrans}
-                    seciliSiniflar={seciliSiniflar}
-                    onBransToggle={handleBransToggle}
-                    onSinifToggle={handleSinifToggle}
-                  />
-                </div>
-              )}
-
-              {filtered.length === 0 && (
-                <p className="text-center text-sm py-10" style={{ color: 'var(--color-text3)' }}>
-                  "{query}" için sonuç bulunamadı
-                </p>
-              )}
-            </div>
-
-            {/* CTA — branş seçilince görünür */}
-            {acikBrans && seciliBrans && (
-              <div
-                className="px-5 pb-8 pt-3 flex-shrink-0"
-                style={{
-                  borderTop: '1px solid var(--color-border)',
-                  backgroundColor: 'var(--color-surface)',
-                }}
-              >
-                <Button
-                  onClick={handleOlustur}
-                  disabled={loading || seciliSiniflar.length === 0}
-                  loading={loading}
-                  variant="primary"
-                  className="w-full text-base"
-                >
-                  {seciliSiniflar.length === 1
-                    ? `${seciliBrans.label} · ${seciliSiniflar[0]} için Plan Oluştur →`
-                    : `${seciliBrans.label} · ${seciliSiniflar.length} sınıf için Plan Oluştur →`
-                  }
-                </Button>
-              </div>
-            )}
-          </>
-        )}
+        <button onClick={() => onTamamla([])} style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-text3)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px' }}>
+          Atla
+        </button>
       </div>
-    </div>
-  )
 
-  return createPortal(modal, document.body)
-}
+      {/* Başlık */}
+      <div style={{ padding: '24px 20px 16px', flexShrink: 0 }}>
+        <h1 style={{ fontFamily: "var(--font-display),'Bricolage Grotesque',sans-serif", fontSize: '26px', fontWeight: 800, color: 'var(--color-text1)', letterSpacing: '-0.04em', lineHeight: '32px', marginBottom: '4px' }}>
+          Branşınızı seçin
+        </h1>
+        <p style={{ fontSize: '14px', color: 'var(--color-text2)', lineHeight: '20px' }}>
+          Dersleriniz otomatik listelenecek.
+        </p>
+      </div>
 
-function BransList({
-  branches, acikBrans, seciliSiniflar, onBransToggle, onSinifToggle,
-}: {
-  branches: Branch[]
-  acikBrans: string | null
-  seciliSiniflar: string[]
-  onBransToggle: (b: Branch) => void
-  onSinifToggle: (s: string) => void
-}) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      {branches.map(branch => (
-        <BransItem
-          key={branch.id}
-          branch={branch}
-          isOpen={acikBrans === branch.id}
-          seciliSiniflar={seciliSiniflar}
-          onToggle={() => onBransToggle(branch)}
-          onSinifToggle={onSinifToggle}
+      {/* Arama */}
+      <div style={{ padding: '0 20px 16px', flexShrink: 0, position: 'relative' }}>
+        <Search size={18} style={{ position: 'absolute', left: '32px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text3)', pointerEvents: 'none' }} />
+        <input
+          type="text"
+          placeholder="Branş ara…"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          style={{ width: '100%', height: '44px', paddingLeft: '44px', paddingRight: '16px', borderRadius: '100px', border: '1.5px solid var(--color-border)', background: 'var(--color-surface)', fontSize: '15px', fontWeight: 500, color: 'var(--color-text1)', outline: 'none', boxShadow: 'var(--shadow-xs)', fontFamily: 'inherit', transition: 'border-color 0.2s, box-shadow 0.2s' }}
+          onFocus={e => { e.currentTarget.style.borderColor = '#4F6AF5'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(79,106,245,.12)' }}
+          onBlur={e => { e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.boxShadow = 'var(--shadow-xs)' }}
         />
-      ))}
-    </div>
-  )
-}
+      </div>
 
-function BransItem({
-  branch, isOpen, seciliSiniflar, onToggle, onSinifToggle,
-}: {
-  branch: Branch
-  isOpen: boolean
-  seciliSiniflar: string[]
-  onToggle: () => void
-  onSinifToggle: (s: string) => void
-}) {
-  return (
-    <div
-      className="overflow-hidden transition-all"
-      style={{
-        borderRadius: 'var(--radius-lg)',
-        border: `1px solid ${isOpen ? 'var(--color-primary)' : 'var(--color-border)'}`,
-        backgroundColor: isOpen ? 'color-mix(in srgb, var(--color-primary) 6%, transparent)' : 'var(--color-surface)',
-      }}
-    >
-      {/* Branş satırı */}
-      <button
-        onClick={onToggle}
-        className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors active:opacity-70"
-      >
-        <branch.icon
-          size={20}
-          className="flex-shrink-0"
-          style={{ color: 'var(--color-primary)' }}
-        />
-        <span
-          className="text-sm font-semibold flex-1"
-          style={{ color: isOpen ? 'var(--color-primary)' : 'var(--color-text1)' }}
-        >
-          {branch.label}
-        </span>
-        <span
-          className="transition-transform duration-200"
-          style={{
-            color: 'var(--color-text3)',
-            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-          }}
-        >
-          <ChevronDown size={16} />
-        </span>
-      </button>
-
-      {/* Sınıf seçimi — accordion */}
-      {isOpen && (
-        <div
-          className="px-4 pb-4 pt-2"
-          style={{ borderTop: '1px solid var(--color-border)' }}
-        >
-          <p className="text-xs mb-2" style={{ color: 'var(--color-text3)' }}>Hangi sınıflar için?</p>
-          <div className="flex flex-wrap gap-2">
-            {branch.classes.map(sinif => {
-              const sel = seciliSiniflar.includes(sinif)
+      {/* Branş chip'leri */}
+      <div style={{ padding: '0 20px', flexShrink: 0 }}>
+        {!query && popular.length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+            {popular.map(branch => {
+              const sel = seciliBransId === branch.id
+              const Icon = branch.icon
               return (
                 <button
-                  key={sinif}
-                  onClick={() => onSinifToggle(sinif)}
-                  className="font-bold text-xs transition-all active:scale-95"
-                  style={{
-                    padding: '5px 12px',
-                    borderRadius: 'var(--radius-pill)',
-                    border: `1.5px solid ${sel ? 'var(--color-primary)' : 'var(--color-border)'}`,
-                    backgroundColor: sel ? 'var(--color-primary)' : 'var(--color-bg)',
-                    color: sel ? '#ffffff' : 'var(--color-text2)',
-                  }}
+                  key={branch.id}
+                  onClick={() => handleBransToggle(branch)}
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '44px', padding: '0 16px', borderRadius: '100px', border: `1.5px solid ${sel ? '#4F6AF5' : 'var(--color-border)'}`, background: sel ? '#EEF1FE' : 'var(--color-surface)', color: sel ? '#1B2E5E' : 'var(--color-text2)', fontSize: '14px', fontWeight: 600, cursor: 'pointer', boxShadow: sel ? '0 4px 12px rgba(79,106,245,.2)' : 'var(--shadow-xs)', transform: sel ? 'translateY(-2px)' : 'none', transition: 'all 0.2s cubic-bezier(0.22,1,0.36,1)' }}
                 >
-                  {sinif}
+                  <Icon size={16} style={{ color: sel ? '#4F6AF5' : 'var(--color-text3)', flexShrink: 0 }} />
+                  {branch.label}
                 </button>
               )
             })}
           </div>
+        )}
+
+        {/* Diğer branşlar — arama sonuçları veya tam liste */}
+        {(query ? filtered : rest).length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+            {(query ? filtered : rest).map(branch => {
+              const sel = seciliBransId === branch.id
+              const Icon = branch.icon
+              return (
+                <button
+                  key={branch.id}
+                  onClick={() => handleBransToggle(branch)}
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '44px', padding: '0 16px', borderRadius: '100px', border: `1.5px solid ${sel ? '#4F6AF5' : 'var(--color-border)'}`, background: sel ? '#EEF1FE' : 'var(--color-surface)', color: sel ? '#1B2E5E' : 'var(--color-text2)', fontSize: '14px', fontWeight: 600, cursor: 'pointer', boxShadow: sel ? '0 4px 12px rgba(79,106,245,.2)' : 'var(--shadow-xs)', transform: sel ? 'translateY(-2px)' : 'none', transition: 'all 0.2s cubic-bezier(0.22,1,0.36,1)' }}
+                >
+                  <Icon size={16} style={{ color: sel ? '#4F6AF5' : 'var(--color-text3)', flexShrink: 0 }} />
+                  {branch.label}
+                </button>
+              )
+            })}
+          </div>
+        )}
+
+        {filtered.length === 0 && (
+          <p style={{ textAlign: 'center', fontSize: '14px', color: 'var(--color-text3)', padding: '32px 0' }}>
+            "{query}" için sonuç bulunamadı
+          </p>
+        )}
+      </div>
+
+      {/* Sınıf seçimi — branş seçilince açılır */}
+      {seciliBrans && (
+        <div ref={sinifSecRef} style={{ padding: '8px 20px 24px', flexShrink: 0 }}>
+          <h2 style={{ fontFamily: "var(--font-display),'Bricolage Grotesque',sans-serif", fontSize: '22px', fontWeight: 800, color: 'var(--color-text1)', letterSpacing: '-0.03em', marginBottom: '4px' }}>
+            Sınıflarınızı seçin
+          </h2>
+          <p style={{ fontSize: '14px', color: 'var(--color-text2)', marginBottom: '16px' }}>
+            Seçilen branşa göre dersler listelendi.
+          </p>
+
+          {/* Ders grupları */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: '18px', padding: '16px', boxShadow: 'var(--shadow-xs)' }}>
+              <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-text1)', marginBottom: '12px' }}>{seciliBrans.label}</p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {seciliBrans.classes.map(sinif => {
+                  const sel = seciliSiniflar.includes(sinif)
+                  return (
+                    <button
+                      key={sinif}
+                      onClick={() => handleSinifToggle(sinif)}
+                      style={{ height: '36px', padding: '0 14px', borderRadius: '100px', border: `1.5px solid ${sel ? '#4F6AF5' : 'var(--color-border)'}`, background: sel ? '#4F6AF5' : 'var(--color-bg)', color: sel ? '#fff' : 'var(--color-text2)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', transform: sel ? 'scale(1.05)' : 'scale(1)', boxShadow: sel ? '0 3px 10px rgba(79,106,245,.3)' : 'none', transition: 'all 0.2s cubic-bezier(0.34,1.56,0.64,1)' }}
+                    >
+                      {sinif}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
         </div>
       )}
-    </div>
+
+      {/* Devam Et butonu — sabit alt */}
+      {seciliBrans && seciliSiniflar.length > 0 && (
+        <div style={{ position: 'sticky', bottom: 0, padding: '12px 20px 32px', background: 'linear-gradient(to top, var(--color-bg) 70%, transparent)', flexShrink: 0 }}>
+          <button
+            onClick={handleOlustur}
+            disabled={loading}
+            style={{ width: '100%', height: '52px', borderRadius: '100px', background: loading ? 'rgba(79,106,245,.6)' : '#4F6AF5', color: '#fff', border: 'none', fontSize: '16px', fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', boxShadow: '0 4px 20px rgba(79,106,245,.35)', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+          >
+            {loading ? (
+              <>
+                <svg style={{ animation: 'spin 1s linear infinite' }} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                </svg>
+                Plan hazırlanıyor…
+              </>
+            ) : (
+              seciliSiniflar.length === 1
+                ? `${seciliBrans.label} · ${seciliSiniflar[0]} için Plan Oluştur →`
+                : `${seciliBrans.label} · ${seciliSiniflar.length} sınıf için Plan Oluştur →`
+            )}
+          </button>
+        </div>
+      )}
+
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>,
+    document.body
   )
 }
