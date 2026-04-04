@@ -4,6 +4,9 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { HomePage } from './pages/HomePage'
 import { YuklemePage } from './pages/YuklemePage'
 import { AppHomeScreen } from './pages/AppHomeScreen'
+import { PlanPage } from './pages/PlanPage.v8'
+import { DosyamPage } from './pages/DosyamPage.v8'
+import { UretPage } from './pages/UretPage.v8'
 import { AppSettingsScreen } from './pages/AppSettingsScreen'
 import { AppLayout } from './components/AppLayout'
 import { HaftaDetayPage } from './pages/HaftaDetayPage'
@@ -68,13 +71,14 @@ function AppInner() {
         <Route path="/yukle" element={<Navigate to="/app/yukle" replace />} />
         <Route path="/plan" element={<Navigate to="/app" replace />} />
         <Route path="/app" element={<AppLayout><AppHomeScreen planlar={planlar} onPlanEkle={handlePlanEkle} onSinifSec={handleSinifSec} syncing={syncing} tamamlananlar={tamamlananlar} /></AppLayout>} />
+        <Route path="/app/planla" element={<AppLayout><PlanPage /></AppLayout>} />
+        <Route path="/app/dosyam" element={<AppLayout><DosyamPage /></AppLayout>} />
+        <Route path="/app/uret" element={<AppLayout><UretPage /></AppLayout>} />
         <Route path="/app/yukle" element={<AppLayout><YuklemePage onYukle={handleYukleLegacy} /></AppLayout>} />
         <Route path="/app/profil" element={<AppLayout><AppSettingsScreen onPlanEkle={handlePlanEkle} onPlanSil={handlePlanSil} planlar={planlar} user={user} /></AppLayout>} />
         <Route path="/app/hafta/:haftaNo" element={<AppLayout><HaftaDetayPage entry={aktifEntry} onTamamlaToggle={handleTamamlananGuncelle} /></AppLayout>} />
         {/* Backward compat redirects */}
-        <Route path="/app/plan" element={<Navigate to="/app" replace />} />
-        <Route path="/app/dosyam" element={<Navigate to="/app" replace />} />
-        <Route path="/app/uret" element={<Navigate to="/app" replace />} />
+        <Route path="/app/plan" element={<Navigate to="/app/planla" replace />} />
         <Route path="/app/ayarlar" element={<Navigate to="/app/profil" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
