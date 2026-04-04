@@ -312,23 +312,37 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
 
   /* ── Render ───────────────────────────────────────── */
 
+  // Hero renk sistemi
+  const heroColor = tatilKazanim && toplamKazanim === 0
+    ? 'var(--color-warning)'
+    : hepsiTamam
+    ? 'var(--color-success)'
+    : 'var(--color-primary)'
+
   return (
     <div className="page-shell">
 
       {/* ── Header ─────────────────────────────────── */}
       <div className="page-header stagger-1">
         <div className="flex items-center justify-between">
-          <p
-            className="font-bold tracking-tight"
-            style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--color-text1)' }}
-          >
-            {selamMesaji()}{ogretmenAd ? `, ${ogretmenAd} Hoca` : ''}
-          </p>
+          <div>
+            <p
+              className="font-bold tracking-tight leading-tight"
+              style={{ fontFamily: 'var(--font-display)', fontSize: '20px', color: 'var(--color-text1)', letterSpacing: '-0.02em' }}
+            >
+              {selamMesaji()}{ogretmenAd ? `, ${ogretmenAd} Hoca` : ''}
+            </p>
+            {planlar.length > 0 && aktifHafta && (
+              <p className="text-xs font-semibold mt-0.5" style={{ color: 'var(--color-text3)' }}>
+                {aktifHafta.haftaNo}. Hafta · {formatTarihKisa(aktifHafta.baslangicTarihi)} – {formatTarihKisa(aktifHafta.bitisTarihi)}
+              </p>
+            )}
+          </div>
           <button
             type="button"
             aria-label="Bildirimler"
             className="w-9 h-9 rounded-full flex items-center justify-center relative transition-all active:scale-95"
-            style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
+            style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-xs)' }}
           >
             <Bell size={16} style={{ color: 'var(--color-text3)' }} />
           </button>
@@ -354,132 +368,160 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
             className="stagger-2"
             style={{
               borderRadius: 'var(--radius-xl)',
-              backgroundColor: tatilKazanim
-                ? 'color-mix(in srgb, var(--color-warning) 8%, var(--color-surface))'
-                : hepsiTamam
-                ? 'color-mix(in srgb, var(--color-success) 8%, var(--color-surface))'
-                : 'color-mix(in srgb, var(--color-primary) 8%, var(--color-surface))',
-              padding: 'var(--space-5)',
-              transition: 'background-color 0.4s ease',
+              background: `linear-gradient(135deg, ${heroColor}, color-mix(in srgb, ${heroColor} 80%, #818cf8))`,
+              padding: '20px 20px 18px',
+              boxShadow: `0 4px 20px color-mix(in srgb, ${heroColor} 35%, transparent)`,
+              position: 'relative',
+              overflow: 'hidden',
+              transition: 'background 0.4s ease, box-shadow 0.4s ease',
             }}
           >
+            {/* Decorative orb */}
+            <div style={{
+              position: 'absolute', top: '-24px', right: '-24px',
+              width: '96px', height: '96px',
+              borderRadius: '50%',
+              background: 'rgba(255,255,255,0.10)',
+              pointerEvents: 'none',
+            }} />
+            <div style={{
+              position: 'absolute', bottom: '-16px', left: '30%',
+              width: '64px', height: '64px',
+              borderRadius: '50%',
+              background: 'rgba(255,255,255,0.06)',
+              pointerEvents: 'none',
+            }} />
+
             {tatilKazanim && toplamKazanim === 0 ? (
               /* Tatil haftası */
-              <>
-                <p className="text-sm font-semibold mb-1" style={{ color: 'var(--color-warning)' }}>
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'rgba(255,255,255,0.65)', letterSpacing: '0.12em' }}>
+                  Bu Hafta
+                </p>
+                <p className="font-bold text-white mb-1" style={{ fontFamily: 'var(--font-display)', fontSize: '22px', letterSpacing: '-0.02em' }}>
                   {tatilKazanim.tatilAdi || 'Tatil Haftası'}
                 </p>
-                <p className="text-xs" style={{ color: 'var(--color-text3)' }}>
+                <p className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.6)' }}>
                   {formatTarihKisa(tatilKazanim.haftaBaslangic)} – {formatTarihKisa(tatilKazanim.haftaBitis)}
                 </p>
-              </>
+              </div>
             ) : (
               /* Normal hafta */
-              <>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-[13px] font-semibold" style={{ color: 'var(--color-text2)' }}>
-                    Bu hafta
-                  </span>
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'rgba(255,255,255,0.65)', letterSpacing: '0.12em' }}>
+                  Bu Hafta
+                </p>
+                <div className="flex items-end justify-between mb-4">
                   <span
-                    className="font-bold"
+                    className="font-bold text-white leading-none"
                     style={{
                       fontFamily: 'var(--font-display)',
-                      fontSize: '24px',
-                      color: hepsiTamam ? 'var(--color-success)' : 'var(--color-primary)',
-                      transition: 'color 0.3s',
+                      fontSize: hepsiTamam ? '22px' : '44px',
+                      letterSpacing: '-0.03em',
                       animation: kutlamaAktif ? 'pop-in 0.6s ease-out' : 'none',
                     }}
                   >
                     {hepsiTamam ? 'Harika bir hafta! ✓' : `${tamamlananSayi}/${toplamKazanim}`}
                   </span>
+                  {!hepsiTamam && toplamKazanim > 0 && (
+                    <span className="text-xs font-bold mb-2" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                      kazanım
+                    </span>
+                  )}
                 </div>
 
                 {/* Progress bar */}
                 {toplamKazanim > 0 && (
                   <div
-                    className="h-1.5 rounded-full overflow-hidden mb-2"
-                    style={{ backgroundColor: 'var(--color-border)' }}
+                    className="rounded-full overflow-hidden"
+                    style={{ height: '5px', backgroundColor: 'rgba(255,255,255,0.22)' }}
                   >
                     <div
                       className="h-full rounded-full"
                       style={{
-                        width: `${toplamKazanim > 0 ? (tamamlananSayi / toplamKazanim) * 100 : 0}%`,
-                        backgroundColor: hepsiTamam ? 'var(--color-success)' : 'var(--color-primary)',
-                        transition: 'width 0.4s ease-out, background-color 0.3s',
+                        width: `${(tamamlananSayi / toplamKazanim) * 100}%`,
+                        backgroundColor: 'rgba(255,255,255,0.75)',
+                        transition: 'width 0.4s ease-out',
                       }}
                     />
                   </div>
                 )}
-
-                {aktifHafta && (
-                  <p className="text-xs" style={{ color: 'var(--color-text3)' }}>
-                    {aktifHafta.haftaNo}. Hafta · {formatTarihKisa(aktifHafta.baslangicTarihi)} – {formatTarihKisa(aktifHafta.bitisTarihi)}
-                  </p>
-                )}
-              </>
+              </div>
             )}
           </section>
 
           {/* ── Bekleyen Kazanımlar ────────────────────── */}
           {bekleyenler.length > 0 && (
             <section className="stagger-3">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-3">
                 <span className="section-label mb-0">Bu Hafta</span>
-                <span className="text-[11px] font-bold" style={{ color: 'var(--color-text3)' }}>
+                <span
+                  className="text-[11px] font-bold px-2 py-0.5 rounded-full"
+                  style={{ backgroundColor: 'var(--color-primary-s)', color: 'var(--color-primary)' }}
+                >
                   {toplamKazanim} kazanım
                 </span>
               </div>
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2.5">
                 {bekleyenler.map((item, idx) => {
                   const animKey = `${item.sinif}-${item.haftaNo}`
                   const isAnimating = tamamlananAnim === animKey
                   return (
                     <div
                       key={animKey}
-                      className="flex items-start gap-3 transition-all"
+                      className="transition-all overflow-hidden"
                       style={{
                         borderRadius: 'var(--radius-lg)',
                         backgroundColor: 'var(--color-surface)',
                         border: '1px solid var(--color-border)',
+                        borderLeft: '3.5px solid var(--color-primary)',
                         boxShadow: 'var(--shadow-xs)',
-                        padding: 'var(--card-density)',
                         opacity: isAnimating ? 0 : 1,
                         transform: isAnimating ? 'translateY(-8px) scale(0.97)' : 'none',
                         maxHeight: isAnimating ? '0px' : '200px',
-                        overflow: 'hidden',
                         marginBottom: isAnimating ? '-8px' : '0',
                         animation: `stagger-up 0.35s ease-out ${0.05 + idx * 0.07}s both`,
                       }}
                     >
-                      {/* Check circle */}
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleTamamlaToggle(item.entry, item.haftaNo)
-                        }}
-                        aria-label={`${item.label} kazanımı tamamla`}
-                        className="w-6 h-6 rounded-full flex items-center justify-center transition-all active:scale-90 flex-shrink-0 mt-0.5"
-                        style={{
-                          border: '2px solid var(--color-border2)',
-                          backgroundColor: 'transparent',
-                        }}
-                      />
+                      <div className="flex items-start gap-3 p-3.5">
+                        {/* Check circle */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleTamamlaToggle(item.entry, item.haftaNo)
+                          }}
+                          aria-label={`${item.label} kazanımı tamamla`}
+                          className="w-7 h-7 rounded-full flex items-center justify-center transition-all active:scale-90 flex-shrink-0 mt-0.5"
+                          style={{
+                            border: '2px solid var(--color-primary)',
+                            backgroundColor: 'var(--color-primary-s)',
+                          }}
+                        />
 
-                      {/* İçerik */}
-                      <div
-                        className="flex-1 min-w-0 cursor-pointer"
-                        onClick={() => {
-                          onSinifSec(item.entry.sinif)
-                          navigate(`/app/hafta/${item.haftaNo}`)
-                        }}
-                      >
-                        <p className="text-[13px] font-semibold" style={{ color: 'var(--color-text1)' }}>
-                          {item.ders} · {item.label}
-                        </p>
-                        <p className="text-[13px] leading-snug line-clamp-2 mt-0.5" style={{ color: 'var(--color-text2)' }}>
-                          {item.kazanim}
-                        </p>
+                        {/* İçerik */}
+                        <div
+                          className="flex-1 min-w-0 cursor-pointer"
+                          onClick={() => {
+                            onSinifSec(item.entry.sinif)
+                            navigate(`/app/hafta/${item.haftaNo}`)
+                          }}
+                        >
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <span
+                              className="text-[11px] font-bold px-1.5 py-0.5 rounded"
+                              style={{ backgroundColor: 'var(--color-primary-s)', color: 'var(--color-primary)' }}
+                            >
+                              {item.label}
+                            </span>
+                            <span className="text-[12px] font-semibold" style={{ color: 'var(--color-text2)' }}>
+                              {item.ders}
+                            </span>
+                          </div>
+                          <p className="text-[13px] font-medium leading-snug line-clamp-2" style={{ color: 'var(--color-text1)' }}>
+                            {item.kazanim}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   )
@@ -491,58 +533,70 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
           {/* ── Tamamlananlar ──────────────────────────── */}
           {tamamlananlarListesi.length > 0 && (
             <section className="stagger-4">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-3">
                 <span className="section-label mb-0">Tamamlananlar</span>
-                <span className="text-[11px] font-bold" style={{ color: 'var(--color-text3)' }}>
+                <span
+                  className="text-[11px] font-bold px-2 py-0.5 rounded-full"
+                  style={{ backgroundColor: 'var(--color-success-s)', color: 'var(--color-success)' }}
+                >
                   {tamamlananlarListesi.length}
                 </span>
               </div>
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2.5">
                 {tamamlananlarListesi.map(item => {
                   const animKey = `${item.sinif}-${item.haftaNo}`
                   return (
                     <div
                       key={animKey}
-                      className="flex items-start gap-3"
                       style={{
                         borderRadius: 'var(--radius-lg)',
                         backgroundColor: 'color-mix(in srgb, var(--color-success) 5%, var(--color-surface))',
-                        border: '1px solid color-mix(in srgb, var(--color-success) 15%, transparent)',
-                        padding: 'var(--card-density)',
+                        border: '1px solid color-mix(in srgb, var(--color-success) 20%, transparent)',
+                        borderLeft: '3.5px solid var(--color-success)',
                       }}
                     >
-                      {/* Check circle — dolu */}
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleTamamlaToggle(item.entry, item.haftaNo)
-                        }}
-                        aria-label={`${item.label} kazanımını geri al`}
-                        className="w-6 h-6 rounded-full flex items-center justify-center transition-all active:scale-90 flex-shrink-0 mt-0.5"
-                        style={{
-                          backgroundColor: 'var(--color-success)',
-                          border: 'none',
-                          animation: tamamlananAnim === animKey ? 'pop-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none',
-                        }}
-                      >
-                        <Check size={14} strokeWidth={3} color="#fff" />
-                      </button>
+                      <div className="flex items-start gap-3 p-3.5">
+                        {/* Check circle — dolu */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleTamamlaToggle(item.entry, item.haftaNo)
+                          }}
+                          aria-label={`${item.label} kazanımını geri al`}
+                          className="w-7 h-7 rounded-full flex items-center justify-center transition-all active:scale-90 flex-shrink-0 mt-0.5"
+                          style={{
+                            backgroundColor: 'var(--color-success)',
+                            border: 'none',
+                            animation: tamamlananAnim === animKey ? 'pop-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none',
+                          }}
+                        >
+                          <Check size={14} strokeWidth={3} color="#fff" />
+                        </button>
 
-                      {/* İçerik */}
-                      <div
-                        className="flex-1 min-w-0 cursor-pointer"
-                        onClick={() => {
-                          onSinifSec(item.entry.sinif)
-                          navigate(`/app/hafta/${item.haftaNo}`)
-                        }}
-                      >
-                        <p className="text-[13px] font-semibold" style={{ color: 'var(--color-text3)' }}>
-                          {item.ders} · {item.label}
-                        </p>
-                        <p className="text-[13px] leading-snug line-clamp-2 mt-0.5 line-through" style={{ color: 'var(--color-text3)' }}>
-                          {item.kazanim}
-                        </p>
+                        {/* İçerik */}
+                        <div
+                          className="flex-1 min-w-0 cursor-pointer"
+                          onClick={() => {
+                            onSinifSec(item.entry.sinif)
+                            navigate(`/app/hafta/${item.haftaNo}`)
+                          }}
+                        >
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <span
+                              className="text-[11px] font-bold px-1.5 py-0.5 rounded"
+                              style={{ backgroundColor: 'var(--color-success-s)', color: 'var(--color-success)' }}
+                            >
+                              {item.label}
+                            </span>
+                            <span className="text-[12px] font-semibold" style={{ color: 'var(--color-text3)' }}>
+                              {item.ders}
+                            </span>
+                          </div>
+                          <p className="text-[13px] font-medium leading-snug line-clamp-2 line-through" style={{ color: 'var(--color-text3)' }}>
+                            {item.kazanim}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   )
@@ -562,13 +616,14 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
                   <button
                     key={p.sinif}
                     onClick={() => setSeciliPlanIdx(i)}
-                    className="whitespace-nowrap flex-shrink-0 text-xs font-semibold transition-all active:scale-95"
+                    className="whitespace-nowrap flex-shrink-0 text-xs font-bold transition-all active:scale-95"
                     style={{
-                      padding: '6px 14px',
+                      padding: '7px 15px',
                       borderRadius: 'var(--radius-pill)',
-                      backgroundColor: i === seciliPlanIdx ? 'var(--color-primary)' : 'var(--color-surface2)',
+                      backgroundColor: i === seciliPlanIdx ? 'var(--color-primary)' : 'var(--color-surface)',
                       color: i === seciliPlanIdx ? '#ffffff' : 'var(--color-text2)',
-                      border: i === seciliPlanIdx ? 'none' : '1px solid var(--color-border)',
+                      border: i === seciliPlanIdx ? 'none' : '1.5px solid var(--color-border)',
+                      boxShadow: i === seciliPlanIdx ? '0 2px 8px color-mix(in srgb, var(--color-primary) 30%, transparent)' : 'var(--shadow-xs)',
                     }}
                   >
                     {p.label || p.sinif}
@@ -606,17 +661,18 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
 
             {/* Export butonları */}
             {seciliPlan && (
-              <div className="flex gap-2 mt-4">
+              <div className="flex gap-2 mt-5">
                 <div className="relative flex-1">
                   <button
                     onClick={() => setExportMenuAcik(p => !p)}
                     disabled={!!exporting}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-bold transition-all active:scale-95 disabled:opacity-60"
+                    className="w-full flex items-center justify-center gap-2 py-3 text-sm font-bold transition-all active:scale-95 disabled:opacity-60"
                     style={{
-                      borderRadius: 'var(--radius-lg)',
-                      border: '1px solid var(--color-border)',
-                      backgroundColor: 'var(--color-surface)',
-                      color: 'var(--color-primary)',
+                      borderRadius: 'var(--radius-pill)',
+                      border: 'none',
+                      backgroundColor: 'var(--color-primary)',
+                      color: '#ffffff',
+                      boxShadow: '0 3px 12px color-mix(in srgb, var(--color-primary) 30%, transparent)',
                     }}
                   >
                     {exporting ? (
@@ -629,7 +685,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
                     <>
                       <div className="fixed inset-0 z-10" onClick={() => setExportMenuAcik(false)} />
                       <div
-                        className="absolute bottom-full left-0 right-0 mb-1 z-20 overflow-hidden"
+                        className="absolute bottom-full left-0 right-0 mb-2 z-20 overflow-hidden"
                         style={{
                           borderRadius: 'var(--radius-lg)',
                           border: '1px solid var(--color-border)',
@@ -652,11 +708,12 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
                   onClick={handleYazdir}
                   className="flex items-center gap-1.5 text-sm font-bold transition-all active:scale-95 whitespace-nowrap"
                   style={{
-                    padding: '0 14px',
-                    borderRadius: 'var(--radius-lg)',
-                    border: '1px solid var(--color-border)',
+                    padding: '0 18px',
+                    borderRadius: 'var(--radius-pill)',
+                    border: '1.5px solid var(--color-border)',
                     backgroundColor: 'var(--color-surface)',
                     color: 'var(--color-text2)',
+                    boxShadow: 'var(--shadow-xs)',
                   }}
                 >
                   <Printer size={16} /> Yazdır
