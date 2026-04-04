@@ -1,9 +1,12 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bell, Settings, Calendar } from 'lucide-react'
+import { Bell, User, Calendar, Folder, Sparkles } from 'lucide-react'
 import type { PlanEntry } from '../types/planEntry'
 import { StorageKeys } from '../lib/storageKeys'
 import { BosdurumuEkrani } from '../components/BosdurumuEkrani/BosdurumuEkrani'
+import { BugunDersleri } from '../components/Home/BugunDersleri'
+import { useDersProgrami } from '../hooks/useDersProgrami'
+import { useOnemliTarihler } from '../hooks/useOnemliTarihler'
 
 interface AppHomeScreenProps {
   planlar: PlanEntry[]
@@ -15,10 +18,10 @@ interface AppHomeScreenProps {
 
 function selamMesaji(): string {
   const saat = new Date().getHours()
-  if (saat >= 6 && saat < 12) return 'Günaydın'
-  if (saat >= 12 && saat < 18) return 'İyi günler'
-  if (saat >= 18 && saat < 22) return 'İyi akşamlar'
-  return 'İyi geceler'
+  if (saat >= 6 && saat < 12) return 'GÃ¼naydÄ±n'
+  if (saat >= 12 && saat < 18) return 'Ä°yi gÃ¼nler'
+  if (saat >= 18 && saat < 22) return 'Ä°yi akÅŸamlar'
+  return 'Ä°yi geceler'
 }
 
 export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreenProps) {
@@ -49,7 +52,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
-      {/* ── TOPBAR ──────────────────────────────── */}
+      {/* â”€â”€ TOPBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div
         style={{
           padding: '12px 20px 12px 20px',
@@ -143,7 +146,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
         </div>
       </div>
 
-      {/* ── BENTO GRID ──────────────────────────── */}
+      {/* â”€â”€ BENTO GRID â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div
         style={{
           padding: '0 16px 16px',
@@ -175,7 +178,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
           }}
         >
           <p style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '0.12em', color: '#D97706', marginBottom: '4px' }}>
-            ⚠ ACİL
+            âš  ACÄ°L
           </p>
           <p
             style={{
@@ -187,10 +190,10 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
               marginBottom: '4px',
             }}
           >
-            Not girişi son günü
+            Not giriÅŸi son gÃ¼nÃ¼
           </p>
           <p style={{ fontSize: '13px', color: '#52524F', marginBottom: '12px' }}>
-            10-B sınıfı tamamlanmadı
+            10-B sÄ±nÄ±fÄ± tamamlanmadÄ±
           </p>
         </div>
 
@@ -239,11 +242,11 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
           </p>
 
           <p style={{ fontSize: '14px', color: '#52524F', fontWeight: 500, marginBottom: '16px' }}>
-            saat geri aldınız
+            saat geri aldÄ±nÄ±z
           </p>
 
           <div style={{ display: 'flex', borderTop: '1px solid rgba(0,0,0,0.07)', paddingTop: '16px' }}>
-            {['Yazılı', 'Evrak', 'Plan'].map((label, idx) => (
+            {['YazÄ±lÄ±', 'Evrak', 'Plan'].map((label, idx) => (
               <div key={idx} style={{ flex: 1, textAlign: 'center' }}>
                 <p
                   style={{
@@ -289,7 +292,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
           >
             14
           </p>
-          <p style={{ fontSize: '10px', color: '#9B9B97', fontWeight: 600 }}>belge hazır</p>
+          <p style={{ fontSize: '10px', color: '#9B9B97', fontWeight: 600 }}>belge hazÄ±r</p>
         </div>
 
         <div
@@ -316,10 +319,10 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
           >
             7
           </p>
-          <p style={{ fontSize: '10px', color: '#9B9B97', fontWeight: 600 }}>üretim hakkı</p>
+          <p style={{ fontSize: '10px', color: '#9B9B97', fontWeight: 600 }}>Ã¼retim hakkÄ±</p>
         </div>
 
-        {/* Ders Programı Prompt (full width) */}
+        {/* Ders ProgramÄ± Prompt (full width) */}
         <div
           style={{
             gridColumn: '1 / -1',
@@ -336,8 +339,8 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec }: AppHomeScreen
         >
           <Calendar size={18} style={{ color: '#4F6AF5', flexShrink: 0 }} />
           <div style={{ flex: 1 }}>
-            <p style={{ fontSize: '13px', fontWeight: 700, color: '#0C0C0B' }}>Ders programını ekle</p>
-            <p style={{ fontSize: '11px', color: '#52524F' }}>Yıllık plan otomatik hazırlanır</p>
+            <p style={{ fontSize: '13px', fontWeight: 700, color: '#0C0C0B' }}>Ders programÄ±nÄ± ekle</p>
+            <p style={{ fontSize: '11px', color: '#52524F' }}>YÄ±llÄ±k plan otomatik hazÄ±rlanÄ±r</p>
           </div>
         </div>
       </div>

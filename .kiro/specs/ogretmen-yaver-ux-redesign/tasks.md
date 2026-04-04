@@ -6,20 +6,20 @@ Mevcut React 19 + TypeScript + Vite + Tailwind CSS 4 + Supabase stack'i üzerine
 
 ## Tasks
 
-- [ ] 1. Veri modeli ve StorageKeys güncellemesi
-  - [ ] 1.1 `src/lib/storageKeys.ts` dosyasına `DERS_PROGRAMI`, `ONEMLI_TARIHLER`, `GUNLUK_PLANLAR`, `JETON_DURUMU` anahtarlarını ekle
+- [x] 1. Veri modeli ve StorageKeys güncellemesi
+  - [x] 1.1 `src/lib/storageKeys.ts` dosyasına `DERS_PROGRAMI`, `ONEMLI_TARIHLER`, `GUNLUK_PLANLAR`, `JETON_DURUMU` anahtarlarını ekle
     - Mevcut anahtarlar değiştirilmez; sadece yeni sabitler eklenir
     - _Requirements: 7.3, 8.2_
-  - [ ] 1.2 `src/types/dersProgrami.ts` dosyasını oluştur: `Gun`, `DersSaati`, `DersProgrami` interface'lerini tanımla
+  - [x] 1.2 `src/types/dersProgrami.ts` dosyasını oluştur: `Gun`, `DersSaati`, `DersProgrami` interface'lerini tanımla
     - Design doc'taki type tanımlarını birebir uygula
     - _Requirements: 7.1, 7.2_
-  - [ ] 1.3 `src/types/onemliTarih.ts` dosyasını oluştur: `OnemliTarihKategori`, `OnemliTarih` interface'lerini tanımla
+  - [x] 1.3 `src/types/onemliTarih.ts` dosyasını oluştur: `OnemliTarihKategori`, `OnemliTarih` interface'lerini tanımla
     - _Requirements: 8.2_
-  - [ ] 1.4 `src/types/gunlukPlan.ts` dosyasını oluştur: `GunlukPlan` interface'ini tanımla
+  - [x] 1.4 `src/types/gunlukPlan.ts` dosyasını oluştur: `GunlukPlan` interface'ini tanımla
     - _Requirements: 1.6, 3.4_
-  - [ ] 1.5 `src/types/evrak.ts` dosyasını oluştur: `EvrakKategori`, `EvrakSablon`, `JetonDurumu` interface'lerini tanımla
+  - [x] 1.5 `src/types/evrak.ts` dosyasını oluştur: `EvrakKategori`, `EvrakSablon`, `JetonDurumu` interface'lerini tanımla
     - _Requirements: 4.1, 6.5, 9.1_
-  - [ ] 1.6 `src/lib/storageKeys.ts` içindeki `OgretmenAyarlari` interface'ini `src/types/ogretmenAyarlari.ts`'e taşı; `zumreOgretmenleri`, `ilkkeriyeGrubu`, `ilkkeriyeYontemi`, `bildirimTercihleri` alanlarını ekle
+  - [x] 1.6 `src/lib/storageKeys.ts` içindeki `OgretmenAyarlari` interface'ini `src/types/ogretmenAyarlari.ts`'e taşı; `zumreOgretmenleri`, `ilkkeriyeGrubu`, `ilkkeriyeYontemi`, `bildirimTercihleri` alanlarını ekle
     - `AppSettingsScreen` ve `AppHomeScreen` import'larını güncelle
     - _Requirements: 5.2, 5.3_
   - [ ]* 1.7 Property testi: `StorageKeys` round-trip (Property 9, 16, 21)
@@ -28,12 +28,12 @@ Mevcut React 19 + TypeScript + Vite + Tailwind CSS 4 + Supabase stack'i üzerine
     - **Property 21: Ders Programı Kaydetme Round-Trip** — `DersProgrami` nesnesi localStorage'a kaydedilip okunduğunda saatler dizisi eşdeğer olmalı
     - **Validates: Requirements 7.3, 8.2, 5.4**
 
-- [ ] 2. Ders programı servisi ve hook'u
-  - [ ] 2.1 `src/lib/dersProgramiService.ts` dosyasını oluştur: `getDersProgrami`, `saveDersProgrami`, `checkCakisma` fonksiyonlarını yaz
+- [x] 2. Ders programı servisi ve hook'u
+  - [x] 2.1 `src/lib/dersProgramiService.ts` dosyasını oluştur: `getDersProgrami`, `saveDersProgrami`, `checkCakisma` fonksiyonlarını yaz
     - `checkCakisma(program, gun, saat)` → boolean
     - localStorage'a yazar; Supabase sync arka planda (auth varsa)
     - _Requirements: 7.3, 7.5_
-  - [ ] 2.2 `src/hooks/useDersProgrami.ts` hook'unu oluştur
+  - [x] 2.2 `src/hooks/useDersProgrami.ts` hook'unu oluştur
     - State: `program`, `loading`, `error`
     - Actions: `hucreGuncelle(gun, saat, sinif)`, `kaydet()`, `yukle()`
     - `hucreGuncelle` çakışma varsa `error` state'ini set eder
@@ -42,12 +42,12 @@ Mevcut React 19 + TypeScript + Vite + Tailwind CSS 4 + Supabase stack'i üzerine
     - **Property 20: Ders Programı Çakışma Tespiti** — Aynı (gün, saat) slotuna ikinci sınıf atanmaya çalışıldığında `checkCakisma` her zaman `true` döndürmeli
     - **Validates: Requirements 7.5**
 
-- [ ] 3. Önemli tarihler servisi ve hook'u
-  - [ ] 3.1 `src/lib/onemliTarihlerService.ts` dosyasını oluştur: `getOnemliTarihler`, `saveOnemliTarih`, `deleteOnemliTarih`, `hesaplaYakinlik`, `getMebTakvimi` fonksiyonlarını yaz
+- [x] 3. Önemli tarihler servisi ve hook'u
+  - [x] 3.1 `src/lib/onemliTarihlerService.ts` dosyasını oluştur: `getOnemliTarihler`, `saveOnemliTarih`, `deleteOnemliTarih`, `hesaplaYakinlik`, `getMebTakvimi` fonksiyonlarını yaz
     - `hesaplaYakinlik(tarih, bugun)` → `'kritik' | 'yaklasan' | 'normal'` (≤1 gün kritik, ≤7 gün yaklaşan, >7 gün normal)
     - `getMebTakvimi(yil)` → `OnemliTarih[]` (sabit MEB tatil/dönem tarihleri)
     - _Requirements: 8.2, 8.3, 8.4, 8.5_
-  - [ ] 3.2 `src/hooks/useOnemliTarihler.ts` hook'unu oluştur
+  - [x] 3.2 `src/hooks/useOnemliTarihler.ts` hook'unu oluştur
     - State: `tarihler`, `yaklasanSayisi`
     - Actions: `ekle(tarih)`, `sil(id)`, `mebTakviminiYukle(yil)`
     - `yaklasanSayisi` bugün veya gelecekteki tarihlerin sayısını tutar
@@ -57,8 +57,8 @@ Mevcut React 19 + TypeScript + Vite + Tailwind CSS 4 + Supabase stack'i üzerine
     - **Property 10: MEB Takvimi Otomatik Yükleme** — Geçerli öğretim yılı için en az bir tatil/dönem tarihi içeren boş olmayan liste dönmeli
     - **Validates: Requirements 3.8, 8.3, 8.4, 8.5**
 
-- [ ] 4. Jeton ve premium servisi
-  - [ ] 4.1 `src/lib/tokenService.ts` dosyasını oluştur: `getJetonDurumu`, `harcaJeton`, `checkPremiumErisim` fonksiyonlarını yaz
+- [x] 4. Jeton ve premium servisi
+  - [x] 4.1 `src/lib/tokenService.ts` dosyasını oluştur: `getJetonDurumu`, `harcaJeton`, `checkPremiumErisim` fonksiyonlarını yaz
     - `checkPremiumErisim(ozellik, isPremium)` → boolean
     - Free tier: aylık 3 jeton; premium: sınırsız
     - _Requirements: 6.5, 6.6, 9.1, 9.2_
@@ -68,8 +68,8 @@ Mevcut React 19 + TypeScript + Vite + Tailwind CSS 4 + Supabase stack'i üzerine
     - **Property 19: Jeton Tier Limiti Uygulaması** — Free tier aylık 3 jetonu geçemez; premium sınırsız; abonelik bitince free'ye düşmeli
     - **Validates: Requirements 4.6, 6.5, 6.7, 9.1, 9.2, 9.5**
 
-- [ ] 5. Evrak servisi
-  - [ ] 5.1 `src/lib/evrakService.ts` dosyasını oluştur: `getEvrakSablonlari`, `doldurSablon`, `tespit EksikAlanlar` fonksiyonlarını yaz
+- [-] 5. Evrak servisi
+  - [x] 5.1 `src/lib/evrakService.ts` dosyasını oluştur: `getEvrakSablonlari`, `doldurSablon`, `tespit EksikAlanlar` fonksiyonlarını yaz
     - `tespitEksikAlanlar(sablon, ayarlar)` → `string[]` (eksik alan adları)
     - `doldurSablon(sablon, ayarlar)` → doldurulmuş şablon nesnesi
     - Kategori listesi: `ogretmen-dosyasi`, `kulup-evraklari` (premium), `zumre-tutanaklari`, `sinif-rehberlik` (premium), `genel-burokratik`
@@ -80,21 +80,21 @@ Mevcut React 19 + TypeScript + Vite + Tailwind CSS 4 + Supabase stack'i üzerine
     - **Property 13: Eksik Alan Tespiti Kapsamlılığı** — `zorunluAlanlar` listesindeki tüm eksik alanlar raporlanmalı; hiçbiri atlanmamalı
     - **Validates: Requirements 4.1, 4.3, 4.4, 4.7, 5.6**
 
-- [ ] 6. Checkpoint — Servis katmanı tamamlandı
+- [x] 6. Checkpoint — Servis katmanı tamamlandı
   - Tüm servis ve hook testleri geçmeli. Kullanıcıya soru varsa sor.
 
-- [ ] 7. `DersProgramiGrid` bileşeni
-  - [ ] 7.1 `src/components/DersProgrami/DersProgramiGrid.tsx` bileşenini oluştur
+- [x] 7. `DersProgramiGrid` bileşeni
+  - [x] 7.1 `src/components/DersProgrami/DersProgramiGrid.tsx` bileşenini oluştur
     - 5 sütun (Pzt-Cum) × 8 satır (ders saatleri) ızgara
     - Her hücre tıklanabilir; `onHucreGuncelle(gun, saat, sinif)` callback'i çağırır
     - Çakışma durumunda hücre kırmızı border alır
     - `readOnly` prop'u ile salt okunur mod
     - _Requirements: 7.1, 7.5_
-  - [ ] 7.2 `src/components/DersProgrami/SinifSeciciSheet.tsx` bileşenini oluştur
+  - [x] 7.2 `src/components/DersProgrami/SinifSeciciSheet.tsx` bileşenini oluştur
     - Mevcut `BottomSheet` bileşenini kullanır
     - Mevcut `planlar` listesinden sınıfları listeler; "Boş" seçeneği de sunar
     - _Requirements: 7.2_
-  - [ ] 7.3 `src/pages/DersProgramiPage.tsx` sayfasını oluştur
+  - [x] 7.3 `src/pages/DersProgramiPage.tsx` sayfasını oluştur
     - `useDersProgrami` hook'unu kullanır
     - `DersProgramiGrid` + `SinifSeciciSheet` + Kaydet butonu
     - Kaydet sonrası toast gösterir
@@ -103,17 +103,17 @@ Mevcut React 19 + TypeScript + Vite + Tailwind CSS 4 + Supabase stack'i üzerine
     - **Property 3: Ders Programı → Ana Ekran Sıralama Doğruluğu** — Herhangi bir gün için listelenen dersler saat sırasına göre artan düzende olmalı
     - **Validates: Requirements 2.2, 7.4**
 
-- [ ] 8. `OnemliTarihlerListesi` bileşeni ve takvim sayfası
-  - [ ] 8.1 `src/components/Takvim/OnemliTarihlerListesi.tsx` bileşenini oluştur
+- [-] 8. `OnemliTarihlerListesi` bileşeni ve takvim sayfası
+  - [x] 8.1 `src/components/Takvim/OnemliTarihlerListesi.tsx` bileşenini oluştur
     - Tarihler yakınlığa göre sıralanır
     - 7 gün içindekiler amber badge, 1 gün içindekiler kırmızı badge alır
     - `onEkle` ve `onSil` callback'leri
     - _Requirements: 8.1, 8.3, 8.4_
-  - [ ] 8.2 `src/components/Takvim/TarihEkleForm.tsx` bileşenini oluştur
+  - [x] 8.2 `src/components/Takvim/TarihEkleForm.tsx` bileşenini oluştur
     - `BottomSheet` içinde açılır
     - Tarih, başlık, kategori alanları
     - _Requirements: 8.2_
-  - [ ] 8.3 `src/pages/OnemliTarihlerPage.tsx` sayfasını oluştur
+  - [x] 8.3 `src/pages/OnemliTarihlerPage.tsx` sayfasını oluştur
     - `useOnemliTarihler` hook'unu kullanır
     - MEB takvimini otomatik yükler (ilk açılışta)
     - `OnemliTarihlerListesi` + `TarihEkleForm`
@@ -122,19 +122,19 @@ Mevcut React 19 + TypeScript + Vite + Tailwind CSS 4 + Supabase stack'i üzerine
     - **Property 5: Bildirim Sayısı Tutarlılığı** — Bildirim ikonundaki sayı, bugün veya gelecekteki önemli tarih sayısıyla eşit olmalı
     - **Validates: Requirements 2.7**
 
-- [ ] 9. `PlanPage` alt sekme navigasyonu
-  - [ ] 9.1 `src/components/Plan/PlanAltSekmeler.tsx` bileşenini oluştur
+- [x] 9. `PlanPage` alt sekme navigasyonu
+  - [x] 9.1 `src/components/Plan/PlanAltSekmeler.tsx` bileşenini oluştur
     - Üç sekme: "Yıllık Plan" | "Ders Programı" | "Takvim"
     - Aktif sekme vurgulanır; geçiş animasyonu
     - _Requirements: 3.5, 3.7_
-  - [ ] 9.2 `src/pages/PlanPage.tsx` dosyasını güncelle
+  - [x] 9.2 `src/pages/PlanPage.tsx` dosyasını güncelle
     - `PlanAltSekmeler` bileşenini entegre et
     - "Ders Programı" sekmesi → `DersProgramiGrid` (readOnly=false)
     - "Takvim" sekmesi → `OnemliTarihlerListesi`
     - Mevcut yıllık plan görünümü "Yıllık Plan" sekmesine taşınır
     - _Requirements: 3.5, 3.6, 3.7_
 
-- [ ] 10. `AppHomeScreen` — BugunDersleri bileşeni
+- [-] 10. `AppHomeScreen` — BugunDersleri bileşeni
   - [ ] 10.1 `src/components/Home/BugunDersleri.tsx` bileşenini oluştur
     - `useDersProgrami` hook'undan bugünün derslerini alır
     - Saat sırasına göre listeler (saat | sınıf | ders)

@@ -9,6 +9,14 @@ import { Check, CalendarDays, ChevronDown } from 'lucide-react'
 import { StorageKeys } from '../lib/storageKeys'
 import { SectionHeader } from '../components/UI/SectionHeader'
 import { EmptyState } from '../components/UI/EmptyState'
+import { PlanAltSekmeler } from '../components/Plan/PlanAltSekmeler'
+import type { Sekme } from '../components/Plan/PlanAltSekmeler'
+import { DersProgramiGrid } from '../components/DersProgrami/DersProgramiGrid'
+import { useDersProgrami } from '../hooks/useDersProgrami'
+import { OnemliTarihlerListesi } from '../components/Takvim/OnemliTarihlerListesi'
+import { TarihEkleForm } from '../components/Takvim/TarihEkleForm'
+import { useOnemliTarihler } from '../hooks/useOnemliTarihler'
+import type { OnemliTarih } from '../types/onemliTarih'
 
 function DonemGrubu({
   donemNo, haftalar, tamamlananlar, bugunHaftaNo, bugunRef,
@@ -189,7 +197,11 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
   const [tamamlananlar, setTamamlananlar] = useState<number[]>([])
   const [visibleYuzde, setVisibleYuzde] = useState(0)
   const [donemAcik, setDonemAcik] = useState<Record<number, boolean>>({ 1: true, 2: false })
+  const [aktifSekme, setAktifSekme] = useState<Sekme>('yillik')
+  const [tarihFormAcik, setTarihFormAcik] = useState(false)
   const bugunRef = useRef<HTMLDivElement>(null)
+  const { program, guncelle: dersProgramiGuncelle } = useDersProgrami()
+  const { tarihler, ekle: tarihEkle, sil: tarihSil, mebTakviminiYukle } = useOnemliTarihler()
 
   const bugunStr = new Date().toISOString().split('T')[0]
   const bugunHaftaNo = entry?.plan?.haftalar.find(
@@ -231,6 +243,16 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
     const t = setTimeout(() => setVisibleYuzde(calc), 80)
     return () => clearTimeout(t)
   }, [tamamlananlar, entry])
+
+  useEffect(() => {
+    if (entry?.yil) mebTakviminiYukle(entry.yil)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entry?.yil])
+
+  function handleTarihEkle(tarih: OnemliTarih) {
+    tarihEkle(tarih)
+    setTarihFormAcik(false)
+  }
 
   if (!entry) {
     return (
@@ -366,8 +388,40 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
         </div>
       </div>
 
-      {/* Dönem grupları ve export araçları */}
-      <div className="section-stack" style={{ padding: '0 16px 16px' }}>
+      {/* Alt Sekmeler */}
+      <PlanAltSekmeler aktif={aktifSekme} onChange={setAktifSekme} />
+
+      {/* Sekme içerikleri */}
+      {aktifSekme === 'ders-programi' && (
+        <div style={{ padding: '0 16px 24px' }}>
+          <DersProgramiGrid
+            program={program}
+            onHucreGuncelle={(gun, saat, sinifVal) => {
+              const ders2 = planlar?.find(p => p.sinif === sinifVal)?.ders
+              dersProgramiGuncelle(gun, saat, sinifVal, ders2)
+            }}
+          />
+        </div>
+      )}
+
+      {aktifSekme === 'takvim' && (
+        <div style={{ padding: '0 16px 24px' }}>
+          <OnemliTarihlerListesi
+            tarihler={tarihler}
+            onEkle={() => setTarihFormAcik(true)}
+            onSil={tarihSil}
+          />
+          {tarihFormAcik && (
+            <TarihEkleForm
+              onKaydet={handleTarihEkle}
+              onKapat={() => setTarihFormAcik(false)}
+            />
+          )}
+        </div>
+      )}
+
+      {aktifSekme === 'yillik' && (
+        <div className="section-stack" style={{ padding: '0 16px 16px' }}>
         <AdBanner className="rounded-lg" />
 
         {isMeb && (
@@ -445,6 +499,7 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
           </div>
         )}
       </div>
+      )}
     </div>
   )
 }
