@@ -16,7 +16,7 @@ import { Button } from '../components/Button'
 import { SectionHeader } from '../components/UI/SectionHeader'
 import { EmptyState } from '../components/UI/EmptyState'
 import { ConfirmActionRow } from '../components/UI/ConfirmActionRow'
-import { Bell, BookOpen, ChevronRight, LogOut, Plus, Save, ShieldCheck, UserRound, X, Users2, School } from 'lucide-react'
+import { Bell, BookOpen, ChevronRight, LogOut, Plus, Save, ShieldCheck, Sparkles, UserRound, X, Users2, School } from 'lucide-react'
 
 interface AppSettingsScreenProps {
   onPlanEkle: (entries: PlanEntry[]) => void
@@ -123,7 +123,7 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
     <div className="page-shell">
       <div className="page-header">
         <h1 className="text-[22px] font-bold tracking-tight mb-0.5" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text1)' }}>
-          Profil ve Ayarlar
+          Profil
         </h1>
         <p className="text-sm" style={{ color: 'var(--color-text2)' }}>
           Ogretmen, okul ve belge otomasyonu icin gereken bilgiler
@@ -244,6 +244,28 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
             </div>
           )}
         </Card>
+
+        {/* Yakında badge */}
+        <div
+          className="flex items-start gap-3 px-4 py-4"
+          style={{
+            borderRadius: 'var(--radius-lg)',
+            backgroundColor: 'var(--color-accent-s)',
+            border: '1px solid color-mix(in srgb, var(--color-accent) 20%, transparent)',
+          }}
+          onClick={() => goster('Bu ozellik yakinda aktif olacak', 'bilgi')}
+        >
+          <Sparkles size={20} style={{ color: 'var(--color-accent)', flexShrink: 0, marginTop: 2 }} />
+          <div className="flex-1">
+            <p className="text-sm font-bold" style={{ color: 'var(--color-text1)' }}>Evrak Uretici</p>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--color-text2)' }}>
+              Yazili sorulari ve burokratik evraklari otomatik olustur
+            </p>
+          </div>
+          <span className="text-[11px] font-bold px-2 py-1 rounded-full whitespace-nowrap" style={{ backgroundColor: 'color-mix(in srgb, var(--color-accent) 15%, transparent)', color: 'var(--color-accent)' }}>
+            Yakinda
+          </span>
+        </div>
 
         <Card style={{ borderRadius: 'var(--radius-xl)' }}>
           <SectionHeader title="Tercihler" />

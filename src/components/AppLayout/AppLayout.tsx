@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import type { ReactNode } from 'react'
-import { Home, CalendarDays, FolderOpen, Sparkles, UserRound } from 'lucide-react'
+import { Home, UserRound } from 'lucide-react'
 
 interface AppLayoutProps {
   children: ReactNode
@@ -8,15 +8,10 @@ interface AppLayoutProps {
 
 const TABS = [
   { name: 'Ana', path: '/app', icon: Home, exact: true },
-  { name: 'Planla', path: '/app/plan', icon: CalendarDays, exact: false },
-  { name: 'Dosyam', path: '/app/dosyam', icon: FolderOpen, exact: false },
-  { name: 'Uret', path: '/app/uret', icon: Sparkles, exact: false },
+  { name: 'Profil', path: '/app/profil', icon: UserRound, exact: false },
 ]
 
 function isTabActive(tab: typeof TABS[number], pathname: string) {
-  if (tab.path === '/app/plan') {
-    return pathname.startsWith('/app/plan') || pathname.startsWith('/app/hafta')
-  }
   if (tab.exact) return pathname === tab.path
   return pathname.startsWith(tab.path)
 }
@@ -101,23 +96,6 @@ export function AppLayout({ children }: AppLayoutProps) {
             )
           })}
 
-          <button
-            onClick={() => navigate('/app/ayarlar')}
-            aria-label="Profil ve ayarlar"
-            className="w-10 h-10 rounded-full flex items-center justify-center ml-1 shrink-0 transition-all active:scale-90"
-            style={{
-              backgroundColor: location.pathname === '/app/ayarlar'
-                ? 'color-mix(in srgb, var(--color-primary) 10%, transparent)'
-                : 'var(--color-surface2)',
-              border: `1.5px solid ${location.pathname === '/app/ayarlar' ? 'color-mix(in srgb, var(--color-primary) 30%, transparent)' : 'var(--color-border2)'}`,
-            }}
-          >
-            <UserRound
-              size={17}
-              strokeWidth={location.pathname === '/app/ayarlar' ? 2.5 : 1.8}
-              style={{ color: location.pathname === '/app/ayarlar' ? 'var(--color-primary)' : 'var(--color-text3)' }}
-            />
-          </button>
         </nav>
       </div>
     </div>

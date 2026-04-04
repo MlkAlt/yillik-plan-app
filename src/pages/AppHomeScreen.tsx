@@ -1,18 +1,19 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bell, ChevronRight, AlertTriangle } from 'lucide-react'
+import { Bell, Check, Download, FileSpreadsheet, FileText, Printer } from 'lucide-react'
 import type { OlusturulmusPlan } from '../types/takvim'
 import type { PlanEntry } from '../types/planEntry'
 import { showKazanimBildirimi } from '../lib/notifications'
 import { getSession } from '../lib/auth'
 import { syncProgressToSupabase } from '../lib/planSync'
+import { exportPlanToExcel, exportPlanToWord, exportPlanToPrint } from '../lib/exportUtils'
 import { BosdurumuEkrani } from '../components/BosdurumuEkrani/BosdurumuEkrani'
+import { DonemGrubu } from '../components/DonemGrubu'
 import { StorageKeys } from '../lib/storageKeys'
 import { useToast } from '../lib/toast'
 
 /* ── Yardımcılar ─────────────────────────────────────── */
 
-const GUNLER = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt']
 const AYLAR = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara']
 
 function formatTarihKisa(isoTarih: string) {
@@ -30,52 +31,28 @@ function sonrakiHaftayiAl(plan: OlusturulmusPlan) {
   return plan.haftalar.find(h => h.baslangicTarihi > bugunStr) ?? null
 }
 
-function haftaninGunleriOlustur(planlar: PlanEntry[], tamamlananlar: Record<string, number[]>) {
-  const bugun = new Date()
-  const bugunGun = bugun.getDay()
-  const pazartesi = new Date(bugun)
-  pazartesi.setDate(bugun.getDate() - ((bugunGun === 0 ? 7 : bugunGun) - 1))
+function selamMesaji(): string {
+  const saat = new Date().getHours()
+  if (saat >= 6 && saat < 12) return 'Günaydın'
+  if (saat >= 12 && saat < 18) return 'İyi günler'
+  if (saat >= 18 && saat < 22) return 'İyi akşamlar'
+  return 'İyi geceler'
+}
 
-  const gunler: {
-    gun: string
-    tarih: number
-    bugun: boolean
-    dersler: { sinif: string; ders: string; kazanim: string; haftaNo: number; tamamlandi: boolean; entry: PlanEntry }[]
-  }[] = []
+/* ── Kazanım tipi ────────────────────────────────────── */
 
-  for (let i = 0; i < 5; i++) {
-    const tarih = new Date(pazartesi)
-    tarih.setDate(pazartesi.getDate() + i)
-    const tarihStr = tarih.toISOString().split('T')[0]
-    const isBugun = tarihStr === bugun.toISOString().split('T')[0]
-
-    const dersler = planlar
-      .filter(p => p.plan)
-      .map(p => {
-        const hafta = p.plan!.haftalar.find(h => tarihStr >= h.baslangicTarihi && tarihStr <= h.bitisTarihi)
-        if (!hafta || hafta.tatilMi) return null
-        return {
-          sinif: p.label || p.sinif,
-          ders: p.ders,
-          kazanim: hafta.kazanim || 'Kazanım girilmemiş',
-          haftaNo: hafta.haftaNo,
-          tamamlandi: (tamamlananlar[p.sinif] || []).includes(hafta.haftaNo),
-          entry: p,
-        }
-      })
-      .filter(Boolean) as {
-        sinif: string; ders: string; kazanim: string; haftaNo: number; tamamlandi: boolean; entry: PlanEntry
-      }[]
-
-    gunler.push({
-      gun: GUNLER[tarih.getDay()],
-      tarih: tarih.getDate(),
-      bugun: isBugun,
-      dersler,
-    })
-  }
-
-  return gunler
+interface KazanimSatiri {
+  sinif: string
+  label: string
+  ders: string
+  kazanim: string
+  haftaNo: number
+  haftaBaslangic: string
+  haftaBitis: string
+  tamamlandi: boolean
+  tatilMi: boolean
+  tatilAdi?: string
+  entry: PlanEntry
 }
 
 /* ── Props ───────────────────────────────────────────── */
@@ -93,7 +70,9 @@ interface AppHomeScreenProps {
 export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamamlananlar: tamamlananlarProp }: AppHomeScreenProps) {
   const navigate = useNavigate()
   const { goster } = useToast()
+  const bugunRef = useRef<HTMLDivElement>(null)
 
+  /* ── Öğretmen adı ────────────────────────────────── */
   const [ogretmenAd] = useState(() => {
     try {
       const item = localStorage.getItem(StorageKeys.OGRETMEN_AYARLARI)
@@ -105,6 +84,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
     return ''
   })
 
+  /* ── Tamamlananlar state ─────────────────────────── */
   const [tamamlananlarLocal, setTamamlananlarLocal] = useState<Record<string, number[]>>(() => {
     if (tamamlananlarProp) return tamamlananlarProp
     try {
@@ -146,77 +126,129 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [syncing])
 
+  /* ── Bildirim ────────────────────────────────────── */
   useEffect(() => {
     if (planlar.length > 0) {
-      const aktifEntry = planlar[0]
-      if (aktifEntry.plan) {
+      const aktifPlan = planlar[0]
+      if (aktifPlan.plan) {
         const bugunStr = new Date().toISOString().split('T')[0]
-        const bugunHafta = aktifEntry.plan.haftalar.find(
+        const bugunHafta = aktifPlan.plan.haftalar.find(
           h => bugunStr >= h.baslangicTarihi && bugunStr <= h.bitisTarihi
         )
         if (bugunHafta && !bugunHafta.tatilMi && bugunHafta.kazanim) {
-          showKazanimBildirimi(bugunHafta.haftaNo, bugunHafta.kazanim, aktifEntry.ders)
+          showKazanimBildirimi(bugunHafta.haftaNo, bugunHafta.kazanim, aktifPlan.ders)
         }
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [planlar.length])
 
-  /* ── Hesaplamalar ─────────────────────────────────── */
+  /* ── Animasyon state ─────────────────────────────── */
+  const [tamamlananAnim, setTamamlananAnim] = useState<string | null>(null)
+  const [kutlamaAktif, setKutlamaAktif] = useState(false)
 
-  const saat = new Date().getHours()
-  let mesaj = 'İyi geceler'
-  if (saat >= 6 && saat < 12) mesaj = 'Günaydın'
-  else if (saat >= 12 && saat < 17) mesaj = 'İyi günler'
-  else if (saat >= 17 && saat < 21) mesaj = 'İyi akşamlar'
+  /* ── Yıllık plan bölümü state ────────────────────── */
+  const [seciliPlanIdx, setSeciliPlanIdx] = useState(0)
+  const [donemAcik, setDonemAcik] = useState<Record<number, boolean>>({ 1: true, 2: false })
+  const [exportMenuAcik, setExportMenuAcik] = useState(false)
+  const [exporting, setExporting] = useState<'excel' | 'word' | null>(null)
 
-  const haftaGunleri = planlar.length > 0 ? haftaninGunleriOlustur(planlar, tamamlananlar) : []
+  const seciliPlan = planlar[seciliPlanIdx] || null
 
-  const ilkPlan = planlar[0]
-  const aktifHafta = ilkPlan?.plan ? (bugunHaftasiniAl(ilkPlan.plan) ?? sonrakiHaftayiAl(ilkPlan.plan)) : null
-  const haftaNo = aktifHafta?.haftaNo ?? null
+  // Dönem açık/kapalı state'ini seçili plana göre güncelle
+  useEffect(() => {
+    if (!seciliPlan?.plan) return
+    const bugunStr = new Date().toISOString().split('T')[0]
+    const bugunHaftaNo = seciliPlan.plan.haftalar.find(
+      h => bugunStr >= h.baslangicTarihi && bugunStr <= h.bitisTarihi
+    )?.haftaNo ?? null
+    const aktifDonem = seciliPlan.plan.haftalar.find(h => h.haftaNo === bugunHaftaNo)?.donem ?? 1
+    setDonemAcik({ 1: aktifDonem === 1, 2: aktifDonem === 2 })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seciliPlan?.sinif])
 
-  // Bugünkü kazanımlar (flat list — tüm sınıflar)
-  const bugunKartlari = planlar
+  /* ── Bu haftanın kazanımları (tüm sınıflar) ──────── */
+
+  const bugunStr = new Date().toISOString().split('T')[0]
+
+  const buHaftaKazanimlari: KazanimSatiri[] = planlar
     .filter(p => p.plan)
     .map(p => {
-      const h = bugunHaftasiniAl(p.plan!)
-      const sonraki = !h ? sonrakiHaftayiAl(p.plan!) : null
-      const aktif = h ?? sonraki
-      const tamamlandi = aktif ? (tamamlananlar[p.sinif] || []).includes(aktif.haftaNo) : false
+      const hafta = bugunHaftasiniAl(p.plan!) ?? sonrakiHaftayiAl(p.plan!)
+      if (!hafta) return null
+      if (hafta.tatilMi) {
+        return {
+          sinif: p.sinif,
+          label: p.label || p.sinif,
+          ders: p.ders,
+          kazanim: '',
+          haftaNo: hafta.haftaNo,
+          haftaBaslangic: hafta.baslangicTarihi,
+          haftaBitis: hafta.bitisTarihi,
+          tamamlandi: false,
+          tatilMi: true,
+          tatilAdi: hafta.tatilAdi,
+          entry: p,
+        }
+      }
       return {
-        sinif: p.label || p.sinif,
+        sinif: p.sinif,
+        label: p.label || p.sinif,
         ders: p.ders,
-        kazanim: aktif?.kazanim || (aktif?.tatilMi ? aktif.tatilAdi : '') || 'Kazanım girilmemiş',
-        haftaNo: aktif?.haftaNo ?? null,
-        tarih: aktif ? `${formatTarihKisa(aktif.baslangicTarihi)} – ${formatTarihKisa(aktif.bitisTarihi)}` : '',
-        tatilMi: aktif?.tatilMi ?? false,
-        gelecek: !h,
-        tamamlandi,
+        kazanim: hafta.kazanim || 'Kazanım girilmemiş',
+        haftaNo: hafta.haftaNo,
+        haftaBaslangic: hafta.baslangicTarihi,
+        haftaBitis: hafta.bitisTarihi,
+        tamamlandi: (tamamlananlar[p.sinif] || []).includes(hafta.haftaNo),
+        tatilMi: false,
         entry: p,
       }
     })
+    .filter(Boolean) as KazanimSatiri[]
 
-  // Deadline placeholder'ları
-  const deadlines = [
-    { ad: 'Not Girişi', gun: 2, renk: 'var(--color-danger)' },
-    { ad: 'ZHA Tutanak', gun: 5, renk: 'var(--color-warning)' },
-    { ad: 'Yazılı Sınav', gun: 12, renk: 'var(--color-success)' },
-  ]
+  // Tatil olmayan kazanımlar
+  const normalKazanimlar = buHaftaKazanimlari.filter(k => !k.tatilMi)
+  const tatilKazanim = buHaftaKazanimlari.find(k => k.tatilMi)
+  const bekleyenler = normalKazanimlar.filter(k => !k.tamamlandi)
+  const tamamlananlarListesi = normalKazanimlar.filter(k => k.tamamlandi)
+  const toplamKazanim = normalKazanimlar.length
+  const tamamlananSayi = tamamlananlarListesi.length
+  const hepsiTamam = toplamKazanim > 0 && tamamlananSayi === toplamKazanim
+
+  // Hafta bilgisi (ilk planın haftası)
+  const ilkPlan = planlar[0]
+  const aktifHafta = ilkPlan?.plan ? (bugunHaftasiniAl(ilkPlan.plan) ?? sonrakiHaftayiAl(ilkPlan.plan)) : null
 
   /* ── Toggle handler ───────────────────────────────── */
 
-  async function handleTamamlaToggle(entry: PlanEntry, hNo: number | null) {
-    if (!hNo) return
+  const handleTamamlaToggle = useCallback(async (entry: PlanEntry, hNo: number) => {
     try {
       const mevcut = localStorage.getItem(StorageKeys.TAMAMLANAN_HAFTALAR)
       const parsed = mevcut ? JSON.parse(mevcut) : {}
       const eskiListe: number[] = Array.isArray(parsed) ? parsed : (parsed[entry.sinif] || [])
-      const tamamlandi = eskiListe.includes(hNo)
-      const yeniListe = tamamlandi ? eskiListe.filter((n: number) => n !== hNo) : [...eskiListe, hNo]
+      const zatenTamamlandi = eskiListe.includes(hNo)
+      const yeniListe = zatenTamamlandi ? eskiListe.filter((n: number) => n !== hNo) : [...eskiListe, hNo]
       const yeniParsed = Array.isArray(parsed) ? { [entry.sinif]: yeniListe } : { ...parsed, [entry.sinif]: yeniListe }
       localStorage.setItem(StorageKeys.TAMAMLANAN_HAFTALAR, JSON.stringify(yeniParsed))
       setTamamlananlarLocal(yeniParsed)
+
+      if (!zatenTamamlandi) {
+        // Animasyon tetikle
+        setTamamlananAnim(`${entry.sinif}-${hNo}`)
+        setTimeout(() => setTamamlananAnim(null), 800)
+
+        // Tüm kazanımlar tamamlandı mı kontrol et
+        const yeniTamamSayi = normalKazanimlar.filter(k => {
+          if (k.sinif === entry.sinif && k.haftaNo === hNo) return true
+          return (yeniParsed[k.sinif] || []).includes(k.haftaNo)
+        }).length
+        if (yeniTamamSayi === toplamKazanim && toplamKazanim > 0) {
+          setTimeout(() => {
+            setKutlamaAktif(true)
+            setTimeout(() => setKutlamaAktif(false), 2000)
+          }, 500)
+        }
+      }
 
       const session = await getSession()
       if (session) {
@@ -225,11 +257,58 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
         syncProgressToSupabase(session.user.id, yeniParsed, notlar).catch(() => {})
       }
 
-      goster(tamamlandi ? 'İşaret kaldırıldı' : 'Kazanım tamamlandı ✓', 'basari')
+      goster(zatenTamamlandi ? 'İşaret kaldırıldı' : 'Kazanım tamamlandı ✓', 'basari')
     } catch {
       goster('İşlem tamamlanamadı', 'hata')
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [normalKazanimlar, toplamKazanim, goster])
+
+  /* ── Export handlers ──────────────────────────────── */
+
+  async function handleExcelIndir() {
+    if (!seciliPlan) return
+    setExporting('excel')
+    setExportMenuAcik(false)
+    try {
+      const ayarlar = localStorage.getItem(StorageKeys.OGRETMEN_AYARLARI)
+      const meta = ayarlar ? JSON.parse(ayarlar) : {}
+      await exportPlanToExcel(seciliPlan, { okulAdi: meta.okulAdi, ogretmenAdi: meta.adSoyad })
+    } finally {
+      setExporting(null)
+    }
   }
+
+  function handleWordIndir() {
+    if (!seciliPlan) return
+    setExporting('word')
+    setExportMenuAcik(false)
+    try {
+      const ayarlar = localStorage.getItem(StorageKeys.OGRETMEN_AYARLARI)
+      const meta = ayarlar ? JSON.parse(ayarlar) : {}
+      exportPlanToWord(seciliPlan, { okulAdi: meta.okulAdi, ogretmenAdi: meta.adSoyad })
+    } finally {
+      setExporting(null)
+    }
+  }
+
+  function handleYazdir() {
+    if (!seciliPlan) return
+    setExportMenuAcik(false)
+    const ayarlar = localStorage.getItem(StorageKeys.OGRETMEN_AYARLARI)
+    const meta = ayarlar ? JSON.parse(ayarlar) : {}
+    exportPlanToPrint(seciliPlan, { okulAdi: meta.okulAdi, ogretmenAdi: meta.adSoyad })
+  }
+
+  /* ── Yıllık plan verileri ────────────────────────── */
+
+  const yillikPlan = seciliPlan?.plan
+  const yillikTamamlananlar = seciliPlan ? (tamamlananlar[seciliPlan.sinif] || []) : []
+  const yillikBugunHaftaNo = yillikPlan?.haftalar.find(
+    h => bugunStr >= h.baslangicTarihi && bugunStr <= h.bitisTarihi
+  )?.haftaNo ?? yillikPlan?.haftalar.find(
+    h => h.baslangicTarihi >= bugunStr
+  )?.haftaNo ?? null
 
   /* ── Render ───────────────────────────────────────── */
 
@@ -238,38 +317,21 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
 
       {/* ── Header ─────────────────────────────────── */}
       <div className="page-header stagger-1">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className="text-[12px] font-semibold" style={{ color: 'var(--color-text3)' }}>
-              {mesaj}
-            </p>
-            <p
-              className="font-bold tracking-tight"
-              style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--color-text1)', letterSpacing: '-.03em' }}
-            >
-              {ogretmenAd ? `${ogretmenAd} Hoca` : 'Öğretmen Yaver'}
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => navigate('/app/ayarlar')}
-              aria-label="Profil"
-              className="w-[36px] h-[36px] rounded-full flex items-center justify-center transition-all active:scale-95"
-              style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-xs)' }}
-            >
-              <span className="text-[14px]">👤</span>
-            </button>
-            <button
-              type="button"
-              aria-label="Bildirimler"
-              className="w-[36px] h-[36px] rounded-full flex items-center justify-center relative transition-all active:scale-95"
-              style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-xs)' }}
-            >
-              <Bell size={15} style={{ color: 'var(--color-text2)' }} />
-              <span className="absolute top-[6px] right-[6px] w-[7px] h-[7px] rounded-full" style={{ backgroundColor: 'var(--color-danger)', border: '1.5px solid var(--color-bg)' }} />
-            </button>
-          </div>
+        <div className="flex items-center justify-between">
+          <p
+            className="font-bold tracking-tight"
+            style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--color-text1)' }}
+          >
+            {selamMesaji()}{ogretmenAd ? `, ${ogretmenAd} Hoca` : ''}
+          </p>
+          <button
+            type="button"
+            aria-label="Bildirimler"
+            className="w-9 h-9 rounded-full flex items-center justify-center relative transition-all active:scale-95"
+            style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
+          >
+            <Bell size={16} style={{ color: 'var(--color-text3)' }} />
+          </button>
         </div>
       </div>
 
@@ -280,7 +342,6 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
             localStorage.setItem(StorageKeys.ONBOARDING_TAMAMLANDI, '1')
             onPlanEkle(entries)
             onSinifSec(entries[0].sinif)
-            navigate('/app/plan')
           }}
         />
       )}
@@ -288,232 +349,320 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
       {planlar.length > 0 && (
         <div className="section-stack">
 
-          {/* ── Acil Kart ─────────────────────────────── */}
+          {/* ── Hero Kartı ─────────────────────────────── */}
           <section
             className="stagger-2"
             style={{
               borderRadius: 'var(--radius-xl)',
-              backgroundColor: 'var(--color-warning-s)',
-              border: '1px solid var(--color-warning-b)',
-              padding: '14px 16px',
+              backgroundColor: tatilKazanim
+                ? 'color-mix(in srgb, var(--color-warning) 8%, var(--color-surface))'
+                : hepsiTamam
+                ? 'color-mix(in srgb, var(--color-success) 8%, var(--color-surface))'
+                : 'color-mix(in srgb, var(--color-primary) 8%, var(--color-surface))',
+              padding: 'var(--space-5)',
+              transition: 'background-color 0.4s ease',
             }}
           >
-            <div className="flex items-start gap-3">
-              <AlertTriangle size={16} style={{ color: 'var(--color-warning)', marginTop: 2, flexShrink: 0 }} />
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-[.1em] mb-1" style={{ color: 'var(--color-warning)' }}>
-                  Acil
+            {tatilKazanim && toplamKazanim === 0 ? (
+              /* Tatil haftası */
+              <>
+                <p className="text-sm font-semibold mb-1" style={{ color: 'var(--color-warning)' }}>
+                  {tatilKazanim.tatilAdi || 'Tatil Haftası'}
                 </p>
-                <p className="text-[14px] font-bold mb-1" style={{ color: 'var(--color-text1)' }}>
-                  Not girişi son gün yaklaşıyor
+                <p className="text-xs" style={{ color: 'var(--color-text3)' }}>
+                  {formatTarihKisa(tatilKazanim.haftaBaslangic)} – {formatTarihKisa(tatilKazanim.haftaBitis)}
                 </p>
-                <p className="text-[12px]" style={{ color: 'var(--color-text2)' }}>
-                  2 gün kaldı · Tamamlanmamış sınıflar var
-                </p>
-              </div>
-              <span
-                className="text-[11px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap"
-                style={{ backgroundColor: 'var(--color-warning)', color: '#ffffff' }}
-              >
-                Tamamla →
-              </span>
-            </div>
-          </section>
-
-          {/* ── Bu Hafta Widget ────────────────────────── */}
-          <section
-            className="stagger-3 overflow-hidden"
-            style={{
-              borderRadius: 'var(--radius-xl)',
-              backgroundColor: 'var(--color-surface)',
-              border: '1px solid var(--color-border)',
-              boxShadow: 'var(--shadow-sm)',
-            }}
-          >
-            <div
-              className="flex items-center justify-between px-4 py-3"
-              style={{ borderBottom: '1px solid var(--color-border)' }}
-            >
-              <span className="text-[14px] font-bold" style={{ color: 'var(--color-text1)' }}>
-                Bu Hafta
-              </span>
-              {haftaNo && (
-                <span
-                  className="text-[12px] font-bold"
-                  style={{ color: 'var(--color-primary)' }}
-                >
-                  {haftaNo}. Hafta
-                </span>
-              )}
-            </div>
-
-            <div>
-              {haftaGunleri.map((g, gi) => (
-                <div
-                  key={g.gun}
-                  className="flex items-start gap-3 px-4 py-3"
-                  style={{
-                    borderBottom: gi < haftaGunleri.length - 1 ? '1px solid var(--color-border)' : 'none',
-                    backgroundColor: g.bugun ? 'color-mix(in srgb, var(--color-primary) 4%, transparent)' : 'transparent',
-                  }}
-                >
-                  {/* Gün + Tarih */}
-                  <div className="w-[32px] text-center flex-shrink-0">
-                    <p className="text-[10px] font-bold uppercase tracking-[.04em]" style={{ color: 'var(--color-text3)' }}>
-                      {g.gun}
-                    </p>
-                    <p
-                      className="font-bold leading-none"
-                      style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: g.bugun ? 'var(--color-primary)' : 'var(--color-text1)', letterSpacing: '-.02em' }}
-                    >
-                      {g.tarih}
-                    </p>
-                  </div>
-
-                  {/* Ders bilgisi */}
-                  <div className="flex-1 min-w-0">
-                    {g.dersler.length === 0 ? (
-                      <p className="text-[12px] font-medium" style={{ color: 'var(--color-text3)' }}>Ders yok</p>
-                    ) : (
-                      g.dersler.map((d, di) => (
-                        <div
-                          key={`${d.sinif}-${di}`}
-                          className="cursor-pointer"
-                          onClick={() => {
-                            onSinifSec(d.entry.sinif)
-                            navigate(`/app/hafta/${d.haftaNo}`)
-                          }}
-                        >
-                          <p className="text-[13px] font-bold" style={{ color: 'var(--color-text1)' }}>
-                            {d.ders} · {d.sinif}
-                          </p>
-                          <p className="text-[11px] leading-snug line-clamp-1" style={{ color: 'var(--color-text2)' }}>
-                            {d.kazanim}
-                          </p>
-                          {di < g.dersler.length - 1 && <div className="my-1.5" />}
-                        </div>
-                      ))
-                    )}
-                  </div>
-
-                  {/* Durum noktası */}
-                  <div className="flex flex-col gap-1.5 mt-1.5">
-                    {g.dersler.length === 0 ? (
-                      <span className="w-[8px] h-[8px] rounded-full" style={{ backgroundColor: 'var(--color-border2)' }} />
-                    ) : (
-                      g.dersler.map((d, di) => (
-                        <span
-                          key={`dot-${di}`}
-                          className="w-[8px] h-[8px] rounded-full flex-shrink-0"
-                          style={{
-                            backgroundColor: d.tamamlandi
-                              ? 'var(--color-success)'
-                              : g.bugun
-                              ? 'var(--color-warning)'
-                              : 'var(--color-border2)',
-                          }}
-                        />
-                      ))
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* ── Deadline Strip ───────────��─────────────── */}
-          <section className="stagger-4">
-            <p className="section-label">Yaklaşan</p>
-            <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth: 'none' }}>
-              {deadlines.map(d => (
-                <div
-                  key={d.ad}
-                  className="flex-shrink-0 min-w-[92px] px-3 py-3 cursor-pointer transition-all active:scale-[0.96]"
-                  style={{
-                    borderRadius: 'var(--radius-lg)',
-                    backgroundColor: 'var(--color-surface)',
-                    border: '1px solid var(--color-border)',
-                    boxShadow: 'var(--shadow-xs)',
-                  }}
-                >
-                  <p className="text-[11px] font-bold mb-1" style={{ color: 'var(--color-text2)' }}>{d.ad}</p>
-                  <p
-                    className="font-bold leading-none"
-                    style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: d.renk, letterSpacing: '-.02em' }}
-                  >
-                    {d.gun}
-                  </p>
-                  <p className="text-[10px] font-semibold mt-0.5" style={{ color: 'var(--color-text3)' }}>gün kaldı</p>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* ── Bugünkü Kazanımlar ─────────────────────── */}
-          <section className="stagger-5">
-            <div className="flex items-center justify-between mb-2">
-              <span className="section-label mb-0">Bugünkü Kazanımlar</span>
-              <span className="text-[11px] font-bold" style={{ color: 'var(--color-text2)' }}>{bugunKartlari.length} sınıf</span>
-            </div>
-            <div className="flex flex-col gap-2">
-              {bugunKartlari.map(item => (
-                <div
-                  key={`${item.sinif}-${item.haftaNo ?? 'yok'}`}
-                  className="flex items-start gap-3 px-3.5 py-3"
-                  style={{
-                    borderRadius: 'var(--radius-lg)',
-                    backgroundColor: 'var(--color-surface)',
-                    border: '1px solid var(--color-border)',
-                    boxShadow: 'var(--shadow-xs)',
-                  }}
-                >
-                  {/* Checkbox */}
-                  <button
-                    type="button"
-                    onClick={() => handleTamamlaToggle(item.entry, item.haftaNo)}
-                    aria-label={`${item.sinif} kazanımı tamamla`}
-                    className="w-5 h-5 rounded mt-0.5 flex items-center justify-center transition-all active:scale-90"
+              </>
+            ) : (
+              /* Normal hafta */
+              <>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[13px] font-semibold" style={{ color: 'var(--color-text2)' }}>
+                    Bu hafta
+                  </span>
+                  <span
+                    className="font-bold"
                     style={{
-                      backgroundColor: item.tamamlandi ? 'var(--color-success)' : 'transparent',
-                      border: `1.5px solid ${item.tamamlandi ? 'var(--color-success)' : 'var(--color-border2)'}`,
-                      color: item.tamamlandi ? '#fff' : 'transparent',
-                      fontSize: '10px',
-                      flexShrink: 0,
+                      fontFamily: 'var(--font-display)',
+                      fontSize: '24px',
+                      color: hepsiTamam ? 'var(--color-success)' : 'var(--color-primary)',
+                      transition: 'color 0.3s',
+                      animation: kutlamaAktif ? 'pop-in 0.6s ease-out' : 'none',
                     }}
                   >
-                    ✓
-                  </button>
+                    {hepsiTamam ? 'Harika bir hafta! ✓' : `${tamamlananSayi}/${toplamKazanim}`}
+                  </span>
+                </div>
 
-                  {/* İçerik */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2 mb-0.5">
-                      <p className="text-[13px] font-bold" style={{ color: 'var(--color-text1)' }}>{item.sinif}</p>
+                {/* Progress bar */}
+                {toplamKazanim > 0 && (
+                  <div
+                    className="h-1.5 rounded-full overflow-hidden mb-2"
+                    style={{ backgroundColor: 'var(--color-border)' }}
+                  >
+                    <div
+                      className="h-full rounded-full"
+                      style={{
+                        width: `${toplamKazanim > 0 ? (tamamlananSayi / toplamKazanim) * 100 : 0}%`,
+                        backgroundColor: hepsiTamam ? 'var(--color-success)' : 'var(--color-primary)',
+                        transition: 'width 0.4s ease-out, background-color 0.3s',
+                      }}
+                    />
+                  </div>
+                )}
+
+                {aktifHafta && (
+                  <p className="text-xs" style={{ color: 'var(--color-text3)' }}>
+                    {aktifHafta.haftaNo}. Hafta · {formatTarihKisa(aktifHafta.baslangicTarihi)} – {formatTarihKisa(aktifHafta.bitisTarihi)}
+                  </p>
+                )}
+              </>
+            )}
+          </section>
+
+          {/* ── Bekleyen Kazanımlar ────────────────────── */}
+          {bekleyenler.length > 0 && (
+            <section className="stagger-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="section-label mb-0">Bu Hafta</span>
+                <span className="text-[11px] font-bold" style={{ color: 'var(--color-text3)' }}>
+                  {toplamKazanim} kazanım
+                </span>
+              </div>
+              <div className="flex flex-col gap-2">
+                {bekleyenler.map((item, idx) => {
+                  const animKey = `${item.sinif}-${item.haftaNo}`
+                  const isAnimating = tamamlananAnim === animKey
+                  return (
+                    <div
+                      key={animKey}
+                      className="flex items-start gap-3 transition-all"
+                      style={{
+                        borderRadius: 'var(--radius-lg)',
+                        backgroundColor: 'var(--color-surface)',
+                        border: '1px solid var(--color-border)',
+                        boxShadow: 'var(--shadow-xs)',
+                        padding: 'var(--card-density)',
+                        opacity: isAnimating ? 0 : 1,
+                        transform: isAnimating ? 'translateY(-8px) scale(0.97)' : 'none',
+                        maxHeight: isAnimating ? '0px' : '200px',
+                        overflow: 'hidden',
+                        marginBottom: isAnimating ? '-8px' : '0',
+                        animation: `stagger-up 0.35s ease-out ${0.05 + idx * 0.07}s both`,
+                      }}
+                    >
+                      {/* Check circle */}
                       <button
                         type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleTamamlaToggle(item.entry, item.haftaNo)
+                        }}
+                        aria-label={`${item.label} kazanımı tamamla`}
+                        className="w-6 h-6 rounded-full flex items-center justify-center transition-all active:scale-90 flex-shrink-0 mt-0.5"
+                        style={{
+                          border: '2px solid var(--color-border2)',
+                          backgroundColor: 'transparent',
+                        }}
+                      />
+
+                      {/* İçerik */}
+                      <div
+                        className="flex-1 min-w-0 cursor-pointer"
                         onClick={() => {
                           onSinifSec(item.entry.sinif)
-                          if (item.haftaNo) navigate(`/app/hafta/${item.haftaNo}`)
-                          else navigate('/app/plan')
+                          navigate(`/app/hafta/${item.haftaNo}`)
                         }}
-                        className="inline-flex items-center gap-0.5 text-[11px] font-bold flex-shrink-0"
-                        style={{ color: 'var(--color-primary)' }}
                       >
-                        Detay <ChevronRight size={12} />
-                      </button>
+                        <p className="text-[13px] font-semibold" style={{ color: 'var(--color-text1)' }}>
+                          {item.ders} · {item.label}
+                        </p>
+                        <p className="text-[13px] leading-snug line-clamp-2 mt-0.5" style={{ color: 'var(--color-text2)' }}>
+                          {item.kazanim}
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-[11px] mb-1" style={{ color: 'var(--color-text3)' }}>
-                      {item.ders} · {item.tarih || 'Takvim dışı'}
-                    </p>
-                    <p
-                      className="text-[12px] leading-5 line-clamp-2"
-                      style={{ color: item.tatilMi ? 'var(--color-warning)' : 'var(--color-text1)' }}
+                  )
+                })}
+              </div>
+            </section>
+          )}
+
+          {/* ── Tamamlananlar ──────────────────────────── */}
+          {tamamlananlarListesi.length > 0 && (
+            <section className="stagger-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="section-label mb-0">Tamamlananlar</span>
+                <span className="text-[11px] font-bold" style={{ color: 'var(--color-text3)' }}>
+                  {tamamlananlarListesi.length}
+                </span>
+              </div>
+              <div className="flex flex-col gap-2">
+                {tamamlananlarListesi.map(item => {
+                  const animKey = `${item.sinif}-${item.haftaNo}`
+                  return (
+                    <div
+                      key={animKey}
+                      className="flex items-start gap-3"
+                      style={{
+                        borderRadius: 'var(--radius-lg)',
+                        backgroundColor: 'color-mix(in srgb, var(--color-success) 5%, var(--color-surface))',
+                        border: '1px solid color-mix(in srgb, var(--color-success) 15%, transparent)',
+                        padding: 'var(--card-density)',
+                      }}
                     >
-                      {item.kazanim}
-                    </p>
-                  </div>
+                      {/* Check circle — dolu */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleTamamlaToggle(item.entry, item.haftaNo)
+                        }}
+                        aria-label={`${item.label} kazanımını geri al`}
+                        className="w-6 h-6 rounded-full flex items-center justify-center transition-all active:scale-90 flex-shrink-0 mt-0.5"
+                        style={{
+                          backgroundColor: 'var(--color-success)',
+                          border: 'none',
+                          animation: tamamlananAnim === animKey ? 'pop-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none',
+                        }}
+                      >
+                        <Check size={14} strokeWidth={3} color="#fff" />
+                      </button>
+
+                      {/* İçerik */}
+                      <div
+                        className="flex-1 min-w-0 cursor-pointer"
+                        onClick={() => {
+                          onSinifSec(item.entry.sinif)
+                          navigate(`/app/hafta/${item.haftaNo}`)
+                        }}
+                      >
+                        <p className="text-[13px] font-semibold" style={{ color: 'var(--color-text3)' }}>
+                          {item.ders} · {item.label}
+                        </p>
+                        <p className="text-[13px] leading-snug line-clamp-2 mt-0.5 line-through" style={{ color: 'var(--color-text3)' }}>
+                          {item.kazanim}
+                        </p>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </section>
+          )}
+
+          {/* ── Yıllık Plan Bölümü ─────────────────────── */}
+          <section style={{ borderTop: '1px solid var(--color-border)', paddingTop: 'var(--section-gap)', marginTop: 'var(--space-2)' }}>
+            <span className="section-label">Yıllık Plan</span>
+
+            {/* Sınıf chips (birden fazla plan varsa) */}
+            {planlar.length > 1 && (
+              <div className="flex gap-2 overflow-x-auto pb-3 -mx-1 px-1" style={{ scrollbarWidth: 'none' }}>
+                {planlar.map((p, i) => (
+                  <button
+                    key={p.sinif}
+                    onClick={() => setSeciliPlanIdx(i)}
+                    className="whitespace-nowrap flex-shrink-0 text-xs font-semibold transition-all active:scale-95"
+                    style={{
+                      padding: '6px 14px',
+                      borderRadius: 'var(--radius-pill)',
+                      backgroundColor: i === seciliPlanIdx ? 'var(--color-primary)' : 'var(--color-surface2)',
+                      color: i === seciliPlanIdx ? '#ffffff' : 'var(--color-text2)',
+                      border: i === seciliPlanIdx ? 'none' : '1px solid var(--color-border)',
+                    }}
+                  >
+                    {p.label || p.sinif}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Dönem grupları */}
+            {yillikPlan && (
+              <div className="flex flex-col gap-4">
+                {[1, 2].map(donemNo => {
+                  const donemHaftalar = yillikPlan.haftalar.filter(h => h.donem === donemNo)
+                  if (donemHaftalar.length === 0) return null
+                  const dTamamlananSayisi = donemHaftalar.filter(h => !h.tatilMi && yillikTamamlananlar.includes(h.haftaNo)).length
+                  const dToplamSayisi = donemHaftalar.filter(h => !h.tatilMi).length
+
+                  return (
+                    <DonemGrubu
+                      key={donemNo}
+                      donemNo={donemNo}
+                      haftalar={donemHaftalar}
+                      tamamlananlar={yillikTamamlananlar}
+                      bugunHaftaNo={yillikBugunHaftaNo}
+                      bugunRef={bugunRef}
+                      tamamlananSayisi={dTamamlananSayisi}
+                      toplamSayisi={dToplamSayisi}
+                      acik={donemAcik[donemNo] ?? false}
+                      onToggle={() => setDonemAcik(prev => ({ ...prev, [donemNo]: !prev[donemNo] }))}
+                    />
+                  )
+                })}
+              </div>
+            )}
+
+            {/* Export butonları */}
+            {seciliPlan && (
+              <div className="flex gap-2 mt-4">
+                <div className="relative flex-1">
+                  <button
+                    onClick={() => setExportMenuAcik(p => !p)}
+                    disabled={!!exporting}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-bold transition-all active:scale-95 disabled:opacity-60"
+                    style={{
+                      borderRadius: 'var(--radius-lg)',
+                      border: '1px solid var(--color-border)',
+                      backgroundColor: 'var(--color-surface)',
+                      color: 'var(--color-primary)',
+                    }}
+                  >
+                    {exporting ? (
+                      <span className="animate-pulse text-xs">Hazırlanıyor...</span>
+                    ) : (
+                      <><Download size={16} /> İndir</>
+                    )}
+                  </button>
+                  {exportMenuAcik && (
+                    <>
+                      <div className="fixed inset-0 z-10" onClick={() => setExportMenuAcik(false)} />
+                      <div
+                        className="absolute bottom-full left-0 right-0 mb-1 z-20 overflow-hidden"
+                        style={{
+                          borderRadius: 'var(--radius-lg)',
+                          border: '1px solid var(--color-border)',
+                          backgroundColor: 'var(--color-surface)',
+                          boxShadow: 'var(--shadow-md)',
+                        }}
+                      >
+                        <button onClick={handleExcelIndir} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold active:opacity-70" style={{ color: 'var(--color-text1)', borderBottom: '1px solid var(--color-border)' }}>
+                          <FileSpreadsheet size={16} style={{ color: 'var(--color-success)' }} /> Excel (.xlsx)
+                        </button>
+                        <button onClick={handleWordIndir} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold active:opacity-70" style={{ color: 'var(--color-text1)' }}>
+                          <FileText size={16} style={{ color: 'var(--color-primary)' }} /> Word (.doc)
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
-              ))}
-            </div>
+
+                <button
+                  onClick={handleYazdir}
+                  className="flex items-center gap-1.5 text-sm font-bold transition-all active:scale-95 whitespace-nowrap"
+                  style={{
+                    padding: '0 14px',
+                    borderRadius: 'var(--radius-lg)',
+                    border: '1px solid var(--color-border)',
+                    backgroundColor: 'var(--color-surface)',
+                    color: 'var(--color-text2)',
+                  }}
+                >
+                  <Printer size={16} /> Yazdır
+                </button>
+              </div>
+            )}
           </section>
 
         </div>

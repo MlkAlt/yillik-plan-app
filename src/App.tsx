@@ -2,12 +2,9 @@ import { useRef, useState, useCallback, useEffect } from 'react'
 import { useColorScheme } from './hooks/useColorScheme'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { HomePage } from './pages/HomePage'
-import { PlanPage } from './pages/PlanPage'
 import { YuklemePage } from './pages/YuklemePage'
 import { AppHomeScreen } from './pages/AppHomeScreen'
 import { AppSettingsScreen } from './pages/AppSettingsScreen'
-import { DosyamPage } from './pages/DosyamPage'
-import { UretPage } from './pages/UretPage'
 import { AppLayout } from './components/AppLayout'
 import { HaftaDetayPage } from './pages/HaftaDetayPage'
 import { AuthModal } from './components/AuthModal'
@@ -69,14 +66,16 @@ function AppInner() {
         <Route path="/" element={<HomePage />} />
         <Route path="/olustur" element={<Navigate to="/app" replace />} />
         <Route path="/yukle" element={<Navigate to="/app/yukle" replace />} />
-        <Route path="/plan" element={<Navigate to="/app/plan" replace />} />
+        <Route path="/plan" element={<Navigate to="/app" replace />} />
         <Route path="/app" element={<AppLayout><AppHomeScreen planlar={planlar} onPlanEkle={handlePlanEkle} onSinifSec={handleSinifSec} syncing={syncing} tamamlananlar={tamamlananlar} /></AppLayout>} />
-        <Route path="/app/plan" element={<AppLayout>{planlar.length > 0 && aktifEntry ? <PlanPage entry={aktifEntry} planlar={planlar} onSinifSec={handleSinifSec} /> : <AppHomeScreen planlar={planlar} onPlanEkle={handlePlanEkle} onSinifSec={handleSinifSec} syncing={syncing} tamamlananlar={tamamlananlar} />}</AppLayout>} />
         <Route path="/app/yukle" element={<AppLayout><YuklemePage onYukle={handleYukleLegacy} /></AppLayout>} />
-        <Route path="/app/dosyam" element={<AppLayout><DosyamPage /></AppLayout>} />
-        <Route path="/app/uret" element={<AppLayout><UretPage /></AppLayout>} />
-        <Route path="/app/ayarlar" element={<AppLayout><AppSettingsScreen onPlanEkle={handlePlanEkle} onPlanSil={handlePlanSil} planlar={planlar} user={user} /></AppLayout>} />
+        <Route path="/app/profil" element={<AppLayout><AppSettingsScreen onPlanEkle={handlePlanEkle} onPlanSil={handlePlanSil} planlar={planlar} user={user} /></AppLayout>} />
         <Route path="/app/hafta/:haftaNo" element={<AppLayout><HaftaDetayPage entry={aktifEntry} onTamamlaToggle={handleTamamlananGuncelle} /></AppLayout>} />
+        {/* Backward compat redirects */}
+        <Route path="/app/plan" element={<Navigate to="/app" replace />} />
+        <Route path="/app/dosyam" element={<Navigate to="/app" replace />} />
+        <Route path="/app/uret" element={<Navigate to="/app" replace />} />
+        <Route path="/app/ayarlar" element={<Navigate to="/app/profil" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       {authPromptAcik && (
