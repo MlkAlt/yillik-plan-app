@@ -14,7 +14,7 @@ export function BosdurumuEkrani({ onTamamla }: BosdurumuEkraniProps) {
   const overlay = (
     <div
       data-testid="onboarding-deger-onizleme"
-      className="fixed inset-0 z-40 flex items-end justify-center pb-24"
+      className="fixed inset-0 z-40 flex items-center justify-center px-4"
       style={{ animation: 'overlay-in 0.3s ease-out both' }}
     >
       {/* Blur backdrop */}
@@ -25,7 +25,7 @@ export function BosdurumuEkrani({ onTamamla }: BosdurumuEkraniProps) {
 
       {/* Splash card */}
       <div
-        className="relative z-10 w-full max-w-sm mx-4 text-center"
+        className="relative z-10 w-full max-w-sm text-center"
         style={{ animation: 'splash-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both' }}
       >
         <div

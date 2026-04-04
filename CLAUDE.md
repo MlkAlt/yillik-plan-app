@@ -97,9 +97,9 @@ plans (id, user_id, sinif, ders, yil, tip, plan_json, rows_json, label, sinif_ge
 
 ### v6 için eklenecek (Sprint 2)
 ```sql
-kullanicilar   -- profil, branş, jeton bakiyesi
+kullanicilar   -- profil, branş, uretim hakki bakiyesi
 kullanici_dersler -- seçili dersler + sınıflar
-jeton_islemleri   -- jeton geçmişi
+uretim_hakki_islemleri   -- uretim hakki gecmisi
 sinavlar          -- üretilen sınavlar
 ```
 

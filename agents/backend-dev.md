@@ -27,7 +27,7 @@ plans (
 -- Sırayla ekle, bağımlılık sırasına göre
 1. kullanicilar      -- önce bu (diğerleri buna bağlı)
 2. kullanici_dersler -- kullanicilar'a bağlı
-3. jeton_islemleri  -- kullanicilar'a bağlı
+3. uretim_hakki_islemleri  -- kullanicilar'a bağlı
 4. sinavlar         -- kullanicilar'a bağlı
 5. dosyalar         -- Sprint 3
 ```

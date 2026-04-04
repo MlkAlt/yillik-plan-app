@@ -59,7 +59,7 @@ Değişim tipi: GÜNCELLE | YENİ | SİL
 
 ```
 ✅ 4 sekme: Ana · Planla · Dosyam · Üret
-✅ Jeton sistemi UI
+✅ Uretim hakki sistemi UI
 ✅ Onboarding: Branş → Dersler → Sınıflar
 ✅ Öğretmen Dosyası ekranı
 ✅ Sınav wizard (Üret sekmesi)

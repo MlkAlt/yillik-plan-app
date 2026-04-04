@@ -5,11 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build --configLoader native",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest --run",
-    "test:watch": "vitest"
+    "test": "vitest --run --configLoader native",
+    "test:watch": "vitest --configLoader native"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.99.3",

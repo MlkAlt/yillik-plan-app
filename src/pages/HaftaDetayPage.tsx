@@ -7,12 +7,12 @@ import { getSession } from '../lib/auth'
 import { syncProgressToSupabase } from '../lib/planSync'
 import { useToast } from '../lib/toast'
 import { StorageKeys } from '../lib/storageKeys'
-import { ChevronLeft, Check } from 'lucide-react'
+import { ChevronLeft, Check, NotebookPen, Sparkles } from 'lucide-react'
 import { Card } from '../components/UI/Card'
+import { SectionHeader } from '../components/UI/SectionHeader'
 
 function formatTarih(isoTarih: string): string {
-  const aylar = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
-    'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık']
+  const aylar = ['Ocak', 'Subat', 'Mart', 'Nisan', 'Mayis', 'Haziran', 'Temmuz', 'Agustos', 'Eylul', 'Ekim', 'Kasim', 'Aralik']
   const d = new Date(isoTarih)
   return `${d.getDate()} ${aylar[d.getMonth()]} ${d.getFullYear()}`
 }
@@ -20,6 +20,33 @@ function formatTarih(isoTarih: string): string {
 interface HaftaDetayPageProps {
   entry: PlanEntry | null
   onTamamlaToggle?: () => void
+}
+
+interface GecisButonuProps {
+  hedefNo: number
+  yon: 'onceki' | 'sonraki'
+  onClick: () => void
+}
+
+function GecisButonu({ hedefNo, yon, onClick }: GecisButonuProps) {
+  const oncekiMi = yon === 'onceki'
+  return (
+    <button
+      onClick={onClick}
+      className="flex-1 flex items-center justify-center gap-1.5 py-3 text-sm font-bold transition-all active:scale-95"
+      style={{
+        borderRadius: 'var(--radius-lg)',
+        border: '1px solid var(--color-border)',
+        backgroundColor: 'var(--color-surface)',
+        color: 'var(--color-text2)',
+        boxShadow: 'var(--shadow-xs)',
+      }}
+    >
+      <span style={{ color: 'var(--color-text3)' }}>{oncekiMi ? '<' : ''}</span>
+      {hedefNo}. Hafta
+      <span style={{ color: 'var(--color-text3)' }}>{oncekiMi ? '' : '>'}</span>
+    </button>
+  )
 }
 
 export function HaftaDetayPage({ entry, onTamamlaToggle }: HaftaDetayPageProps) {
@@ -31,7 +58,7 @@ export function HaftaDetayPage({ entry, onTamamlaToggle }: HaftaDetayPageProps) 
   const [uploadedRow, setUploadedRow] = useState<ParsedRow | null>(null)
   const [ders, setDers] = useState('')
   const [sinif, setSinif] = useState('')
-  const [tumHaftaNoları, setTumHaftaNoları] = useState<number[]>([])
+  const [tumHaftaNolari, setTumHaftaNolari] = useState<number[]>([])
   const [tamamlandi, setTamamlandi] = useState(false)
   const [tamamlaAnimating, setTamamlaAnimating] = useState(false)
   const [not, setNot] = useState('')
@@ -40,46 +67,47 @@ export function HaftaDetayPage({ entry, onTamamlaToggle }: HaftaDetayPageProps) 
   const { goster } = useToast()
 
   useEffect(() => {
-    // Plan verisini prop'tan oku
+    setHafta(null)
+    setUploadedRow(null)
     if (entry) {
       setDers(entry.ders || '')
       setSinif(entry.sinifGercek || entry.sinif || '')
       if (entry.tip === 'meb' && entry.plan) {
         const bulunan = entry.plan.haftalar.find((h) => h.haftaNo === no)
         if (bulunan) setHafta(bulunan)
-        setTumHaftaNoları(entry.plan.haftalar.map(h => h.haftaNo))
+        setTumHaftaNolari(entry.plan.haftalar.map(h => h.haftaNo))
       } else if (entry.tip === 'yukle' && entry.rows) {
         const bulunan = entry.rows.find((r) => r.haftaNo === no)
         if (bulunan) setUploadedRow(bulunan)
-        setTumHaftaNoları(entry.rows.filter(r => r.haftaNo != null).map(r => r.haftaNo!))
+        setTumHaftaNolari(entry.rows.filter(r => r.haftaNo != null).map(r => r.haftaNo!))
       }
     }
 
-    // Progress verisi localStorage'dan okunmaya devam eder (global)
     try {
       const aktifSinifStr = localStorage.getItem(StorageKeys.AKTIF_SINIF) || ''
-
       const tamamlananItem = localStorage.getItem(StorageKeys.TAMAMLANAN_HAFTALAR)
       if (tamamlananItem) {
         const parsed = JSON.parse(tamamlananItem)
-        const liste: number[] = Array.isArray(parsed)
-          ? parsed
-          : (parsed[aktifSinifStr] || [])
+        const liste: number[] = Array.isArray(parsed) ? parsed : (parsed[aktifSinifStr] || [])
         setTamamlandi(liste.includes(no))
       }
 
       const notlarItem = localStorage.getItem(StorageKeys.HAFTA_NOTLARI)
       if (notlarItem) {
         const parsed = JSON.parse(notlarItem)
-        const notlar = aktifSinifStr && parsed[aktifSinifStr]
-          ? parsed[aktifSinifStr]
-          : parsed
+        const notlar = aktifSinifStr && parsed[aktifSinifStr] ? parsed[aktifSinifStr] : parsed
         setNot(notlar[String(no)] || '')
+      } else {
+        setNot('')
       }
-    } catch {
-      // localStorage okunamadı
-    }
+    } catch { /* ignore */ }
   }, [no, entry])
+
+  useEffect(() => {
+    return () => {
+      if (notTimerRef.current) clearTimeout(notTimerRef.current)
+    }
+  }, [])
 
   function handleTamamlaToggle() {
     try {
@@ -87,26 +115,19 @@ export function HaftaDetayPage({ entry, onTamamlaToggle }: HaftaDetayPageProps) 
       const tamamlananItem = localStorage.getItem(StorageKeys.TAMAMLANAN_HAFTALAR)
       const parsed = tamamlananItem ? JSON.parse(tamamlananItem) : {}
       const eskiListe: number[] = Array.isArray(parsed) ? parsed : (parsed[aktifSinifStr] || [])
-      const yeniListe = tamamlandi
-        ? eskiListe.filter((n) => n !== no)
-        : [...eskiListe, no]
-      const yeniParsed = Array.isArray(parsed)
-        ? { [aktifSinifStr]: yeniListe }
-        : { ...parsed, [aktifSinifStr]: yeniListe }
+      const yeniListe = tamamlandi ? eskiListe.filter((n) => n !== no) : [...eskiListe, no]
+      const yeniParsed = Array.isArray(parsed) ? { [aktifSinifStr]: yeniListe } : { ...parsed, [aktifSinifStr]: yeniListe }
       localStorage.setItem(StorageKeys.TAMAMLANAN_HAFTALAR, JSON.stringify(yeniParsed))
       if (!tamamlandi) setTamamlaAnimating(true)
       setTamamlandi(!tamamlandi)
-      onTamamlaToggle?.() // App.tsx'teki state'i güncelle
-      // Arka planda Supabase'e sync
+      onTamamlaToggle?.()
       getSession().then(session => {
         if (!session) return
         const notlarItem = localStorage.getItem(StorageKeys.HAFTA_NOTLARI)
         const notlar = notlarItem ? JSON.parse(notlarItem) : {}
         syncProgressToSupabase(session.user.id, yeniParsed, notlar).catch(() => {})
       })
-    } catch {
-      // kayıt başarısız
-    }
+    } catch { /* ignore */ }
   }
 
   function handleNotChange(deger: string) {
@@ -120,179 +141,168 @@ export function HaftaDetayPage({ entry, onTamamlaToggle }: HaftaDetayPageProps) 
       sinifNotlar[String(no)] = deger
       parsed[aktifSinifStr] = sinifNotlar
       localStorage.setItem(StorageKeys.HAFTA_NOTLARI, JSON.stringify(parsed))
-      // Kaydedildi göstergesi — debounced
       if (notTimerRef.current) clearTimeout(notTimerRef.current)
       notTimerRef.current = setTimeout(() => {
         setKaydedildi(true)
         goster('Not kaydedildi', 'basari')
       }, 800)
-      // Arka planda Supabase'e sync (debounced ile aynı süre)
       getSession().then(session => {
         if (!session) return
         const tamamlananItem = localStorage.getItem(StorageKeys.TAMAMLANAN_HAFTALAR)
         const tamamlanan = tamamlananItem ? JSON.parse(tamamlananItem) : {}
         syncProgressToSupabase(session.user.id, tamamlanan, parsed).catch(() => {})
       })
-    } catch {
-      // kayıt başarısız
-    }
+    } catch { /* ignore */ }
   }
 
+  const altBaslik = ders ? `${ders}${sinif ? ` · ${sinif}` : ''}` : 'Haftalik plan ayrintisi'
+  const durumMetni = hafta?.tatilMi ? 'Tatil haftasi' : tamamlandi ? 'Tamamlandi' : 'Devam ediyor'
+
   return (
-    <div className="p-4 pb-20 w-full max-w-lg mx-auto">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-6 mt-2">
-        <button
-          onClick={() => navigate(-1)}
-          className="text-gray-400 hover:text-gray-600 transition-colors p-2 -ml-1 rounded-lg hover:bg-gray-100 active:scale-95"
-        >
-          <ChevronLeft size={20} strokeWidth={2.5} />
-        </button>
-        <div>
-          <h1 className="text-2xl font-bold text-[#1C1917]">{no}. Hafta</h1>
-          {ders && <p className="text-sm text-gray-400 font-medium mt-0.5">{ders} · {sinif}</p>}
+    <div className="page-shell">
+      <div className="page-header">
+        <div className="flex items-start gap-3 mb-3">
+          <button
+            onClick={() => navigate(-1)}
+            aria-label="Plan ekranina geri don"
+            className="w-10 h-10 flex items-center justify-center flex-shrink-0 transition-all active:scale-95"
+            style={{
+              borderRadius: 'var(--radius-lg)',
+              border: '1px solid var(--color-border)',
+              backgroundColor: 'var(--color-surface)',
+              color: 'var(--color-text2)',
+              boxShadow: 'var(--shadow-xs)',
+            }}
+          >
+            <ChevronLeft size={18} strokeWidth={2.5} />
+          </button>
+          <div className="flex-1 min-w-0">
+            <p className="text-[11px] font-bold uppercase tracking-[.12em] mb-1" style={{ color: 'var(--color-text3)' }}>Hafta Detayi</p>
+            <h1 className="text-[24px] font-bold tracking-tight mb-1" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text1)' }}>
+              {no}. Hafta
+            </h1>
+            <p className="text-sm" style={{ color: 'var(--color-text2)' }}>{altBaslik}</p>
+          </div>
+          <div
+            className="px-2.5 py-1.5 flex-shrink-0"
+            style={{
+              borderRadius: 'var(--radius-pill)',
+              border: `1px solid ${hafta?.tatilMi ? 'color-mix(in srgb, var(--color-warning) 30%, transparent)' : tamamlandi ? 'color-mix(in srgb, var(--color-success) 30%, transparent)' : 'color-mix(in srgb, var(--color-primary) 25%, transparent)'}`,
+              backgroundColor: hafta?.tatilMi ? 'color-mix(in srgb, var(--color-warning) 10%, transparent)' : tamamlandi ? 'color-mix(in srgb, var(--color-success) 10%, transparent)' : 'color-mix(in srgb, var(--color-primary) 8%, transparent)',
+            }}
+          >
+            <span className="text-[11px] font-bold whitespace-nowrap" style={{ color: hafta?.tatilMi ? 'var(--color-warning)' : tamamlandi ? 'var(--color-success)' : 'var(--color-primary)' }}>
+              {durumMetni}
+            </span>
+          </div>
         </div>
-        {tamamlandi && (
-          <span className="ml-auto flex items-center gap-1 bg-[#059669]/10 text-[#059669] text-xs font-bold px-3 py-1.5 rounded-full border border-[#059669]/30 animate-slide-up">
-            <Check size={12} strokeWidth={3} /> Tamamlandı
-          </span>
-        )}
       </div>
 
-      {/* Tatil haftası */}
-      {hafta?.tatilMi && (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-4 text-center">
-          <p className="text-3xl mb-2">🎉</p>
-          <p className="text-amber-700 font-bold text-lg">{hafta.tatilAdi}</p>
-          <p className="text-amber-500 text-sm mt-1">Tatil Haftası</p>
-        </div>
-      )}
-
-      {/* Kazanım kartı — MEB planı */}
-      {hafta && !hafta.tatilMi && (
-        <Card className="mb-4">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold uppercase tracking-widest bg-gray-100 text-gray-500 px-3 py-1.5 rounded-full">
-              {hafta.donem}. Dönem
-            </span>
-            <span className="text-xs text-gray-400 font-medium">
-              {formatTarih(hafta.baslangicTarihi)} – {formatTarih(hafta.bitisTarihi)}
-            </span>
+      <div className="section-stack">
+        {hafta?.tatilMi && (
+          <div className="px-5 py-5 text-center" style={{ borderRadius: 'var(--radius-xl)', border: '1px solid color-mix(in srgb, var(--color-warning) 28%, transparent)', backgroundColor: 'color-mix(in srgb, var(--color-warning) 8%, transparent)', boxShadow: 'var(--shadow-xs)' }}>
+            <div className="w-12 h-12 flex items-center justify-center mx-auto mb-3" style={{ borderRadius: '999px', backgroundColor: 'color-mix(in srgb, var(--color-warning) 14%, transparent)', color: 'var(--color-warning)' }}>
+              <Sparkles size={18} />
+            </div>
+            <p className="text-sm font-bold mb-1" style={{ color: 'var(--color-warning)' }}>Tatil Haftasi</p>
+            <p className="text-[18px] font-bold tracking-tight" style={{ color: 'var(--color-text1)', fontFamily: 'var(--font-display)' }}>{hafta.tatilAdi}</p>
           </div>
+        )}
 
-          {hafta.uniteAdi && (
-            <span className="inline-block bg-[#2D5BE3]/10 text-[#2D5BE3] text-xs font-semibold px-2.5 py-1 rounded-full mb-3">
-              {hafta.uniteAdi}
-            </span>
+        {hafta && !hafta.tatilMi && (
+          <Card style={{ borderRadius: 'var(--radius-xl)' }}>
+            <SectionHeader title="Haftanin Icerigi" meta={`${hafta.donem}. donem`} />
+            <div className="flex items-center justify-between gap-3 mb-4 pb-3" style={{ borderBottom: '1px solid var(--color-border)' }}>
+              <span className="text-[11px] font-bold uppercase tracking-[.1em] px-2.5 py-1 rounded-full" style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', color: 'var(--color-primary)' }}>
+                {hafta.donem}. Donem
+              </span>
+              <span className="text-xs font-medium" style={{ color: 'var(--color-text3)' }}>
+                {formatTarih(hafta.baslangicTarihi)} - {formatTarih(hafta.bitisTarihi)}
+              </span>
+            </div>
+            {hafta.uniteAdi && (
+              <span className="inline-block text-xs font-semibold px-2.5 py-1 rounded-full mb-3" style={{ backgroundColor: 'color-mix(in srgb, var(--color-pop) 10%, transparent)', color: 'var(--color-pop)' }}>
+                {hafta.uniteAdi}
+              </span>
+            )}
+            <p className="text-[17px] font-bold leading-snug mb-2" style={{ color: 'var(--color-text1)' }}>{hafta.kazanim || 'Bu hafta icin kazanim girilmemis.'}</p>
+            {hafta.kazanimDetay && <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text2)' }}>{hafta.kazanimDetay}</p>}
+          </Card>
+        )}
+
+        {uploadedRow && (
+          <Card style={{ borderRadius: 'var(--radius-xl)' }}>
+            <SectionHeader title="Yuklenen Satir" meta={uploadedRow.donem || 'Ekstra'} />
+            {uploadedRow.tarihAraligi && <p className="text-xs font-medium mb-3" style={{ color: 'var(--color-text3)' }}>{uploadedRow.tarihAraligi}</p>}
+            <p className="text-[17px] font-bold leading-snug" style={{ color: 'var(--color-text1)' }}>{uploadedRow.kazanim}</p>
+          </Card>
+        )}
+
+        <div className="sticky-action-bar">
+          <button
+            onClick={handleTamamlaToggle}
+            onAnimationEnd={() => setTamamlaAnimating(false)}
+            className={`w-full py-3.5 flex items-center justify-center gap-2 font-bold text-sm transition-all active:scale-95 ${tamamlaAnimating ? 'animate-pop-in' : ''}`}
+            style={{
+              borderRadius: 'var(--radius-pill)',
+              border: tamamlandi ? '1px solid color-mix(in srgb, var(--color-success) 30%, transparent)' : '1px solid color-mix(in srgb, var(--color-pop) 30%, transparent)',
+              backgroundColor: tamamlandi ? 'color-mix(in srgb, var(--color-success) 10%, transparent)' : 'var(--color-pop)',
+              color: tamamlandi ? 'var(--color-success)' : '#ffffff',
+              boxShadow: tamamlandi ? 'none' : 'var(--shadow-sm)',
+            }}
+          >
+            <Check size={16} strokeWidth={3} />
+            {tamamlandi ? 'Tamamlandi - geri al' : 'Haftayi Tamamladim'}
+          </button>
+          {!tamamlandi && (
+            <p className="text-center text-xs mt-2" style={{ color: 'var(--color-text3)' }}>
+              Once haftayi gozden gecir, sonra tamamlandi olarak isaretle.
+            </p>
           )}
+        </div>
 
-          {hafta.kazanim ? (
-            <>
-              <p className="font-bold text-[#2D5BE3] text-base leading-snug mb-2">
-                {hafta.kazanim}
-              </p>
-              {hafta.kazanimDetay && (
-                <p className="text-gray-500 text-sm leading-relaxed">
-                  {hafta.kazanimDetay}
-                </p>
-              )}
-            </>
-          ) : (
-            <p className="text-gray-400 text-sm italic">Bu hafta için kazanım girilmemiş.</p>
-          )}
-        </Card>
-      )}
-
-      {/* Kazanım kartı — yüklenen plan */}
-      {uploadedRow && (
-        <Card className="mb-4">
-          {uploadedRow.donem && (
-            <span className="inline-block text-xs font-bold uppercase tracking-widest bg-gray-100 text-gray-500 px-3 py-1.5 rounded-full mb-3">
-              {uploadedRow.donem}
-            </span>
-          )}
-          {uploadedRow.tarihAraligi && (
-            <p className="text-xs text-gray-400 font-medium mb-3">{uploadedRow.tarihAraligi}</p>
-          )}
-          <p className="font-bold text-[#2D5BE3] text-base leading-snug">
-            {uploadedRow.kazanim}
-          </p>
-        </Card>
-      )}
-
-      {/* Plan yoksa */}
-      {!hafta && !uploadedRow && (
-        <Card className="mb-4 text-center">
-          <p className="text-gray-400 text-sm">Bu hafta için plan bilgisi bulunamadı.</p>
-        </Card>
-      )}
-
-      {/* Tamamlandı butonu */}
-      <button
-        onClick={handleTamamlaToggle}
-        onAnimationEnd={() => setTamamlaAnimating(false)}
-        className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all active:scale-95 mb-4 flex items-center justify-center gap-2 ${
-          tamamlandi
-            ? 'bg-[#059669]/10 text-[#059669] border-2 border-[#059669]/30 hover:bg-[#059669]/20'
-            : 'bg-[#F59E0B] text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:opacity-90'
-        } ${tamamlaAnimating ? 'animate-pop-in' : ''}`}
-      >
-        {tamamlandi
-          ? <><Check size={16} strokeWidth={3} /> Tamamlandı — geri al</>
-          : <>Haftayı Tamamladım <Check size={16} strokeWidth={3} /></>
-        }
-      </button>
-      {!tamamlandi && (
-        <p className="text-center text-xs text-gray-400 -mt-3 mb-4">Haftayı tamamlayınca işaretle</p>
-      )}
-      {/* Önceki / Sonraki hafta navigasyonu */}
-      {tumHaftaNoları.length > 1 && (() => {
-        const sorted = [...tumHaftaNoları].sort((a, b) => a - b)
-        const idx = sorted.indexOf(no)
-        const prev = idx > 0 ? sorted[idx - 1] : null
-        const next = idx < sorted.length - 1 ? sorted[idx + 1] : null
-        return (
-          <div className="flex gap-3 mb-4">
-            {prev !== null ? (
-              <button
-                onClick={() => navigate(`/app/hafta/${prev}`)}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-[#E7E5E4] bg-[#FAFAF9] text-sm font-bold text-gray-500 hover:border-gray-300 active:scale-95 transition-all"
-              >
-                ← {prev}. Hafta
-              </button>
-            ) : <div className="flex-1" />}
-            {next !== null ? (
-              <button
-                onClick={() => navigate(`/app/hafta/${next}`)}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-[#E7E5E4] bg-[#FAFAF9] text-sm font-bold text-gray-500 hover:border-gray-300 active:scale-95 transition-all"
-              >
-                {next}. Hafta →
-              </button>
-            ) : <div className="flex-1" />}
+        <Card style={{ borderRadius: 'var(--radius-xl)' }}>
+          <SectionHeader title="Ogretmen Notu" meta={kaydedildi ? 'Kaydedildi' : 'Otomatik kayit'} />
+          <div className="flex items-start gap-2 mb-3">
+            <div className="w-8 h-8 flex items-center justify-center" style={{ borderRadius: 'var(--radius-md)', backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', color: 'var(--color-primary)' }}>
+              <NotebookPen size={15} />
+            </div>
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text2)' }}>
+              Not alanini ikinci adim olarak kullan. Once haftayi tamamla, sonra gozlem veya hatirlatma notunu birak.
+            </p>
           </div>
-        )
-      })()}
+          <textarea
+            value={not}
+            onChange={(e) => handleNotChange(e.target.value)}
+            rows={4}
+            placeholder="Bu haftayla ilgili not ekle..."
+            className="w-full p-3 text-sm transition-all resize-none"
+            style={{
+              borderRadius: 'var(--radius-lg)',
+              border: '1px solid var(--color-border)',
+              backgroundColor: 'var(--color-bg)',
+              color: 'var(--color-text1)',
+              outline: 'none',
+            }}
+          />
+        </Card>
 
-      {/* Öğretmen notu */}
-      <Card>
-        <div className="flex items-center justify-between mb-2">
-          <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider">
-            Notlarım
-          </label>
-        </div>
-        <textarea
-          value={not}
-          onChange={(e) => handleNotChange(e.target.value)}
-          rows={4}
-          placeholder="Bu haftayla ilgili not ekle..."
-          className="w-full border border-[#E7E5E4] rounded-xl p-3 text-sm text-[#1C1917] bg-[#FAFAF9] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/20 focus:border-[#F59E0B] transition-all resize-none"
-        />
-        <div className="flex justify-end mt-1.5 h-4">
-          {kaydedildi && (
-            <span className="text-xs text-green-600 font-medium">✓ Kaydedildi</span>
-          )}
-        </div>
-      </Card>
+        {tumHaftaNolari.length > 1 && (() => {
+          const sorted = [...tumHaftaNolari].sort((a, b) => a - b)
+          const idx = sorted.indexOf(no)
+          const prev = idx > 0 ? sorted[idx - 1] : null
+          const next = idx < sorted.length - 1 ? sorted[idx + 1] : null
+          return (
+            <div>
+              <SectionHeader title="Hafta Gecisi" meta="Ikincil gezinti" />
+              <div className="flex gap-3">
+                {prev !== null ? <GecisButonu hedefNo={prev} yon="onceki" onClick={() => navigate(`/app/hafta/${prev}`)} /> : <div className="flex-1" />}
+                {next !== null ? <GecisButonu hedefNo={next} yon="sonraki" onClick={() => navigate(`/app/hafta/${next}`)} /> : <div className="flex-1" />}
+              </div>
+            </div>
+          )
+        })()}
+      </div>
     </div>
   )
 }

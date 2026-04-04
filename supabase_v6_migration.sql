@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS kullanicilar (
   brans_id      TEXT,
   okul          TEXT,
   il            TEXT,
-  jeton         INTEGER DEFAULT 5 CHECK (jeton >= 0),
+  uretim_hakki  INTEGER DEFAULT 5 CHECK (uretim_hakki >= 0),
   created_at    TIMESTAMPTZ DEFAULT now(),
   updated_at    TIMESTAMPTZ DEFAULT now()
 );
@@ -51,7 +51,7 @@ CREATE INDEX idx_kullanici_dersler_kullanici
 -- ═══════════════════════════════════
 -- 3. JETON İŞLEMLERİ
 -- ═══════════════════════════════════
-CREATE TABLE IF NOT EXISTS jeton_islemleri (
+CREATE TABLE IF NOT EXISTS uretim_hakki_islemleri (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   kullanici_id  UUID REFERENCES kullanicilar(id) ON DELETE CASCADE NOT NULL,
   miktar        INTEGER NOT NULL, -- pozitif: ekle, negatif: harca
@@ -63,17 +63,17 @@ CREATE TABLE IF NOT EXISTS jeton_islemleri (
   created_at    TIMESTAMPTZ DEFAULT now()
 );
 
-ALTER TABLE jeton_islemleri ENABLE ROW LEVEL SECURITY;
+ALTER TABLE uretim_hakki_islemleri ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Kendi jeton geçmişini gör" ON jeton_islemleri
+CREATE POLICY "Kendi uretim hakki gecmisini gor" ON uretim_hakki_islemleri
   FOR SELECT USING (auth.uid() = kullanici_id);
 
--- Sistem jeton ekleyebilir (INSERT için service role)
-CREATE POLICY "Sistem jeton ekleyebilir" ON jeton_islemleri
+-- Sistem uretim hakki ekleyebilir (INSERT için service role)
+CREATE POLICY "Sistem uretim hakki ekleyebilir" ON uretim_hakki_islemleri
   FOR INSERT WITH CHECK (auth.uid() = kullanici_id);
 
-CREATE INDEX idx_jeton_islemleri_kullanici
-  ON jeton_islemleri(kullanici_id);
+CREATE INDEX idx_uretim_hakki_islemleri_kullanici
+  ON uretim_hakki_islemleri(kullanici_id);
 
 -- ═══════════════════════════════════
 -- 4. SINAVLAR
@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS sinavlar (
   soru_sayisi     INTEGER DEFAULT 10,
   zorluk          TEXT DEFAULT 'orta' CHECK (zorluk IN ('kolay', 'orta', 'zor')),
   icerik          JSONB,  -- { sorular: [{soru, secenekler, dogru, aciklama}] }
-  jeton_harcandi  INTEGER DEFAULT 1,
+  uretim_hakki_harcandi INTEGER DEFAULT 1,
   created_at      TIMESTAMPTZ DEFAULT now()
 );
 

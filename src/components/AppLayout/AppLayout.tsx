@@ -7,10 +7,10 @@ interface AppLayoutProps {
 }
 
 const TABS = [
-  { name: 'Ana',    path: '/app',         icon: Home,         exact: true  },
-  { name: 'Planla', path: '/app/plan',    icon: CalendarDays, exact: false },
-  { name: 'Dosyam', path: '/app/dosyam',  icon: FolderOpen,   exact: false },
-  { name: 'Üret',   path: '/app/uret',    icon: Sparkles,     exact: false },
+  { name: 'Ana', path: '/app', icon: Home, exact: true },
+  { name: 'Planla', path: '/app/plan', icon: CalendarDays, exact: false },
+  { name: 'Dosyam', path: '/app/dosyam', icon: FolderOpen, exact: false },
+  { name: 'Uret', path: '/app/uret', icon: Sparkles, exact: false },
 ]
 
 function isTabActive(tab: typeof TABS[number], pathname: string) {
@@ -26,15 +26,32 @@ export function AppLayout({ children }: AppLayoutProps) {
   const location = useLocation()
 
   return (
-    <div className="min-h-screen font-sans flex justify-center" style={{ backgroundColor: 'var(--color-bg2, #ededea)' }}>
-      <div className="w-full max-w-lg min-h-screen relative flex flex-col" style={{ backgroundColor: 'var(--color-bg, #f5f5f2)', boxShadow: 'var(--shadow-md)' }}>
+    <div
+      className="min-h-screen font-sans flex justify-center"
+      style={{
+        background:
+          'radial-gradient(circle at top, color-mix(in srgb, var(--color-primary) 8%, transparent) 0%, transparent 34%), var(--color-bg2, #ededea)',
+      }}
+    >
+      <div
+        className="w-full max-w-lg min-h-screen relative flex flex-col overflow-hidden"
+        style={{
+          backgroundColor: 'var(--color-bg, #f5f5f2)',
+          boxShadow: 'var(--shadow-md)',
+        }}
+      >
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(180deg, color-mix(in srgb, var(--color-surface) 42%, transparent) 0%, transparent 18%)',
+          }}
+        />
 
-        {/* MAIN — header yok, her ekranın kendi topbar'ı var */}
-        <main key={location.pathname} className="flex-1 overflow-y-auto pb-[72px] animate-fade-in">
+        <main key={location.pathname} className="relative flex-1 overflow-y-auto pb-[72px] animate-fade-in">
           {children}
         </main>
 
-        {/* BOTTOM NAV */}
         <nav
           className="fixed bottom-0 w-full max-w-lg z-50 flex items-center px-1"
           style={{
@@ -42,6 +59,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             background: 'linear-gradient(180deg, color-mix(in srgb, var(--color-surface) 92%, var(--color-bg)) 0%, var(--color-surface) 100%)',
             borderTop: '1px solid var(--color-border)',
             paddingBottom: '8px',
+            backdropFilter: 'blur(12px)',
           }}
         >
           {TABS.map((tab) => {
@@ -52,9 +70,11 @@ export function AppLayout({ children }: AppLayoutProps) {
                 key={tab.path}
                 onClick={() => navigate(tab.path, { replace: active })}
                 className="flex-1 flex flex-col items-center gap-[3px] px-1 py-2 transition-all duration-150 active:scale-90"
-                style={{ borderRadius: '12px' }}
+                style={{
+                  borderRadius: '12px',
+                  backgroundColor: active ? 'color-mix(in srgb, var(--color-primary) 7%, transparent)' : 'transparent',
+                }}
               >
-                {/* Aktif nokta göstergesi */}
                 <div className="relative">
                   <Icon
                     size={20}
@@ -82,7 +102,6 @@ export function AppLayout({ children }: AppLayoutProps) {
             )
           })}
         </nav>
-
       </div>
     </div>
   )

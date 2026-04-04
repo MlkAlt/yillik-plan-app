@@ -1,4 +1,4 @@
-const CACHE_NAME = 'yillik-plan-v3';
+const CACHE_NAME = 'yillik-plan-v4-ux-refresh';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -41,5 +41,16 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  event.respondWith(fetch(event.request));
+  event.respondWith(
+    fetch(event.request).catch(() => {
+      if (event.request.mode === 'navigate') {
+        return Response.redirect('/app');
+      }
+
+      return new Response('', {
+        status: 503,
+        statusText: 'Service Unavailable',
+      });
+    })
+  );
 });

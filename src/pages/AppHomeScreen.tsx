@@ -1,18 +1,18 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Bell, User, ChevronRight, Plus, Upload } from 'lucide-react';
-import type { OlusturulmusPlan } from '../types/takvim';
-import type { PlanEntry } from '../types/planEntry';
-import { showKazanimBildirimi } from '../lib/notifications';
-import { getYilSecenekleri } from '../lib/dersSinifMap';
-import { BottomSheet } from '../components/UI/BottomSheet';
-import { PlanSelector } from '../components/PlanSelector';
-import { BosdurumuEkrani } from '../components/BosdurumuEkrani/BosdurumuEkrani';
-import { StorageKeys } from '../lib/storageKeys';
-import { useToast } from '../lib/toast';
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Bell, CalendarDays, ChevronRight, FolderOpen, User } from 'lucide-react'
+import type { OlusturulmusPlan } from '../types/takvim'
+import type { PlanEntry } from '../types/planEntry'
+import { showKazanimBildirimi } from '../lib/notifications'
+import { getSession } from '../lib/auth'
+import { syncProgressToSupabase } from '../lib/planSync'
+import { BosdurumuEkrani } from '../components/BosdurumuEkrani/BosdurumuEkrani'
+import { StorageKeys } from '../lib/storageKeys'
+import { useToast } from '../lib/toast'
+import { SectionHeader } from '../components/UI/SectionHeader'
 
-function formatTarihKisa(isoTarih: string): string {
-  const aylar = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara']
+function formatTarihKisa(isoTarih: string) {
+  const aylar = ['Oca', 'Sub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Agu', 'Eyl', 'Eki', 'Kas', 'Ara']
   const d = new Date(isoTarih)
   return `${d.getDate()} ${aylar[d.getMonth()]}`
 }
@@ -28,17 +28,16 @@ function sonrakiHaftayiAl(plan: OlusturulmusPlan) {
 }
 
 interface AppHomeScreenProps {
-  planlar: PlanEntry[];
-  onPlanEkle: (entries: PlanEntry[]) => void;
-  onSinifSec: (sinif: string) => void;
-  syncing?: boolean;
-  tamamlananlar?: Record<string, number[]>;
+  planlar: PlanEntry[]
+  onPlanEkle: (entries: PlanEntry[]) => void
+  onSinifSec: (sinif: string) => void
+  syncing?: boolean
+  tamamlananlar?: Record<string, number[]>
 }
 
 export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamamlananlar: tamamlananlarProp }: AppHomeScreenProps) {
   const navigate = useNavigate()
   const { goster } = useToast()
-  const [planSelectorAcik, setPlanSelectorAcik] = useState(false)
 
   const [ogretmenAd] = useState(() => {
     try {
@@ -70,7 +69,7 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
   const tamamlananlar = tamamlananlarProp ?? tamamlananlarLocal
 
   useEffect(() => {
-    if (syncing) goster('Planlar buluttan güncelleniyor...', 'bilgi', 4000)
+    if (syncing) goster('Planlar buluttan guncelleniyor...', 'bilgi', 3000)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [syncing])
 
@@ -108,470 +107,244 @@ export function AppHomeScreen({ planlar, onPlanEkle, onSinifSec, syncing, tamaml
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [planlar.length])
 
-  // Karşılama metni
   const saat = new Date().getHours()
-  let mesaj = 'İyi geceler'
-  if (saat >= 6 && saat < 12) mesaj = 'Günaydın'
-  else if (saat >= 12 && saat < 17) mesaj = 'İyi günler'
-  else if (saat >= 17 && saat < 21) mesaj = 'İyi akşamlar'
+  let mesaj = 'Iyi geceler'
+  if (saat >= 6 && saat < 12) mesaj = 'Gunaydin'
+  else if (saat >= 12 && saat < 17) mesaj = 'Iyi gunler'
+  else if (saat >= 17 && saat < 21) mesaj = 'Iyi aksamlar'
 
-  // Bu haftanın tarih aralığı (ilk plandan)
-  const buHaftaAralik = (() => {
-    const ilk = planlar[0]?.plan
-    if (!ilk) return ''
-    const h = bugunHaftasiniAl(ilk)
-    if (!h) return ''
-    return `${formatTarihKisa(h.baslangicTarihi)} – ${formatTarihKisa(h.bitisTarihi)}`
-  })()
-
-  // Bu hafta kazanım satırları (her plan için bir satır)
-  const kazanimSatirlari = planlar
+  const bugunKartlari = planlar
     .filter(p => p.plan)
     .map(p => {
       const h = bugunHaftasiniAl(p.plan!)
       const sonraki = !h ? sonrakiHaftayiAl(p.plan!) : null
-      const tamamlandi = h ? (tamamlananlar[p.sinif] || []).includes(h.haftaNo) : false
+      const aktifHafta = h ?? sonraki
+      const tamamlandi = aktifHafta ? (tamamlananlar[p.sinif] || []).includes(aktifHafta.haftaNo) : false
       return {
         sinif: p.label || p.sinif,
         ders: p.ders,
-        kazanim: h?.kazanim || (h?.tatilMi ? h.tatilAdi : '') || sonraki?.kazanim || '',
-        haftaNo: h?.haftaNo ?? sonraki?.haftaNo ?? null,
-        tatilMi: h?.tatilMi ?? false,
-        geleceK: !h,
+        kazanim: aktifHafta?.kazanim || (aktifHafta?.tatilMi ? aktifHafta.tatilAdi : '') || 'Kazanim girilmemis',
+        haftaNo: aktifHafta?.haftaNo ?? null,
+        tarih: aktifHafta ? `${formatTarihKisa(aktifHafta.baslangicTarihi)} - ${formatTarihKisa(aktifHafta.bitisTarihi)}` : '',
+        tatilMi: aktifHafta?.tatilMi ?? false,
+        gelecek: !h,
         tamamlandi,
         entry: p,
       }
     })
 
+  const sonrakiGorev = bugunKartlari.find(item => !item.tatilMi && !item.tamamlandi) ?? bugunKartlari[0] ?? null
+
+  async function handleTamamlaToggle(entry: PlanEntry, haftaNo: number | null) {
+    if (!haftaNo) return
+    try {
+      const mevcut = localStorage.getItem(StorageKeys.TAMAMLANAN_HAFTALAR)
+      const parsed = mevcut ? JSON.parse(mevcut) : {}
+      const eskiListe: number[] = Array.isArray(parsed) ? parsed : (parsed[entry.sinif] || [])
+      const tamamlandi = eskiListe.includes(haftaNo)
+      const yeniListe = tamamlandi ? eskiListe.filter(n => n !== haftaNo) : [...eskiListe, haftaNo]
+      const yeniParsed = Array.isArray(parsed) ? { [entry.sinif]: yeniListe } : { ...parsed, [entry.sinif]: yeniListe }
+      localStorage.setItem(StorageKeys.TAMAMLANAN_HAFTALAR, JSON.stringify(yeniParsed))
+      setTamamlananlarLocal(yeniParsed)
+
+      const session = await getSession()
+      if (session) {
+        const notlarItem = localStorage.getItem(StorageKeys.HAFTA_NOTLARI)
+        const notlar = notlarItem ? JSON.parse(notlarItem) : {}
+        syncProgressToSupabase(session.user.id, yeniParsed, notlar).catch(() => {})
+      }
+
+      goster(tamamlandi ? 'Tamamlandi isareti kaldirildi' : 'Kazanim tamamlandi olarak isaretlendi', 'basari')
+    } catch {
+      goster('Islem tamamlanamadi', 'hata')
+    }
+  }
+
   return (
-    <div className="pb-8 w-full max-w-lg mx-auto">
+    <div className="page-shell">
+      <div className="page-header stagger-1">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold" style={{ color: 'var(--color-text3)', marginBottom: '2px' }}>
+              {mesaj}
+            </p>
+            <p
+              className="font-bold tracking-tight leading-tight"
+              style={{ fontFamily: 'var(--font-display)', fontSize: '26px', color: 'var(--color-text1)', letterSpacing: '-.03em' }}
+            >
+              {ogretmenAd ? `${ogretmenAd} Hoca` : 'Ogretmen Yaver'}
+            </p>
+          </div>
 
-      {/* ── TOPBAR ── */}
-      <div
-        className="px-[18px] pt-[10px] pb-3 flex items-center justify-between"
-      >
-        <div>
-          <p
-            className="text-xs font-semibold"
-            style={{ color: 'var(--color-text3)', marginBottom: '2px' }}
-          >
-            {mesaj}{ogretmenAd ? '' : ' 👋'}
-          </p>
-          <p
-            className="font-bold tracking-tight leading-tight"
-            style={{ fontFamily: 'var(--font-display)', fontSize: '26px', color: 'var(--color-text1)', letterSpacing: '-.03em' }}
-          >
-            {ogretmenAd ? `${ogretmenAd} Hoca` : 'Öğretmen Yaver'}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            className="w-[33px] h-[33px] rounded-full flex items-center justify-center relative transition-all active:scale-90"
-            style={{
-              backgroundColor: 'var(--color-surface)',
-              border: '1px solid var(--color-border)',
-              boxShadow: 'var(--shadow-xs)',
-            }}
-          >
-            <Bell size={15} style={{ color: 'var(--color-text2)' }} />
-            {/* bildirim noktası */}
-            <span
-              className="absolute top-[5px] right-[5px] w-[7px] h-[7px] rounded-full"
-              style={{
-                backgroundColor: 'var(--color-danger)',
-                border: '1.5px solid var(--color-bg)',
-              }}
-            />
-          </button>
-          <button
-            className="w-[33px] h-[33px] rounded-full flex items-center justify-center transition-all active:scale-90"
-            style={{
-              backgroundColor: 'var(--color-surface)',
-              border: '1px solid var(--color-border)',
-              boxShadow: 'var(--shadow-xs)',
-            }}
-          >
-            <User size={15} style={{ color: 'var(--color-text2)' }} />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              aria-label="Bildirimler"
+              className="w-[40px] h-[40px] rounded-full flex items-center justify-center relative transition-all active:scale-95"
+              style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-xs)' }}
+            >
+              <Bell size={16} style={{ color: 'var(--color-text2)' }} />
+              <span className="absolute top-[8px] right-[8px] w-[7px] h-[7px] rounded-full" style={{ backgroundColor: 'var(--color-danger)', border: '1.5px solid var(--color-bg)' }} />
+            </button>
+
+            <button
+              type="button"
+              aria-label="Profil ve ayarlar"
+              onClick={() => navigate('/app/ayarlar')}
+              className="h-[40px] rounded-full flex items-center justify-center gap-2 px-3 transition-all active:scale-95"
+              style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-xs)' }}
+            >
+              <User size={15} style={{ color: 'var(--color-primary)' }} />
+              <span className="text-[12px] font-bold" style={{ color: 'var(--color-text1)' }}>Ayarlar</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="px-4 flex flex-col gap-3">
-
-        {/* ── PLAN YOK → Onboarding overlay (portal, blur arkaplanlı) ── */}
-
-        {planlar.length === 0 && (
-          <BosdurumuEkrani
-            onTamamla={entries => {
-              localStorage.setItem(StorageKeys.ONBOARDING_TAMAMLANDI, '1')
-              onPlanEkle(entries)
-              onSinifSec(entries[0].sinif)
-              navigate('/app/plan')
-            }}
-          />
-        )}
-
-        {planlar.length > 0 && (
-          <>
-            {/* ── ACİL KART ── */}
-            <div
-              className="px-4 py-3.5 card-lift stagger-1"
-              style={{
-                borderRadius: 'var(--radius-xl)',
-                backgroundColor: 'var(--color-warning-s)',
-                border: '1px solid var(--color-warning-b)',
-              }}
-            >
-              <p
-                className="text-[10px] font-bold uppercase tracking-[.1em] mb-1"
-                style={{ color: 'var(--color-warning)' }}
-              >
-                Acil
-              </p>
-              <p className="text-[15px] font-bold mb-0.5" style={{ color: 'var(--color-text1)' }}>
-                Not girişi son gün yaklaşıyor
-              </p>
-              <p className="text-xs mb-2.5" style={{ color: 'var(--color-text2)' }}>
-                2 gün kaldı · Tamamlanmamış sınıflar var
-              </p>
-              <span
-                className="inline-flex items-center text-xs font-bold px-2.5 py-1 rounded-full"
-                style={{
-                  backgroundColor: 'color-mix(in srgb, var(--color-warning) 15%, transparent)',
-                  color: 'var(--color-warning)',
-                }}
-              >
-                Şimdi Tamamla →
-              </span>
-            </div>
-
-            {/* ── TASARRUF KARTI ── */}
-            <div
-              className="relative overflow-hidden stagger-2"
-              style={{
-                borderRadius: 'var(--radius-xl)',
-                backgroundColor: 'var(--color-surface)',
-                border: '1px solid var(--color-border)',
-                boxShadow: 'var(--shadow-sm)',
-                padding: '18px',
-              }}
-            >
-              {/* Üst şerit: blue → indigo */}
-              <div
-                className="absolute top-0 left-0 right-0 h-[3px]"
-                style={{
-                  background: 'linear-gradient(90deg, var(--color-primary), #818cf8)',
-                  borderRadius: 'var(--radius-xl) var(--radius-xl) 0 0',
-                }}
-              />
-              <div className="flex justify-between items-start mb-3 mt-1">
-                <div>
-                  <p
-                    className="text-[10px] font-bold uppercase tracking-[.1em] mb-1"
-                    style={{ color: 'var(--color-text3)' }}
-                  >
-                    Bu ay tasarruf
-                  </p>
-                  <p
-                    className="font-bold leading-none mb-1"
-                    style={{
-                      fontFamily: 'var(--font-display)',
-                      fontSize: '48px',
-                      color: 'var(--color-pop)',
-                      letterSpacing: '-.04em',
-                      animation: 'count-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both',
-                    }}
-                  >
-                    {planlar.length > 0
-                      ? Math.round(planlar.reduce((acc, p) => {
-                          const done = (tamamlananlar[p.sinif] || []).length
-                          return acc + done * 0.5
-                        }, 0) * 10) / 10
-                      : 0}
-                  </p>
-                  <p className="text-sm font-medium" style={{ color: 'var(--color-text2)' }}>
-                    saat geri aldınız
-                  </p>
-                </div>
-                <div
-                  className="px-2.5 py-1.5 h-fit"
-                  style={{
-                    borderRadius: 'var(--radius-pill)',
-                    backgroundColor: 'var(--color-success-s)',
-                    border: '1px solid var(--color-success-b)',
-                  }}
-                >
-                  <span className="text-[11px] font-bold" style={{ color: '#047857' }}>
-                    ↑ Kazanılan
-                  </span>
-                </div>
-              </div>
-              <div
-                className="flex pt-3"
-                style={{ borderTop: '1px solid var(--color-border)' }}
-              >
-                {[
-                  { sayi: planlar.length, etiket: 'Ders planı' },
-                  {
-                    sayi: planlar.reduce((acc, p) => acc + (tamamlananlar[p.sinif] || []).length, 0),
-                    etiket: 'Tamamlanan',
-                  },
-                  {
-                    sayi: planlar.reduce((acc, p) => {
-                      const total = p.plan?.haftalar.filter(h => !h.tatilMi).length || 0
-                      const done = (tamamlananlar[p.sinif] || []).length
-                      return acc + Math.max(0, total - done)
-                    }, 0),
-                    etiket: 'Kalan hafta',
-                  },
-                ].map((item, i) => (
-                  <div
-                    key={i}
-                    className="flex-1 text-center"
-                    style={i > 0 ? { borderLeft: '1px solid var(--color-border)' } : {}}
-                  >
-                    <p
-                      className="font-bold"
-                      style={{ fontFamily: 'var(--font-display)', fontSize: '16px', color: 'var(--color-text1)', letterSpacing: '-.02em' }}
-                    >
-                      {item.sayi}
-                    </p>
-                    <p className="text-[10px] font-semibold mt-0.5" style={{ color: 'var(--color-text3)' }}>
-                      {item.etiket}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* ── BU HAFTA WİDGET ── */}
-            <div className="stagger-3">
-              <p
-                className="text-[11px] font-bold uppercase tracking-[.1em] mb-2"
-                style={{ color: 'var(--color-text3)' }}
-              >
-                Bu Hafta{buHaftaAralik ? ` · ${buHaftaAralik}` : ''}
-              </p>
-              <div
-                style={{
-                  borderRadius: 'var(--radius-xl)',
-                  backgroundColor: 'var(--color-surface)',
-                  border: '1px solid var(--color-border)',
-                  boxShadow: 'var(--shadow-sm)',
-                  overflow: 'hidden',
-                }}
-              >
-                {/* Kart başlığı */}
-                <div
-                  className="flex justify-between items-center px-4 py-3"
-                  style={{ borderBottom: '1px solid var(--color-border)' }}
-                >
-                  <span className="text-sm font-bold" style={{ color: 'var(--color-text1)' }}>
-                    Dersler & Kazanımlar
-                  </span>
-                  {kazanimSatirlari[0]?.haftaNo && (
-                    <span className="text-xs font-bold" style={{ color: 'var(--color-primary)' }}>
-                      {kazanimSatirlari[0].haftaNo}. Hafta
-                    </span>
-                  )}
-                </div>
-
-                {/* Kazanım satırları */}
-                {kazanimSatirlari.length === 0 ? (
-                  <div className="px-4 py-4">
-                    <p className="text-sm" style={{ color: 'var(--color-text3)' }}>Plan dönemi dışı</p>
-                  </div>
-                ) : (
-                  kazanimSatirlari.map((satir, i) => (
-                    <button
-                      key={i}
-                      onClick={() => { onSinifSec(satir.entry.sinif); navigate('/app/plan') }}
-                      className="w-full flex items-start gap-3 px-4 py-[11px] text-left transition-all active:opacity-70"
-                      style={
-                        i < kazanimSatirlari.length - 1
-                          ? { borderBottom: '1px solid var(--color-border)' }
-                          : {}
-                      }
-                    >
-                      {/* Sınıf etiketi */}
-                      <div className="min-w-[40px] flex-shrink-0">
-                        <p
-                          className="text-[10px] font-bold uppercase tracking-[.04em]"
-                          style={{ color: 'var(--color-text3)' }}
-                        >
-                          Sınıf
-                        </p>
-                        <p
-                          className="font-bold"
-                          style={{ fontFamily: 'var(--font-display)', fontSize: '15px', color: 'var(--color-text1)' }}
-                        >
-                          {satir.sinif.replace(/[^0-9A-Za-z-]/g, '').slice(0, 4)}
-                        </p>
-                      </div>
-                      {/* Ders + kazanım */}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-bold mb-0.5 truncate" style={{ color: 'var(--color-text1)' }}>
-                          {satir.ders}
-                          {satir.sinif !== satir.entry.sinif ? ` · ${satir.sinif}` : ` · ${satir.sinif}`}
-                        </p>
-                        <p
-                          className="text-[11px] leading-relaxed line-clamp-2"
-                          style={{ color: 'var(--color-text2)' }}
-                        >
-                          {satir.tatilMi
-                            ? `🎉 ${satir.kazanim}`
-                            : satir.kazanim || 'Kazanım girilmemiş'}
-                        </p>
-                      </div>
-                      {/* Durum noktası */}
-                      <div
-                        className="w-2 h-2 rounded-full flex-shrink-0 mt-1"
-                        style={{
-                          backgroundColor: satir.tatilMi
-                            ? 'var(--color-warning)'
-                            : satir.tamamlandi
-                            ? 'var(--color-success)'
-                            : satir.geleceK
-                            ? 'var(--color-border2)'
-                            : 'var(--color-warning)',
-                        }}
-                      />
-                    </button>
-                  ))
-                )}
-              </div>
-            </div>
-
-            {/* ── YAKLAŞAN ── */}
-            <div className="stagger-4">
-              <p
-                className="text-[11px] font-bold uppercase tracking-[.1em] mb-2"
-                style={{ color: 'var(--color-text3)' }}
-              >
-                Yaklaşan
-              </p>
-              <div className="flex gap-2 overflow-x-auto pb-0.5 -mx-0.5 px-0.5">
-                {[
-                  { ad: 'Not Girişi', gun: 2, renk: 'var(--color-danger)' },
-                  { ad: 'ZHA Tutanak', gun: 5, renk: 'var(--color-warning)' },
-                  { ad: 'Yazılı Sınav', gun: 12, renk: 'var(--color-success)' },
-                  { ad: 'Karne', gun: 28, renk: 'var(--color-success)' },
-                ].map(item => (
-                  <div
-                    key={item.ad}
-                    className="flex-shrink-0 cursor-pointer transition-all active:scale-95"
-                    style={{
-                      minWidth: '88px',
-                      padding: '12px 10px',
-                      borderRadius: 'var(--radius-lg)',
-                      backgroundColor: 'var(--color-surface)',
-                      border: '1px solid var(--color-border)',
-                      boxShadow: 'var(--shadow-xs)',
-                    }}
-                  >
-                    <p className="text-[11px] font-bold mb-1" style={{ color: 'var(--color-text2)' }}>
-                      {item.ad}
-                    </p>
-                    <p
-                      className="font-bold leading-none"
-                      style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: item.renk, letterSpacing: '-.02em' }}
-                    >
-                      {item.gun}
-                    </p>
-                    <p className="text-[10px] font-semibold mt-0.5" style={{ color: 'var(--color-text3)' }}>
-                      gün kaldı
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* ── HIZLI ERİŞİM ── */}
-            <div className="stagger-5">
-              <p
-                className="text-[11px] font-bold uppercase tracking-[.1em] mb-2"
-                style={{ color: 'var(--color-text3)' }}
-              >
-                Hızlı Erişim
-              </p>
-              <div className="flex flex-col gap-2">
-                <button
-                  onClick={() => setPlanSelectorAcik(true)}
-                  className="flex items-center gap-3 px-3.5 py-3 card-lift w-full text-left"
-                  style={{
-                    borderRadius: 'var(--radius-lg)',
-                    backgroundColor: 'var(--color-surface)',
-                    border: '1px solid var(--color-border)',
-                    boxShadow: 'var(--shadow-xs)',
-                  }}
-                >
-                  <div
-                    className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-                    style={{
-                      background: 'linear-gradient(135deg, var(--color-primary-s), var(--color-primary-b))',
-                      border: '2px dashed var(--color-primary-b)',
-                    }}
-                  >
-                    <Plus size={16} style={{ color: 'var(--color-primary)' }} />
-                  </div>
-                  <div className="flex-1 text-left">
-                    <p className="text-[13px] font-bold" style={{ color: 'var(--color-text1)' }}>
-                      Yeni Plan Oluştur
-                    </p>
-                    <p className="text-[11px]" style={{ color: 'var(--color-text2)' }}>
-                      Ders ve sınıf seç, plan hazır
-                    </p>
-                  </div>
-                  <ChevronRight size={15} style={{ color: 'var(--color-text3)' }} />
-                </button>
-                <button
-                  onClick={() => navigate('/app/yukle')}
-                  className="flex items-center gap-3 px-3.5 py-3 card-lift w-full text-left"
-                  style={{
-                    borderRadius: 'var(--radius-lg)',
-                    backgroundColor: 'var(--color-surface)',
-                    border: '1px solid var(--color-border)',
-                    boxShadow: 'var(--shadow-xs)',
-                  }}
-                >
-                  <div
-                    className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-                    style={{
-                      background: 'linear-gradient(135deg, var(--color-success-s), var(--color-success-b))',
-                      border: '2px dashed var(--color-success-b)',
-                    }}
-                  >
-                    <Upload size={16} style={{ color: 'var(--color-success)' }} />
-                  </div>
-                  <div className="flex-1 text-left">
-                    <p className="text-[13px] font-bold" style={{ color: 'var(--color-text1)' }}>
-                      Dosya Yükle
-                    </p>
-                    <p className="text-[11px]" style={{ color: 'var(--color-text2)' }}>
-                      Excel / Word planını içe aktar
-                    </p>
-                  </div>
-                  <ChevronRight size={15} style={{ color: 'var(--color-text3)' }} />
-                </button>
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* YENİ PLAN EKLE — Bottom Sheet */}
-      <BottomSheet open={planSelectorAcik} onClose={() => setPlanSelectorAcik(false)}>
-        <PlanSelector
-          yil={getYilSecenekleri()[0]}
-          onComplete={entries => {
+      {planlar.length === 0 && (
+        <BosdurumuEkrani
+          onTamamla={entries => {
+            localStorage.setItem(StorageKeys.ONBOARDING_TAMAMLANDI, '1')
             onPlanEkle(entries)
             onSinifSec(entries[0].sinif)
-            setPlanSelectorAcik(false)
             navigate('/app/plan')
           }}
-          onCancel={() => setPlanSelectorAcik(false)}
         />
-      </BottomSheet>
+      )}
+
+      {planlar.length > 0 && (
+        <div className="section-stack">
+          {sonrakiGorev && (
+            <section
+              className="page-hero stagger-2 relative overflow-hidden"
+              style={{ borderRadius: 'var(--radius-xl)', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-sm)', padding: '18px' }}
+            >
+              <div className="absolute top-0 left-0 right-0 h-[3px]" style={{ background: 'linear-gradient(90deg, var(--color-primary), var(--color-pop))' }} />
+              <p className="text-[10px] font-bold uppercase tracking-[.12em] mb-1 mt-1" style={{ color: 'var(--color-text3)' }}>
+                Bugunun odagi
+              </p>
+              <p className="text-[18px] font-bold mb-1" style={{ color: 'var(--color-text1)' }}>
+                {sonrakiGorev.sinif} - {sonrakiGorev.ders}
+              </p>
+              <p className="text-xs mb-3" style={{ color: 'var(--color-text2)' }}>{sonrakiGorev.tarih}</p>
+              <p className="text-sm leading-6 mb-4" style={{ color: 'var(--color-text1)' }}>{sonrakiGorev.kazanim}</p>
+
+              <div className="flex items-center justify-between gap-3 px-3.5 py-3" style={{ borderRadius: 'var(--radius-lg)', backgroundColor: 'color-mix(in srgb, var(--color-primary) 6%, transparent)', border: '1px solid color-mix(in srgb, var(--color-primary) 14%, transparent)' }}>
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[.08em]" style={{ color: 'var(--color-primary)' }}>
+                    Siradaki adim
+                  </p>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--color-text1)' }}>
+                    {sonrakiGorev.tamamlandi ? 'Bugunluk hedef kapandi' : 'Bu kazanimi tamamla'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onSinifSec(sonrakiGorev.entry.sinif)
+                    if (sonrakiGorev.haftaNo) navigate(`/app/hafta/${sonrakiGorev.haftaNo}`)
+                    else navigate('/app/plan')
+                  }}
+                  className="inline-flex items-center gap-1 text-xs font-bold"
+                  style={{ color: 'var(--color-primary)' }}
+                >
+                  Detay
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+            </section>
+          )}
+
+          <section className="stagger-3">
+            <SectionHeader title="Bugunku kazanımlar" meta={`${bugunKartlari.length} sinif`} />
+            <div className="flex flex-col gap-2.5">
+              {bugunKartlari.map(item => (
+                <div
+                  key={`${item.sinif}-${item.haftaNo ?? 'yok'}`}
+                  className="px-4 py-4"
+                  style={{ borderRadius: 'var(--radius-xl)', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-xs)' }}
+                >
+                  <div className="flex items-start gap-3">
+                    <button
+                      type="button"
+                      onClick={() => handleTamamlaToggle(item.entry, item.haftaNo)}
+                      aria-label={`${item.sinif} kazanimi tamamlandi olarak isaretle`}
+                      className="w-6 h-6 rounded-md mt-0.5 flex items-center justify-center transition-all active:scale-95"
+                      style={{
+                        backgroundColor: item.tamamlandi ? 'var(--color-success)' : 'var(--color-surface)',
+                        border: `1.5px solid ${item.tamamlandi ? 'var(--color-success)' : 'var(--color-border2)'}`,
+                        color: item.tamamlandi ? '#ffffff' : 'transparent',
+                      }}
+                    >
+                      ✓
+                    </button>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-3 mb-1">
+                        <div>
+                          <p className="text-[13px] font-bold" style={{ color: 'var(--color-text1)' }}>{item.sinif}</p>
+                          <p className="text-[11px]" style={{ color: 'var(--color-text3)' }}>
+                            {item.ders} - {item.tarih || 'Takvim disi'}
+                          </p>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onSinifSec(item.entry.sinif)
+                            if (item.haftaNo) navigate(`/app/hafta/${item.haftaNo}`)
+                            else navigate('/app/plan')
+                          }}
+                          className="inline-flex items-center gap-1 text-[11px] font-bold"
+                          style={{ color: 'var(--color-primary)' }}
+                        >
+                          Detay
+                          <ChevronRight size={13} />
+                        </button>
+                      </div>
+
+                      <p className="text-sm leading-6" style={{ color: item.tatilMi ? 'var(--color-warning)' : 'var(--color-text1)' }}>
+                        {item.kazanim}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="stagger-4">
+            <SectionHeader title="Kisayollar" meta="Ihtiyac oldugunda" />
+            <div className="grid grid-cols-2 gap-2.5">
+              <button
+                type="button"
+                onClick={() => navigate('/app/plan')}
+                className="flex items-center gap-3 px-3.5 py-3 card-lift text-left"
+                style={{ borderRadius: 'var(--radius-lg)', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-xs)' }}
+              >
+                <CalendarDays size={16} style={{ color: 'var(--color-primary)' }} />
+                <div className="min-w-0">
+                  <p className="text-[12px] font-bold" style={{ color: 'var(--color-text1)' }}>Planim</p>
+                  <p className="text-[10px]" style={{ color: 'var(--color-text2)' }}>Tum haftalar</p>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => navigate('/app/dosyam')}
+                className="flex items-center gap-3 px-3.5 py-3 card-lift text-left"
+                style={{ borderRadius: 'var(--radius-lg)', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-xs)' }}
+              >
+                <FolderOpen size={16} style={{ color: 'var(--color-accent)' }} />
+                <div className="min-w-0">
+                  <p className="text-[12px] font-bold" style={{ color: 'var(--color-text1)' }}>Dosyam</p>
+                  <p className="text-[10px]" style={{ color: 'var(--color-text2)' }}>Belgeler</p>
+                </div>
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </div>
   )
 }
