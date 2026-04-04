@@ -135,23 +135,23 @@ Mevcut React 19 + TypeScript + Vite + Tailwind CSS 4 + Supabase stack'i üzerine
     - _Requirements: 3.5, 3.6, 3.7_
 
 - [-] 10. `AppHomeScreen` — BugunDersleri bileşeni
-  - [ ] 10.1 `src/components/Home/BugunDersleri.tsx` bileşenini oluştur
+  - [x] 10.1 `src/components/Home/BugunDersleri.tsx` bileşenini oluştur
     - `useDersProgrami` hook'undan bugünün derslerini alır
     - Saat sırasına göre listeler (saat | sınıf | ders)
     - Ders programı yoksa davet kartı gösterir
     - _Requirements: 2.2, 2.6_
-  - [ ] 10.2 `src/pages/AppHomeScreen.tsx` dosyasını güncelle
+  - [x] 10.2 `src/pages/AppHomeScreen.tsx` dosyasını güncelle
     - `BugunDersleri` bileşenini hero alanının altına ekle
     - Bildirim ikonu `useOnemliTarihler`'den `yaklasanSayisi` alır; badge gösterir
     - "Ders Programı Ekle" kartı `DersProgramiPage`'e navigate eder
     - _Requirements: 2.2, 2.5, 2.6, 2.7_
 
-- [ ] 11. `OnboardingModal` — "Günlük plan ister misin?" adımı
-  - [ ] 11.1 `src/components/BosdurumuEkrani/OnboardingModal.tsx` dosyasını güncelle
+- [-] 11. `OnboardingModal` — "Günlük plan ister misin?" adımı
+  - [x] 11.1 `src/components/BosdurumuEkrani/OnboardingModal.tsx` dosyasını güncelle
     - Tebrik ekranına "Günlük plan da oluşturayım mı?" seçeneği ekle (Evet / Hayır / Atla)
     - "Evet" seçilirse `GunlukPlanTaslak` bileşenini göster
     - _Requirements: 1.5, 1.6, 1.7_
-  - [ ] 11.2 `src/components/Plan/GunlukPlanTaslak.tsx` bileşenini oluştur
+  - [x] 11.2 `src/components/Plan/GunlukPlanTaslak.tsx` bileşenini oluştur
     - Kazanım, yöntem (çoklu seçim chip), etkinlikler, materyaller, süre alanları
     - "Kaydet" → `StorageKeys.GUNLUK_PLANLAR`'a yazar; "İndir" → PDF export
     - _Requirements: 1.6, 3.4_
@@ -159,19 +159,19 @@ Mevcut React 19 + TypeScript + Vite + Tailwind CSS 4 + Supabase stack'i üzerine
     - **Property 2: Günlük Plan Taslağı Oluşturulabilirliği** — Geçerli hafta no, sınıf ve ders kombinasyonu için taslak en az kazanım, yöntem ve etkinlik alanlarını içermeli
     - **Validates: Requirements 1.6, 3.4**
 
-- [ ] 12. `DosyamPage` — Kategori sistemi ve premium kilit
-  - [ ] 12.1 `src/components/Evrak/PremiumKilit.tsx` bileşenini oluştur
+- [-] 12. `DosyamPage` — Kategori sistemi ve premium kilit
+  - [x] 12.1 `src/components/Evrak/PremiumKilit.tsx` bileşenini oluştur
     - Kilitli kategorilerin üzerine overlay olarak gelir
     - "Premium'a Geç" CTA butonu; `onYukselt` callback'i
     - _Requirements: 4.6, 9.3_
-  - [ ] 12.2 `src/pages/DosyamPage.tsx` dosyasını güncelle
+  - [x] 12.2 `src/pages/DosyamPage.tsx` dosyasını güncelle
     - `evrakService.getEvrakSablonlari()` ile gerçek kategori listesini yükle
     - Premium olmayan kategorilere `PremiumKilit` overlay'i ekle
     - `tespitEksikAlanlar` ile eksik bilgi uyarısı göster; Ayarlar'a yönlendir
     - _Requirements: 4.1, 4.4, 4.6, 4.7_
 
-- [ ] 13. `AppSettingsScreen` — Zümre listesi ve ilkkeriye alanları
-  - [ ] 13.1 `src/pages/AppSettingsScreen.tsx` dosyasını güncelle
+- [-] 13. `AppSettingsScreen` — Zümre listesi ve ilkkeriye alanları
+  - [x] 13.1 `src/pages/AppSettingsScreen.tsx` dosyasını güncelle
     - `OgretmenAyarlari` tipini yeni interface'e göre güncelle
     - İlkokul branşı seçilmişse `ilkkeriyeGrubu` ve `ilkkeriyeYontemi` alanlarını göster (koşullu render)
     - `bildirimTercihleri.onemliTarihler` ve `bildirimTercihleri.haftaBaslangici` toggle'larını ekle
@@ -180,21 +180,21 @@ Mevcut React 19 + TypeScript + Vite + Tailwind CSS 4 + Supabase stack'i üzerine
     - **Property 15: Zümre Listesi Değişmezliği** — Ekleme uzunluğu tam 1 artırmalı; silme tam 1 azaltmalı; liste hiçbir zaman negatif uzunlukta olamaz
     - **Validates: Requirements 5.2**
 
-- [ ] 14. `UretPage` — Plan'dan bağlamsal tetikleme
-  - [ ] 14.1 `src/pages/UretPage.tsx` dosyasını güncelle
+- [-] 14. `UretPage` — Plan'dan bağlamsal tetikleme
+  - [x] 14.1 `src/pages/UretPage.tsx` dosyasını güncelle
     - `location.state` üzerinden gelen `kazanim` ve `sinif` değerlerini form alanlarına otomatik doldur (zaten kısmen mevcut; `ders` alanını da ekle)
     - Jeton bakiyesi `tokenService.getJetonDurumu()` ile gerçek veriden okunur
     - Bakiye 0 ise üretim butonu devre dışı; premium/jeton al modal'ı gösterilir
     - _Requirements: 6.3, 6.5, 6.6_
-  - [ ] 14.2 `src/pages/HaftaDetayPage.tsx` dosyasını güncelle (veya `PlanPage.tsx`)
+  - [x] 14.2 `src/pages/HaftaDetayPage.tsx` dosyasını güncelle (veya `PlanPage.tsx`)
     - "Günlük Plan Oluştur" butonu `navigate('/app/uret', { state: { sinif, ders, haftaNo, kazanim } })` ile Üret Ekranı'na yönlendirir
     - _Requirements: 6.3, 3.4_
   - [ ]* 14.3 Property testi: üretim bağlamı aktarımı (Property 17)
     - **Property 17: Üretim Bağlamı Aktarımı** — Hafta + sınıf + ders kombinasyonu Plan'dan Üret'e geçişte form alanlarındaki kazanım ve sınıf değerleri kaynak verilerle eşleşmeli
     - **Validates: Requirements 6.3**
 
-- [ ] 15. Route yapısı güncellemesi
-  - [ ] 15.1 `src/App.tsx` dosyasını güncelle
+- [x] 15. Route yapısı güncellemesi
+  - [x] 15.1 `src/App.tsx` dosyasını güncelle
     - `/app/planla/ders-programi` → `DersProgramiPage` route'unu ekle
     - `/app/planla/takvim` → `OnemliTarihlerPage` route'unu ekle
     - Her iki route da `AppLayout` içinde render edilir

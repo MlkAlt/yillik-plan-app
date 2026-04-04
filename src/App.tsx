@@ -7,6 +7,8 @@ import { AppHomeScreen } from './pages/AppHomeScreen'
 import { PlanPage } from './pages/PlanPage'
 import { DosyamPage } from './pages/DosyamPage'
 import { UretPage } from './pages/UretPage'
+import { DersProgramiPage } from './pages/DersProgramiPage'
+import { OnemliTarihlerPage } from './pages/OnemliTarihlerPage'
 import { AppSettingsScreen } from './pages/AppSettingsScreen'
 import { AppLayout } from './components/AppLayout'
 import { HaftaDetayPage } from './pages/HaftaDetayPage'
@@ -72,6 +74,8 @@ function AppInner() {
         <Route path="/plan" element={<Navigate to="/app" replace />} />
         <Route path="/app" element={<AppLayout><AppHomeScreen planlar={planlar} onPlanEkle={handlePlanEkle} onSinifSec={handleSinifSec} syncing={syncing} tamamlananlar={tamamlananlar} /></AppLayout>} />
         <Route path="/app/planla" element={<AppLayout><PlanPage entry={aktifEntry} planlar={planlar} onSinifSec={handleSinifSec} /></AppLayout>} />
+        <Route path="/app/planla/ders-programi" element={<AppLayout><DersProgramiPage planlar={planlar} /></AppLayout>} />
+        <Route path="/app/planla/takvim" element={<AppLayout><OnemliTarihlerPage /></AppLayout>} />
         <Route path="/app/dosyam" element={<AppLayout><DosyamPage /></AppLayout>} />
         <Route path="/app/uret" element={<AppLayout><UretPage /></AppLayout>} />
         <Route path="/app/yukle" element={<AppLayout><YuklemePage onYukle={handleYukleLegacy} /></AppLayout>} />

@@ -1,5 +1,11 @@
-import { CalendarDays, ClipboardList, Users, BookOpen, Moon, Eye, Download, ChevronRight, AlertTriangle, Check, ArrowRight, FileCheck2 } from 'lucide-react'
+import { CalendarDays, Download, ChevronRight, Check, AlertTriangle } from 'lucide-react'
 import { SectionHeader } from '../components/UI/SectionHeader'
+import { useNavigate } from 'react-router-dom'
+import { getEvrakSablonlari, isPremiumKategori, tespitEksikAlanlar } from '../lib/evrakService'
+import { PremiumKilit } from '../components/Evrak/PremiumKilit'
+import { StorageKeys } from '../lib/storageKeys'
+import type { OgretmenAyarlari } from '../types/ogretmenAyarlari'
+import type { EvrakKategori } from '../types/evrak'
 
 const ikoBg = {
   blue: 'color-mix(in srgb, var(--color-primary) 12%, transparent)',
@@ -133,6 +139,31 @@ function BelgeGrubu({ baslik, sayi, sayiRenk, belgeler, soluk = false }: { basli
 }
 
 export function DosyamPage() {
+  const navigate = useNavigate()
+  const sablonlar = getEvrakSablonlari()
+  const isPremium = false // TODO: gerçek premium kontrolü
+
+  function getAyarlar(): Partial<OgretmenAyarlari> {
+    try {
+      const item = localStorage.getItem(StorageKeys.OGRETMEN_AYARLARI)
+      return item ? JSON.parse(item) : {}
+    } catch { return {} }
+  }
+
+  const ayarlar = getAyarlar()
+
+  // Eksik alan uyarısı — ilk şablonun zorunlu alanlarını kontrol et
+  const kritikSablon = sablonlar.find(s => !s.premium)
+  const eksikAlanlar = kritikSablon ? tespitEksikAlanlar(kritikSablon, ayarlar) : []
+
+  const kategoriler: EvrakKategori[] = ['ogretmen-dosyasi', 'zumre-tutanaklari', 'genel-burokratik', 'kulup-evraklari', 'sinif-rehberlik']
+  const kategoriAd: Record<EvrakKategori, string> = {
+    'ogretmen-dosyasi': 'Öğretmen Dosyası',
+    'zumre-tutanaklari': 'Zümre Tutanakları',
+    'genel-burokratik': 'Genel Bürokratik',
+    'kulup-evraklari': 'Kulüp Evrakları',
+    'sinif-rehberlik': 'Sınıf Rehberlik',
+  }
   return (
     <div className="page-shell">
       <div className="page-header">
@@ -196,70 +227,57 @@ export function DosyamPage() {
       </div>
 
       <div className="section-stack">
-        <div
-          style={{
-            borderRadius: 'var(--radius-xl)',
-            border: '1px solid color-mix(in srgb, var(--color-warning) 28%, transparent)',
-            backgroundColor: 'color-mix(in srgb, var(--color-warning) 7%, var(--color-surface))',
-            boxShadow: 'var(--shadow-xs)',
-            padding: '16px',
-          }}
-        >
-          <div className="flex items-start gap-3">
-            <div
-              className="w-10 h-10 flex items-center justify-center flex-shrink-0"
-              style={{
-                borderRadius: 'var(--radius-md)',
-                backgroundColor: 'color-mix(in srgb, var(--color-warning) 14%, transparent)',
-                color: 'var(--color-warning)',
-              }}
-            >
-              <FileCheck2 size={18} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-[.1em] mb-1" style={{ color: 'var(--color-warning)' }}>
-                Bugunun onceligi
-              </p>
-              <p className="text-[15px] font-bold mb-1" style={{ color: 'var(--color-text1)' }}>
-                Nobet Dokumu eksik
-              </p>
-              <p className="text-xs leading-5" style={{ color: 'var(--color-text2)' }}>
-                Ogretmen dosyasini eksiksiz tutmak icin once bu belgeyi tamamlayin. Sonrasinda tum dosyayi tek parca indirebilirsiniz.
-              </p>
-            </div>
-          </div>
-          <button
-            className="w-full mt-4 inline-flex items-center justify-center gap-2 py-3 text-sm font-bold"
-            style={{
-              borderRadius: 'var(--radius-pill)',
-              backgroundColor: 'var(--color-warning)',
-              color: '#ffffff',
-              border: 'none',
-              boxShadow: 'var(--shadow-sm)',
-            }}
+        {/* Eksik alan uyarısı */}
+        {eksikAlanlar.length > 0 && (
+          <div
+            onClick={() => navigate('/app/profil')}
+            style={{ borderRadius: 'var(--radius-lg)', border: '1px solid color-mix(in srgb, var(--color-warning) 30%, transparent)', backgroundColor: 'color-mix(in srgb, var(--color-warning) 8%, transparent)', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}
           >
-            Nobet Dokumunu tamamla
-            <ArrowRight size={15} />
-          </button>
-        </div>
+            <AlertTriangle size={16} style={{ color: 'var(--color-warning)', flexShrink: 0 }} />
+            <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-warning)', flex: 1 }}>
+              Eksik bilgi: {eksikAlanlar.join(', ')} — Ayarlardan tamamla
+            </p>
+            <ChevronRight size={14} style={{ color: 'var(--color-warning)', flexShrink: 0 }} />
+          </div>
+        )}
 
-        <div
-          className="flex items-center gap-2 px-3.5 py-2.5"
-          style={{
-            borderRadius: 'var(--radius-lg)',
-            border: '1px solid color-mix(in srgb, var(--color-warning) 30%, transparent)',
-            backgroundColor: 'color-mix(in srgb, var(--color-warning) 8%, transparent)',
-          }}
-        >
-          <AlertTriangle size={14} style={{ color: 'var(--color-warning)', flexShrink: 0 }} />
-          <p className="text-[12px] font-semibold" style={{ color: 'var(--color-warning)' }}>
-            1 eksik belge var. Once Nobet Dokumu tamamlanirsa dosya butunu guclenir.
-          </p>
-        </div>
+        {/* Kategoriler */}
+        {kategoriler.map(kategori => {
+          const kategoriSablonlari = sablonlar.filter(s => s.kategori === kategori)
+          if (kategoriSablonlari.length === 0) return null
+          const premium = isPremiumKategori(kategori)
+          const erisimVar = !premium || isPremium
 
-        <BelgeGrubu baslik="Hazir Belgeler" sayi="4 odak belge" belgeler={otomatikBelgeler} />
-        <BelgeGrubu baslik="Tamamlanmasi Gereken" sayi="1 eksik" sayiRenk="var(--color-warning)" belgeler={eksikBelgeler} />
-        <BelgeGrubu baslik="Manuel Eklenebilir" belgeler={manuelBelgeler} soluk />
+          return (
+            <div key={kategori}>
+              <SectionHeader title={kategoriAd[kategori]} meta={`${kategoriSablonlari.length} belge`} />
+              {erisimVar ? (
+                <div className="flex flex-col gap-2">
+                  {kategoriSablonlari.map(sablon => {
+                    const eksik = tespitEksikAlanlar(sablon, ayarlar)
+                    return (
+                      <BelgeItem
+                        key={sablon.id}
+                        belge={{
+                          id: sablon.id,
+                          ikon: <CalendarDays size={18} />,
+                          renk: 'blue',
+                          ad: sablon.ad,
+                          alt: sablon.aciklama,
+                          durum: eksik.length > 0 ? 'uyari' : 'hazir',
+                          durumMetin: eksik.length > 0 ? 'Eksik' : 'Hazır',
+                          aksiyonMetni: 'İndir',
+                        }}
+                      />
+                    )
+                  })}
+                </div>
+              ) : (
+                <PremiumKilit ozellik={kategoriAd[kategori]} onYukselt={() => navigate('/app/uret')} />
+              )}
+            </div>
+          )
+        })}
       </div>
     </div>
   )

@@ -4,6 +4,8 @@ import { BRANCHES, type Branch } from '../../lib/branchConfig'
 import { buildPlan } from '../../lib/planBuilder'
 import { getYilSecenekleri } from '../../lib/dersSinifMap'
 import type { PlanEntry } from '../../types/planEntry'
+import { GunlukPlanTaslak } from '../Plan/GunlukPlanTaslak'
+import type { Gun } from '../../types/dersProgrami'
 
 interface OnboardingModalProps {
   onTamamla: (entries: PlanEntry[]) => void
@@ -14,7 +16,9 @@ export function OnboardingModal({ onTamamla }: OnboardingModalProps) {
   const [seciliBransId, setSeciliBransId]   = useState<string | null>(null)
   const [seciliSiniflar, setSeciliSiniflar] = useState<string[]>([])
   const [loading, setLoading]               = useState(false)
-  const [tebrik, setTebrik]                 = useState<{ ders: string; siniflar: string[] } | null>(null)
+  const [tebrik, setTebrik]                 = useState<{ ders: string; siniflar: string[]; lessonId: string } | null>(null)
+  const [gunlukPlanAdimiAcik, setGunlukPlanAdimiAcik] = useState(false)
+  const [onboardingTamamlandi, setOnboardingTamamlandi] = useState(false)
   const yil = getYilSecenekleri()[0]
   const sinifSecRef = useRef<HTMLDivElement>(null)
 
@@ -58,7 +62,7 @@ export function OnboardingModal({ onTamamla }: OnboardingModalProps) {
           return { sinif, ders: seciliBrans.lessonId, yil, tip: 'meb' as const, plan, rows: null }
         })
       )
-      setTebrik({ ders: seciliBrans.label, siniflar: seciliSiniflar })
+      setTebrik({ ders: seciliBrans.label, siniflar: seciliSiniflar, lessonId: seciliBrans.lessonId })
       setLoading(false)
       setTimeout(() => onTamamla(entries), 2400)
     } catch {
@@ -66,8 +70,32 @@ export function OnboardingModal({ onTamamla }: OnboardingModalProps) {
     }
   }
 
+  // ── Günlük plan adımı ────────────────────────────────────────────────────
+  if (tebrik && gunlukPlanAdimiAcik && !onboardingTamamlandi) {
+    const ilkSinif = tebrik.siniflar[0]
+    return (
+      <div style={{ position: 'absolute', inset: 0, zIndex: 60, background: 'var(--color-bg)', display: 'flex', flexDirection: 'column', overflowY: 'auto', padding: '24px 20px' }}>
+        <h2 style={{ fontFamily: "var(--font-display),'Bricolage Grotesque',sans-serif", fontSize: '22px', fontWeight: 800, color: 'var(--color-text1)', letterSpacing: '-0.03em', marginBottom: '4px' }}>
+          Günlük plan oluşturalım
+        </h2>
+        <p style={{ fontSize: '14px', color: 'var(--color-text2)', marginBottom: '20px' }}>
+          {ilkSinif} için bu haftanın ders planı
+        </p>
+        <GunlukPlanTaslak
+          haftaNo={1}
+          gun={'Pazartesi' as Gun}
+          sinif={ilkSinif}
+          ders={tebrik.lessonId}
+          kazanim="Bu haftanın kazanımı"
+          onKaydet={() => { setOnboardingTamamlandi(true); setTimeout(() => onTamamla([]), 800) }}
+          onAtla={() => { setOnboardingTamamlandi(true); onTamamla([]) }}
+        />
+      </div>
+    )
+  }
+
   // ── Tebrik ekranı ─────────────────────────────────────────────────────────
-  if (tebrik) {
+  if (tebrik && !onboardingTamamlandi) {
     return (
       <div style={{ position: 'absolute', inset: 0, zIndex: 60, background: 'var(--color-bg)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 24px', textAlign: 'center' }}>
         <div style={{ fontSize: '72px', marginBottom: '24px', animation: 'celebrate 0.8s cubic-bezier(0.34,1.56,0.64,1) both' }}>🎉</div>
@@ -79,14 +107,19 @@ export function OnboardingModal({ onTamamla }: OnboardingModalProps) {
           <span style={{ color: 'var(--color-text3)', fontSize: '13px' }}>{tebrik.siniflar.join(', ')}</span>
         </p>
         <button
-          onClick={() => onTamamla([])}
+          onClick={() => setGunlukPlanAdimiAcik(true)}
           style={{ width: '100%', maxWidth: '280px', height: '52px', borderRadius: '100px', background: '#4F6AF5', color: '#fff', border: 'none', fontSize: '16px', fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 20px rgba(79,106,245,.35)', animation: 'stagger-up 0.5s 0.4s ease-out both' }}
+        >
+          Günlük Plan Oluştur →
+        </button>
+        <button
+          onClick={() => onTamamla([])}
+          style={{ width: '100%', maxWidth: '280px', height: '44px', borderRadius: '100px', background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text3)', fontSize: '14px', fontWeight: 600, cursor: 'pointer', marginTop: '8px', animation: 'stagger-up 0.5s 0.5s ease-out both' }}
         >
           Ana Ekrana Git
         </button>
-        <p style={{ fontSize: '12px', color: 'var(--color-text3)', marginTop: '16px', lineHeight: '20px', animation: 'stagger-up 0.5s 0.5s ease-out both' }}>
-          Ders programını daha sonra ekleyebilirsiniz.<br />
-          Eklenince yıllık planınız otomatik hazırlanır.
+        <p style={{ fontSize: '12px', color: 'var(--color-text3)', marginTop: '12px', lineHeight: '20px', animation: 'stagger-up 0.5s 0.6s ease-out both' }}>
+          Ders programını daha sonra ekleyebilirsiniz.
         </p>
       </div>
     )
@@ -193,9 +226,9 @@ export function OnboardingModal({ onTamamla }: OnboardingModalProps) {
           {/* Ders grupları */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: '18px', padding: '16px', boxShadow: 'var(--shadow-xs)' }}>
-              <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-text1)', marginBottom: '12px' }}>{seciliBrans.label}</p>
+              <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-text1)', marginBottom: '12px' }}>{seciliBrans!.label}</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                {seciliBrans.classes.map(sinif => {
+                {seciliBrans!.classes.map(sinif => {
                   const sel = seciliSiniflar.includes(sinif)
                   return (
                     <button
@@ -230,8 +263,8 @@ export function OnboardingModal({ onTamamla }: OnboardingModalProps) {
               </>
             ) : (
               seciliSiniflar.length === 1
-                ? `${seciliBrans.label} · ${seciliSiniflar[0]} için Plan Oluştur →`
-                : `${seciliBrans.label} · ${seciliSiniflar.length} sınıf için Plan Oluştur →`
+                ? `${seciliBrans!.label} · ${seciliSiniflar[0]} için Plan Oluştur →`
+                : `${seciliBrans!.label} · ${seciliSiniflar.length} sınıf için Plan Oluştur →`
             )}
           </button>
         </div>

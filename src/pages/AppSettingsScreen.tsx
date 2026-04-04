@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+﻿import { useState, useEffect, useRef } from 'react'
 import type { PlanEntry } from '../types/planEntry'
 import { signOut, type User } from '../lib/auth'
 import { AuthModal } from '../components/AuthModal'
@@ -51,6 +51,12 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
   const [mudurYardimcisiAdi, setMudurYardimcisiAdi] = useState(() => ayarlar.mudurYardimcisiAdi || '')
   const [zumreOgretmenleri, setZumreOgretmenleri] = useState<string[]>(() => ayarlar.zumreOgretmenleri?.length ? ayarlar.zumreOgretmenleri : [''])
   const [yil, setYil] = useState(() => ayarlar.yil || getYilSecenekleri()[0])
+  const [ilkkeriyeGrubu, setIlkkeriyeGrubu] = useState(() => (ayarlar as Record<string, unknown>).ilkkeriyeGrubu as string || '')
+  const [ilkkeriyeYontemi, setIlkkeriyeYontemi] = useState(() => (ayarlar as Record<string, unknown>).ilkkeriyeYontemi as string || '')
+  const [bildirimOnemliTarihler, setBildirimOnemliTarihler] = useState(() => {
+    const bt = (ayarlar as Record<string, unknown>).bildirimTercihleri as Record<string, boolean> | undefined
+    return bt?.onemliTarihler ?? true
+  })
   const [degisti, setDegisti] = useState(false)
   const [authModalAcik, setAuthModalAcik] = useState(false)
   const [planSelectorAcik, setPlanSelectorAcik] = useState(false)
@@ -63,7 +69,7 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
   useEffect(() => {
     if (isFirst.current) { isFirst.current = false; return }
     setDegisti(true)
-  }, [adSoyad, okulAdi, yil, mudurAdi, mudurYardimcisiAdi, zumreOgretmenleri])
+  }, [adSoyad, okulAdi, yil, mudurAdi, mudurYardimcisiAdi, zumreOgretmenleri, ilkkeriyeGrubu, ilkkeriyeYontemi])
 
   function handleKaydet() {
     const temizZumre = zumreOgretmenleri.map(item => item.trim()).filter(Boolean)
@@ -75,6 +81,9 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
       mudurAdi,
       mudurYardimcisiAdi,
       zumreOgretmenleri: temizZumre,
+      ilkkeriyeGrubu: ilkkeriyeGrubu.trim() || undefined,
+      ilkkeriyeYontemi: ilkkeriyeYontemi.trim() || undefined,
+      bildirimTercihleri: { onemliTarihler: bildirimOnemliTarihler, haftaBaslangici: true },
     }))
     setZumreOgretmenleri(temizZumre.length ? temizZumre : [''])
     setDegisti(false)
@@ -106,6 +115,12 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
     onPlanEkle(entries)
     setPlanSelectorAcik(false)
   }
+
+  const isIlkokul = planlarProp.some(p => {
+    const sinifStr = p.sinifGercek || p.sinif
+    const sinifNo = parseInt(sinifStr)
+    return !isNaN(sinifNo) && sinifNo <= 4
+  })
 
   function handleZumreDegistir(index: number, value: string) {
     setZumreOgretmenleri(prev => prev.map((item, i) => i === index ? value : item))
@@ -202,6 +217,45 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
                 <Save size={15} /> Kaydet
               </Button>
             </div>
+          </div>
+        </Card>
+
+        {/* İlkkeriye alanları — sadece ilkokul branşında */}
+        {isIlkokul && (
+          <Card style={{ borderRadius: 'var(--radius-xl)' }}>
+            <SectionHeader title="İlkkeriye Bilgileri" meta="İlkokul 1. sınıf" />
+            <div className="flex flex-col gap-3">
+              <div>
+                <p className="text-[11px] font-bold mb-1 uppercase tracking-[.08em]" style={{ color: 'var(--color-text2)' }}>İlkkeriye Grubu</p>
+                <input value={ilkkeriyeGrubu} onChange={e => setIlkkeriyeGrubu(e.target.value)} placeholder="Örn: Ses Temelli Cümle Yöntemi" className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-surface)', color: 'var(--color-text1)', outline: 'none' }} />
+              </div>
+              <div>
+                <p className="text-[11px] font-bold mb-1 uppercase tracking-[.08em]" style={{ color: 'var(--color-text2)' }}>Öğretim Yöntemi</p>
+                <input value={ilkkeriyeYontemi} onChange={e => setIlkkeriyeYontemi(e.target.value)} placeholder="Örn: Analitik Sentez" className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-surface)', color: 'var(--color-text1)', outline: 'none' }} />
+              </div>
+              <div className={`overflow-hidden transition-all duration-200 ${degisti ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'}`}>
+                <Button onClick={handleKaydet} variant="primary" className="w-full mt-1">
+                  <Save size={15} /> Kaydet
+                </Button>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {/* Bildirim tercihleri */}
+        <Card style={{ borderRadius: 'var(--radius-xl)' }}>
+          <SectionHeader title="Bildirim Tercihleri" />
+          <div className="flex items-center justify-between py-2">
+            <div>
+              <p className="text-sm font-semibold" style={{ color: 'var(--color-text1)' }}>Önemli tarih bildirimleri</p>
+              <p className="text-xs" style={{ color: 'var(--color-text3)' }}>ZHA, not girişi, veli toplantısı</p>
+            </div>
+            <button
+              onClick={() => { setBildirimOnemliTarihler(p => !p); setDegisti(true) }}
+              style={{ width: '44px', height: '24px', borderRadius: '100px', background: bildirimOnemliTarihler ? '#4F6AF5' : 'var(--color-border)', position: 'relative', border: 'none', cursor: 'pointer', transition: 'background 0.2s' }}
+            >
+              <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#fff', position: 'absolute', top: '3px', left: bildirimOnemliTarihler ? '23px' : '3px', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,.2)' }} />
+            </button>
           </div>
         </Card>
 
@@ -346,3 +400,4 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
     </div>
   )
 }
+

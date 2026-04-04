@@ -227,6 +227,15 @@ export function HaftaDetayPage({ entry, onTamamlaToggle }: HaftaDetayPageProps) 
             )}
             <p className="text-[17px] font-bold leading-snug mb-2" style={{ color: 'var(--color-text1)' }}>{hafta.kazanim || 'Bu hafta icin kazanim girilmemis.'}</p>
             {hafta.kazanimDetay && <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text2)' }}>{hafta.kazanimDetay}</p>}
+            {hafta.kazanim && (
+              <button
+                onClick={() => navigate('/app/uret', { state: { sinif, ders, haftaNo: no, kazanim: hafta.kazanim, kaynak: 'hafta-detay' } })}
+                className="mt-3 inline-flex items-center gap-2 text-sm font-bold px-4 py-2 transition-all active:scale-95"
+                style={{ borderRadius: 'var(--radius-pill)', background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', color: 'var(--color-primary)', border: '1px solid color-mix(in srgb, var(--color-primary) 20%, transparent)' }}
+              >
+                <Sparkles size={14} /> Günlük Plan / Materyal Üret
+              </button>
+            )}
           </Card>
         )}
 
