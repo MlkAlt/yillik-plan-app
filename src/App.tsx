@@ -72,7 +72,7 @@ function AppInner() {
         <Route path="/olustur" element={<Navigate to="/app" replace />} />
         <Route path="/yukle" element={<Navigate to="/app/yukle" replace />} />
         <Route path="/plan" element={<Navigate to="/app" replace />} />
-        <Route path="/app" element={<AppLayout><AppHomeScreen planlar={planlar} onPlanEkle={handlePlanEkle} onSinifSec={handleSinifSec} syncing={syncing} tamamlananlar={tamamlananlar} /></AppLayout>} />
+        <Route path="/app" element={<AppLayout><AppHomeScreen planlar={planlar} onPlanEkle={handlePlanEkle} onSinifSec={handleSinifSec} syncing={syncing} tamamlananlar={tamamlananlar} onTamamlananGuncelle={handleTamamlananGuncelle} /></AppLayout>} />
         <Route path="/app/planla" element={<AppLayout><PlanPage entry={aktifEntry} planlar={planlar} onSinifSec={handleSinifSec} /></AppLayout>} />
         <Route path="/app/planla/ders-programi" element={<AppLayout><DersProgramiPage planlar={planlar} /></AppLayout>} />
         <Route path="/app/planla/takvim" element={<AppLayout><OnemliTarihlerPage /></AppLayout>} />
