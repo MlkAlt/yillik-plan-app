@@ -73,6 +73,12 @@ export function GunlukPlanTaslak({ haftaNo, gun, sinif, ders, kazanim, onKaydet,
         <textarea value={etkinlikler} onChange={e => setEtkinlikler(e.target.value)} rows={3} placeholder="Giriş sorusu, grup tartışması..." style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid var(--color-border)', background: 'var(--color-bg)', fontSize: '14px', color: 'var(--color-text1)', outline: 'none', resize: 'none', fontFamily: 'inherit' }} />
       </div>
 
+      {/* Materyaller */}
+      <div>
+        <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--color-text2)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Materyaller (her satır ayrı)</p>
+        <textarea value={materyaller} onChange={e => setMateryaller(e.target.value)} rows={2} placeholder="Akıllı tahta, çalışma yaprağı..." style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid var(--color-border)', background: 'var(--color-bg)', fontSize: '14px', color: 'var(--color-text1)', outline: 'none', resize: 'none', fontFamily: 'inherit' }} />
+      </div>
+
       {/* Süre */}
       <div>
         <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--color-text2)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Süre (dakika)</p>
