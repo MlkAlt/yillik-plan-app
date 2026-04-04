@@ -7,18 +7,33 @@ Son guncelleme: 2026-04-04
 
 ---
 
-## Son Yapılanlar: v8 Design Migration (4 Commit - 2026-04-04)
+## ✅ v8 Design Migration — COMPLETED & DEPLOYED
 
-**Sprint 0 — v8 Design Refresh (COMPLETED)**
-- **Phase 1:** Fonts (Bricolage Grotesque + DM Sans) + Navy color palette (#1B2E5E)
-- **Phase 2:** AlertCard + AnalyticsCard on AppHomeScreen
-- **Phase 3:** NavyCard, PricingCard, StatusBadge, GlassSheet components
-- **Phase 4:** UretPage improvements (dropdowns, sık kullanılanlar)
-- Build ✅ Tests 12/12 ✅ Production ready
+**Timeline:**
+- Phase A: 4-tab glassmorphic bottom nav + pill bar animation
+- Phase B: HTML-exact CSS tokens (colors, shadows, radius, easing)
+- Phase C: Home screen bento grid layout (topbar + acil + tasarruf + small cards)
+- Phase D: Routes fixed + 3 screen stubs (Planla/Dosyam/Üret)
+
+**Results:**
+- ✅ Build: Success
+- ✅ Tests: 12/12 passing
+- ✅ Git: 4 commits pushed
+- ✅ **Vercel Deploy: LIVE** 🚀
+
+**Live URL:** https://ogretmen-yaver.vercel.app
+
+**v8 Features Now Live:**
+- Bricolage Grotesque + DM Sans fonts
+- Navy (#1B2E5E) + Blue (#4F6AF5) color palette
+- Glassmorphism (blur 24px + saturate 180%)
+- Spring easing animations (cubic-bezier .34,1.56,.64,1)
+- Bento grid home screen (2-col, gap 8px)
+- 4-tab navigation with exact HTML layout
 
 ---
 
-## Aktif Sprint: Sprint 1 - v6 Tasarim Gecisi
+## Aktif Sprint: Sprint 2 - Detaylı Ekranlar & Backend
 
 **Hedef:** v6 tasarimini mevcut React + Vite projesine uygulamak  
 **Bitis:** 2026-04-13
