@@ -345,7 +345,7 @@ export function AppHomeScreen({
       })()}
 
       {/* ── BU HAFTANIN KAZANIMLARI ─────────── */}
-      {buHaftaListesi.length > 0 && (
+      {buHaftaListesi.length > 0 && !dersProgramiDolu && (
         <div style={{ padding: '16px 16px 0' }}>
           <div
             className="rounded-xl p-4"
