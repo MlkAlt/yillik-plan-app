@@ -4,7 +4,7 @@ const GUNLER: Gun[] = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma']
 const GUN_KISALTMA: Record<Gun, string> = {
   Pazartesi: 'Pzt', Salı: 'Sal', Çarşamba: 'Çar', Perşembe: 'Per', Cuma: 'Cum',
 }
-const SAAT_SAYISI = 8
+const SAAT_SAYISI = 10
 
 interface DersProgramiGridProps {
   program: DersProgrami

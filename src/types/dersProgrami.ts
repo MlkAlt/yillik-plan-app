@@ -2,7 +2,7 @@ export type Gun = 'Pazartesi' | 'Salı' | 'Çarşamba' | 'Perşembe' | 'Cuma'
 
 export interface DersSaati {
   gun: Gun
-  saat: number          // 1-8 (ders saati sırası)
+  saat: number          // 1-10 (ders saati sırası)
   sinif: string | null  // null = boş saat
   ders?: string         // sinif varsa otomatik doldurulur
 }

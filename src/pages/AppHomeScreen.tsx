@@ -64,7 +64,11 @@ export function AppHomeScreen({
   const [, setEksikAyarlar] = useState(false)
   const [localTamamlananlar, setLocalTamamlananlar] = useState<Record<string, number[]>>(tamamlananlar)
 
-  const { program: dersProgrami } = useDersProgrami()
+  const { program: dersProgrami, bugunDersleri } = useDersProgrami()
+  const bugunStr = new Date().toISOString().split('T')[0]
+  const [tamamlananBugun, setTamamlananBugun] = useState<number[]>(() => {
+    try { return JSON.parse(localStorage.getItem(`bugun_tamamlanan_${bugunStr}`) || '[]') } catch { return [] }
+  })
   const { tarihler } = useOnemliTarihler()
 
   const freeBelgeler = getEvrakSablonlari().filter(s => !s.premium)
@@ -97,6 +101,14 @@ export function AppHomeScreen({
       }
     } catch { /* ignore */ }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  function handleBugunToggle(saat: number) {
+    setTamamlananBugun(prev => {
+      const next = prev.includes(saat) ? prev.filter(s => s !== saat) : [...prev, saat]
+      localStorage.setItem(`bugun_tamamlanan_${bugunStr}`, JSON.stringify(next))
+      return next
+    })
+  }
 
   function handleTamamlaToggle(sinif: string, haftaNo: number) {
     try {
@@ -243,6 +255,87 @@ export function AppHomeScreen({
         </div>
       </div>
 
+      {/* ── BUGÜNÜN DERSLERİ ─────────────────── */}
+      {dersProgramiDolu && (() => {
+        const liste = bugunDersleri().map(ders => {
+          const entry = planlar.find(p => p.sinif === ders.sinif)
+          const haftaNo = entry ? bugunHaftaNoHesapla(entry) : null
+          const hafta = entry && haftaNo ? entry.plan?.haftalar.find(h => h.haftaNo === haftaNo) : null
+          const renk = SINIF_RENKLERI[planlar.indexOf(entry!) % SINIF_RENKLERI.length] || '#4F6AF5'
+          return { ders, entry, hafta, renk }
+        })
+        if (liste.length === 0) return null
+        return (
+          <div style={{ padding: '16px 16px 0' }}>
+            <div className="rounded-xl p-4" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <span style={{ fontSize: 16 }}>📋</span>
+                  <div>
+                    <p className="font-sans font-bold" style={{ fontSize: 14, color: 'var(--color-text1)' }}>Bugünün Dersleri</p>
+                    <p style={{ fontSize: 11, color: 'var(--color-text3)' }}>{liste.length} ders • İşaretleyerek ilerle</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => navigate('/app/planla/ders-programi')}
+                  className="flex items-center gap-1 font-sans font-semibold"
+                  style={{ fontSize: 12, color: 'var(--color-primary)' }}
+                >
+                  Program <ChevronRight size={14} />
+                </button>
+              </div>
+              <div className="flex flex-col">
+                {liste.map(({ ders, entry, hafta, renk }, i) => {
+                  const tamamlandi = tamamlananBugun.includes(ders.saat)
+                  return (
+                    <div
+                      key={`${ders.gun}-${ders.saat}`}
+                      className="flex items-center gap-3"
+                      style={{ padding: '9px 0', borderBottom: i < liste.length - 1 ? '1px solid var(--color-border)' : 'none' }}
+                    >
+                      {/* Saat numarası */}
+                      <span className="font-display font-bold flex-shrink-0" style={{ fontSize: 12, color: 'var(--color-text3)', width: 18, textAlign: 'center' }}>
+                        {ders.saat}.
+                      </span>
+                      {/* Sınıf badge */}
+                      <span className="font-sans font-bold flex-shrink-0" style={{
+                        fontSize: 11, color: renk,
+                        background: `${renk}18`,
+                        padding: '2px 8px', borderRadius: 100,
+                      }}>
+                        {ders.sinif}
+                      </span>
+                      {/* Kazanım */}
+                      <p style={{
+                        fontSize: 13, flex: 1,
+                        color: tamamlandi ? 'var(--color-text3)' : 'var(--color-text1)',
+                        textDecoration: tamamlandi ? 'line-through' : 'none',
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                      }}>
+                        {hafta?.kazanim || entry?.plan?.haftalar[0]?.uniteAdi || ders.ders || '—'}
+                      </p>
+                      {/* Checkbox */}
+                      <button
+                        onClick={() => handleBugunToggle(ders.saat)}
+                        className="flex items-center justify-center flex-shrink-0 rounded-full"
+                        style={{
+                          width: 22, height: 22,
+                          border: `2px solid ${tamamlandi ? 'var(--color-success)' : 'var(--color-border2)'}`,
+                          background: tamamlandi ? 'var(--color-success)' : 'transparent',
+                          cursor: 'pointer', transition: 'all 0.15s',
+                        }}
+                      >
+                        {tamamlandi && <Check size={11} strokeWidth={3} color="#fff" />}
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        )
+      })()}
+
       {/* ── BU HAFTANIN KAZANIMLARI ─────────── */}
       {buHaftaListesi.length > 0 && (
         <div style={{ padding: '16px 16px 0' }}>
@@ -273,44 +366,53 @@ export function AppHomeScreen({
               </button>
             </div>
 
-            <div className="flex flex-col gap-2">
-              {buHaftaListesi.map(({ entry, hafta, isTamamlandi }) => (
-                <div
-                  key={`${entry.sinif}-${hafta.haftaNo}`}
-                  className="flex items-center gap-3"
-                  style={{ padding: '8px 0', borderBottom: '1px solid var(--color-border)' }}
-                >
-                  <button
-                    onClick={() => handleTamamlaToggle(entry.sinif, hafta.haftaNo)}
-                    className="flex items-center justify-center flex-shrink-0 rounded-full"
-                    style={{
-                      width: 22, height: 22,
-                      border: `2px solid ${isTamamlandi ? 'var(--color-success)' : 'var(--color-border2)'}`,
-                      background: isTamamlandi ? 'var(--color-success)' : 'transparent',
-                      cursor: 'pointer', transition: 'all 0.15s',
-                    }}
+            <div className="flex flex-col">
+              {buHaftaListesi.map(({ entry, hafta, isTamamlandi }, i) => {
+                const renk = SINIF_RENKLERI[planlar.indexOf(entry) % SINIF_RENKLERI.length] || '#4F6AF5'
+                return (
+                  <div
+                    key={`${entry.sinif}-${hafta.haftaNo}`}
+                    className="flex items-center gap-3"
+                    style={{ padding: '9px 0', borderBottom: i < buHaftaListesi.length - 1 ? '1px solid var(--color-border)' : 'none' }}
                   >
-                    {isTamamlandi && <Check size={11} strokeWidth={3} color="#fff" />}
-                  </button>
-                  <p
-                    style={{
-                      fontSize: 13, color: isTamamlandi ? 'var(--color-text3)' : 'var(--color-text1)',
-                      textDecoration: isTamamlandi ? 'line-through' : 'none',
-                      flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                    }}
-                  >
-                    {hafta.kazanim || 'Kazanım girilmemiş'}
-                  </p>
-                  <button
-                    onClick={() => { onSinifSec(entry.sinif); navigate(`/app/hafta/${hafta.haftaNo}`) }}
-                    style={{ flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text3)' }}
-                  >
-                    <ChevronRight size={14} />
-                  </button>
-                </div>
-              ))}
-              {/* Son satırın border'ını kaldır */}
-              <style>{`.kazanim-row:last-child { border-bottom: none; }`}</style>
+                    <button
+                      onClick={() => handleTamamlaToggle(entry.sinif, hafta.haftaNo)}
+                      className="flex items-center justify-center flex-shrink-0 rounded-full"
+                      style={{
+                        width: 22, height: 22,
+                        border: `2px solid ${isTamamlandi ? 'var(--color-success)' : 'var(--color-border2)'}`,
+                        background: isTamamlandi ? 'var(--color-success)' : 'transparent',
+                        cursor: 'pointer', transition: 'all 0.15s',
+                      }}
+                    >
+                      {isTamamlandi && <Check size={11} strokeWidth={3} color="#fff" />}
+                    </button>
+                    {/* Sınıf badge */}
+                    <span className="font-sans font-bold flex-shrink-0" style={{
+                      fontSize: 11, color: renk,
+                      background: `${renk}18`,
+                      padding: '2px 8px', borderRadius: 100,
+                    }}>
+                      {entry.sinifGercek || entry.sinif}
+                    </span>
+                    <p
+                      style={{
+                        fontSize: 13, color: isTamamlandi ? 'var(--color-text3)' : 'var(--color-text1)',
+                        textDecoration: isTamamlandi ? 'line-through' : 'none',
+                        flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                      }}
+                    >
+                      {hafta.kazanim || 'Kazanım girilmemiş'}
+                    </p>
+                    <button
+                      onClick={() => { onSinifSec(entry.sinif); navigate(`/app/hafta/${hafta.haftaNo}`) }}
+                      style={{ flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text3)' }}
+                    >
+                      <ChevronRight size={14} />
+                    </button>
+                  </div>
+                )
+              })}
             </div>
           </div>
         </div>
