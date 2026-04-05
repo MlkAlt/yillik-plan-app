@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   CalendarDays, Check, ChevronRight,
-  Clock, FileText, TrendingUp, Users, Sparkles, Bell,
+  Clock, FileText, Users, Sparkles, Bell,
 } from 'lucide-react'
 import type { PlanEntry } from '../types/planEntry'
 import { StorageKeys } from '../lib/storageKeys'
@@ -212,12 +212,33 @@ export function AppHomeScreen({
             </p>
             <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>Mevcut Hafta</p>
           </div>
-          <div style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.18)', borderRadius: 14, padding: '10px 12px' }}>
-            <TrendingUp size={16} color="rgba(255,255,255,0.8)" />
-            <p className="font-display font-bold" style={{ fontSize: 18, color: '#fff', marginTop: 6, letterSpacing: '-0.02em' }}>
-              %{ilerlemeYuzde}
-            </p>
-            <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>Yıllık İlerleme</p>
+          <div style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.18)', borderRadius: 14, padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
+            {/* Circular progress ring */}
+            <svg width={44} height={44} viewBox="0 0 44 44" style={{ flexShrink: 0 }}>
+              {/* Track */}
+              <circle cx={22} cy={22} r={18} fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth={4} />
+              {/* Progress */}
+              <circle
+                cx={22} cy={22} r={18} fill="none"
+                stroke="#fff" strokeWidth={4}
+                strokeLinecap="round"
+                strokeDasharray={`${2 * Math.PI * 18}`}
+                strokeDashoffset={2 * Math.PI * 18 * (1 - ilerlemeYuzde / 100)}
+                transform="rotate(-90 22 22)"
+                style={{ transition: 'stroke-dashoffset 0.6s ease' }}
+              />
+              {/* Percentage text */}
+              <text x={22} y={22} textAnchor="middle" dominantBaseline="central"
+                fill="#fff" fontSize={9} fontWeight={700} fontFamily="var(--font-display)">
+                %{ilerlemeYuzde}
+              </text>
+            </svg>
+            <div>
+              <p className="font-display font-bold" style={{ fontSize: 13, color: '#fff', letterSpacing: '-0.01em', lineHeight: 1.2 }}>
+                {36 - (mevcutHafta ?? 0)} hafta kaldı
+              </p>
+              <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', fontWeight: 500, marginTop: 2 }}>Yıllık İlerleme</p>
+            </div>
           </div>
         </div>
       </div>
