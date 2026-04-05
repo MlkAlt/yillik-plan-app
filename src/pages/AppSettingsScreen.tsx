@@ -16,7 +16,7 @@ import { Button } from '../components/Button'
 import { SectionHeader } from '../components/UI/SectionHeader'
 import { EmptyState } from '../components/UI/EmptyState'
 import { ConfirmActionRow } from '../components/UI/ConfirmActionRow'
-import { Bell, BookOpen, ChevronRight, LogOut, Plus, Save, ShieldCheck, Sparkles, UserRound, X, Users2, School } from 'lucide-react'
+import { Bell, BookOpen, ChevronRight, LogOut, Plus, Save, ShieldCheck, UserRound, X, Users2, School } from 'lucide-react'
 
 interface AppSettingsScreenProps {
   onPlanEkle: (entries: PlanEntry[]) => void
@@ -57,7 +57,7 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
     const bt = (ayarlar as Record<string, unknown>).bildirimTercihleri as Record<string, boolean> | undefined
     return bt?.onemliTarihler ?? true
   })
-  const [degisti, setDegisti] = useState(false)
+  const [, setDegisti] = useState(false)
   const [authModalAcik, setAuthModalAcik] = useState(false)
   const [planSelectorAcik, setPlanSelectorAcik] = useState(false)
   const [silOnayBekleyen, setSilOnayBekleyen] = useState<string | null>(null)
@@ -134,262 +134,328 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
     setZumreOgretmenleri(prev => prev.length === 1 ? [''] : prev.filter((_, i) => i !== index))
   }
 
+  const [aktifTab, setAktifTab] = useState<'profil' | 'okul' | 'zumre' | 'uygulama'>('profil')
+
+  const avatarHarf = adSoyad ? adSoyad.charAt(0).toUpperCase() : 'Ö'
+  const planBrans = planlarProp[0]?.ders || ''
+  const planSiniflar = planlarProp.map(p => p.sinifGercek || p.sinif)
+
+  const TABS = [
+    { id: 'profil', label: 'Profil' },
+    { id: 'okul', label: 'Okul' },
+    { id: 'zumre', label: 'Zümre' },
+    { id: 'uygulama', label: 'Uygulama' },
+  ] as const
+
   return (
     <div className="page-shell">
-      <div className="page-header">
-        <h1 className="text-[22px] font-bold tracking-tight mb-0.5" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text1)' }}>
-          Profil
-        </h1>
-        <p className="text-sm" style={{ color: 'var(--color-text2)' }}>
-          Ogretmen, okul ve belge otomasyonu icin gereken bilgiler
-        </p>
+      {/* Başlık + Kaydet */}
+      <div className="flex items-center justify-between" style={{ padding: '16px 16px 0' }}>
+        <div>
+          <h1 className="font-display font-bold" style={{ fontSize: 22, color: 'var(--color-text1)', letterSpacing: '-0.03em' }}>Ayarlar</h1>
+          <p style={{ fontSize: 12, color: 'var(--color-text2)', marginTop: 2 }}>Profil, okul ve uygulama tercihlerinizi yönetin</p>
+        </div>
+        <button
+          onClick={handleKaydet}
+          className="flex items-center gap-2 font-sans font-bold"
+          style={{ height: 38, padding: '0 14px', borderRadius: 'var(--radius-lg)', background: 'var(--color-primary)', color: '#fff', fontSize: 13, cursor: 'pointer', border: 'none' }}
+        >
+          <Save size={15} /> Kaydet
+        </button>
       </div>
 
-      <div className="page-hero relative overflow-hidden" style={{ borderRadius: 'var(--radius-xl)', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-sm)', padding: '18px' }}>
-        <div className="absolute top-0 left-0 right-0 h-[3px]" style={{ background: 'linear-gradient(90deg, var(--color-primary), var(--color-pop))' }} />
-        <div className="flex items-center gap-3 mt-1">
-          <div className="w-11 h-11 flex items-center justify-center flex-shrink-0" style={{ borderRadius: '999px', backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', color: 'var(--color-primary)' }}>
-            <UserRound size={18} />
+      {/* Gradient Profil Kartı */}
+      <div
+        className="relative overflow-hidden"
+        style={{ margin: '16px 16px 0', borderRadius: 'var(--radius-xl)', background: 'var(--gradient-primary, linear-gradient(135deg,#4F6AF5,#6D28D9))', padding: '18px' }}
+      >
+        <div style={{ position: 'absolute', top: -30, right: -20, width: 100, height: 100, borderRadius: '50%', background: 'rgba(255,255,255,0.08)' }} />
+        <div className="flex items-center gap-3">
+          <div
+            className="flex items-center justify-center font-display font-bold rounded-xl flex-shrink-0"
+            style={{ width: 44, height: 44, background: 'rgba(255,255,255,0.25)', color: '#fff', fontSize: 20 }}
+          >
+            {avatarHarf}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-[.1em]" style={{ color: 'var(--color-text3)' }}>Hesap Durumu</p>
-            <p className="text-[16px] font-bold truncate" style={{ color: 'var(--color-text1)' }}>{adSoyad || 'Ogretmen Profili'}</p>
-            <p className="text-xs" style={{ color: user ? 'var(--color-success)' : 'var(--color-text2)' }}>
-              {user ? 'Bulut senkronizasyonu aktif' : 'Yerel kullanim modu'}
-            </p>
+            <p className="font-display font-bold truncate" style={{ fontSize: 16, color: '#fff' }}>{adSoyad || 'Öğretmen'}</p>
+            {planBrans && (
+              <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)' }}>{planBrans}</p>
+            )}
+            {planSiniflar.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-1">
+                {planSiniflar.map(s => (
+                  <span
+                    key={s}
+                    className="font-sans font-semibold"
+                    style={{ fontSize: 11, color: 'rgba(255,255,255,0.9)', background: 'rgba(255,255,255,0.18)', padding: '1px 8px', borderRadius: 'var(--radius-pill)' }}
+                  >
+                    {s}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
-          <div className="px-2.5 py-1.5" style={{ borderRadius: 'var(--radius-pill)', backgroundColor: user ? 'color-mix(in srgb, var(--color-success) 10%, transparent)' : 'color-mix(in srgb, var(--color-warning) 10%, transparent)' }}>
-            <span className="text-[11px] font-bold" style={{ color: user ? 'var(--color-success)' : 'var(--color-warning)' }}>{user ? 'Bagli' : 'Misafir'}</span>
-          </div>
+          <button
+            onClick={() => setAktifTab('profil')}
+            className="flex items-center gap-1 font-sans font-semibold"
+            style={{ fontSize: 12, color: 'rgba(255,255,255,0.9)', background: 'rgba(255,255,255,0.18)', padding: '6px 12px', borderRadius: 'var(--radius-pill)', border: '1px solid rgba(255,255,255,0.25)', cursor: 'pointer', flexShrink: 0 }}
+          >
+            ✏ Düzenle
+          </button>
         </div>
       </div>
 
-      <div className="section-stack">
-        <Card style={{ borderRadius: 'var(--radius-xl)' }}>
-          <SectionHeader title="Ogretmen Bilgileri" meta={degisti ? 'Duzenleme var' : 'Kayitli'} />
-          <div className="flex flex-col gap-3">
-            <div>
-              <p className="text-[11px] font-bold mb-1" style={{ color: 'var(--color-text2)' }}>Ad Soyad</p>
-              <input type="text" placeholder="Ad Soyad" value={adSoyad} onChange={e => setAdSoyad(e.target.value)} className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text1)', outline: 'none' }} />
-            </div>
-            <div>
-              <p className="text-[11px] font-bold mb-1" style={{ color: 'var(--color-text2)' }}>Okul Adi</p>
-              <input type="text" placeholder="Okul Adi" value={okulAdi} onChange={e => setOkulAdi(e.target.value)} className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text1)', outline: 'none' }} />
-            </div>
-          </div>
-        </Card>
+      {/* Tab bar */}
+      <div style={{ padding: '12px 16px 0' }}>
+        <div
+          className="flex"
+          style={{ background: 'var(--color-bg)', borderRadius: 'var(--radius-pill)', padding: 4 }}
+        >
+          {TABS.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setAktifTab(tab.id)}
+              className="flex-1 font-sans font-semibold"
+              style={{
+                height: 36, borderRadius: 'var(--radius-pill)', fontSize: 13,
+                background: aktifTab === tab.id ? '#fff' : 'transparent',
+                color: aktifTab === tab.id ? 'var(--color-primary)' : 'var(--color-text3)',
+                border: 'none', cursor: 'pointer',
+                boxShadow: aktifTab === tab.id ? 'var(--shadow-xs)' : 'none',
+                transition: 'all 0.2s',
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
-        <Card style={{ borderRadius: 'var(--radius-xl)' }}>
-          <SectionHeader title="Kurum Bilgileri" meta="Belgelerde kullanilacak" />
-          <div className="flex flex-col gap-3">
-            <div>
-              <p className="text-[11px] font-bold mb-1" style={{ color: 'var(--color-text2)' }}>Mudur Adi</p>
-              <input type="text" placeholder="Okul muduru" value={mudurAdi} onChange={e => setMudurAdi(e.target.value)} className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text1)', outline: 'none' }} />
-            </div>
-            <div>
-              <p className="text-[11px] font-bold mb-1" style={{ color: 'var(--color-text2)' }}>Mudur Yardimcisi</p>
-              <input type="text" placeholder="Mudur yardimcisi" value={mudurYardimcisiAdi} onChange={e => setMudurYardimcisiAdi(e.target.value)} className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text1)', outline: 'none' }} />
-            </div>
-            <div className="px-3.5 py-3" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)' }}>
-              <div className="flex items-center justify-between gap-3 mb-3">
-                <div className="flex items-center gap-2">
-                  <Users2 size={15} style={{ color: 'var(--color-primary)' }} />
-                  <p className="text-sm font-semibold" style={{ color: 'var(--color-text1)' }}>Zumre Ogretmenleri</p>
+      <div className="section-stack" style={{ padding: '0 16px 32px' }}>
+
+        {/* ── PROFİL TAB ── */}
+        {aktifTab === 'profil' && (
+          <>
+            <Card style={{ borderRadius: 'var(--radius-xl)', marginTop: 12 }}>
+              <div className="flex items-center gap-2 mb-3">
+                <UserRound size={16} style={{ color: 'var(--color-primary)' }} />
+                <div>
+                  <p className="font-sans font-bold" style={{ fontSize: 14, color: 'var(--color-text1)' }}>Kişisel Bilgiler</p>
+                  <p style={{ fontSize: 11, color: 'var(--color-text3)' }}>Ad soyad evraklarda kullanılır</p>
                 </div>
-                <button type="button" onClick={handleZumreEkle} className="inline-flex items-center gap-1 text-xs font-bold" style={{ color: 'var(--color-primary)' }}>
-                  <Plus size={14} />
-                  Ekle
-                </button>
               </div>
-              <div className="flex flex-col gap-2">
-                {zumreOgretmenleri.map((isim, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <input type="text" placeholder={`Zumre ogretmeni ${index + 1}`} value={isim} onChange={e => handleZumreDegistir(index, e.target.value)} className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-surface)', color: 'var(--color-text1)', outline: 'none' }} />
-                    <button type="button" onClick={() => handleZumreSil(index)} className="w-10 h-10 flex items-center justify-center" style={{ borderRadius: '999px', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text3)' }}>
-                      <X size={14} />
-                    </button>
-                  </div>
-                ))}
+              <div className="flex flex-col gap-3">
+                <div>
+                  <p className="text-[11px] font-bold mb-1" style={{ color: 'var(--color-text2)' }}>Ad Soyad</p>
+                  <input type="text" placeholder="Ad Soyad" value={adSoyad} onChange={e => setAdSoyad(e.target.value)} className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text1)', outline: 'none' }} />
+                </div>
               </div>
-            </div>
-            <div className={`overflow-hidden transition-all duration-200 ${degisti ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'}`}>
-              <Button onClick={handleKaydet} variant="primary" className="w-full mt-1">
-                <Save size={15} /> Kaydet
-              </Button>
-            </div>
-          </div>
-        </Card>
+            </Card>
 
-        {/* İlkkeriye alanları — sadece ilkokul branşında */}
-        {isIlkokul && (
-          <Card style={{ borderRadius: 'var(--radius-xl)' }}>
-            <SectionHeader title="İlkkeriye Bilgileri" meta="İlkokul 1. sınıf" />
+            <Card style={{ borderRadius: 'var(--radius-xl)' }}>
+              <div className="flex items-center gap-2 mb-3">
+                <BookOpen size={16} style={{ color: 'var(--color-accent)' }} />
+                <div>
+                  <p className="font-sans font-bold" style={{ fontSize: 14, color: 'var(--color-text1)' }}>Branş ve Sınıflar</p>
+                  <p style={{ fontSize: 11, color: 'var(--color-text3)' }}>Plan ve evrak oluşturmada kullanılır</p>
+                </div>
+              </div>
+
+              {planlarProp.length === 0 ? (
+                <EmptyState icon={<School size={20} />} title="Plan yok" body="Plan ekleyerek branş ve sınıf bilgisi oluşturulur." />
+              ) : (
+                <div className="flex flex-col gap-2 mb-3">
+                  {planlarProp.map(p => (
+                    <div key={p.sinif} className="flex items-center gap-3 px-3 py-2.5" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', background: 'var(--color-bg)' }}>
+                      <BookOpen size={15} style={{ color: 'var(--color-primary)', flexShrink: 0 }} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold truncate" style={{ color: 'var(--color-text1)' }}>{p.label || p.ders}</p>
+                        <p className="text-xs" style={{ color: 'var(--color-text2)' }}>{p.sinifGercek || p.sinif} · {p.yil}</p>
+                      </div>
+                      {silOnayBekleyen === p.sinif ? (
+                        <ConfirmActionRow onConfirm={() => handlePlanSilOnayla(p.sinif)} onCancel={() => setSilOnayBekleyen(null)} />
+                      ) : (
+                        <button onClick={() => setSilOnayBekleyen(p.sinif)} className="w-7 h-7 flex items-center justify-center" style={{ borderRadius: '999px', background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text3)', cursor: 'pointer' }}>
+                          <X size={13} />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <button onClick={() => setPlanSelectorAcik(true)} className="w-full flex items-center justify-center gap-2 py-3 text-sm font-bold" style={{ borderRadius: 'var(--radius-pill)', border: '1px dashed var(--color-primary-b)', backgroundColor: 'color-mix(in srgb, var(--color-primary) 7%, transparent)', color: 'var(--color-primary)', cursor: 'pointer' }}>
+                <Plus size={15} /> Yeni Plan Ekle
+              </button>
+
+              {mufredatUyari && (
+                <div className="mt-3 px-3 py-2.5" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid color-mix(in srgb, var(--color-warning) 25%, transparent)', backgroundColor: 'color-mix(in srgb, var(--color-warning) 8%, transparent)' }}>
+                  <p className="text-xs font-semibold" style={{ color: 'var(--color-warning)' }}>{mufredatUyari}</p>
+                </div>
+              )}
+            </Card>
+
+            {isIlkokul && (
+              <Card style={{ borderRadius: 'var(--radius-xl)' }}>
+                <SectionHeader title="İlkkeriye Bilgileri" meta="İlkokul 1. sınıf" />
+                <div className="flex flex-col gap-3">
+                  <div>
+                    <p className="text-[11px] font-bold mb-1" style={{ color: 'var(--color-text2)' }}>İlkkeriye Grubu</p>
+                    <input value={ilkkeriyeGrubu} onChange={e => setIlkkeriyeGrubu(e.target.value)} placeholder="Örn: Ses Temelli Cümle Yöntemi" className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text1)', outline: 'none' }} />
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-bold mb-1" style={{ color: 'var(--color-text2)' }}>Öğretim Yöntemi</p>
+                    <input value={ilkkeriyeYontemi} onChange={e => setIlkkeriyeYontemi(e.target.value)} placeholder="Örn: Analitik Sentez" className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text1)', outline: 'none' }} />
+                  </div>
+                </div>
+              </Card>
+            )}
+          </>
+        )}
+
+        {/* ── OKUL TAB ── */}
+        {aktifTab === 'okul' && (
+          <Card style={{ borderRadius: 'var(--radius-xl)', marginTop: 12 }}>
+            <SectionHeader title="Okul Bilgileri" meta="Belgelerde kullanılacak" />
             <div className="flex flex-col gap-3">
               <div>
-                <p className="text-[11px] font-bold mb-1 uppercase tracking-[.08em]" style={{ color: 'var(--color-text2)' }}>İlkkeriye Grubu</p>
-                <input value={ilkkeriyeGrubu} onChange={e => setIlkkeriyeGrubu(e.target.value)} placeholder="Örn: Ses Temelli Cümle Yöntemi" className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-surface)', color: 'var(--color-text1)', outline: 'none' }} />
+                <p className="text-[11px] font-bold mb-1" style={{ color: 'var(--color-text2)' }}>Okul Adı</p>
+                <input type="text" placeholder="Okul adı" value={okulAdi} onChange={e => setOkulAdi(e.target.value)} className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text1)', outline: 'none' }} />
               </div>
               <div>
-                <p className="text-[11px] font-bold mb-1 uppercase tracking-[.08em]" style={{ color: 'var(--color-text2)' }}>Öğretim Yöntemi</p>
-                <input value={ilkkeriyeYontemi} onChange={e => setIlkkeriyeYontemi(e.target.value)} placeholder="Örn: Analitik Sentez" className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-surface)', color: 'var(--color-text1)', outline: 'none' }} />
+                <p className="text-[11px] font-bold mb-1" style={{ color: 'var(--color-text2)' }}>Müdür Adı</p>
+                <input type="text" placeholder="Okul müdürü" value={mudurAdi} onChange={e => setMudurAdi(e.target.value)} className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text1)', outline: 'none' }} />
               </div>
-              <div className={`overflow-hidden transition-all duration-200 ${degisti ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'}`}>
-                <Button onClick={handleKaydet} variant="primary" className="w-full mt-1">
-                  <Save size={15} /> Kaydet
-                </Button>
+              <div>
+                <p className="text-[11px] font-bold mb-1" style={{ color: 'var(--color-text2)' }}>Müdür Yardımcısı</p>
+                <input type="text" placeholder="Müdür yardımcısı" value={mudurYardimcisiAdi} onChange={e => setMudurYardimcisiAdi(e.target.value)} className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text1)', outline: 'none' }} />
+              </div>
+              <div className="flex items-center justify-between px-3.5 py-3" style={{ borderRadius: 'var(--radius-lg)', backgroundColor: 'var(--color-bg)', border: '1px solid var(--color-border)' }}>
+                <div>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--color-text1)' }}>Akademik Yıl</p>
+                  <p className="text-xs" style={{ color: 'var(--color-text3)' }}>Varsayılan plan yılı</p>
+                </div>
+                <div className="flex items-center gap-1">
+                  <select value={yil} onChange={e => setYil(e.target.value)} className="text-sm font-bold bg-transparent border-none" style={{ color: 'var(--color-primary)', outline: 'none' }}>
+                    {getYilSecenekleri().map(y => <option key={y} value={y}>{y}</option>)}
+                  </select>
+                  <ChevronRight size={14} style={{ color: 'var(--color-text3)' }} />
+                </div>
               </div>
             </div>
           </Card>
         )}
 
-        {/* Bildirim tercihleri */}
-        <Card style={{ borderRadius: 'var(--radius-xl)' }}>
-          <SectionHeader title="Bildirim Tercihleri" />
-          <div className="flex items-center justify-between py-2">
-            <div>
-              <p className="text-sm font-semibold" style={{ color: 'var(--color-text1)' }}>Önemli tarih bildirimleri</p>
-              <p className="text-xs" style={{ color: 'var(--color-text3)' }}>ZHA, not girişi, veli toplantısı</p>
+        {/* ── ZÜMRE TAB ── */}
+        {aktifTab === 'zumre' && (
+          <Card style={{ borderRadius: 'var(--radius-xl)', marginTop: 12 }}>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Users2 size={16} style={{ color: 'var(--color-primary)' }} />
+                <p className="font-sans font-bold" style={{ fontSize: 14, color: 'var(--color-text1)' }}>Zümre Öğretmenleri</p>
+              </div>
+              <button type="button" onClick={handleZumreEkle} className="inline-flex items-center gap-1 text-xs font-bold" style={{ color: 'var(--color-primary)' }}>
+                <Plus size={14} /> Ekle
+              </button>
             </div>
-            <button
-              onClick={() => { setBildirimOnemliTarihler(p => !p); setDegisti(true) }}
-              style={{ width: '44px', height: '24px', borderRadius: '100px', background: bildirimOnemliTarihler ? '#4F6AF5' : 'var(--color-border)', position: 'relative', border: 'none', cursor: 'pointer', transition: 'background 0.2s' }}
-            >
-              <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#fff', position: 'absolute', top: '3px', left: bildirimOnemliTarihler ? '23px' : '3px', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,.2)' }} />
-            </button>
-          </div>
-        </Card>
-
-        <Card style={{ borderRadius: 'var(--radius-xl)' }}>
-          <SectionHeader title="Planlarim" meta={`${planlarProp.length} plan`} />
-          <button onClick={() => setPlanSelectorAcik(true)} className="w-full flex items-center justify-center gap-2 mb-3 py-3 text-sm font-bold transition-all active:scale-[0.98]" style={{ borderRadius: 'var(--radius-pill)', border: '1px dashed var(--color-primary-b)', backgroundColor: 'color-mix(in srgb, var(--color-primary) 7%, transparent)', color: 'var(--color-primary)' }}>
-            <Plus size={15} /> Yeni Plan Ekle
-          </button>
-
-          {planlarProp.length === 0 ? (
-            <EmptyState icon={<School size={20} />} title="Henuz plan yok" body="Yeni plan ekleyerek takip, not ve uretim akisini doldurabilirsin." />
-          ) : (
             <div className="flex flex-col gap-2">
-              {planlarProp.map(p => (
-                <div key={p.sinif} className="px-3.5 py-3" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-surface)' }}>
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 flex items-center justify-center flex-shrink-0" style={{ borderRadius: 'var(--radius-md)', backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', color: 'var(--color-primary)' }}>
-                      <BookOpen size={15} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold truncate" style={{ color: 'var(--color-text1)' }}>{p.label || p.ders}</p>
-                      <p className="text-xs" style={{ color: 'var(--color-text2)' }}>{p.sinifGercek || p.sinif} - {p.yil}</p>
-                    </div>
-                    {silOnayBekleyen === p.sinif ? (
-                      <ConfirmActionRow onConfirm={() => handlePlanSilOnayla(p.sinif)} onCancel={() => setSilOnayBekleyen(null)} />
-                    ) : (
-                      <button onClick={() => setSilOnayBekleyen(p.sinif)} aria-label={`${p.label || p.ders} planini sil`} className="w-8 h-8 flex items-center justify-center transition-all active:scale-95" style={{ borderRadius: '999px', backgroundColor: 'var(--color-bg)', color: 'var(--color-text3)' }}>
-                        <X size={15} />
-                      </button>
-                    )}
-                  </div>
+              {zumreOgretmenleri.map((isim, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <input type="text" placeholder={`Zümre öğretmeni ${index + 1}`} value={isim} onChange={e => handleZumreDegistir(index, e.target.value)} className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text1)', outline: 'none' }} />
+                  <button type="button" onClick={() => handleZumreSil(index)} className="w-10 h-10 flex items-center justify-center" style={{ borderRadius: '999px', backgroundColor: 'var(--color-bg)', border: '1px solid var(--color-border)', color: 'var(--color-text3)', cursor: 'pointer' }}>
+                    <X size={14} />
+                  </button>
                 </div>
               ))}
             </div>
-          )}
+          </Card>
+        )}
 
-          {mufredatUyari && (
-            <div className="mt-3 px-3 py-2.5" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid color-mix(in srgb, var(--color-warning) 25%, transparent)', backgroundColor: 'color-mix(in srgb, var(--color-warning) 8%, transparent)' }}>
-              <p className="text-xs font-semibold" style={{ color: 'var(--color-warning)' }}>{mufredatUyari}</p>
-            </div>
-          )}
-        </Card>
-
-        {/* Yakında badge */}
-        <div
-          className="flex items-start gap-3 px-4 py-4"
-          style={{
-            borderRadius: 'var(--radius-lg)',
-            backgroundColor: 'var(--color-accent-s)',
-            border: '1px solid color-mix(in srgb, var(--color-accent) 20%, transparent)',
-          }}
-          onClick={() => goster('Bu ozellik yakinda aktif olacak', 'bilgi')}
-        >
-          <Sparkles size={20} style={{ color: 'var(--color-accent)', flexShrink: 0, marginTop: 2 }} />
-          <div className="flex-1">
-            <p className="text-sm font-bold" style={{ color: 'var(--color-text1)' }}>Evrak Uretici</p>
-            <p className="text-xs mt-0.5" style={{ color: 'var(--color-text2)' }}>
-              Yazili sorulari ve burokratik evraklari otomatik olustur
-            </p>
-          </div>
-          <span className="text-[11px] font-bold px-2 py-1 rounded-full whitespace-nowrap" style={{ backgroundColor: 'color-mix(in srgb, var(--color-accent) 15%, transparent)', color: 'var(--color-accent)' }}>
-            Yakinda
-          </span>
-        </div>
-
-        <Card style={{ borderRadius: 'var(--radius-xl)' }}>
-          <SectionHeader title="Tercihler" />
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between px-3.5 py-3" style={{ borderRadius: 'var(--radius-lg)', backgroundColor: 'var(--color-bg)', border: '1px solid var(--color-border)' }}>
-              <div>
-                <p className="text-sm font-semibold" style={{ color: 'var(--color-text1)' }}>Akademik Yil</p>
-                <p className="text-xs" style={{ color: 'var(--color-text3)' }}>Varsayilan plan yili</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <select value={yil} onChange={e => setYil(e.target.value)} className="text-sm font-bold bg-transparent border-none" style={{ color: 'var(--color-primary)', outline: 'none' }}>
-                  {getYilSecenekleri().map(y => <option key={y} value={y}>{y}</option>)}
-                </select>
-                <ChevronRight size={14} style={{ color: 'var(--color-text3)' }} />
-              </div>
-            </div>
-
-            {isBildirimDestekleniyor() && (
-              <div className="flex items-center justify-between px-3.5 py-3" style={{ borderRadius: 'var(--radius-lg)', backgroundColor: 'var(--color-bg)', border: '1px solid var(--color-border)' }}>
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 flex items-center justify-center" style={{ borderRadius: 'var(--radius-md)', backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', color: 'var(--color-primary)' }}>
-                    <Bell size={15} />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold" style={{ color: 'var(--color-text1)' }}>Haftalik hatirlatici</p>
-                    <p className="text-xs" style={{ color: 'var(--color-text3)' }}>{bildirimIzni === 'denied' ? 'Tarayici ayarlarindan izin ver' : 'Haftabasi kazanimi bildir'}</p>
-                  </div>
+        {/* ── UYGULAMA TAB ── */}
+        {aktifTab === 'uygulama' && (
+          <>
+            <Card style={{ borderRadius: 'var(--radius-xl)', marginTop: 12 }}>
+              <SectionHeader title="Bildirim Tercihleri" />
+              <div className="flex items-center justify-between py-2">
+                <div>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--color-text1)' }}>Önemli tarih bildirimleri</p>
+                  <p className="text-xs" style={{ color: 'var(--color-text3)' }}>ZHA, not girişi, veli toplantısı</p>
                 </div>
-                <button onClick={handleBildirimToggle} disabled={bildirimIzni === 'denied'} className="relative w-11 h-6 transition-all duration-200 disabled:opacity-40" aria-label="Haftalik hatirlatici ayari" style={{ borderRadius: '999px', backgroundColor: bildirimAktif && bildirimIzni === 'granted' ? 'var(--color-primary)' : 'var(--color-border2)' }}>
-                  <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full transition-transform duration-200 ${bildirimAktif && bildirimIzni === 'granted' ? 'translate-x-5' : 'translate-x-0'}`} style={{ backgroundColor: '#ffffff', boxShadow: 'var(--shadow-xs)' }} />
+                <button
+                  onClick={() => { setBildirimOnemliTarihler(p => !p); setDegisti(true) }}
+                  style={{ width: 44, height: 24, borderRadius: 100, background: bildirimOnemliTarihler ? '#4F6AF5' : 'var(--color-border)', position: 'relative', border: 'none', cursor: 'pointer', transition: 'background 0.2s', flexShrink: 0 }}
+                >
+                  <div style={{ width: 18, height: 18, borderRadius: '50%', background: '#fff', position: 'absolute', top: 3, left: bildirimOnemliTarihler ? 23 : 3, transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,.2)' }} />
                 </button>
               </div>
-            )}
-          </div>
-        </Card>
 
-        <Card style={{ borderRadius: 'var(--radius-xl)' }}>
-          <SectionHeader title="Hesap ve Guvenlik" />
-          {user ? (
-            <div className="px-3.5 py-3" style={{ borderRadius: 'var(--radius-lg)', backgroundColor: 'var(--color-bg)', border: '1px solid var(--color-border)' }}>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 flex items-center justify-center flex-shrink-0" style={{ borderRadius: '999px', backgroundColor: 'color-mix(in srgb, var(--color-success) 10%, transparent)', color: 'var(--color-success)' }}>
-                  <ShieldCheck size={16} />
+              {isBildirimDestekleniyor() && (
+                <div className="flex items-center justify-between py-2 border-t" style={{ borderColor: 'var(--color-border)' }}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 flex items-center justify-center" style={{ borderRadius: 'var(--radius-md)', backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', color: 'var(--color-primary)' }}>
+                      <Bell size={15} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold" style={{ color: 'var(--color-text1)' }}>Haftalık hatırlatıcı</p>
+                      <p className="text-xs" style={{ color: 'var(--color-text3)' }}>{bildirimIzni === 'denied' ? 'Tarayıcı ayarlarından izin ver' : 'Haftabaşı kazanımı bildir'}</p>
+                    </div>
+                  </div>
+                  <button onClick={handleBildirimToggle} disabled={bildirimIzni === 'denied'} className="relative w-11 h-6 disabled:opacity-40" style={{ borderRadius: 999, backgroundColor: bildirimAktif && bildirimIzni === 'granted' ? 'var(--color-primary)' : 'var(--color-border2)', border: 'none', cursor: 'pointer', transition: 'background 0.2s', flexShrink: 0 }}>
+                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full transition-transform duration-200 ${bildirimAktif && bildirimIzni === 'granted' ? 'translate-x-5' : 'translate-x-0'}`} style={{ backgroundColor: '#fff', boxShadow: 'var(--shadow-xs)', display: 'block' }} />
+                  </button>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold truncate" style={{ color: 'var(--color-text1)' }}>{user.email}</p>
-                  <p className="text-xs font-medium" style={{ color: 'var(--color-success)' }}>Planlar buluta kaydediliyor</p>
+              )}
+            </Card>
+
+            <Card style={{ borderRadius: 'var(--radius-xl)' }}>
+              <SectionHeader title="Hesap ve Güvenlik" />
+              {user ? (
+                <div className="px-3.5 py-3" style={{ borderRadius: 'var(--radius-lg)', backgroundColor: 'var(--color-bg)', border: '1px solid var(--color-border)' }}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 flex items-center justify-center flex-shrink-0" style={{ borderRadius: '999px', backgroundColor: 'color-mix(in srgb, var(--color-success) 10%, transparent)', color: 'var(--color-success)' }}>
+                      <ShieldCheck size={16} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold truncate" style={{ color: 'var(--color-text1)' }}>{user.email}</p>
+                      <p className="text-xs font-medium" style={{ color: 'var(--color-success)' }}>Planlar buluta kaydediliyor</p>
+                    </div>
+                  </div>
+                  <button onClick={() => signOut()} className="w-full flex items-center justify-center gap-2 py-3 text-sm font-bold" style={{ borderRadius: 'var(--radius-pill)', border: '1px solid color-mix(in srgb, var(--color-danger) 25%, transparent)', backgroundColor: 'color-mix(in srgb, var(--color-danger) 8%, transparent)', color: 'var(--color-danger)', cursor: 'pointer' }}>
+                    <LogOut size={15} /> Çıkış Yap
+                  </button>
                 </div>
-              </div>
-              <button onClick={() => signOut()} className="w-full flex items-center justify-center gap-2 py-3 text-sm font-bold transition-all active:scale-[0.98]" style={{ borderRadius: 'var(--radius-pill)', border: '1px solid color-mix(in srgb, var(--color-danger) 25%, transparent)', backgroundColor: 'color-mix(in srgb, var(--color-danger) 8%, transparent)', color: 'var(--color-danger)' }}>
-                <LogOut size={15} /> Cikis Yap
-              </button>
+              ) : (
+                <div className="px-3.5 py-4" style={{ borderRadius: 'var(--radius-lg)', backgroundColor: 'var(--color-bg)', border: '1px solid var(--color-border)' }}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 flex items-center justify-center flex-shrink-0" style={{ borderRadius: '999px', backgroundColor: 'var(--color-surface)', color: 'var(--color-text3)', border: '1px solid var(--color-border)' }}>
+                      <UserRound size={16} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold" style={{ color: 'var(--color-text1)' }}>Giriş yapılmadı</p>
+                      <p className="text-xs" style={{ color: 'var(--color-text3)' }}>Planlara tüm cihazlardan erişilebilir olsun</p>
+                    </div>
+                  </div>
+                  <Button onClick={() => setAuthModalAcik(true)} variant="secondary" className="w-full">
+                    Giriş Yap / Kayıt Ol
+                  </Button>
+                </div>
+              )}
+            </Card>
+
+                    <div
+              className="flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer"
+              style={{ background: 'color-mix(in srgb, var(--color-danger) 8%, transparent)', border: '1px solid color-mix(in srgb, var(--color-danger) 20%, transparent)' }}
+            >
+              <p className="font-sans font-semibold" style={{ fontSize: 14, color: 'var(--color-danger)' }}>Tüm verileri sıfırla</p>
+              <ConfirmActionRow
+                confirmLabel="Sıfırla"
+                onConfirm={() => { localStorage.clear(); window.location.reload() }}
+                onCancel={() => {}}
+              />
             </div>
-          ) : (
-            <div className="px-3.5 py-4" style={{ borderRadius: 'var(--radius-lg)', backgroundColor: 'var(--color-bg)', border: '1px solid var(--color-border)' }}>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 flex items-center justify-center flex-shrink-0" style={{ borderRadius: '999px', backgroundColor: 'var(--color-surface)', color: 'var(--color-text3)', border: '1px solid var(--color-border)' }}>
-                  <UserRound size={16} />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold" style={{ color: 'var(--color-text1)' }}>Giris yapilmadi</p>
-                  <p className="text-xs" style={{ color: 'var(--color-text3)' }}>Planlara tum cihazlardan erisilebilir olsun</p>
-                </div>
-              </div>
-              <Button onClick={() => setAuthModalAcik(true)} variant="secondary" className="w-full">
-                Giris Yap / Kayit Ol
-              </Button>
-            </div>
-          )}
-        </Card>
+          </>
+        )}
       </div>
 
       {authModalAcik && <AuthModal onClose={() => setAuthModalAcik(false)} />}

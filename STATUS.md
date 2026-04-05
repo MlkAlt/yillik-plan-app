@@ -3,7 +3,7 @@
 > Her oturumda bu dosya okunur ve yalnizca gerekli bilgiler guncellenir.
 > Durum: TODO -> WIP -> DONE | Engel: BLOCKED
 
-Son guncelleme: 2026-04-05
+Son guncelleme: 2026-04-05 (Figma uyarlama - Faz 1 + Faz 2 tamamlandı)
 
 ---
 
@@ -142,6 +142,28 @@ Son guncelleme: 2026-04-05
 
 - PWA katmani UI/UX gelistirme asamasinda gecici olarak devre disi.
 - Yerel build su an duzgun calisiyor; onceki `@tailwindcss/oxide-win32-x64-msvc` ve `spawn EPERM` sorunu tooling duzeltmesiyle asildi.
+
+---
+
+### 2026-04-05 — Figma tasarım uyarlaması: Faz 1 + Faz 2 tamamlandı
+
+**Faz 1 (Navigasyon Altyapısı):**
+- `index.css` — gradient tokenlar + topbar/sidebar boyut değişkenleri eklendi
+- `TopBar.tsx` (yeni) — hamburger + ÖğretmenAsistan logo + Beta badge + Bell ikonu
+- `SidebarDrawer.tsx` (yeni) — 6 menü item, Premium banner, kullanıcı kartı, slide-in animasyon
+- `AppLayout.tsx` — bottom nav kaldırıldı, TopBar + SidebarDrawer entegre edildi
+
+**Faz 2 (Ekran UI Güncellemeleri):**
+- `AppHomeScreen.tsx` — gradient welcome banner + 4 stat kartı (Branş/Sınıf/Hafta/İlerleme) + Hızlı Erişim 2×2 grid + Sınıflarım + Yaklaşan Tarihler + Evrak Durumu dark card
+- `AppSettingsScreen.tsx` — gradient profil kartı + 4 tab (Profil/Okul/Zümre/Uygulama)
+- `DosyamPage.tsx` — Evrak Merkezi rebrand + Premium banner + arama + kategori chips + belge kartı
+- `OnemliTarihlerPage.tsx` — ay grid takvim + stat chips + tab switcher (Yaklaşan/Geçmiş) + event kartı sol border
+- `DersProgramiPage.tsx` — ders sayısı badge + sınıf renk göstergesi
+
+**Kalan (Faz 3):**
+- PlanPage ünite kartları (C2)
+- OnemliTarihlerListesi stil (C1)
+- PlanPage boş state + stat kartlar (B2)
 
 ---
 

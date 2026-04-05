@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bell, Calendar, Check, ChevronRight, Settings } from 'lucide-react'
+import {
+  BookOpen, CalendarDays, Check, ChevronRight,
+  Clock, FileText, TrendingUp, Users, Sparkles, Bell,
+} from 'lucide-react'
 import type { PlanEntry } from '../types/planEntry'
 import { StorageKeys } from '../lib/storageKeys'
 import { BosdurumuEkrani } from '../components/BosdurumuEkrani/BosdurumuEkrani'
 import { getEvrakSablonlari, tespitEksikAlanlar } from '../lib/evrakService'
 import { useDersProgrami } from '../hooks/useDersProgrami'
+import { useOnemliTarihler } from '../hooks/useOnemliTarihler'
 import type { OgretmenAyarlari } from '../types/ogretmenAyarlari'
 
 interface AppHomeScreenProps {
@@ -36,23 +40,37 @@ function bugunHaftaNoHesapla(entry: PlanEntry): number | null {
   )
 }
 
+function formatBugunTurkce(): string {
+  const now = new Date()
+  const gunler = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi']
+  const aylar = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık']
+  return `${gunler[now.getDay()]}, ${now.getDate()} ${aylar[now.getMonth()]} ${now.getFullYear()}`
+}
+
+const SINIF_RENKLERI = ['#4F6AF5', '#6D28D9', '#059669', '#D97706', '#DC2626', '#0EA5E9', '#7C3AED', '#10B981']
+
+const HIZLI_ERISIM = [
+  { label: 'Yıllık Plan', alt: 'Görüntüle & İndir', icon: BookOpen, renk: '#4F6AF5', bg: '#EEF1FE', path: '/app/planla' },
+  { label: 'Evrak Oluştur', alt: 'Tek tıkla hazırla', icon: FileText, renk: '#6D28D9', bg: '#F5F3FF', path: '/app/dosyam' },
+  { label: 'Takvim', alt: 'Önemli tarihler', icon: CalendarDays, renk: '#059669', bg: '#ECFDF5', path: '/app/planla/takvim' },
+  { label: 'Ders Programı', alt: 'Haftalık çizelge', icon: Clock, renk: '#D97706', bg: '#FFFBEB', path: '/app/planla/ders-programi' },
+]
+
 export function AppHomeScreen({
   planlar, onPlanEkle, onSinifSec,
   tamamlananlar = {}, onTamamlananGuncelle,
 }: AppHomeScreenProps) {
   const navigate = useNavigate()
   const [ogretmenAd, setOgretmenAd] = useState('')
-  const [uretimHakki, setUretimHakki] = useState(0)
-  const [eksikAyarlar, setEksikAyarlar] = useState(false)
-  // Optimistik UI: tamamlananlar yerel kopyası
+  const [, setUretimHakki] = useState(0)
+  const [, setEksikAyarlar] = useState(false)
   const [localTamamlananlar, setLocalTamamlananlar] = useState<Record<string, number[]>>(tamamlananlar)
 
   const { program: dersProgrami } = useDersProgrami()
-  const dersProgramiDolu = dersProgrami.saatler.some(s => s.sinif !== null)
+  const { tarihler } = useOnemliTarihler()
 
   const freeBelgeler = getEvrakSablonlari().filter(s => !s.premium)
   const belgeSayisi = freeBelgeler.length
-  const tasarrufSaat = Math.round((planlar.length * 1.5 + belgeSayisi * 0.5) * 10) / 10
 
   useEffect(() => {
     setLocalTamamlananlar(tamamlananlar)
@@ -88,12 +106,8 @@ export function AppHomeScreen({
       const parsed = item ? JSON.parse(item) : {}
       const eskiListe: number[] = Array.isArray(parsed) ? parsed : (parsed[sinif] || [])
       const isTamamlandi = eskiListe.includes(haftaNo)
-      const yeniListe = isTamamlandi
-        ? eskiListe.filter(n => n !== haftaNo)
-        : [...eskiListe, haftaNo]
-      const yeniParsed = Array.isArray(parsed)
-        ? { [sinif]: yeniListe }
-        : { ...parsed, [sinif]: yeniListe }
+      const yeniListe = isTamamlandi ? eskiListe.filter(n => n !== haftaNo) : [...eskiListe, haftaNo]
+      const yeniParsed = Array.isArray(parsed) ? { [sinif]: yeniListe } : { ...parsed, [sinif]: yeniListe }
       localStorage.setItem(StorageKeys.TAMAMLANAN_HAFTALAR, JSON.stringify(yeniParsed))
       setLocalTamamlananlar(yeniParsed)
       onTamamlananGuncelle?.()
@@ -112,7 +126,15 @@ export function AppHomeScreen({
     )
   }
 
-  // Aktif planlardan bu haftanın listesini oluştur
+  // Aktif plan verileri
+  const activeEntry = planlar[0]
+  const brans = planlar[0]?.ders ?? ''
+  const siniflar = planlar.map(p => p.sinifGercek || p.sinif)
+  const mevcutHafta = activeEntry ? bugunHaftaNoHesapla(activeEntry) : null
+  const toplamHafta = activeEntry?.plan?.haftalar?.length ?? 36
+  const ilerlemeYuzde = mevcutHafta ? Math.round(((mevcutHafta - 1) / toplamHafta) * 100) : 0
+
+  // Bu hafta listesi
   const buHaftaListesi = planlar
     .map(entry => {
       const haftaNo = bugunHaftaNoHesapla(entry)
@@ -124,335 +146,387 @@ export function AppHomeScreen({
     })
     .filter(Boolean) as { entry: PlanEntry; hafta: NonNullable<PlanEntry['plan']>['haftalar'][number]; isTamamlandi: boolean }[]
 
-  const tumTamamlandi = buHaftaListesi.length > 0 && buHaftaListesi.every(i => i.isTamamlandi)
+  // Yaklaşan tarihler (önümüzdeki 30 gün)
+  const bugun = new Date()
+  const yaklasanTarihler = tarihler
+    .filter(t => {
+      const d = new Date(t.tarih)
+      const diff = (d.getTime() - bugun.getTime()) / (1000 * 60 * 60 * 24)
+      return diff >= 0 && diff <= 30
+    })
+    .slice(0, 3)
+
+  const dersProgramiDolu = dersProgrami.saatler.some(s => s.sinif !== null)
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
-      {/* ── TOPBAR ──────────────────────────────── */}
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100%', paddingBottom: 24 }}>
+
+      {/* ── GRADIENT WELCOME BANNER ──────────── */}
       <div
         style={{
-          padding: '12px 20px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          background: 'var(--gradient-banner, linear-gradient(135deg, #1B2E5E 0%, #4F6AF5 100%))',
+          padding: '20px 20px 24px',
+          position: 'relative',
+          overflow: 'hidden',
         }}
       >
-        <div>
-          <p
-            style={{
-              fontFamily: "var(--font-display), 'Bricolage Grotesque', sans-serif",
-              fontSize: '22px',
-              fontWeight: 800,
-              color: 'var(--color-text1)',
-              letterSpacing: '-0.04em',
-            }}
-          >
-            {ogretmenAd ? `${selamMesaji()}, ${ogretmenAd}` : selamMesaji()}
-          </p>
-          <p style={{ fontSize: '12px', color: '#9B9B97', fontWeight: 500, marginTop: '2px' }}>
-            Bugün neler yapacaksın?
-          </p>
-        </div>
+        {/* Dekoratif daireler */}
+        <div style={{ position: 'absolute', top: -40, right: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(255,255,255,0.06)' }} />
+        <div style={{ position: 'absolute', bottom: -20, right: 40, width: 80, height: 80, borderRadius: '50%', background: 'rgba(255,255,255,0.04)' }} />
 
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', fontWeight: 500, marginBottom: 6, position: 'relative' }}>
+          {formatBugunTurkce()}
+        </p>
+        <h1
+          className="font-display"
+          style={{ fontSize: 22, fontWeight: 800, color: '#fff', letterSpacing: '-0.03em', marginBottom: 4, position: 'relative' }}
+        >
+          {selamMesaji()}{ogretmenAd ? `, ${ogretmenAd}!` : '!'} 👋
+        </h1>
+        {brans && (
+          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', marginBottom: 16, position: 'relative' }}>
+            {brans} branşı{siniflar.length > 0 ? ` • ${siniflar.join(', ')}` : ''}
+          </p>
+        )}
+        <div style={{ display: 'flex', gap: 10, position: 'relative' }}>
           <button
-            onClick={() => navigate('/app/profil')}
-            style={{
-              width: '44px', height: '44px', borderRadius: '50%',
-              background: 'rgba(255,255,255,0.75)', border: '1px solid rgba(0,0,0,0.07)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', backdropFilter: 'blur(12px)',
-              boxShadow: '0 1px 2px rgba(0,0,0,.04)',
-              transition: 'transform 0.2s cubic-bezier(0.22, 1, 0.36, 1)',
-              position: 'relative',
-            }}
-            onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.06)')}
-            onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+            onClick={() => navigate('/app/planla')}
+            className="flex items-center gap-2 font-sans font-semibold"
+            style={{ height: 38, padding: '0 16px', borderRadius: 'var(--radius-pill)', background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)', color: '#fff', fontSize: 13, cursor: 'pointer' }}
           >
-            <Bell size={18} style={{ color: '#52524F' }} />
-            {eksikAyarlar && (
-              <div style={{
-                position: 'absolute', top: '8px', right: '8px',
-                width: '8px', height: '8px', borderRadius: '50%',
-                background: '#DC2626', border: '2px solid #F4F3F0',
-                animation: 'ndot-pulse 2s ease-in-out infinite',
-              }} />
-            )}
+            <Sparkles size={14} /> Plan Oluştur
           </button>
-
           <button
-            onClick={() => navigate('/app/ayarlar')}
-            style={{
-              width: '44px', height: '44px', borderRadius: '50%',
-              background: 'rgba(255,255,255,0.75)', border: '1px solid rgba(0,0,0,0.07)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', backdropFilter: 'blur(12px)',
-              boxShadow: '0 1px 2px rgba(0,0,0,.04)',
-              transition: 'transform 0.2s cubic-bezier(0.22, 1, 0.36, 1)',
-            }}
-            onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.06)')}
-            onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+            onClick={() => navigate('/app/dosyam')}
+            className="flex items-center gap-2 font-sans font-semibold"
+            style={{ height: 38, padding: '0 16px', borderRadius: 'var(--radius-pill)', background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)', color: '#fff', fontSize: 13, cursor: 'pointer' }}
           >
-            <Settings size={18} style={{ color: '#52524F' }} />
+            <FileText size={14} /> Evrak İndir
           </button>
         </div>
       </div>
 
-      {/* ── BU HAFTA ────────────────────────────── */}
-      <div style={{ padding: '0 16px 8px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-          <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--color-text3)' }}>
-            Bu Hafta
+      {/* ── 4 STAT KART (2×2 grid) ──────────── */}
+      <div style={{ padding: '12px 16px 0', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+
+        {/* Branş */}
+        <div
+          className="rounded-xl p-4 flex flex-col gap-1"
+          style={{ background: '#4F6AF5', minHeight: 90 }}
+        >
+          <div className="flex items-center justify-between">
+            <BookOpen size={18} color="rgba(255,255,255,0.8)" />
+          </div>
+          <p className="font-display font-bold text-white" style={{ fontSize: 15, marginTop: 'auto', lineHeight: 1.2 }}>
+            {brans || '—'}
           </p>
-          {tumTamamlandi && (
-            <span style={{ fontSize: '10px', fontWeight: 700, color: '#059669', display: 'flex', alignItems: 'center', gap: '3px' }}>
-              <Check size={10} strokeWidth={3} /> Hepsi tamamlandı
-            </span>
-          )}
+          <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>Branş</p>
         </div>
 
-        {buHaftaListesi.length === 0 ? (
-          <div style={{
-            background: 'var(--color-surface)', border: '1px solid var(--color-border)',
-            borderRadius: '16px', padding: '16px', textAlign: 'center',
-          }}>
-            <p style={{ fontSize: '13px', color: 'var(--color-text3)' }}>Bu hafta ders dışı</p>
+        {/* Sınıf Sayısı */}
+        <div
+          className="rounded-xl p-4 flex flex-col gap-1"
+          style={{ background: '#6D28D9', minHeight: 90 }}
+        >
+          <div className="flex items-center justify-between">
+            <Users size={18} color="rgba(255,255,255,0.8)" />
           </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {buHaftaListesi.map(({ entry, hafta, isTamamlandi }) => (
-              <div
-                key={`${entry.sinif}-${hafta.haftaNo}`}
-                style={{
-                  background: isTamamlandi
-                    ? 'color-mix(in srgb, #059669 6%, var(--color-surface))'
-                    : 'var(--color-surface)',
-                  border: `1px solid ${isTamamlandi ? 'color-mix(in srgb, #059669 25%, transparent)' : 'var(--color-border)'}`,
-                  borderRadius: '16px',
-                  padding: '14px 16px',
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '12px',
-                  transition: 'all 0.2s cubic-bezier(0.22, 1, 0.36, 1)',
-                }}
-              >
-                {/* Tamamla butonu */}
-                <button
-                  onClick={() => handleTamamlaToggle(entry.sinif, hafta.haftaNo)}
-                  style={{
-                    width: '24px', height: '24px', borderRadius: '50%', flexShrink: 0,
-                    border: `2px solid ${isTamamlandi ? '#059669' : 'var(--color-border)'}`,
-                    background: isTamamlandi ? '#059669' : 'transparent',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    cursor: 'pointer', marginTop: '1px',
-                    transition: 'all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                  }}
-                >
-                  {isTamamlandi && <Check size={12} strokeWidth={3} color="#fff" />}
-                </button>
+          <p className="font-display font-bold text-white" style={{ fontSize: 22, marginTop: 'auto', letterSpacing: '-0.03em' }}>
+            {planlar.length} Sınıf
+          </p>
+          <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>Sınıf Sayısı</p>
+        </div>
 
-                {/* İçerik */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
-                    <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--color-primary)' }}>
-                      {entry.label || entry.ders}
-                    </span>
-                    <span style={{ fontSize: '10px', color: 'var(--color-text3)', fontWeight: 600 }}>
-                      {entry.sinifGercek || entry.sinif}
-                    </span>
-                    <span style={{
-                      marginLeft: 'auto', fontSize: '10px', fontWeight: 700,
-                      color: 'var(--color-text3)', flexShrink: 0,
-                    }}>
-                      {hafta.haftaNo}. Hafta
-                    </span>
-                  </div>
-                  <p style={{
-                    fontSize: '13px', fontWeight: 500, color: isTamamlandi ? 'var(--color-text3)' : 'var(--color-text1)',
-                    textDecoration: isTamamlandi ? 'line-through' : 'none',
-                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                    marginBottom: hafta.uniteAdi ? '2px' : 0,
-                  }}>
-                    {hafta.kazanim || 'Kazanım girilmemiş'}
+        {/* Mevcut Hafta */}
+        <div
+          className="rounded-xl p-4 flex flex-col gap-1"
+          style={{ background: '#1B2E5E', minHeight: 90 }}
+        >
+          <div className="flex items-center justify-between">
+            <CalendarDays size={18} color="rgba(255,255,255,0.8)" />
+          </div>
+          <p className="font-display font-bold text-white" style={{ fontSize: 22, marginTop: 'auto', letterSpacing: '-0.03em' }}>
+            {mevcutHafta ? `${mevcutHafta}. Hafta` : '—'}
+          </p>
+          <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>Mevcut Hafta</p>
+        </div>
+
+        {/* Yıllık İlerleme */}
+        <div
+          className="rounded-xl p-4 flex flex-col gap-1"
+          style={{ background: '#D97706', minHeight: 90 }}
+        >
+          <div className="flex items-center justify-between">
+            <TrendingUp size={18} color="rgba(255,255,255,0.8)" />
+          </div>
+          <p className="font-display font-bold text-white" style={{ fontSize: 22, marginTop: 'auto', letterSpacing: '-0.03em' }}>
+            %{ilerlemeYuzde}
+          </p>
+          <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>Yıllık İlerleme</p>
+        </div>
+      </div>
+
+      {/* ── BU HAFTANIN KAZANIMLARI ─────────── */}
+      {buHaftaListesi.length > 0 && (
+        <div style={{ padding: '16px 16px 0' }}>
+          <div
+            className="rounded-xl p-4"
+            style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <span style={{ fontSize: 16 }}>⭐</span>
+                <div>
+                  <p className="font-sans font-bold" style={{ fontSize: 14, color: 'var(--color-text1)' }}>
+                    Bu Haftanın Kazanımları
                   </p>
-                  {hafta.uniteAdi && (
-                    <p style={{ fontSize: '11px', color: 'var(--color-text3)' }}>
-                      {hafta.uniteAdi}
+                  {buHaftaListesi[0] && (
+                    <p style={{ fontSize: 11, color: 'var(--color-text3)' }}>
+                      {buHaftaListesi[0].hafta.haftaNo}. Hafta • {buHaftaListesi[0].entry.ders}
                     </p>
                   )}
                 </div>
+              </div>
+              <button
+                onClick={() => navigate('/app/planla')}
+                className="flex items-center gap-1 font-sans font-semibold"
+                style={{ fontSize: 12, color: 'var(--color-primary)' }}
+              >
+                Tüm Plan <ChevronRight size={14} />
+              </button>
+            </div>
 
-                {/* Detay ok */}
-                <button
-                  onClick={() => { onSinifSec(entry.sinif); navigate(`/app/hafta/${hafta.haftaNo}`) }}
-                  style={{
-                    flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer',
-                    padding: '2px', color: 'var(--color-text3)',
-                  }}
+            <div className="flex flex-col gap-2">
+              {buHaftaListesi.map(({ entry, hafta, isTamamlandi }) => (
+                <div
+                  key={`${entry.sinif}-${hafta.haftaNo}`}
+                  className="flex items-center gap-3"
+                  style={{ padding: '8px 0', borderBottom: '1px solid var(--color-border)' }}
                 >
-                  <ChevronRight size={16} />
-                </button>
-              </div>
-            ))}
+                  <button
+                    onClick={() => handleTamamlaToggle(entry.sinif, hafta.haftaNo)}
+                    className="flex items-center justify-center flex-shrink-0 rounded-full"
+                    style={{
+                      width: 22, height: 22,
+                      border: `2px solid ${isTamamlandi ? 'var(--color-success)' : 'var(--color-border2)'}`,
+                      background: isTamamlandi ? 'var(--color-success)' : 'transparent',
+                      cursor: 'pointer', transition: 'all 0.15s',
+                    }}
+                  >
+                    {isTamamlandi && <Check size={11} strokeWidth={3} color="#fff" />}
+                  </button>
+                  <p
+                    style={{
+                      fontSize: 13, color: isTamamlandi ? 'var(--color-text3)' : 'var(--color-text1)',
+                      textDecoration: isTamamlandi ? 'line-through' : 'none',
+                      flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {hafta.kazanim || 'Kazanım girilmemiş'}
+                  </p>
+                  <button
+                    onClick={() => { onSinifSec(entry.sinif); navigate(`/app/hafta/${hafta.haftaNo}`) }}
+                    style={{ flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text3)' }}
+                  >
+                    <ChevronRight size={14} />
+                  </button>
+                </div>
+              ))}
+              {/* Son satırın border'ını kaldır */}
+              <style>{`.kazanim-row:last-child { border-bottom: none; }`}</style>
+            </div>
           </div>
-        )}
+        </div>
+      )}
+
+      {/* ── HIZLI ERİŞİM ─────────────────────── */}
+      <div style={{ padding: '16px 16px 0' }}>
+        <p className="font-sans font-bold" style={{ fontSize: 13, color: 'var(--color-text1)', marginBottom: 10 }}>
+          Hızlı Erişim
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+          {HIZLI_ERISIM.map(item => {
+            const Icon = item.icon
+            return (
+              <button
+                key={item.path}
+                onClick={() => navigate(item.path)}
+                className="rounded-xl flex flex-col items-center justify-center text-center gap-2 cursor-pointer"
+                style={{ background: item.bg, border: '1px solid transparent', padding: '18px 12px', transition: 'transform 0.15s' }}
+                onMouseDown={e => (e.currentTarget.style.transform = 'scale(0.97)')}
+                onMouseUp={e => (e.currentTarget.style.transform = 'scale(1)')}
+                onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+              >
+                <div
+                  className="flex items-center justify-center rounded-full"
+                  style={{ width: 44, height: 44, background: item.renk }}
+                >
+                  <Icon size={22} color="#fff" />
+                </div>
+                <div>
+                  <p className="font-sans font-bold" style={{ fontSize: 13, color: 'var(--color-text1)' }}>{item.label}</p>
+                  <p style={{ fontSize: 11, color: 'var(--color-text3)' }}>{item.alt}</p>
+                </div>
+              </button>
+            )
+          })}
+        </div>
       </div>
 
-      {/* ── BENTO GRID ──────────────────────────── */}
-      <div
-        style={{
-          padding: '8px 16px 16px',
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '8px',
-        }}
-      >
-        {/* Eksik ayarlar uyarısı */}
-        {eksikAyarlar && (
-          <div
-            onClick={() => navigate('/app/ayarlar')}
-            style={{
-              gridColumn: '1 / -1',
-              background: '#FFFBEB', border: '1px solid #FDE68A',
-              borderRadius: '16px', padding: '12px 16px',
-              display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer',
-            }}
+      {/* ── SINIFLARIM ─────────────────────────── */}
+      <div style={{ padding: '16px 16px 0' }}>
+        <div
+          className="rounded-xl p-4"
+          style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <Users size={16} style={{ color: 'var(--color-accent)' }} />
+            <p className="font-sans font-bold" style={{ fontSize: 14, color: 'var(--color-text1)' }}>Sınıflarım</p>
+          </div>
+
+          <div className="flex flex-col gap-2 mb-3">
+            {planlar.map((entry, i) => {
+              const sinifAd = entry.sinifGercek || entry.sinif
+              const sinifNo = parseInt(sinifAd) || (i + 1)
+              const renk = SINIF_RENKLERI[i % SINIF_RENKLERI.length]
+              return (
+                <div
+                  key={entry.sinif}
+                  className="flex items-center gap-3"
+                  style={{ padding: '10px 12px', borderRadius: 'var(--radius-lg)', background: 'var(--color-bg)', border: '1px solid var(--color-border)' }}
+                >
+                  <div
+                    className="flex items-center justify-center font-display font-bold flex-shrink-0 rounded-lg"
+                    style={{ width: 32, height: 32, background: renk, color: '#fff', fontSize: 14 }}
+                  >
+                    {sinifNo}
+                  </div>
+                  <p className="font-sans font-semibold flex-1" style={{ fontSize: 14, color: 'var(--color-text1)' }}>
+                    {sinifAd}
+                  </p>
+                  <span
+                    className="font-sans font-semibold"
+                    style={{ fontSize: 12, color: 'var(--color-primary)', background: 'var(--color-primary-s)', padding: '2px 10px', borderRadius: 'var(--radius-pill)' }}
+                  >
+                    Aktif
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+
+          <button
+            onClick={() => navigate('/app/planla')}
+            className="flex items-center gap-1 font-sans font-semibold w-full justify-center"
+            style={{ fontSize: 13, color: 'var(--color-primary)', padding: '8px 0', borderTop: '1px solid var(--color-border)' }}
           >
-            <span style={{ fontSize: '14px' }}>⚠️</span>
-            <div style={{ flex: 1 }}>
-              <p style={{ fontSize: '13px', fontWeight: 700, color: '#92400E' }}>Ayarlarınızı tamamlayın</p>
-              <p style={{ fontSize: '11px', color: '#B45309' }}>Belge üretimi için profil bilgileri gerekli</p>
+            Planları Gör <ChevronRight size={14} />
+          </button>
+        </div>
+      </div>
+
+      {/* ── YAKLAŞAN TARİHLER ──────────────────── */}
+      <div style={{ padding: '16px 16px 0' }}>
+        <div
+          className="rounded-xl p-4"
+          style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
+        >
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Bell size={16} style={{ color: 'var(--color-warning)' }} />
+              <p className="font-sans font-bold" style={{ fontSize: 14, color: 'var(--color-text1)' }}>Yaklaşan Tarihler</p>
             </div>
-            <ChevronRight size={14} style={{ color: '#B45309', flexShrink: 0 }} />
+            <button
+              onClick={() => navigate('/app/planla/takvim')}
+              className="font-sans font-semibold"
+              style={{ fontSize: 12, color: 'var(--color-primary)' }}
+            >
+              Hepsi
+            </button>
           </div>
-        )}
 
-        {/* Tasarruf Card */}
+          {yaklasanTarihler.length === 0 ? (
+            <div className="flex flex-col items-center gap-2 py-4">
+              <CalendarDays size={28} style={{ color: 'var(--color-text3)' }} />
+              <p style={{ fontSize: 13, color: 'var(--color-text3)' }}>Yaklaşan tarih yok</p>
+              <button
+                onClick={() => navigate('/app/planla/takvim')}
+                className="font-sans font-semibold"
+                style={{ fontSize: 13, color: 'var(--color-primary)' }}
+              >
+                Tarih Ekle
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {yaklasanTarihler.map(tarih => (
+                <div
+                  key={tarih.id}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
+                  style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)' }}
+                >
+                  <div
+                    className="flex-shrink-0 rounded-lg flex flex-col items-center justify-center"
+                    style={{ width: 36, height: 36, background: 'var(--color-primary-s)' }}
+                  >
+                    <p className="font-display font-bold" style={{ fontSize: 14, color: 'var(--color-primary)', lineHeight: 1 }}>
+                      {new Date(tarih.tarih).getDate()}
+                    </p>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-sans font-semibold truncate" style={{ fontSize: 13, color: 'var(--color-text1)' }}>{tarih.baslik}</p>
+                    {tarih.aciklama && (
+                      <p className="truncate" style={{ fontSize: 11, color: 'var(--color-text3)' }}>{tarih.aciklama}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── EVRAK DURUMU ───────────────────────── */}
+      <div style={{ padding: '16px 16px 0' }}>
         <div
-          style={{
-            gridColumn: '1 / -1', padding: '20px',
-            position: 'relative', overflow: 'hidden',
-            borderRadius: '20px', background: 'var(--color-surface)',
-            border: '1px solid var(--color-border)',
-            boxShadow: '0 1px 2px rgba(0,0,0,.04)',
-          }}
+          className="rounded-xl p-4"
+          style={{ background: 'var(--color-navy)', border: '1px solid rgba(255,255,255,0.08)' }}
         >
-          <div style={{
-            position: 'absolute', top: 0, left: 0, right: 0, height: '3px',
-            background: 'linear-gradient(90deg, #4F6AF5, #818cf8, #4F6AF5)',
-            backgroundSize: '200%', borderRadius: '20px 20px 0 0',
-            animation: 'shimmer 3s linear infinite',
-          }} />
-          <p style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--color-text3)', marginBottom: '8px', textTransform: 'uppercase' }}>
-            Bu ay tasarruf
-          </p>
-          <p style={{
-            fontFamily: "var(--font-display), 'Bricolage Grotesque', sans-serif",
-            fontSize: '48px', fontWeight: 800, color: 'var(--color-text1)',
-            letterSpacing: '-0.06em', lineHeight: '52px',
-          }}>
-            {tasarrufSaat}
-          </p>
-          <p style={{ fontSize: '14px', color: 'var(--color-text2)', fontWeight: 500, marginBottom: '14px' }}>
-            saat geri aldınız
-          </p>
-          <div style={{ display: 'flex', borderTop: '1px solid var(--color-border)', paddingTop: '14px' }}>
-            {[
-              { label: 'Plan', deger: `${planlar.length > 0 ? Math.round(planlar.length * 1.5 * 10) / 10 : 0}s` },
-              { label: 'Evrak', deger: `${Math.round(belgeSayisi * 0.5 * 10) / 10}s` },
-              { label: 'Yazılı', deger: '0s' },
-            ].map(({ label, deger }) => (
-              <div key={label} style={{ flex: 1, textAlign: 'center' }}>
-                <p style={{
-                  fontFamily: "var(--font-display), 'Bricolage Grotesque', sans-serif",
-                  fontSize: '18px', fontWeight: 700, color: 'var(--color-text1)', letterSpacing: '-0.03em',
-                }}>
-                  {deger}
-                </p>
-                <p style={{ fontSize: '10px', color: 'var(--color-text3)', fontWeight: 600, marginTop: '2px' }}>
-                  {label}
-                </p>
-              </div>
-            ))}
+          <div className="flex items-center gap-2 mb-2">
+            <FileText size={16} color="rgba(255,255,255,0.7)" />
+            <p className="font-sans font-semibold" style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>Evrak Durumu</p>
           </div>
-        </div>
-
-        {/* Dosyam küçük kart */}
-        <div
-          onClick={() => navigate('/app/dosyam')}
-          style={{
-            background: 'var(--color-surface)', border: '1px solid var(--color-border)',
-            borderRadius: '18px', padding: '16px', cursor: 'pointer',
-            minHeight: '100px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-            transition: 'transform 0.15s cubic-bezier(0.22, 1, 0.36, 1)',
-          }}
-          onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.02)')}
-          onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
-        >
-          <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--color-text2)' }}>Dosyam</p>
-          <p style={{
-            fontFamily: "var(--font-display), 'Bricolage Grotesque', sans-serif",
-            fontSize: '24px', fontWeight: 800, color: 'var(--color-text1)',
-          }}>
-            {belgeSayisi}
+          <p className="font-display font-bold" style={{ fontSize: 26, color: '#fff', letterSpacing: '-0.03em', marginBottom: 2 }}>
+            {belgeSayisi} Evrak
           </p>
-          <p style={{ fontSize: '10px', color: 'var(--color-text3)', fontWeight: 600 }}>belge hazır</p>
+          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', marginBottom: 14 }}>Bu dönem oluşturuldu</p>
+          <button
+            onClick={() => navigate('/app/dosyam')}
+            className="w-full flex items-center justify-center gap-2 font-sans font-bold"
+            style={{ height: 42, borderRadius: 'var(--radius-pill)', background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', fontSize: 14, cursor: 'pointer' }}
+          >
+            <FileText size={15} /> Evrak Merkezi
+          </button>
         </div>
+      </div>
 
-        {/* Üretim Hakkı küçük kart */}
-        <div
-          onClick={() => navigate('/app/uret')}
-          style={{
-            background: 'var(--color-surface)', border: '1px solid var(--color-border)',
-            borderRadius: '18px', padding: '16px', cursor: 'pointer',
-            minHeight: '100px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-            transition: 'transform 0.15s cubic-bezier(0.22, 1, 0.36, 1)',
-          }}
-          onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.02)')}
-          onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
-        >
-          <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--color-text2)' }}>Üretim Hakkı</p>
-          <p style={{
-            fontFamily: "var(--font-display), 'Bricolage Grotesque', sans-serif",
-            fontSize: '24px', fontWeight: 800, color: 'var(--color-text1)',
-          }}>
-            {uretimHakki}
-          </p>
-          <p style={{ fontSize: '10px', color: 'var(--color-text3)', fontWeight: 600 }}>kalan hak</p>
-        </div>
-
-        {/* Ders Programı Prompt — sadece dolmamışsa göster */}
-        {!dersProgramiDolu && (
-          <div
+      {/* Ders programı promptu */}
+      {!dersProgramiDolu && (
+        <div style={{ padding: '16px 16px 0' }}>
+          <button
             onClick={() => navigate('/app/planla/ders-programi')}
-            style={{
-              gridColumn: '1 / -1',
-              background: '#EEF1FE', border: '1px solid #C7D2FD',
-              borderRadius: '16px', padding: '12px 16px',
-              display: 'flex', alignItems: 'center', gap: '12px',
-              cursor: 'pointer',
-            }}
+            className="w-full flex items-center gap-3 rounded-xl px-4"
+            style={{ height: 52, background: 'var(--color-primary-s)', border: '1px solid var(--color-primary-b)', cursor: 'pointer' }}
           >
-            <Calendar size={18} style={{ color: '#4F6AF5', flexShrink: 0 }} />
-            <div style={{ flex: 1 }}>
-              <p style={{ fontSize: '13px', fontWeight: 700, color: '#0C0C0B' }}>Ders programını ekle</p>
-              <p style={{ fontSize: '11px', color: '#52524F' }}>Yıllık plan otomatik hazırlanır</p>
+            <Clock size={18} style={{ color: 'var(--color-primary)', flexShrink: 0 }} />
+            <div className="flex-1 text-left">
+              <p className="font-sans font-bold" style={{ fontSize: 13, color: 'var(--color-text1)' }}>Ders programını ekle</p>
+              <p style={{ fontSize: 11, color: 'var(--color-text2)' }}>Yıllık plan otomatik hazırlanır</p>
             </div>
-            <ChevronRight size={14} style={{ color: '#4F6AF5', flexShrink: 0 }} />
-          </div>
-        )}
-      </div>
-
-      <style>{`
-        @keyframes shimmer {
-          0% { background-position: 200% 0; }
-          100% { background-position: -200% 0; }
-        }
-        @keyframes ndot-pulse {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
-          50% { box-shadow: 0 0 0 4px rgba(220, 38, 38, 0); }
-        }
-      `}</style>
+            <ChevronRight size={14} style={{ color: 'var(--color-primary)', flexShrink: 0 }} />
+          </button>
+        </div>
+      )}
     </div>
   )
 }
