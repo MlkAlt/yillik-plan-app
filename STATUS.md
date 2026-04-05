@@ -160,10 +160,10 @@ Son guncelleme: 2026-04-05 (Figma uyarlama - Faz 1 + Faz 2 tamamlandı)
 - `OnemliTarihlerPage.tsx` — ay grid takvim + stat chips + tab switcher (Yaklaşan/Geçmiş) + event kartı sol border
 - `DersProgramiPage.tsx` — ders sayısı badge + sınıf renk göstergesi
 
-**Kalan (Faz 3):**
-- PlanPage ünite kartları (C2)
-- OnemliTarihlerListesi stil (C1)
-- PlanPage boş state + stat kartlar (B2)
+**Faz 3 — TAMAMLANDI ✅**
+- PlanPage boş state + stat kartlar (B2) ✅
+- PlanPage ünite kartları — Figma accordion (C2) ✅
+- OnemliTarihlerListesi stili (C1) ✅
 
 ---
 
