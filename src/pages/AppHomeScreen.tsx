@@ -50,8 +50,6 @@ function formatBugunTurkce(): string {
 const SINIF_RENKLERI = ['#4F6AF5', '#6D28D9', '#059669', '#D97706', '#DC2626', '#0EA5E9', '#7C3AED', '#10B981']
 
 const HIZLI_ERISIM = [
-  { label: 'Yıllık Plan', alt: 'Görüntüle & İndir', icon: BookOpen, renk: '#4F6AF5', bg: '#EEF1FE', path: '/app/planla' },
-  { label: 'Evrak Oluştur', alt: 'Tek tıkla hazırla', icon: FileText, renk: '#6D28D9', bg: '#F5F3FF', path: '/app/dosyam' },
   { label: 'Takvim', alt: 'Önemli tarihler', icon: CalendarDays, renk: '#059669', bg: '#ECFDF5', path: '/app/planla/takvim' },
   { label: 'Ders Programı', alt: 'Haftalık çizelge', icon: Clock, renk: '#D97706', bg: '#FFFBEB', path: '/app/planla/ders-programi' },
 ]
@@ -204,65 +202,26 @@ export function AppHomeScreen({
             <FileText size={14} /> Evrak İndir
           </button>
         </div>
-      </div>
 
-      {/* ── 4 STAT KART (2×2 grid) ──────────── */}
-      <div style={{ padding: '12px 16px 0', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-
-        {/* Branş */}
-        <div
-          className="rounded-xl p-4 flex flex-col gap-1"
-          style={{ background: '#4F6AF5', minHeight: 90 }}
-        >
-          <div className="flex items-center justify-between">
-            <BookOpen size={18} color="rgba(255,255,255,0.8)" />
-          </div>
-          <p className="font-display font-bold text-white" style={{ fontSize: 15, marginTop: 'auto', lineHeight: 1.2 }}>
-            {brans || '—'}
-          </p>
-          <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>Branş</p>
-        </div>
-
-        {/* Sınıf Sayısı */}
-        <div
-          className="rounded-xl p-4 flex flex-col gap-1"
-          style={{ background: '#6D28D9', minHeight: 90 }}
-        >
-          <div className="flex items-center justify-between">
-            <Users size={18} color="rgba(255,255,255,0.8)" />
-          </div>
-          <p className="font-display font-bold text-white" style={{ fontSize: 22, marginTop: 'auto', letterSpacing: '-0.03em' }}>
-            {planlar.length} Sınıf
-          </p>
-          <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>Sınıf Sayısı</p>
-        </div>
-
-        {/* Mevcut Hafta */}
-        <div
-          className="rounded-xl p-4 flex flex-col gap-1"
-          style={{ background: '#1B2E5E', minHeight: 90 }}
-        >
-          <div className="flex items-center justify-between">
-            <CalendarDays size={18} color="rgba(255,255,255,0.8)" />
-          </div>
-          <p className="font-display font-bold text-white" style={{ fontSize: 22, marginTop: 'auto', letterSpacing: '-0.03em' }}>
-            {mevcutHafta ? `${mevcutHafta}. Hafta` : '—'}
-          </p>
-          <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>Mevcut Hafta</p>
-        </div>
-
-        {/* Yıllık İlerleme */}
-        <div
-          className="rounded-xl p-4 flex flex-col gap-1"
-          style={{ background: '#D97706', minHeight: 90 }}
-        >
-          <div className="flex items-center justify-between">
-            <TrendingUp size={18} color="rgba(255,255,255,0.8)" />
-          </div>
-          <p className="font-display font-bold text-white" style={{ fontSize: 22, marginTop: 'auto', letterSpacing: '-0.03em' }}>
-            %{ilerlemeYuzde}
-          </p>
-          <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>Yıllık İlerleme</p>
+        {/* Stat mini-kartlar — banner içinde */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 14, position: 'relative' }}>
+          {([
+            { icon: BookOpen,     label: 'Branş',    value: brans || '—' },
+            { icon: Users,        label: 'Sınıf',    value: `${planlar.length} Sınıf` },
+            { icon: CalendarDays, label: 'Hafta',    value: mevcutHafta ? `${mevcutHafta}. Hafta` : '—' },
+            { icon: TrendingUp,   label: 'İlerleme', value: `%${ilerlemeYuzde}` },
+          ] as const).map(({ icon: Icon, label, value }) => (
+            <div key={label} style={{
+              background: 'rgba(255,255,255,0.12)',
+              border: '1px solid rgba(255,255,255,0.18)',
+              borderRadius: 14,
+              padding: '10px 12px',
+            }}>
+              <Icon size={14} color="rgba(255,255,255,0.65)" />
+              <p className="font-display font-bold" style={{ fontSize: 15, color: '#fff', marginTop: 6, letterSpacing: '-0.02em' }}>{value}</p>
+              <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>{label}</p>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -338,6 +297,59 @@ export function AppHomeScreen({
           </div>
         </div>
       )}
+
+      {/* ── ARAÇLARIM — EVRAK & ÜRET ─────────── */}
+      <div style={{ padding: '16px 16px 0' }}>
+        <p className="font-sans font-bold" style={{ fontSize: 11, color: 'var(--color-text3)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          Araçlarım
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+
+          {/* Evrak Oluştur */}
+          <button
+            onClick={() => navigate('/app/dosyam')}
+            style={{
+              background: 'linear-gradient(135deg, #4F6AF5 0%, #6D28D9 100%)',
+              borderRadius: 18, padding: '16px 14px', border: 'none', cursor: 'pointer',
+              display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 6,
+              minHeight: 110, overflow: 'hidden',
+            }}
+          >
+            <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <FileText size={20} color="#fff" />
+            </div>
+            <div style={{ marginTop: 'auto', textAlign: 'left' }}>
+              <p className="font-display font-bold" style={{ fontSize: 14, color: '#fff', letterSpacing: '-0.02em' }}>Evrak Oluştur</p>
+              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>Tek tıkla hazırla</p>
+            </div>
+            <span style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.9)', background: 'rgba(255,255,255,0.18)', padding: '2px 8px', borderRadius: 100 }}>
+              {belgeSayisi} şablon
+            </span>
+          </button>
+
+          {/* Üret */}
+          <button
+            onClick={() => navigate('/app/uret')}
+            style={{
+              background: 'linear-gradient(135deg, #059669 0%, #0EA5E9 100%)',
+              borderRadius: 18, padding: '16px 14px', border: 'none', cursor: 'pointer',
+              display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 6,
+              minHeight: 110, overflow: 'hidden',
+            }}
+          >
+            <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Sparkles size={20} color="#fff" />
+            </div>
+            <div style={{ marginTop: 'auto', textAlign: 'left' }}>
+              <p className="font-display font-bold" style={{ fontSize: 14, color: '#fff', letterSpacing: '-0.02em' }}>Üret</p>
+              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>AI ile içerik oluştur</p>
+            </div>
+            <span style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.9)', background: 'rgba(255,255,255,0.18)', padding: '2px 8px', borderRadius: 100 }}>
+              AI Destekli
+            </span>
+          </button>
+        </div>
+      </div>
 
       {/* ── HIZLI ERİŞİM ─────────────────────── */}
       <div style={{ padding: '16px 16px 0' }}>
