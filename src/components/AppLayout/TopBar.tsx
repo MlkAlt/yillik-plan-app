@@ -24,11 +24,11 @@ export function TopBar({ onMenuClick, pageTitle }: TopBarProps) {
 
   return (
     <header
-      className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4"
+      className="fixed top-0 z-40 flex items-center justify-between px-4"
       style={{
         height: 'var(--topbar-height, 56px)',
+        width: '100%',
         maxWidth: '512px',
-        margin: '0 auto',
         left: '50%',
         transform: 'translateX(-50%)',
         backgroundColor: 'rgba(255,255,255,0.88)',
