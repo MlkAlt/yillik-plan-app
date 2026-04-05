@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  BookOpen, CalendarDays, Check, ChevronRight,
+  CalendarDays, Check, ChevronRight,
   Clock, FileText, TrendingUp, Users, Sparkles, Bell,
 } from 'lucide-react'
 import type { PlanEntry } from '../types/planEntry'
@@ -205,23 +205,20 @@ export function AppHomeScreen({
 
         {/* Stat mini-kartlar — banner içinde */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 14, position: 'relative' }}>
-          {([
-            { icon: BookOpen,     label: 'Branş',    value: brans || '—' },
-            { icon: Users,        label: 'Sınıf',    value: `${planlar.length} Sınıf` },
-            { icon: CalendarDays, label: 'Hafta',    value: mevcutHafta ? `${mevcutHafta}. Hafta` : '—' },
-            { icon: TrendingUp,   label: 'İlerleme', value: `%${ilerlemeYuzde}` },
-          ] as const).map(({ icon: Icon, label, value }) => (
-            <div key={label} style={{
-              background: 'rgba(255,255,255,0.12)',
-              border: '1px solid rgba(255,255,255,0.18)',
-              borderRadius: 14,
-              padding: '10px 12px',
-            }}>
-              <Icon size={14} color="rgba(255,255,255,0.65)" />
-              <p className="font-display font-bold" style={{ fontSize: 15, color: '#fff', marginTop: 6, letterSpacing: '-0.02em' }}>{value}</p>
-              <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>{label}</p>
-            </div>
-          ))}
+          <div style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.18)', borderRadius: 14, padding: '10px 12px' }}>
+            <CalendarDays size={16} color="rgba(255,255,255,0.8)" />
+            <p className="font-display font-bold" style={{ fontSize: 18, color: '#fff', marginTop: 6, letterSpacing: '-0.02em' }}>
+              {mevcutHafta ? `${mevcutHafta}.` : '—'}
+            </p>
+            <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>Mevcut Hafta</p>
+          </div>
+          <div style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.18)', borderRadius: 14, padding: '10px 12px' }}>
+            <TrendingUp size={16} color="rgba(255,255,255,0.8)" />
+            <p className="font-display font-bold" style={{ fontSize: 18, color: '#fff', marginTop: 6, letterSpacing: '-0.02em' }}>
+              %{ilerlemeYuzde}
+            </p>
+            <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>Yıllık İlerleme</p>
+          </div>
         </div>
       </div>
 
