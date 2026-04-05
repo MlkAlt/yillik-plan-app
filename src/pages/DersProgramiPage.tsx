@@ -22,10 +22,10 @@ export function DersProgramiPage({ planlar }: DersProgramiPageProps) {
     setSeciliHucre({ gun, saat })
   }
 
-  function handleSinifSec(sinif: string | null) {
+  function handleSinifSec(sinif: string | null, sube?: string) {
     if (!seciliHucre) return
     const ders = planlar.find(p => p.sinif === sinif)?.ders
-    guncelle(seciliHucre.gun, seciliHucre.saat, sinif, ders)
+    guncelle(seciliHucre.gun, seciliHucre.saat, sinif, ders, sube)
     setSeciliHucre(null)
   }
 

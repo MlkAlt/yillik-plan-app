@@ -21,6 +21,14 @@ interface AppHomeScreenProps {
   onTamamlananGuncelle?: () => void
 }
 
+function sinifEtiket(sinif: string | null, sube?: string): string {
+  if (!sinif) return '—'
+  const no = sinif.match(/^(\d+)/)?.[1]
+  if (no && sube) return `${no}${sube}`
+  if (no) return `${no}.`
+  return sinif
+}
+
 function selamMesaji(): string {
   const saat = new Date().getHours()
   if (saat >= 6 && saat < 12) return 'Günaydın'
@@ -303,7 +311,7 @@ export function AppHomeScreen({
                         background: `${renk}18`,
                         padding: '2px 8px', borderRadius: 100,
                       }}>
-                        {ders.sinif}
+                        {sinifEtiket(ders.sinif, ders.sube)}
                       </span>
                       {/* Kazanım */}
                       <p style={{

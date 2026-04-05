@@ -13,9 +13,17 @@ interface DersProgramiGridProps {
   cakismaHucreleri?: Array<{ gun: Gun; saat: number }>
 }
 
+function sinifEtiket(sinif: string | null, sube?: string): string {
+  if (!sinif) return '—'
+  const no = sinif.match(/^(\d+)/)?.[1]
+  if (no && sube) return `${no}${sube}`
+  if (no) return `${no}.`
+  return sinif
+}
+
 export function DersProgramiGrid({ program, onHucreGuncelle, readOnly = false, cakismaHucreleri = [] }: DersProgramiGridProps) {
-  function getSinif(gun: Gun, saat: number): string | null {
-    return program.saatler.find(s => s.gun === gun && s.saat === saat)?.sinif ?? null
+  function getSaatBilgi(gun: Gun, saat: number) {
+    return program.saatler.find(s => s.gun === gun && s.saat === saat) ?? null
   }
 
   function isCakisma(gun: Gun, saat: number): boolean {
@@ -40,7 +48,9 @@ export function DersProgramiGrid({ program, onHucreGuncelle, readOnly = false, c
               {saat}
             </div>
             {GUNLER.map(gun => {
-              const sinif = getSinif(gun, saat)
+              const bilgi = getSaatBilgi(gun, saat)
+              const sinif = bilgi?.sinif ?? null
+              const sube = bilgi?.sube
               const cakisma = isCakisma(gun, saat)
               return (
                 <button
@@ -62,7 +72,7 @@ export function DersProgramiGrid({ program, onHucreGuncelle, readOnly = false, c
                       ? '#EEF1FE'
                       : 'var(--color-bg)',
                     color: cakisma ? '#DC2626' : sinif ? '#4F6AF5' : 'var(--color-text3)',
-                    fontSize: '10px',
+                    fontSize: '11px',
                     fontWeight: 700,
                     cursor: readOnly ? 'default' : 'pointer',
                     padding: '2px 4px',
@@ -71,7 +81,7 @@ export function DersProgramiGrid({ program, onHucreGuncelle, readOnly = false, c
                     transition: 'all 0.15s',
                   }}
                 >
-                  {sinif ?? '—'}
+                  {sinifEtiket(sinif, sube)}
                 </button>
               )
             })}

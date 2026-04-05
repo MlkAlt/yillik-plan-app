@@ -20,9 +20,9 @@ export function checkCakisma(program: DersProgrami, gun: Gun, saat: number): boo
   return program.saatler.some(s => s.gun === gun && s.saat === saat && s.sinif !== null)
 }
 
-export function hucreGuncelle(program: DersProgrami, gun: Gun, saat: number, sinif: string | null, ders?: string): DersProgrami {
+export function hucreGuncelle(program: DersProgrami, gun: Gun, saat: number, sinif: string | null, ders?: string, sube?: string): DersProgrami {
   const mevcutIndex = program.saatler.findIndex(s => s.gun === gun && s.saat === saat)
-  const yeniSaat: DersSaati = { gun, saat, sinif, ders }
+  const yeniSaat: DersSaati = { gun, saat, sinif, ders, sube }
 
   let yeniSaatler: DersSaati[]
   if (mevcutIndex >= 0) {

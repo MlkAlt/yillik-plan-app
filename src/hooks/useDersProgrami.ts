@@ -18,10 +18,9 @@ export function useDersProgrami() {
     if (mevcut) setProgram(mevcut)
   }, [])
 
-  const guncelle = useCallback((gun: Gun, saat: number, sinif: string | null, ders?: string) => {
+  const guncelle = useCallback((gun: Gun, saat: number, sinif: string | null, ders?: string, sube?: string) => {
     setError(null)
     setProgram(prev => {
-      // Çakışma kontrolü: farklı bir sınıf atanmaya çalışılıyorsa
       if (sinif !== null && checkCakisma(prev, gun, saat)) {
         const mevcutSaat = prev.saatler.find(s => s.gun === gun && s.saat === saat)
         if (mevcutSaat?.sinif !== sinif) {
@@ -29,7 +28,7 @@ export function useDersProgrami() {
           return prev
         }
       }
-      return hucreGuncelle(prev, gun, saat, sinif, ders)
+      return hucreGuncelle(prev, gun, saat, sinif, ders, sube)
     })
   }, [])
 

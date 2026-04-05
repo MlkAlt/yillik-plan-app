@@ -5,6 +5,7 @@ export interface DersSaati {
   saat: number          // 1-10 (ders saati sırası)
   sinif: string | null  // null = boş saat
   ders?: string         // sinif varsa otomatik doldurulur
+  sube?: string         // şube harfi: 'A', 'B', 'C', ... (opsiyonel)
 }
 
 export interface DersProgrami {
