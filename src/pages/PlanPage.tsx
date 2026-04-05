@@ -126,13 +126,6 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
   if (!entry) {
     return (
       <div className="page-shell">
-        <div className="page-header">
-          <h1 className="text-[22px] font-bold tracking-tight mb-0.5" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text1)' }}>
-            Planlama
-          </h1>
-          <p className="text-sm" style={{ color: 'var(--color-text2)' }}>Yıllık plan takibi</p>
-        </div>
-
         {/* Figma boş state — dashed border card, büyük gradient ikon */}
         <div style={{
           margin: '16px',
@@ -195,13 +188,6 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
 
   return (
     <div className="page-shell">
-      <div className="page-header">
-        <h1 className="text-[22px] font-bold tracking-tight mb-0.5" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text1)' }}>
-          Planlama
-        </h1>
-        <p className="text-sm" style={{ color: 'var(--color-text2)' }}>Yıllık · Haftalık · Ders Programı</p>
-      </div>
-
       {/* Navy hero card */}
       <div style={{ margin: '0 16px 12px', borderRadius: 20, background: 'linear-gradient(145deg,#1B2E5E,#243A78)', padding: '18px', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: 100, height: 100, background: 'radial-gradient(circle,rgba(79,106,245,.22),transparent 70%)', borderRadius: '50%' }} />
