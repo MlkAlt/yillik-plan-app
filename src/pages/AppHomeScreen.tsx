@@ -161,6 +161,12 @@ export function AppHomeScreen({
   const toplamHafta = activeEntry?.plan?.haftalar?.length ?? 36
   const ilerlemeYuzde = mevcutHafta ? Math.round(((mevcutHafta - 1) / toplamHafta) * 100) : 0
 
+  const aktifUniteAdi = (() => {
+    if (!activeEntry?.plan?.haftalar || activeEntry.tip !== 'meb') return null
+    const hafta = activeEntry.plan.haftalar.find(h => h.haftaNo === mevcutHafta)
+    return hafta?.uniteAdi ?? null
+  })()
+
   // Yaklaşan tarihler (önümüzdeki 30 gün)
   const bugun = new Date()
   const yaklasanTarihler = tarihler
@@ -203,22 +209,20 @@ export function AppHomeScreen({
             {brans} branşı{siniflar.length > 0 ? ` • ${siniflar.join(', ')}` : ''}
           </p>
         )}
-        <div style={{ display: 'flex', gap: 10, position: 'relative' }}>
-          <button
-            onClick={() => navigate('/app/planla')}
-            className="flex items-center gap-2 font-sans font-semibold"
-            style={{ height: 38, padding: '0 16px', borderRadius: 'var(--radius-pill)', background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)', color: '#fff', fontSize: 13, cursor: 'pointer' }}
-          >
-            <Sparkles size={14} /> Plan Oluştur
-          </button>
-          <button
-            onClick={() => navigate('/app/dosyam')}
-            className="flex items-center gap-2 font-sans font-semibold"
-            style={{ height: 38, padding: '0 16px', borderRadius: 'var(--radius-pill)', background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)', color: '#fff', fontSize: 13, cursor: 'pointer' }}
-          >
-            <FileText size={14} /> Evrak İndir
-          </button>
-        </div>
+        {aktifUniteAdi && (
+          <div style={{ position: 'relative' }}>
+            <span style={{
+              fontSize: 12, fontWeight: 600,
+              padding: '5px 14px', borderRadius: 100,
+              background: 'rgba(255,255,255,0.15)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              color: 'rgba(255,255,255,0.85)',
+              display: 'inline-block',
+            }}>
+              Şu an: {aktifUniteAdi}
+            </span>
+          </div>
+        )}
 
         {/* Stat mini-kartlar — banner içinde */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 14, position: 'relative' }}>

@@ -8,14 +8,6 @@ import { Button } from '../components/Button'
 import { Check, ChevronDown, CheckCircle2, Clock, BookOpen, Sparkles } from 'lucide-react'
 import { StorageKeys } from '../lib/storageKeys'
 import { SectionHeader } from '../components/UI/SectionHeader'
-import { PlanAltSekmeler } from '../components/Plan/PlanAltSekmeler'
-import type { Sekme } from '../components/Plan/PlanAltSekmeler'
-import { DersProgramiGrid } from '../components/DersProgrami/DersProgramiGrid'
-import { useDersProgrami } from '../hooks/useDersProgrami'
-import { OnemliTarihlerListesi } from '../components/Takvim/OnemliTarihlerListesi'
-import { TarihEkleForm } from '../components/Takvim/TarihEkleForm'
-import { useOnemliTarihler } from '../hooks/useOnemliTarihler'
-import type { OnemliTarih } from '../types/onemliTarih'
 
 // Ünitelere göre grupla
 function groupByUnite(haftalar: Hafta[]) {
@@ -52,11 +44,7 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
   const [visibleYuzde, setVisibleYuzde] = useState(0)
   const [grupAcik, setGrupAcik] = useState<Record<number, boolean>>({ 0: true })
   const [expandedHaftalar, setExpandedHaftalar] = useState<Set<number>>(new Set())
-  const [aktifSekme, setAktifSekme] = useState<Sekme>('yillik')
-  const [tarihFormAcik, setTarihFormAcik] = useState(false)
   const bugunRef = useRef<HTMLDivElement>(null)
-  const { program, guncelle: dersProgramiGuncelle } = useDersProgrami()
-  const { tarihler, ekle: tarihEkle, sil: tarihSil, mebTakviminiYukle } = useOnemliTarihler()
 
   const bugunStr = new Date().toISOString().split('T')[0]
   const bugunHaftaNo = entry?.plan?.haftalar.find(
@@ -102,16 +90,6 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
     const t = setTimeout(() => setVisibleYuzde(calc), 80)
     return () => clearTimeout(t)
   }, [tamamlananlar, entry])
-
-  useEffect(() => {
-    if (entry?.yil) mebTakviminiYukle(entry.yil)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [entry?.yil])
-
-  function handleTarihEkle(tarih: OnemliTarih) {
-    tarihEkle(tarih)
-    setTarihFormAcik(false)
-  }
 
   function toggleHafta(haftaNo: number) {
     setExpandedHaftalar(prev => {
@@ -172,17 +150,6 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
   const toplamDers = isMeb ? plan!.haftalar.filter(h => !h.tatilMi).length : dataLength
   const yuzde = toplamDers > 0 ? Math.round((tamamlananSayi / toplamDers) * 100) : 0
 
-  // Bu haftanın günleri
-  const bugunHafta = entry?.plan?.haftalar.find(h => h.haftaNo === bugunHaftaNo)
-  const gunler = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt']
-  const buHaftaGunler = bugunHafta ? [0, 1, 2].map(i => {
-    const d = new Date(bugunHafta.baslangicTarihi)
-    d.setDate(d.getDate() + i)
-    const dStr = d.toISOString().split('T')[0]
-    const durum = dStr < bugunStr ? 'hazir' : dStr === bugunStr ? 'eksik' : 'gelecek'
-    return { gun: gunler[d.getDay()], gunNo: d.getDate(), ders, sinif: sinifGercek || sinif, kazanim: bugunHafta.kazanim || '', durum }
-  }) : []
-
   // Ünite grupları (MEB planı için)
   const uniteGruplari = isMeb ? groupByUnite(plan!.haftalar) : []
 
@@ -225,100 +192,7 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
         </div>
       )}
 
-      {/* Bu Hafta */}
-      {buHaftaGunler.length > 0 && (
-        <div style={{ margin: '0 16px 12px' }}>
-          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--color-text3)', marginBottom: 8 }}>Bu Hafta</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {buHaftaGunler.map((g, i) => (
-              <div key={i} onClick={() => navigate(`/app/hafta/${bugunHaftaNo}`)}
-                style={{ display: 'flex', alignItems: 'center', gap: 14, background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 14, padding: '12px 14px', cursor: 'pointer' }}>
-                <p style={{ fontFamily: "var(--font-display),'Bricolage Grotesque',sans-serif", fontSize: 22, fontWeight: 800, color: 'var(--color-text1)', letterSpacing: '-0.03em', minWidth: 28 }}>{g.gunNo}</p>
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-text1)', marginBottom: 2 }}>{g.ders} · {g.sinif}</p>
-                  <p style={{ fontSize: 11, color: 'var(--color-text2)', lineHeight: '15px' }}>{g.kazanim || 'Kazanım yok'}</p>
-                </div>
-                <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 100, background: g.durum === 'hazir' ? '#ECFDF5' : g.durum === 'eksik' ? '#FFFBEB' : 'var(--color-bg)', color: g.durum === 'hazir' ? '#059669' : g.durum === 'eksik' ? '#D97706' : 'var(--color-text3)', border: `1px solid ${g.durum === 'hazir' ? '#A7F3D0' : g.durum === 'eksik' ? '#FDE68A' : 'var(--color-border)'}` }}>
-                  {g.durum === 'hazir' ? 'Hazır' : g.durum === 'eksik' ? 'Eksik' : 'Gelecek'}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Haftalık Program grid */}
-      {(() => {
-        const gunSirasi = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma'] as const
-        const gunKisa = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum']
-        const maxSaat = Math.max(1, ...program.saatler.map(s => s.saat))
-        const satirSayisi = Math.min(maxSaat, 8)
-        return (
-          <div style={{ margin: '0 16px 12px', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 16, padding: 14 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-text1)' }}>Haftalık Program</p>
-              <button onClick={() => navigate('/app/planla/ders-programi')} style={{ fontSize: 13, fontWeight: 700, color: '#4F6AF5', background: 'none', border: 'none', cursor: 'pointer' }}>Düzenle</button>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 4 }}>
-              {gunKisa.map(g => (
-                <div key={g} style={{ textAlign: 'center', fontSize: 10, fontWeight: 700, color: 'var(--color-text3)', paddingBottom: 4 }}>{g}</div>
-              ))}
-              {Array.from({ length: satirSayisi * 5 }, (_, i) => {
-                const col = i % 5
-                const row = Math.floor(i / 5)
-                const saatNo = row + 1
-                const gun = gunSirasi[col]
-                const hucre = program.saatler.find(s => s.gun === gun && s.saat === saatNo)
-                const dolu = hucre?.sinif != null
-                const label = dolu ? (hucre!.ders?.split(' ')[0].slice(0, 4) ?? hucre!.sinif!.slice(0, 4)) : ''
-                return (
-                  <div key={i} style={{ minHeight: 32, borderRadius: 6, background: dolu ? 'color-mix(in srgb,#4F6AF5 10%,transparent)' : 'var(--color-bg)', border: dolu ? '1px solid color-mix(in srgb,#4F6AF5 25%,transparent)' : '1px solid transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color: dolu ? '#4F6AF5' : 'transparent', padding: 2, lineHeight: '1.2', textAlign: 'center' }}>
-                    {label}
-                  </div>
-                )
-              })}
-            </div>
-            {!program.saatler.some(s => s.sinif !== null) && (
-              <p style={{ fontSize: 11, color: 'var(--color-text3)', textAlign: 'center', marginTop: 8 }}>Henüz ders programı eklenmemiş</p>
-            )}
-          </div>
-        )
-      })()}
-
-      {/* Alt Sekmeler */}
-      <PlanAltSekmeler aktif={aktifSekme} onChange={setAktifSekme} />
-
-      {/* Sekme içerikleri */}
-      {aktifSekme === 'ders-programi' && (
-        <div style={{ padding: '0 16px 24px' }}>
-          <DersProgramiGrid
-            program={program}
-            onHucreGuncelle={(gun, saat, sinifVal) => {
-              const ders2 = planlar?.find(p => p.sinif === sinifVal)?.ders
-              dersProgramiGuncelle(gun, saat, sinifVal, ders2)
-            }}
-          />
-        </div>
-      )}
-
-      {aktifSekme === 'takvim' && (
-        <div style={{ padding: '0 16px 24px' }}>
-          <OnemliTarihlerListesi
-            tarihler={tarihler}
-            onEkle={() => setTarihFormAcik(true)}
-            onSil={tarihSil}
-          />
-          {tarihFormAcik && (
-            <TarihEkleForm
-              onKaydet={handleTarihEkle}
-              onKapat={() => setTarihFormAcik(false)}
-            />
-          )}
-        </div>
-      )}
-
-      {aktifSekme === 'yillik' && (
-        <div className="section-stack" style={{ padding: '0 16px 16px' }}>
+      <div className="section-stack" style={{ padding: '0 16px 16px' }}>
           <AdBanner className="rounded-lg" />
 
           {/* ─── B2: 3 Stat Kartı ─────────────────────────────────────── */}
@@ -578,7 +452,6 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
             </div>
           )}
         </div>
-      )}
     </div>
   )
 }
