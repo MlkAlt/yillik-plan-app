@@ -1,11 +1,30 @@
 import { useState } from 'react'
-import { CalendarDays, Download, ChevronRight, AlertTriangle } from 'lucide-react'
+import {
+  ChevronRight, AlertTriangle, Construction,
+  FolderOpen, Users, FileSignature, Club, GraduationCap, Search,
+} from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { getEvrakSablonlari, isPremiumKategori, tespitEksikAlanlar } from '../lib/evrakService'
 import { StorageKeys } from '../lib/storageKeys'
 import { useToast } from '../lib/toast'
 import type { OgretmenAyarlari } from '../types/ogretmenAyarlari'
 import type { EvrakKategori } from '../types/evrak'
+
+const KATEGORI_IKON: Record<EvrakKategori, React.ElementType> = {
+  'ogretmen-dosyasi': FolderOpen,
+  'zumre-tutanaklari': Users,
+  'genel-burokratik': FileSignature,
+  'kulup-evraklari': Club,
+  'sinif-rehberlik': GraduationCap,
+}
+
+const KATEGORI_RENK: Record<EvrakKategori, string> = {
+  'ogretmen-dosyasi': '#4F6AF5',
+  'zumre-tutanaklari': '#059669',
+  'genel-burokratik': '#6D28D9',
+  'kulup-evraklari': '#D97706',
+  'sinif-rehberlik': '#0EA5E9',
+}
 
 export function DosyamPage() {
   const navigate = useNavigate()
@@ -28,10 +47,10 @@ export function DosyamPage() {
   const kategoriler: EvrakKategori[] = ['ogretmen-dosyasi', 'zumre-tutanaklari', 'genel-burokratik', 'kulup-evraklari', 'sinif-rehberlik']
   const kategoriAd: Record<EvrakKategori, string> = {
     'ogretmen-dosyasi': 'Öğretmen Dosyası',
-    'zumre-tutanaklari': 'Zümre Tutanakları',
-    'genel-burokratik': 'Genel Bürokratik',
-    'kulup-evraklari': 'Kulüp Evrakları',
-    'sinif-rehberlik': 'Sınıf Rehberlik',
+    'zumre-tutanaklari': 'Zümre',
+    'genel-burokratik': 'Bürokratik',
+    'kulup-evraklari': 'Kulüp',
+    'sinif-rehberlik': 'Rehberlik',
   }
 
   const [aramaMetni, setAramaMetni] = useState('')
@@ -44,36 +63,25 @@ export function DosyamPage() {
   })
 
   const kategoriChips: Array<{ id: EvrakKategori | 'tumu'; label: string }> = [
-    { id: 'tumu', label: `Tümü (${sablonlar.length})` },
-    ...kategoriler.map(k => ({ id: k as EvrakKategori, label: `${kategoriAd[k]} (${sablonlar.filter(s => s.kategori === k).length})` })),
+    { id: 'tumu', label: `Tümü` },
+    ...kategoriler.map(k => ({ id: k as EvrakKategori, label: kategoriAd[k] })),
   ]
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100%', paddingBottom: 24 }}>
       {/* Başlık */}
       <div style={{ padding: '16px 16px 0' }}>
-        <h1 className="font-display font-bold" style={{ fontSize: 22, color: 'var(--color-text1)', letterSpacing: '-0.03em' }}>
+        <h1 className="font-display font-bold" style={{ fontSize: 24, color: 'var(--color-text1)', letterSpacing: '-0.03em' }}>
           Evrak Merkezi
         </h1>
         <p style={{ fontSize: 12, color: 'var(--color-text2)', marginTop: 2 }}>
-          {freeSablonlar.length} ücretsiz + {sablonlar.filter(s => s.premium).length} premium evrak
+          {freeSablonlar.length} ücretsiz · {sablonlar.filter(s => s.premium).length} premium şablon
         </p>
       </div>
 
-      {/* Premium banner */}
-      <div style={{ padding: '12px 16px 0' }}>
-        <button
-          className="w-full flex items-center justify-center gap-2 font-sans font-bold"
-          style={{ height: 48, borderRadius: 'var(--radius-lg)', background: 'var(--color-warning)', color: '#fff', fontSize: 15, border: 'none', cursor: 'pointer' }}
-          onClick={() => goster('Premium özelliği yakında aktif olacak', 'bilgi')}
-        >
-          👑 Premium'a Geç
-        </button>
-      </div>
-
-      {/* Okul bilgisi uyarısı */}
+      {/* Okul bilgisi uyarısı — en önemli aksiyon item'ı */}
       {eksikAlanlar.length > 0 && (
-        <div style={{ padding: '8px 16px 0' }}>
+        <div style={{ padding: '12px 16px 0' }}>
           <div
             className="flex items-center gap-3 rounded-xl px-4"
             style={{ height: 52, background: 'var(--color-warning-s)', border: '1px solid var(--color-warning-b)', cursor: 'pointer' }}
@@ -81,25 +89,20 @@ export function DosyamPage() {
           >
             <AlertTriangle size={16} style={{ color: 'var(--color-warning)', flexShrink: 0 }} />
             <p style={{ fontSize: 13, color: 'var(--color-text1)', flex: 1 }}>
-              Okul bilgilerini ekleyin: Evraklar otomatik doldurulur.
+              Okul bilgilerini ekle — evraklar otomatik doldurulur.
             </p>
-            <button
-              className="font-sans font-bold"
-              style={{ fontSize: 12, color: 'var(--color-warning)', background: 'none', border: 'none', cursor: 'pointer', flexShrink: 0 }}
-            >
-              Ayarlar
-            </button>
+            <ChevronRight size={14} style={{ color: 'var(--color-warning)', flexShrink: 0 }} />
           </div>
         </div>
       )}
 
       {/* Arama */}
-      <div style={{ padding: '8px 16px 0' }}>
+      <div style={{ padding: '12px 16px 0' }}>
         <div
           className="flex items-center gap-2 px-3 rounded-xl"
-          style={{ height: 42, background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
+          style={{ height: 44, background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
         >
-          <ChevronRight size={16} style={{ color: 'var(--color-text3)', transform: 'rotate(90deg)' }} />
+          <Search size={16} style={{ color: 'var(--color-text3)', flexShrink: 0 }} />
           <input
             type="text"
             placeholder="Evrak ara..."
@@ -137,7 +140,7 @@ export function DosyamPage() {
       <div style={{ padding: '12px 16px 0', display: 'flex', flexDirection: 'column', gap: 8 }}>
         {filtreliSablonlar.length === 0 ? (
           <div className="flex flex-col items-center gap-2 py-8">
-            <CalendarDays size={32} style={{ color: 'var(--color-text3)' }} />
+            <Search size={32} style={{ color: 'var(--color-text3)' }} />
             <p style={{ fontSize: 14, color: 'var(--color-text3)' }}>Evrak bulunamadı</p>
           </div>
         ) : (
@@ -145,6 +148,9 @@ export function DosyamPage() {
             const eksik = tespitEksikAlanlar(sablon, ayarlar)
             const premium = isPremiumKategori(sablon.kategori)
             const erisimVar = !premium || isPremium
+            const KategoriIkon = KATEGORI_IKON[sablon.kategori as EvrakKategori] ?? FolderOpen
+            const kategoriRenk = KATEGORI_RENK[sablon.kategori as EvrakKategori] ?? '#4F6AF5'
+
             return (
               <div
                 key={sablon.id}
@@ -162,39 +168,63 @@ export function DosyamPage() {
                 <div className="flex items-start gap-3">
                   <div
                     className="flex items-center justify-center flex-shrink-0 rounded-xl"
-                    style={{ width: 40, height: 40, background: 'var(--color-primary-s)', color: 'var(--color-primary)' }}
+                    style={{ width: 40, height: 40, background: `color-mix(in srgb, ${kategoriRenk} 12%, var(--color-bg))`, color: kategoriRenk }}
                   >
-                    <CalendarDays size={18} />
+                    <KategoriIkon size={18} />
                   </div>
                   <div className="flex-1 min-w-0" style={{ paddingRight: sablon.premium ? 60 : 0 }}>
                     <p className="font-sans font-bold" style={{ fontSize: 14, color: 'var(--color-text1)' }}>{sablon.ad}</p>
                     <p style={{ fontSize: 12, color: 'var(--color-text2)', marginTop: 2 }}>{sablon.aciklama}</p>
                   </div>
                 </div>
+
                 {erisimVar ? (
-                  <button
-                    className="w-full flex items-center justify-center gap-2 font-sans font-bold mt-3"
-                    style={{ height: 38, borderRadius: 'var(--radius-lg)', background: 'var(--color-primary)', color: '#fff', fontSize: 13, border: 'none', cursor: 'pointer' }}
-                    onClick={eksik.length > 0
-                      ? () => navigate('/app/profil')
-                      : () => goster(`${sablon.ad} indirme yakında aktif olacak`, 'bilgi')
-                    }
-                  >
-                    <Download size={14} /> {eksik.length > 0 ? 'Bilgileri Tamamla' : 'İndir'}
-                  </button>
+                  eksik.length > 0 ? (
+                    <button
+                      className="w-full flex items-center justify-center gap-2 font-sans font-bold mt-3"
+                      style={{ height: 38, borderRadius: 'var(--radius-lg)', background: 'var(--color-warning-s)', color: 'var(--color-warning)', fontSize: 13, border: '1px solid var(--color-warning-b)', cursor: 'pointer' }}
+                      onClick={() => navigate('/app/profil')}
+                    >
+                      <AlertTriangle size={14} /> Bilgileri Tamamla
+                    </button>
+                  ) : (
+                    /* İndir — geliştirme aşamasında, honest state */
+                    <div
+                      className="w-full flex items-center justify-center gap-2 font-sans font-semibold mt-3"
+                      style={{ height: 38, borderRadius: 'var(--radius-lg)', background: 'var(--color-bg)', color: 'var(--color-text3)', fontSize: 13, border: '1px solid var(--color-border)' }}
+                    >
+                      <Construction size={13} /> İndirme Yakında
+                    </div>
+                  )
                 ) : (
                   <button
                     className="w-full flex items-center justify-center gap-2 font-sans font-bold mt-3"
-                    style={{ height: 38, borderRadius: 'var(--radius-lg)', background: 'var(--color-warning)', color: '#fff', fontSize: 13, border: 'none', cursor: 'pointer' }}
+                    style={{ height: 38, borderRadius: 'var(--radius-lg)', background: 'var(--color-surface)', color: 'var(--color-text3)', fontSize: 13, border: '1px solid var(--color-border)', cursor: 'default' }}
                     onClick={() => goster('Premium özelliği yakında aktif olacak', 'bilgi')}
                   >
-                    👑 Premium'a Geç
+                    👑 Premium — Yakında
                   </button>
                 )}
               </div>
             )
           })
         )}
+      </div>
+
+      {/* Premium upsell — içerik sonunda */}
+      <div style={{ padding: '16px 16px 0' }}>
+        <div style={{ borderRadius: 16, background: 'var(--color-surface)', border: '1px solid var(--color-border)', padding: '16px 18px', display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{ width: 44, height: 44, borderRadius: 12, background: 'linear-gradient(135deg, #F59E0B, #D97706)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <span style={{ fontSize: 22 }}>👑</span>
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-text1)', marginBottom: 2 }}>Premium'a Geç</p>
+            <p style={{ fontSize: 12, color: 'var(--color-text2)' }}>Tüm evraklara erişim · 149 TL/ay</p>
+          </div>
+          <div style={{ height: 32, padding: '0 12px', borderRadius: 100, background: 'var(--color-border)', display: 'flex', alignItems: 'center' }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text3)' }}>Yakında</span>
+          </div>
+        </div>
       </div>
     </div>
   )

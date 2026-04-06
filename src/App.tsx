@@ -77,7 +77,7 @@ function AppInner() {
         <Route path="/app/planla/ders-programi" element={<AppLayout><DersProgramiPage planlar={planlar} /></AppLayout>} />
         <Route path="/app/planla/takvim" element={<AppLayout><OnemliTarihlerPage /></AppLayout>} />
         <Route path="/app/dosyam" element={<AppLayout><DosyamPage /></AppLayout>} />
-        <Route path="/app/uret" element={<AppLayout><UretPage /></AppLayout>} />
+        <Route path="/app/uret" element={<AppLayout><UretPage planlar={planlar} /></AppLayout>} />
         <Route path="/app/yukle" element={<AppLayout><YuklemePage onYukle={handleYukleLegacy} /></AppLayout>} />
         <Route path="/app/profil" element={<AppLayout><AppSettingsScreen onPlanEkle={handlePlanEkle} onPlanSil={handlePlanSil} planlar={planlar} user={user} /></AppLayout>} />
         <Route path="/app/hafta/:haftaNo" element={<AppLayout><HaftaDetayPage entry={aktifEntry} onTamamlaToggle={handleTamamlananGuncelle} /></AppLayout>} />

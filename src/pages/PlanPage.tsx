@@ -42,7 +42,6 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
   const navigate = useNavigate()
   const [tamamlananlar, setTamamlananlar] = useState<number[]>([])
   const [grupAcik, setGrupAcik] = useState<Record<number, boolean>>({ 0: true })
-  const [expandedHaftalar, setExpandedHaftalar] = useState<Set<number>>(new Set())
   const bugunRef = useRef<HTMLDivElement>(null)
   const { tarihler } = useOnemliTarihler()
 
@@ -60,7 +59,6 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
     const initial: Record<number, boolean> = {}
     unites.forEach((_, i) => { initial[i] = i === (aktifGrupIdx >= 0 ? aktifGrupIdx : 0) })
     setGrupAcik(initial)
-    if (bugunHaftaNo) setExpandedHaftalar(new Set([bugunHaftaNo]))
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entry?.sinif])
 
@@ -79,15 +77,6 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
     } catch { /* ignore */ }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entry?.sinif])
-
-  function toggleHafta(haftaNo: number) {
-    setExpandedHaftalar(prev => {
-      const next = new Set(prev)
-      if (next.has(haftaNo)) next.delete(haftaNo)
-      else next.add(haftaNo)
-      return next
-    })
-  }
 
   // ─── BOŞ STATE ───────────────────────────────────────────────────────────────
   if (!entry) {
@@ -291,7 +280,6 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
                           const isTatil = h.tatilMi
                           const isTamamlandi = tamamlananlar.includes(h.haftaNo)
                           const isBuHafta = h.haftaNo === bugunHaftaNo
-                          const isExpanded = expandedHaftalar.has(h.haftaNo)
 
                           return (
                             <div
@@ -299,12 +287,8 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
                               ref={isBuHafta ? bugunRef : undefined}
                               style={{ borderTop: hIdx > 0 ? `1px solid color-mix(in srgb, var(--color-border) 60%, transparent)` : 'none' }}
                             >
-                              {/* Satır başlığı */}
                               <button
-                                onClick={() => {
-                                  if (isTatil) return
-                                  toggleHafta(h.haftaNo)
-                                }}
+                                onClick={() => { if (!isTatil) navigate(`/app/hafta/${h.haftaNo}`) }}
                                 style={{
                                   width: '100%', display: 'flex', alignItems: 'center', gap: 12,
                                   padding: '11px 16px', background: 'none', border: 'none',
@@ -317,7 +301,6 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
                                   background: isBuHafta ? renk : 'var(--color-surface)',
                                   border: `1px solid ${isBuHafta ? renk : 'var(--color-border)'}`,
                                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                  boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
                                 }}>
                                   <span style={{ fontSize: 11, fontWeight: 700, color: isBuHafta ? '#fff' : 'var(--color-text2)' }}>
                                     {h.haftaNo}
@@ -334,7 +317,7 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
                                     {isTatil ? (h.tatilAdi || 'Tatil') : (h.kazanim || 'Kazanım yok')}
                                   </p>
                                   <p style={{ fontSize: 11, color: 'var(--color-text3)' }}>
-                                    {formatTarih(h.baslangicTarihi)} – {formatTarih(h.bitisTarihi)} · 4 ders saati
+                                    {formatTarih(h.baslangicTarihi)} – {formatTarih(h.bitisTarihi)}
                                   </p>
                                 </div>
 
@@ -349,41 +332,10 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
                                     <CheckCircle2 size={16} color="#059669" />
                                   )}
                                   {!isTatil && (
-                                    <ChevronDown
-                                      size={14}
-                                      color="var(--color-text3)"
-                                      style={{ transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}
-                                    />
+                                    <ChevronDown size={14} color="var(--color-text3)" style={{ transform: 'rotate(-90deg)' }} />
                                   )}
                                 </div>
                               </button>
-
-                              {/* Genişletilmiş detay */}
-                              {isExpanded && !isTatil && (
-                                <div style={{ padding: '0 16px 14px 60px' }}>
-                                  <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text3)', marginBottom: 8, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Kazanım</p>
-                                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: h.kazanimDetay ? 10 : 0 }}>
-                                    <CheckCircle2 size={14} color="#059669" style={{ flexShrink: 0, marginTop: 2 }} />
-                                    <p style={{ fontSize: 13, color: 'var(--color-text2)', lineHeight: 1.6 }}>
-                                      {h.kazanim || 'Kazanım girilmemiş'}
-                                    </p>
-                                  </div>
-                                  {h.kazanimDetay && (
-                                    <p style={{ fontSize: 12, color: 'var(--color-text3)', marginTop: 6, lineHeight: 1.5 }}>{h.kazanimDetay}</p>
-                                  )}
-                                  <button
-                                    onClick={() => navigate(`/app/hafta/${h.haftaNo}`)}
-                                    style={{
-                                      marginTop: 12, fontSize: 12, fontWeight: 700,
-                                      color: renk, background: `color-mix(in srgb, ${renk} 10%, transparent)`,
-                                      border: `1px solid color-mix(in srgb, ${renk} 25%, transparent)`,
-                                      borderRadius: 8, padding: '6px 12px', cursor: 'pointer',
-                                    }}
-                                  >
-                                    Haftayı Görüntüle →
-                                  </button>
-                                </div>
-                              )}
                             </div>
                           )
                         })}

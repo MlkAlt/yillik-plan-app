@@ -1,11 +1,12 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Home, BookOpen, FileText, Sparkles } from 'lucide-react'
+import { Home, BookOpen, FileText, Sparkles, UserRound } from 'lucide-react'
 
 const TABS = [
-  { label: 'Ana',    icon: Home,     path: '/app',       exact: true  },
-  { label: 'Planla', icon: BookOpen,  path: '/app/planla', exact: false },
-  { label: 'Dosyam', icon: FileText,  path: '/app/dosyam', exact: true  },
-  { label: 'Üret',   icon: Sparkles,  path: '/app/uret',   exact: true  },
+  { label: 'Ana',    icon: Home,       path: '/app',        exact: true  },
+  { label: 'Planla', icon: BookOpen,   path: '/app/planla', exact: false },
+  { label: 'Dosyam', icon: FileText,   path: '/app/dosyam', exact: true  },
+  { label: 'Üret',   icon: Sparkles,   path: '/app/uret',   exact: true  },
+  { label: 'Profil', icon: UserRound,  path: '/app/profil', exact: true  },
 ]
 
 function isActive(path: string, exact: boolean, pathname: string) {

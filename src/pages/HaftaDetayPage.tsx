@@ -7,7 +7,7 @@ import { getSession } from '../lib/auth'
 import { syncProgressToSupabase } from '../lib/planSync'
 import { useToast } from '../lib/toast'
 import { StorageKeys } from '../lib/storageKeys'
-import { ChevronLeft, Check, NotebookPen, Sparkles } from 'lucide-react'
+import { ArrowLeft, Check, Sparkles } from 'lucide-react'
 import { Card } from '../components/UI/Card'
 import { SectionHeader } from '../components/UI/SectionHeader'
 
@@ -159,25 +159,23 @@ export function HaftaDetayPage({ entry, onTamamlaToggle }: HaftaDetayPageProps) 
   const durumMetni = hafta?.tatilMi ? 'Tatil haftası' : tamamlandi ? 'Tamamlandı' : 'Devam ediyor'
 
   return (
-    <div className="page-shell">
+    <div className="page-shell" style={{ paddingBottom: 80 }}>
       <div className="page-header">
         <div className="flex items-start gap-3 mb-3">
           <button
             onClick={() => navigate(-1)}
             aria-label="Plan ekranina geri don"
-            className="w-10 h-10 flex items-center justify-center flex-shrink-0 transition-all active:scale-95"
+            className="flex items-center justify-center flex-shrink-0 transition-all active:scale-95"
             style={{
-              borderRadius: 'var(--radius-lg)',
+              width: 36, height: 36, borderRadius: '50%',
               border: '1px solid var(--color-border)',
               backgroundColor: 'var(--color-surface)',
               color: 'var(--color-text2)',
-              boxShadow: 'var(--shadow-xs)',
             }}
           >
-            <ChevronLeft size={18} strokeWidth={2.5} />
+            <ArrowLeft size={18} />
           </button>
           <div className="flex-1 min-w-0">
-            <p className="text-[11px] font-bold uppercase tracking-[.12em] mb-1" style={{ color: 'var(--color-text3)' }}>Hafta Detayı</p>
             <h1 className="text-[24px] font-bold tracking-tight mb-1" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text1)' }}>
               {no}. Hafta
             </h1>
@@ -247,44 +245,14 @@ export function HaftaDetayPage({ entry, onTamamlaToggle }: HaftaDetayPageProps) 
           </Card>
         )}
 
-        <div className="sticky-action-bar">
-          <button
-            onClick={handleTamamlaToggle}
-            onAnimationEnd={() => setTamamlaAnimating(false)}
-            className={`w-full py-3.5 flex items-center justify-center gap-2 font-bold text-sm transition-all active:scale-95 ${tamamlaAnimating ? 'animate-pop-in' : ''}`}
-            style={{
-              borderRadius: 'var(--radius-pill)',
-              border: tamamlandi ? '1px solid color-mix(in srgb, var(--color-success) 30%, transparent)' : '1px solid color-mix(in srgb, var(--color-pop) 30%, transparent)',
-              backgroundColor: tamamlandi ? 'color-mix(in srgb, var(--color-success) 10%, transparent)' : 'var(--color-pop)',
-              color: tamamlandi ? 'var(--color-success)' : '#ffffff',
-              boxShadow: tamamlandi ? 'none' : 'var(--shadow-sm)',
-            }}
-          >
-            <Check size={16} strokeWidth={3} />
-            {tamamlandi ? 'Tamamlandı — geri al' : 'Haftayı Tamamladım'}
-          </button>
-          {!tamamlandi && (
-            <p className="text-center text-xs mt-2" style={{ color: 'var(--color-text3)' }}>
-              Önce haftayı gözden geçir, sonra tamamlandı olarak işaretle.
-            </p>
-          )}
-        </div>
 
         <Card style={{ borderRadius: 'var(--radius-xl)' }}>
-          <SectionHeader title="Öğretmen Notu" meta={kaydedildi ? 'Kaydedildi' : 'Otomatik kayıt'} />
-          <div className="flex items-start gap-2 mb-3">
-            <div className="w-8 h-8 flex items-center justify-center" style={{ borderRadius: 'var(--radius-md)', backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', color: 'var(--color-primary)' }}>
-              <NotebookPen size={15} />
-            </div>
-            <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text2)' }}>
-              Not alanini ikinci adim olarak kullan. Once haftayi tamamla, sonra gozlem veya hatirlatma notunu birak.
-            </p>
-          </div>
+          <SectionHeader title="Öğretmen Notu" meta={kaydedildi ? '✓ Kaydedildi' : 'Otomatik kayıt'} />
           <textarea
             value={not}
             onChange={(e) => handleNotChange(e.target.value)}
             rows={4}
-            placeholder="Bu haftayla ilgili not ekle..."
+            placeholder="Gözlem, hatırlatma veya not ekle..."
             className="w-full p-3 text-sm transition-all resize-none"
             style={{
               borderRadius: 'var(--radius-lg)',
@@ -312,6 +280,35 @@ export function HaftaDetayPage({ entry, onTamamlaToggle }: HaftaDetayPageProps) 
           )
         })()}
       </div>
+
+      {/* Fixed bottom — Tamamla butonu */}
+      {!hafta?.tatilMi && (
+        <div style={{
+          position: 'fixed', bottom: 'calc(var(--bottomnav-height, 64px) + env(safe-area-inset-bottom, 0px))',
+          left: '50%', transform: 'translateX(-50%)',
+          width: '100%', maxWidth: 512,
+          padding: '10px 16px',
+          background: 'var(--color-bg)',
+          borderTop: '1px solid var(--color-border)',
+          zIndex: 40,
+        }}>
+          <button
+            onClick={handleTamamlaToggle}
+            onAnimationEnd={() => setTamamlaAnimating(false)}
+            className={`w-full py-3.5 flex items-center justify-center gap-2 font-bold text-sm transition-all active:scale-95 ${tamamlaAnimating ? 'animate-pop-in' : ''}`}
+            style={{
+              borderRadius: 'var(--radius-pill)',
+              border: tamamlandi ? '1px solid color-mix(in srgb, var(--color-success) 30%, transparent)' : 'none',
+              backgroundColor: tamamlandi ? 'color-mix(in srgb, var(--color-success) 10%, transparent)' : 'var(--color-pop)',
+              color: tamamlandi ? 'var(--color-success)' : '#ffffff',
+              boxShadow: tamamlandi ? 'none' : '0 4px 16px rgba(79,106,245,.28)',
+            }}
+          >
+            <Check size={16} strokeWidth={3} />
+            {tamamlandi ? 'Tamamlandı — geri al' : 'Haftayı Tamamladım'}
+          </button>
+        </div>
+      )}
     </div>
   )
 }
