@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import type { Hafta } from '../types/takvim'
 import type { ParsedRow } from '../lib/fileParser'
 import type { PlanEntry } from '../types/planEntry'
-import { AdBanner } from '../components/AdBanner'
 import { Button } from '../components/Button'
 import { Check, ChevronDown, CheckCircle2, Clock, CalendarDays, Bell, Sparkles } from 'lucide-react'
 import { StorageKeys } from '../lib/storageKeys'
@@ -194,8 +193,6 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
       )}
 
       <div className="section-stack" style={{ padding: '0 16px 16px' }}>
-          <AdBanner className="rounded-lg" />
-
           {/* ─── Yaklaşan Tarihler ───────────────────────────── */}
           {(() => {
             const bugun = new Date()
@@ -442,28 +439,6 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
             </div>
           )}
 
-          {/* İndir banner — Figma style */}
-          {(isMeb || isUploaded) && (
-            <div style={{
-              borderRadius: 16,
-              background: 'linear-gradient(135deg, #4F6AF5, #6D28D9)',
-              padding: '20px 20px',
-              display: 'flex', flexDirection: 'column', gap: 12,
-            }}>
-              <div>
-                <p style={{ fontSize: 15, fontWeight: 700, color: '#fff', marginBottom: 4 }}>Planı İndir</p>
-                <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)' }}>Okul bilgileri otomatik eklenir (Ayarlar'dan yapılandırın)</p>
-              </div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button style={{ flex: 1, height: 40, borderRadius: 10, background: '#fff', color: '#4F6AF5', fontSize: 13, fontWeight: 700, border: 'none', cursor: 'pointer' }}>
-                  Word İndir
-                </button>
-                <button style={{ flex: 1, height: 40, borderRadius: 10, background: 'rgba(255,255,255,0.15)', color: '#fff', fontSize: 13, fontWeight: 700, border: '1px solid rgba(255,255,255,0.25)', cursor: 'pointer' }}>
-                  Excel İndir
-                </button>
-              </div>
-            </div>
-          )}
         </div>
     </div>
   )

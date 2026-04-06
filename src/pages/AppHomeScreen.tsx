@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   CalendarDays, Check, ChevronRight,
-  Clock, FileText, Users, Sparkles,
+  Clock, FileText, Sparkles,
 } from 'lucide-react'
 import type { PlanEntry } from '../types/planEntry'
 import { StorageKeys } from '../lib/storageKeys'
@@ -57,10 +57,6 @@ function formatBugunTurkce(): string {
 
 const SINIF_RENKLERI = ['#4F6AF5', '#6D28D9', '#059669', '#D97706', '#DC2626', '#0EA5E9', '#7C3AED', '#10B981']
 
-const HIZLI_ERISIM = [
-  { label: 'Takvim', alt: 'Önemli tarihler', icon: CalendarDays, renk: '#059669', bg: '#ECFDF5', path: '/app/planla/takvim' },
-  { label: 'Ders Programı', alt: 'Haftalık çizelge', icon: Clock, renk: '#D97706', bg: '#FFFBEB', path: '/app/planla/ders-programi' },
-]
 
 export function AppHomeScreen({
   planlar, aktifEntry, onPlanEkle, onSinifSec,
@@ -488,115 +484,6 @@ export function AppHomeScreen({
         </div>
       </div>
 
-      {/* ── HIZLI ERİŞİM ─────────────────────── */}
-      <div style={{ padding: '16px 16px 0' }}>
-        <p className="font-sans font-bold" style={{ fontSize: 13, color: 'var(--color-text1)', marginBottom: 10 }}>
-          Hızlı Erişim
-        </p>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-          {HIZLI_ERISIM.map(item => {
-            const Icon = item.icon
-            return (
-              <button
-                key={item.path}
-                onClick={() => navigate(item.path)}
-                className="rounded-xl flex flex-col items-center justify-center text-center gap-2 cursor-pointer"
-                style={{ background: item.bg, border: '1px solid transparent', padding: '18px 12px', transition: 'transform 0.15s' }}
-                onMouseDown={e => (e.currentTarget.style.transform = 'scale(0.97)')}
-                onMouseUp={e => (e.currentTarget.style.transform = 'scale(1)')}
-                onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
-              >
-                <div
-                  className="flex items-center justify-center rounded-full"
-                  style={{ width: 44, height: 44, background: item.renk }}
-                >
-                  <Icon size={22} color="#fff" />
-                </div>
-                <div>
-                  <p className="font-sans font-bold" style={{ fontSize: 13, color: 'var(--color-text1)' }}>{item.label}</p>
-                  <p style={{ fontSize: 11, color: 'var(--color-text3)' }}>{item.alt}</p>
-                </div>
-              </button>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* ── SINIFLARIM ─────────────────────────── */}
-      <div style={{ padding: '16px 16px 0' }}>
-        <div
-          className="rounded-xl p-4"
-          style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
-        >
-          <div className="flex items-center gap-2 mb-3">
-            <Users size={16} style={{ color: 'var(--color-accent)' }} />
-            <p className="font-sans font-bold" style={{ fontSize: 14, color: 'var(--color-text1)' }}>Sınıflarım</p>
-          </div>
-
-          <div className="flex flex-col gap-2 mb-3">
-            {planlar.map((entry, i) => {
-              const sinifAd = entry.sinifGercek || entry.sinif
-              const sinifNo = parseInt(sinifAd) || (i + 1)
-              const renk = SINIF_RENKLERI[i % SINIF_RENKLERI.length]
-              return (
-                <div
-                  key={entry.sinif}
-                  className="flex items-center gap-3"
-                  style={{ padding: '10px 12px', borderRadius: 'var(--radius-lg)', background: 'var(--color-bg)', border: '1px solid var(--color-border)' }}
-                >
-                  <div
-                    className="flex items-center justify-center font-display font-bold flex-shrink-0 rounded-lg"
-                    style={{ width: 32, height: 32, background: renk, color: '#fff', fontSize: 14 }}
-                  >
-                    {sinifNo}
-                  </div>
-                  <p className="font-sans font-semibold flex-1" style={{ fontSize: 14, color: 'var(--color-text1)' }}>
-                    {sinifAd}
-                  </p>
-                  <span
-                    className="font-sans font-semibold"
-                    style={{ fontSize: 12, color: 'var(--color-primary)', background: 'var(--color-primary-s)', padding: '2px 10px', borderRadius: 'var(--radius-pill)' }}
-                  >
-                    Aktif
-                  </span>
-                </div>
-              )
-            })}
-          </div>
-
-          <button
-            onClick={() => navigate('/app/planla')}
-            className="flex items-center gap-1 font-sans font-semibold w-full justify-center"
-            style={{ fontSize: 13, color: 'var(--color-primary)', padding: '8px 0', borderTop: '1px solid var(--color-border)' }}
-          >
-            Planları Gör <ChevronRight size={14} />
-          </button>
-        </div>
-      </div>
-
-      {/* ── EVRAK DURUMU ───────────────────────── */}
-      <div style={{ padding: '16px 16px 0' }}>
-        <div
-          className="rounded-xl p-4"
-          style={{ background: 'var(--color-navy)', border: '1px solid rgba(255,255,255,0.08)' }}
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <FileText size={16} color="rgba(255,255,255,0.7)" />
-            <p className="font-sans font-semibold" style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>Evrak Durumu</p>
-          </div>
-          <p className="font-display font-bold" style={{ fontSize: 26, color: '#fff', letterSpacing: '-0.03em', marginBottom: 2 }}>
-            {belgeSayisi} Evrak
-          </p>
-          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', marginBottom: 14 }}>Bu dönem oluşturuldu</p>
-          <button
-            onClick={() => navigate('/app/dosyam')}
-            className="w-full flex items-center justify-center gap-2 font-sans font-bold"
-            style={{ height: 42, borderRadius: 'var(--radius-pill)', background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', fontSize: 14, cursor: 'pointer' }}
-          >
-            <FileText size={15} /> Evrak Merkezi
-          </button>
-        </div>
-      </div>
 
       {/* Ders programı promptu */}
       {!dersProgramiDolu && (
