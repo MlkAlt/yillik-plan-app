@@ -2,14 +2,13 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   CalendarDays, Check, ChevronRight,
-  Clock, FileText, Users, Sparkles, Bell,
+  Clock, FileText, Users, Sparkles,
 } from 'lucide-react'
 import type { PlanEntry } from '../types/planEntry'
 import { StorageKeys } from '../lib/storageKeys'
 import { BosdurumuEkrani } from '../components/BosdurumuEkrani/BosdurumuEkrani'
 import { getEvrakSablonlari, tespitEksikAlanlar } from '../lib/evrakService'
 import { useDersProgrami } from '../hooks/useDersProgrami'
-import { useOnemliTarihler } from '../hooks/useOnemliTarihler'
 import type { OgretmenAyarlari } from '../types/ogretmenAyarlari'
 
 interface AppHomeScreenProps {
@@ -80,8 +79,6 @@ export function AppHomeScreen({
   const [tamamlananBugun, setTamamlananBugun] = useState<number[]>(() => {
     try { return JSON.parse(localStorage.getItem(`bugun_tamamlanan_${bugunStr}`) || '[]') } catch { return [] }
   })
-  const { tarihler } = useOnemliTarihler()
-
   const freeBelgeler = getEvrakSablonlari().filter(s => !s.premium)
   const belgeSayisi = freeBelgeler.length
 
@@ -166,16 +163,6 @@ export function AppHomeScreen({
     const hafta = activeEntry.plan.haftalar.find(h => h.haftaNo === mevcutHafta)
     return hafta?.uniteAdi ?? null
   })()
-
-  // Yaklaşan tarihler (önümüzdeki 30 gün)
-  const bugun = new Date()
-  const yaklasanTarihler = tarihler
-    .filter(t => {
-      const d = new Date(t.tarih)
-      const diff = (d.getTime() - bugun.getTime()) / (1000 * 60 * 60 * 24)
-      return diff >= 0 && diff <= 30
-    })
-    .slice(0, 3)
 
   const dersProgramiDolu = dersProgrami.saatler.some(s => s.sinif !== null)
 
@@ -584,67 +571,6 @@ export function AppHomeScreen({
           >
             Planları Gör <ChevronRight size={14} />
           </button>
-        </div>
-      </div>
-
-      {/* ── YAKLAŞAN TARİHLER ──────────────────── */}
-      <div style={{ padding: '16px 16px 0' }}>
-        <div
-          className="rounded-xl p-4"
-          style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
-        >
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Bell size={16} style={{ color: 'var(--color-warning)' }} />
-              <p className="font-sans font-bold" style={{ fontSize: 14, color: 'var(--color-text1)' }}>Yaklaşan Tarihler</p>
-            </div>
-            <button
-              onClick={() => navigate('/app/planla/takvim')}
-              className="font-sans font-semibold"
-              style={{ fontSize: 12, color: 'var(--color-primary)' }}
-            >
-              Hepsi
-            </button>
-          </div>
-
-          {yaklasanTarihler.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 py-4">
-              <CalendarDays size={28} style={{ color: 'var(--color-text3)' }} />
-              <p style={{ fontSize: 13, color: 'var(--color-text3)' }}>Yaklaşan tarih yok</p>
-              <button
-                onClick={() => navigate('/app/planla/takvim')}
-                className="font-sans font-semibold"
-                style={{ fontSize: 13, color: 'var(--color-primary)' }}
-              >
-                Tarih Ekle
-              </button>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-2">
-              {yaklasanTarihler.map(tarih => (
-                <div
-                  key={tarih.id}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
-                  style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)' }}
-                >
-                  <div
-                    className="flex-shrink-0 rounded-lg flex flex-col items-center justify-center"
-                    style={{ width: 36, height: 36, background: 'var(--color-primary-s)' }}
-                  >
-                    <p className="font-display font-bold" style={{ fontSize: 14, color: 'var(--color-primary)', lineHeight: 1 }}>
-                      {new Date(tarih.tarih).getDate()}
-                    </p>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-sans font-semibold truncate" style={{ fontSize: 13, color: 'var(--color-text1)' }}>{tarih.baslik}</p>
-                    {tarih.aciklama && (
-                      <p className="truncate" style={{ fontSize: 11, color: 'var(--color-text3)' }}>{tarih.aciklama}</p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </div>
 
