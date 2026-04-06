@@ -5,7 +5,7 @@ import type { ParsedRow } from '../lib/fileParser'
 import type { PlanEntry } from '../types/planEntry'
 import { AdBanner } from '../components/AdBanner'
 import { Button } from '../components/Button'
-import { Check, ChevronDown, CheckCircle2, Clock, BookOpen, Sparkles } from 'lucide-react'
+import { Check, ChevronDown, CheckCircle2, Clock, CalendarDays, Sparkles } from 'lucide-react'
 import { StorageKeys } from '../lib/storageKeys'
 import { SectionHeader } from '../components/UI/SectionHeader'
 
@@ -41,7 +41,6 @@ function formatTarih(isoTarih: string): string {
 export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
   const navigate = useNavigate()
   const [tamamlananlar, setTamamlananlar] = useState<number[]>([])
-  const [visibleYuzde, setVisibleYuzde] = useState(0)
   const [grupAcik, setGrupAcik] = useState<Record<number, boolean>>({ 0: true })
   const [expandedHaftalar, setExpandedHaftalar] = useState<Set<number>>(new Set())
   const bugunRef = useRef<HTMLDivElement>(null)
@@ -79,17 +78,6 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
     } catch { /* ignore */ }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entry?.sinif])
-
-  useEffect(() => {
-    if (!entry) { setVisibleYuzde(0); return }
-    const isMebCalc = entry.tip === 'meb' && entry.plan && entry.plan.haftalar.length > 0
-    const toplamCalc = isMebCalc
-      ? entry.plan!.haftalar.filter(h => !h.tatilMi).length
-      : (entry.tip === 'yukle' && entry.rows ? entry.rows.length : 0)
-    const calc = toplamCalc > 0 ? Math.round((tamamlananlar.length / toplamCalc) * 100) : 0
-    const t = setTimeout(() => setVisibleYuzde(calc), 80)
-    return () => clearTimeout(t)
-  }, [tamamlananlar, entry])
 
   function toggleHafta(haftaNo: number) {
     setExpandedHaftalar(prev => {
@@ -146,38 +134,21 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
   const isMeb = tip === 'meb' && plan && plan.haftalar.length > 0
   const isUploaded = tip === 'yukle' && rows && rows.length > 0
   const dataLength = isMeb ? plan!.haftalar.length : (isUploaded ? rows!.length : 0)
-  const tamamlananSayi = tamamlananlar.length
-  const toplamDers = isMeb ? plan!.haftalar.filter(h => !h.tatilMi).length : dataLength
-  const yuzde = toplamDers > 0 ? Math.round((tamamlananSayi / toplamDers) * 100) : 0
-
   // Ünite grupları (MEB planı için)
   const uniteGruplari = isMeb ? groupByUnite(plan!.haftalar) : []
 
   return (
     <div className="page-shell">
-      {/* Navy hero card */}
-      <div style={{ margin: '0 16px 12px', borderRadius: 20, background: 'linear-gradient(145deg,#1B2E5E,#243A78)', padding: '18px', position: 'relative', overflow: 'hidden' }}>
+      {/* Navy hero card — minimal */}
+      <div style={{ margin: '0 16px 12px', borderRadius: 20, background: 'linear-gradient(145deg,#1B2E5E,#243A78)', padding: '16px 18px', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: 100, height: 100, background: 'radial-gradient(circle,rgba(79,106,245,.22),transparent 70%)', borderRadius: '50%' }} />
         <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,.55)', marginBottom: 6 }}>
-          Yıllık Plan · {entry.yil}
+          Müfredat Haritası · {entry.yil}
         </p>
         <p style={{ fontFamily: "var(--font-display),'Bricolage Grotesque',sans-serif", fontSize: 20, fontWeight: 800, color: '#fff', letterSpacing: '-0.03em', marginBottom: 4 }}>{ders}</p>
-        <p style={{ fontSize: 12, color: 'rgba(255,255,255,.6)', marginBottom: 12 }}>
-          {sinifGercek || sinif} · {dataLength} hafta · Haftada 4 saat
+        <p style={{ fontSize: 12, color: 'rgba(255,255,255,.6)' }}>
+          {sinifGercek || sinif} · {dataLength} hafta
         </p>
-        <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-          {bugunHaftaNo && (
-            <span style={{ fontSize: 12, fontWeight: 700, padding: '4px 12px', borderRadius: 100, background: 'rgba(255,255,255,.15)', color: 'rgba(255,255,255,.85)' }}>
-              {bugunHaftaNo}. Hafta
-            </span>
-          )}
-          <span style={{ fontSize: 12, fontWeight: 700, padding: '4px 12px', borderRadius: 100, background: 'rgba(255,255,255,.15)', color: 'rgba(255,255,255,.85)' }}>
-            %{yuzde} tamamlandı
-          </span>
-        </div>
-        <div style={{ height: 4, background: 'rgba(255,255,255,.2)', borderRadius: 100, overflow: 'hidden' }}>
-          <div style={{ height: '100%', width: `${visibleYuzde}%`, background: 'rgba(255,255,255,.75)', borderRadius: 100, transition: 'width 0.7s ease-out' }} />
-        </div>
       </div>
 
       {/* Sınıf seçici */}
@@ -192,34 +163,26 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
         </div>
       )}
 
+      {/* Quick Actions */}
+      <div style={{ padding: '0 16px 12px', display: 'flex', gap: 8 }}>
+        <button
+          onClick={() => navigate('/app/planla/ders-programi')}
+          style={{ display: 'flex', alignItems: 'center', gap: 6, height: 36, padding: '0 14px', borderRadius: 100, background: 'var(--color-surface)', border: '1.5px solid var(--color-border)', fontSize: 13, fontWeight: 600, color: 'var(--color-text1)', cursor: 'pointer' }}
+        >
+          <Clock size={14} color="#4F6AF5" /> Ders Programı
+        </button>
+        <button
+          onClick={() => navigate('/app/planla/takvim')}
+          style={{ display: 'flex', alignItems: 'center', gap: 6, height: 36, padding: '0 14px', borderRadius: 100, background: 'var(--color-surface)', border: '1.5px solid var(--color-border)', fontSize: 13, fontWeight: 600, color: 'var(--color-text1)', cursor: 'pointer' }}
+        >
+          <CalendarDays size={14} color="#059669" /> Takvim
+        </button>
+      </div>
+
       <div className="section-stack" style={{ padding: '0 16px 16px' }}>
           <AdBanner className="rounded-lg" />
 
-          {/* ─── B2: 3 Stat Kartı ─────────────────────────────────────── */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8, marginBottom: 4 }}>
-            {[
-              { label: 'Toplam', value: `${dataLength}`, alt: 'Hafta', renk: '#4F6AF5', Icon: Clock },
-              { label: 'Tamamlanan', value: `${tamamlananSayi}`, alt: 'Hafta', renk: '#059669', Icon: CheckCircle2 },
-              { label: 'Kalan', value: `${Math.max(0, toplamDers - tamamlananSayi)}`, alt: 'Hafta', renk: '#D97706', Icon: BookOpen },
-            ].map(stat => (
-              <div key={stat.label} style={{
-                background: `linear-gradient(135deg, ${stat.renk}, ${stat.renk}cc)`,
-                borderRadius: 16, padding: '14px 12px',
-                display: 'flex', flexDirection: 'column', gap: 6,
-                overflow: 'hidden', position: 'relative',
-              }}>
-                <div style={{ position: 'absolute', top: -10, right: -10, width: 50, height: 50, background: 'rgba(255,255,255,0.1)', borderRadius: '50%' }} />
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>{stat.label}</p>
-                  <stat.Icon size={14} color="rgba(255,255,255,0.5)" />
-                </div>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 800, color: '#fff', lineHeight: 1, letterSpacing: '-0.03em' }}>{stat.value}</p>
-                <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>{stat.alt}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* ─── C2: MEB — Ünite Grupları ─────────────────────────────── */}
+          {/* ─── Ünite Grupları ─────────────────────────────── */}
           {isMeb && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {uniteGruplari.map((grup, gIdx) => {
