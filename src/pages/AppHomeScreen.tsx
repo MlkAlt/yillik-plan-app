@@ -64,13 +64,15 @@ const HIZLI_ERISIM = [
 
 export function AppHomeScreen({
   planlar, onPlanEkle, onSinifSec,
-  tamamlananlar = {}, onTamamlananGuncelle,
+  tamamlananlar = {}, onTamamlananGuncelle: _onTamamlananGuncelle,
 }: AppHomeScreenProps) {
   const navigate = useNavigate()
   const [ogretmenAd, setOgretmenAd] = useState('')
   const [, setUretimHakki] = useState(0)
   const [, setEksikAyarlar] = useState(false)
   const [localTamamlananlar, setLocalTamamlananlar] = useState<Record<string, number[]>>(tamamlananlar)
+
+  const [onboardingAcik, setOnboardingAcik] = useState(false)
 
   const { program: dersProgrami, bugunDersleri } = useDersProgrami()
   const bugunStr = new Date().toISOString().split('T')[0]
@@ -118,29 +120,35 @@ export function AppHomeScreen({
     })
   }
 
-  function handleTamamlaToggle(sinif: string, haftaNo: number) {
-    try {
-      const item = localStorage.getItem(StorageKeys.TAMAMLANAN_HAFTALAR)
-      const parsed = item ? JSON.parse(item) : {}
-      const eskiListe: number[] = Array.isArray(parsed) ? parsed : (parsed[sinif] || [])
-      const isTamamlandi = eskiListe.includes(haftaNo)
-      const yeniListe = isTamamlandi ? eskiListe.filter(n => n !== haftaNo) : [...eskiListe, haftaNo]
-      const yeniParsed = Array.isArray(parsed) ? { [sinif]: yeniListe } : { ...parsed, [sinif]: yeniListe }
-      localStorage.setItem(StorageKeys.TAMAMLANAN_HAFTALAR, JSON.stringify(yeniParsed))
-      setLocalTamamlananlar(yeniParsed)
-      onTamamlananGuncelle?.()
-    } catch { /* ignore */ }
-  }
-
   if (planlar.length === 0) {
+    const onboardingAtlandi = !onboardingAcik && localStorage.getItem(StorageKeys.ONBOARDING_TAMAMLANDI) === '1'
+    if (!onboardingAtlandi) {
+      return (
+        <BosdurumuEkrani
+          onTamamla={entries => {
+            onPlanEkle(entries)
+            if (entries.length > 0) onSinifSec(entries[0].sinif)
+          }}
+        />
+      )
+    }
+    // Onboarding atlandı, henüz plan yok — başla kartı
     return (
-      <BosdurumuEkrani
-        onTamamla={entries => {
-          localStorage.setItem(StorageKeys.ONBOARDING_TAMAMLANDI, '1')
-          onPlanEkle(entries)
-          onSinifSec(entries[0].sinif)
-        }}
-      />
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100%', padding: '40px 24px', textAlign: 'center' }}>
+        <div style={{ fontSize: '64px', marginBottom: '20px', animation: 'pop-in 0.5s cubic-bezier(0.34,1.56,0.64,1) both' }}>📚</div>
+        <h2 className="font-display" style={{ fontSize: '24px', fontWeight: 800, color: 'var(--color-text1)', letterSpacing: '-0.03em', marginBottom: '8px', animation: 'stagger-up 0.45s 0.1s ease-out both' }}>
+          Planınız hazır bekliyor
+        </h2>
+        <p style={{ fontSize: '14px', color: 'var(--color-text2)', lineHeight: '22px', marginBottom: '32px', maxWidth: '280px', animation: 'stagger-up 0.45s 0.18s ease-out both' }}>
+          Branşınızı seçin, yıllık planınız saniyeler içinde hazırlansın.
+        </p>
+        <button
+          onClick={() => setOnboardingAcik(true)}
+          style={{ height: '52px', padding: '0 32px', borderRadius: '100px', background: '#4F6AF5', color: '#fff', border: 'none', fontSize: '16px', fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 20px rgba(79,106,245,.35)', animation: 'stagger-up 0.45s 0.26s ease-out both' }}
+        >
+          Plan Oluştur →
+        </button>
+      </div>
     )
   }
 
@@ -151,18 +159,6 @@ export function AppHomeScreen({
   const mevcutHafta = activeEntry ? bugunHaftaNoHesapla(activeEntry) : null
   const toplamHafta = activeEntry?.plan?.haftalar?.length ?? 36
   const ilerlemeYuzde = mevcutHafta ? Math.round(((mevcutHafta - 1) / toplamHafta) * 100) : 0
-
-  // Bu hafta listesi
-  const buHaftaListesi = planlar
-    .map(entry => {
-      const haftaNo = bugunHaftaNoHesapla(entry)
-      if (!haftaNo) return null
-      const hafta = entry.plan?.haftalar.find(h => h.haftaNo === haftaNo)
-      if (!hafta) return null
-      const sinifTamamlananlar = localTamamlananlar[entry.sinif] || []
-      return { entry, hafta, isTamamlandi: sinifTamamlananlar.includes(haftaNo) }
-    })
-    .filter(Boolean) as { entry: PlanEntry; hafta: NonNullable<PlanEntry['plan']>['haftalar'][number]; isTamamlandi: boolean }[]
 
   // Yaklaşan tarihler (önümüzdeki 30 gün)
   const bugun = new Date()
@@ -344,87 +340,78 @@ export function AppHomeScreen({
         )
       })()}
 
-      {/* ── BU HAFTANIN KAZANIMLARI ─────────── */}
-      {buHaftaListesi.length > 0 && !dersProgramiDolu && (
-        <div style={{ padding: '16px 16px 0' }}>
-          <div
-            className="rounded-xl p-4"
-            style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
-          >
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <span style={{ fontSize: 16 }}>⭐</span>
-                <div>
-                  <p className="font-sans font-bold" style={{ fontSize: 14, color: 'var(--color-text1)' }}>
-                    Bu Haftanın Kazanımları
-                  </p>
-                  {buHaftaListesi[0] && (
-                    <p style={{ fontSize: 11, color: 'var(--color-text3)' }}>
-                      {buHaftaListesi[0].hafta.haftaNo}. Hafta • {buHaftaListesi[0].entry.ders}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <button
-                onClick={() => navigate('/app/planla')}
-                className="flex items-center gap-1 font-sans font-semibold"
-                style={{ fontSize: 12, color: 'var(--color-primary)' }}
-              >
-                Tüm Plan <ChevronRight size={14} />
-              </button>
-            </div>
+      {/* ── SIRADAKİ KAZANIMLAR (ders programı yokken) ─────────── */}
+      {!dersProgramiDolu && (() => {
+        const baslangicHafta = mevcutHafta ?? 1
+        const siradaki = planlar
+          .flatMap(entry => {
+            const renkIdx = planlar.indexOf(entry)
+            return (entry.plan?.haftalar ?? [])
+              .filter(h => h.haftaNo >= baslangicHafta)
+              .map(h => ({ entry, hafta: h, renkIdx }))
+          })
+          .sort((a, b) => a.hafta.haftaNo - b.hafta.haftaNo)
+          .slice(0, 6)
 
-            <div className="flex flex-col">
-              {buHaftaListesi.map(({ entry, hafta, isTamamlandi }, i) => {
-                const renk = SINIF_RENKLERI[planlar.indexOf(entry) % SINIF_RENKLERI.length] || '#4F6AF5'
-                return (
-                  <div
-                    key={`${entry.sinif}-${hafta.haftaNo}`}
-                    className="flex items-center gap-3"
-                    style={{ padding: '9px 0', borderBottom: i < buHaftaListesi.length - 1 ? '1px solid var(--color-border)' : 'none' }}
-                  >
-                    <button
-                      onClick={() => handleTamamlaToggle(entry.sinif, hafta.haftaNo)}
-                      className="flex items-center justify-center flex-shrink-0 rounded-full"
-                      style={{
-                        width: 22, height: 22,
-                        border: `2px solid ${isTamamlandi ? 'var(--color-success)' : 'var(--color-border2)'}`,
-                        background: isTamamlandi ? 'var(--color-success)' : 'transparent',
-                        cursor: 'pointer', transition: 'all 0.15s',
-                      }}
-                    >
-                      {isTamamlandi && <Check size={11} strokeWidth={3} color="#fff" />}
-                    </button>
-                    {/* Sınıf badge */}
-                    <span className="font-sans font-bold flex-shrink-0" style={{
-                      fontSize: 11, color: renk,
-                      background: `${renk}18`,
-                      padding: '2px 8px', borderRadius: 100,
-                    }}>
-                      {entry.sinifGercek || entry.sinif}
-                    </span>
-                    <p
-                      style={{
-                        fontSize: 13, color: isTamamlandi ? 'var(--color-text3)' : 'var(--color-text1)',
-                        textDecoration: isTamamlandi ? 'line-through' : 'none',
-                        flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                      }}
-                    >
-                      {hafta.kazanim || 'Kazanım girilmemiş'}
-                    </p>
-                    <button
-                      onClick={() => { onSinifSec(entry.sinif); navigate(`/app/hafta/${hafta.haftaNo}`) }}
-                      style={{ flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text3)' }}
-                    >
-                      <ChevronRight size={14} />
-                    </button>
+        if (siradaki.length === 0) return null
+
+        return (
+          <div style={{ padding: '16px 16px 0' }}>
+            <div className="rounded-xl p-4" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <span style={{ fontSize: 16 }}>📋</span>
+                  <div>
+                    <p className="font-sans font-bold" style={{ fontSize: 14, color: 'var(--color-text1)' }}>Sıradaki Kazanımlar</p>
+                    <p style={{ fontSize: 11, color: 'var(--color-text3)' }}>Yıllık plana göre</p>
                   </div>
-                )
-              })}
+                </div>
+                <button
+                  onClick={() => navigate('/app/planla')}
+                  className="flex items-center gap-1 font-sans font-semibold"
+                  style={{ fontSize: 12, color: 'var(--color-primary)' }}
+                >
+                  Tüm Plan <ChevronRight size={14} />
+                </button>
+              </div>
+              <div className="flex flex-col">
+                {siradaki.map(({ entry, hafta, renkIdx }, i) => {
+                  const renk = SINIF_RENKLERI[renkIdx % SINIF_RENKLERI.length] || '#4F6AF5'
+                  const sinifTamamlananlar = localTamamlananlar[entry.sinif] || []
+                  const isTamamlandi = sinifTamamlananlar.includes(hafta.haftaNo)
+                  return (
+                    <div
+                      key={`${entry.sinif}-${hafta.haftaNo}`}
+                      className="flex items-center gap-3"
+                      style={{ padding: '9px 0', borderBottom: i < siradaki.length - 1 ? '1px solid var(--color-border)' : 'none' }}
+                    >
+                      {/* Hafta numarası */}
+                      <span className="font-display font-bold flex-shrink-0" style={{ fontSize: 11, color: 'var(--color-text3)', width: 24, textAlign: 'center' }}>
+                        {hafta.haftaNo}.
+                      </span>
+                      {/* Sınıf badge */}
+                      <span className="font-sans font-bold flex-shrink-0" style={{ fontSize: 11, color: renk, background: `${renk}18`, padding: '2px 8px', borderRadius: 100 }}>
+                        {entry.sinifGercek || entry.sinif}
+                      </span>
+                      {/* Kazanım */}
+                      <p style={{ fontSize: 13, flex: 1, color: isTamamlandi ? 'var(--color-text3)' : 'var(--color-text1)', textDecoration: isTamamlandi ? 'line-through' : 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {hafta.kazanim || (hafta as { uniteAdi?: string }).uniteAdi || 'Kazanım girilmemiş'}
+                      </p>
+                      {/* Navigate */}
+                      <button
+                        onClick={() => { onSinifSec(entry.sinif); navigate(`/app/hafta/${hafta.haftaNo}`) }}
+                        style={{ flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text3)' }}
+                      >
+                        <ChevronRight size={14} />
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
 
       {/* ── ARAÇLARIM — EVRAK & ÜRET ─────────── */}
       <div style={{ padding: '16px 16px 0' }}>
