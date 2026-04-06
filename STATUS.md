@@ -3,7 +3,7 @@
 > Her oturumda bu dosya okunur ve yalnizca gerekli bilgiler guncellenir.
 > Durum: TODO -> WIP -> DONE | Engel: BLOCKED
 
-Son guncelleme: 2026-04-06 (Şube sistemi + Ana ekran ders programı entegrasyonu)
+Son guncelleme: 2026-04-06 (Onboarding UX + Atla bug düzeltmesi + Sıradaki Kazanımlar)
 
 ---
 
@@ -201,6 +201,19 @@ Son guncelleme: 2026-04-06 (Şube sistemi + Ana ekran ders programı entegrasyon
 - Evrak & Üret kartları ana ekranda öne çıkarıldı (öğretmenin en büyük acı noktası: evrak yükü)
 
 **Build:** ✅ Tests: 12/12 ✅ Deploy: https://ogretmen-yaver.vercel.app ✅
+
+---
+
+### 2026-04-06 — Onboarding UX + Bug Fixes
+
+- **BUG-FIX:** "Atla" butonu sonsuz döngü düzeltildi — `ONBOARDING_TAMAMLANDI` flag kontrolü eklendi
+- **Onboarding:** `setTimeout(2400)` auto-close kaldırıldı; tek CTA: "Hadi Başlayalım! →"
+- **Onboarding:** "Günlük Plan Oluştur" adımı kaldırıldı (onboarding sadeleşti)
+- **Onboarding:** Progress dots 3→2, adıma göre aktif güncelleniyor
+- **Onboarding:** Metinler ısındı — "Merhaba! Branşınızı seçelim", "Hangi sınıflarda ders veriyorsunuz?" vb.
+- **Onboarding:** Branş/sınıf chip'leri stagger animasyonuyla giriyor; sınıf seçimi pop-in spring ile açılıyor
+- **Ana Ekran:** Ders programı yokken "Sıradaki Kazanımlar" — bu haftadan itibaren tüm planlardan haftaNo sırasıyla max 6 satır
+- **Build:** ✅ Tests: 12/12 ✅ Deploy: https://ogretmen-yaver.vercel.app ✅
 
 ---
 
