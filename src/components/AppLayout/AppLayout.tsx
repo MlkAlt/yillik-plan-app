@@ -1,8 +1,7 @@
-import { useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { TopBar } from './TopBar'
-import { SidebarDrawer } from './SidebarDrawer'
+import { BottomNav } from './BottomNav'
 
 interface AppLayoutProps {
   children: ReactNode
@@ -20,7 +19,6 @@ const PAGE_TITLES: Record<string, string> = {
 
 export function AppLayout({ children }: AppLayoutProps) {
   const location = useLocation()
-  const [sidebarAcik, setSidebarAcik] = useState(false)
 
   const pageTitle = PAGE_TITLES[location.pathname]
 
@@ -37,25 +35,22 @@ export function AppLayout({ children }: AppLayoutProps) {
         }}
       >
         {/* TopBar */}
-        <TopBar
-          onMenuClick={() => setSidebarAcik(true)}
-          pageTitle={pageTitle}
-        />
-
-        {/* Sidebar Drawer */}
-        <SidebarDrawer
-          open={sidebarAcik}
-          onClose={() => setSidebarAcik(false)}
-        />
+        <TopBar pageTitle={pageTitle} />
 
         {/* İçerik */}
         <main
           key={location.pathname}
           className="relative flex-1 overflow-y-auto animate-fade-in"
-          style={{ paddingTop: 'var(--topbar-height, 56px)' }}
+          style={{
+            paddingTop: 'var(--topbar-height, 56px)',
+            paddingBottom: 'calc(var(--bottomnav-height, 64px) + env(safe-area-inset-bottom, 0px))',
+          }}
         >
           {children}
         </main>
+
+        {/* Bottom Nav */}
+        <BottomNav />
       </div>
     </div>
   )

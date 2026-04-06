@@ -14,6 +14,7 @@ import type { OgretmenAyarlari } from '../types/ogretmenAyarlari'
 
 interface AppHomeScreenProps {
   planlar: PlanEntry[]
+  aktifEntry?: PlanEntry | null
   onPlanEkle: (entries: PlanEntry[]) => void
   onSinifSec: (sinif: string) => void
   syncing?: boolean
@@ -63,7 +64,7 @@ const HIZLI_ERISIM = [
 ]
 
 export function AppHomeScreen({
-  planlar, onPlanEkle, onSinifSec,
+  planlar, aktifEntry, onPlanEkle, onSinifSec,
   tamamlananlar = {}, onTamamlananGuncelle: _onTamamlananGuncelle,
 }: AppHomeScreenProps) {
   const navigate = useNavigate()
@@ -152,9 +153,9 @@ export function AppHomeScreen({
     )
   }
 
-  // Aktif plan verileri
-  const activeEntry = planlar[0]
-  const brans = planlar[0]?.ders ?? ''
+  // Aktif plan verileri — aktifEntry prop'u öncelikli, fallback planlar[0]
+  const activeEntry = aktifEntry ?? planlar[0]
+  const brans = activeEntry?.ders ?? ''
   const siniflar = planlar.map(p => p.sinifGercek || p.sinif)
   const mevcutHafta = activeEntry ? bugunHaftaNoHesapla(activeEntry) : null
   const toplamHafta = activeEntry?.plan?.haftalar?.length ?? 36
@@ -258,6 +259,36 @@ export function AppHomeScreen({
           </div>
         </div>
       </div>
+
+      {/* ── SINIF SWITCHER (çoklu plan varsa) ── */}
+      {planlar.length > 1 && (
+        <div style={{ padding: '10px 16px 0', display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none' }}>
+          {planlar.map(entry => {
+            const sinifAd = entry.sinifGercek || entry.sinif
+            const aktif = entry.sinif === activeEntry?.sinif
+            const renk = SINIF_RENKLERI[planlar.indexOf(entry) % SINIF_RENKLERI.length]
+            return (
+              <button
+                key={entry.sinif}
+                onClick={() => onSinifSec(entry.sinif)}
+                style={{
+                  flexShrink: 0,
+                  height: 32, padding: '0 14px', borderRadius: 100,
+                  border: `1.5px solid ${aktif ? renk : 'var(--color-border)'}`,
+                  background: aktif ? `${renk}18` : 'var(--color-surface)',
+                  color: aktif ? renk : 'var(--color-text2)',
+                  fontSize: 12, fontWeight: aktif ? 700 : 500,
+                  cursor: 'pointer',
+                  transition: 'all 0.18s cubic-bezier(0.22,1,0.36,1)',
+                  fontFamily: 'inherit',
+                }}
+              >
+                {sinifAd}
+              </button>
+            )
+          })}
+        </div>
+      )}
 
       {/* ── BUGÜNÜN DERSLERİ ─────────────────── */}
       {dersProgramiDolu && (() => {

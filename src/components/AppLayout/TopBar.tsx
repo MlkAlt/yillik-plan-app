@@ -1,9 +1,8 @@
-import { Menu, Bell } from 'lucide-react'
+import { Bell, Zap } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { StorageKeys } from '../../lib/storageKeys'
 
 interface TopBarProps {
-  onMenuClick: () => void
   pageTitle?: string
 }
 
@@ -18,7 +17,7 @@ function getEksikAyarlar(): boolean {
   }
 }
 
-export function TopBar({ onMenuClick, pageTitle }: TopBarProps) {
+export function TopBar({ pageTitle }: TopBarProps) {
   const navigate = useNavigate()
   const eksik = getEksikAyarlar()
 
@@ -37,21 +36,17 @@ export function TopBar({ onMenuClick, pageTitle }: TopBarProps) {
         borderBottom: '1px solid rgba(0,0,0,0.07)',
       }}
     >
-      {/* Hamburger */}
-      <button
-        onClick={onMenuClick}
-        className="flex items-center justify-center rounded-xl"
-        style={{ width: 40, height: 40, color: 'var(--color-text1)' }}
-        aria-label="Menüyü aç"
-      >
-        <Menu size={22} />
-      </button>
-
-      {/* Logo / Sayfa Başlığı */}
+      {/* Logo */}
       <div className="flex items-center gap-2">
+        <div
+          className="flex items-center justify-center rounded-xl flex-shrink-0"
+          style={{ width: 28, height: 28, background: 'var(--gradient-primary)' }}
+        >
+          <Zap size={14} color="#fff" />
+        </div>
         <span
           className="font-display font-bold"
-          style={{ fontSize: 16, color: 'var(--color-text1)', letterSpacing: '-0.01em' }}
+          style={{ fontSize: 15, color: 'var(--color-text1)', letterSpacing: '-0.01em' }}
         >
           {pageTitle ?? 'ÖğretmenAsistan'}
         </span>
@@ -72,12 +67,12 @@ export function TopBar({ onMenuClick, pageTitle }: TopBarProps) {
         )}
       </div>
 
-      {/* Bell */}
+      {/* Bell → Profil */}
       <button
         onClick={() => navigate('/app/profil')}
         className="flex items-center justify-center rounded-xl relative"
         style={{ width: 40, height: 40, color: 'var(--color-text2)' }}
-        aria-label="Bildirimler"
+        aria-label="Profil ve Ayarlar"
       >
         <Bell size={20} />
         {eksik && (
