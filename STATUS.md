@@ -3,7 +3,7 @@
 > Her oturumda bu dosya okunur ve yalnizca gerekli bilgiler guncellenir.
 > Durum: TODO -> WIP -> DONE | Engel: BLOCKED
 
-Son guncelleme: 2026-04-05 (Figma uyarlama - Faz 1 + Faz 2 + Faz 3 tamamlandı — TopBar hizalama düzeltmesi)
+Son guncelleme: 2026-04-06 (Şube sistemi + Ana ekran ders programı entegrasyonu)
 
 ---
 
@@ -164,6 +164,43 @@ Son guncelleme: 2026-04-05 (Figma uyarlama - Faz 1 + Faz 2 + Faz 3 tamamlandı �
 - PlanPage boş state + stat kartlar (B2) ✅
 - PlanPage ünite kartları — Figma accordion (C2) ✅
 - OnemliTarihlerListesi stili (C1) ✅
+
+---
+
+### 2026-04-06 — Şube (şubeye göre sınıf) sistemi + Ana ekran ders programı entegrasyonu
+
+**Yapılanlar:**
+
+#### A — Ana Ekran UX İyileştirmeleri (Figma uyarlama devamı)
+- Stat kartları (Branş/Sınıf/Hafta/İlerleme) → 2 karta indirgendi (Hafta + Yıllık İlerleme)
+- 4 stat kart banner içine alındı (glassmorphism: `rgba(255,255,255,0.12)`)
+- Yıllık İlerleme kartına SVG dairesel progress ring eklendi (`strokeDasharray / strokeDashoffset`)
+- Haftanın Kazanımları satırları başına sınıf renk badge'i eklendi
+- Hızlı Erişim 4'ten 2'ye indirgendi (Takvim + Ders Programı)
+- "Araçlarım" bölümü eklendi — Evrak Oluştur + Üret gradient kartları; öğretmen evrak acısı vurgulu
+- Ders programı max saat sayısı 8 → 10 çıkarıldı (`SAAT_SAYISI`)
+
+#### B — Bugünün Dersleri Paneli
+- `bugunDersleri()` hook fonksiyonu AppHomeScreen'e entegre edildi
+- Ders programı dolu ise ana ekranda o günün ders saatleri + sınıf badge + kazanım + checkbox gösteriliyor
+- Checkbox durumu localStorage'a günlük kaydediliyor (`bugun_tamamlanan_${bugunStr}`)
+- Ders programı girilmişse → Bugünün Dersleri görünür, "Bu Haftanın Kazanımları" gizlenir
+- Ders programı girilmemişse → "Bu Haftanın Kazanımları" görünür (fallback)
+
+#### C — Şube (Bölüm) Sistemi
+- `DersSaati` tipine `sube?: string` alanı eklendi
+- `hucreGuncelle` ve `guncelle` hook'u `sube` parametresi aldı; mevcut veri geriye dönük uyumlu kaldı
+- `SinifSeciciSheet` 2 adımlı akışa dönüştürüldü: Sınıf → Şube (A/B/C/D/E büyük chip'ler) + "Şubesiz devam et"
+- `DersProgramiGrid` kompakt etiket: "5. Sınıf" + "A" → **"5A"**, şubesiz → "5."
+- `sinifEtiket(sinif, sube?)` yardımcı fonksiyonu hem Grid'de hem AppHomeScreen'de kullanıldı
+
+**Alınan Kararlar:**
+- Ders programı girilmişse "Bu Haftanın Kazanımları" bloklanır; yerine günün programına bağlı kazanımlar gösterilir
+- Şube isteğe bağlı — şubesiz veri geriye dönük bozulmaz
+- Tek dokunuşla şube doldurma (tüm sütunu A ile doldurma) → UX olarak tartışıldı, henüz uygulanmadı; bir sonraki adayda alınabilir
+- Evrak & Üret kartları ana ekranda öne çıkarıldı (öğretmenin en büyük acı noktası: evrak yükü)
+
+**Build:** ✅ Tests: 12/12 ✅ Deploy: https://ogretmen-yaver.vercel.app ✅
 
 ---
 
