@@ -4,7 +4,7 @@ import {
   FolderOpen, Users, FileSignature, Club, GraduationCap, Search,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { getEvrakSablonlari, isPremiumKategori, tespitEksikAlanlar } from '../lib/evrakService'
+import { getEvrakSablonlari, tespitEksikAlanlar } from '../lib/evrakService'
 import { StorageKeys } from '../lib/storageKeys'
 import type { OgretmenAyarlari } from '../types/ogretmenAyarlari'
 import type { EvrakKategori } from '../types/evrak'
@@ -28,7 +28,6 @@ const KATEGORI_RENK: Record<EvrakKategori, string> = {
 export function DosyamPage() {
   const navigate = useNavigate()
   const sablonlar = getEvrakSablonlari()
-  const isPremium = false
 
   function getAyarlar(): Partial<OgretmenAyarlari> {
     try {
@@ -142,9 +141,14 @@ export function DosyamPage() {
             <p style={{ fontSize: 14, color: 'var(--color-text3)' }}>Evrak bulunamadı</p>
           </div>
         ) : (
-          filtreliSablonlar.map(sablon => {
-            const premium = isPremiumKategori(sablon.kategori)
-            const erisimVar = !premium || isPremium
+          <>
+            {/* Ücretsiz şablonlar */}
+            {filtreliSablonlar.filter(s => !s.premium).length > 0 && (
+              <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text3)', textTransform: 'uppercase', letterSpacing: '0.06em', padding: '4px 0 2px' }}>
+                Ücretsiz · {filtreliSablonlar.filter(s => !s.premium).length} şablon
+              </p>
+            )}
+            {filtreliSablonlar.filter(s => !s.premium).map(sablon => {
             const KategoriIkon = KATEGORI_IKON[sablon.kategori as EvrakKategori] ?? FolderOpen
             const kategoriRenk = KATEGORI_RENK[sablon.kategori as EvrakKategori] ?? '#4F6AF5'
 
@@ -154,14 +158,6 @@ export function DosyamPage() {
                 className="rounded-xl p-4 relative"
                 style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-xs)' }}
               >
-                {sablon.premium && (
-                  <span
-                    className="absolute top-3 right-3 font-sans font-bold"
-                    style={{ fontSize: 11, color: '#fff', background: 'var(--color-warning)', padding: '2px 8px', borderRadius: 'var(--radius-pill)' }}
-                  >
-                    Premium
-                  </span>
-                )}
                 <div className="flex items-start gap-3">
                   <div
                     className="flex items-center justify-center flex-shrink-0 rounded-xl"
@@ -169,24 +165,59 @@ export function DosyamPage() {
                   >
                     <KategoriIkon size={18} />
                   </div>
-                  <div className="flex-1 min-w-0" style={{ paddingRight: sablon.premium ? 60 : 0 }}>
+                  <div className="flex-1 min-w-0">
                     <p className="font-sans font-bold" style={{ fontSize: 14, color: 'var(--color-text1)' }}>{sablon.ad}</p>
                     <p style={{ fontSize: 12, color: 'var(--color-text2)', marginTop: 2 }}>{sablon.aciklama}</p>
                   </div>
                 </div>
 
-                {erisimVar && (
-                  /* İndir — geliştirme aşamasında, honest state */
-                  <div
-                    className="w-full flex items-center justify-center gap-2 font-sans font-semibold mt-3"
-                    style={{ height: 38, borderRadius: 'var(--radius-lg)', background: 'var(--color-bg)', color: 'var(--color-text3)', fontSize: 13, border: '1px solid var(--color-border)' }}
-                  >
-                    <Construction size={13} /> İndirme Yakında
-                  </div>
-                )}
+                <div
+                  className="w-full flex items-center justify-center gap-2 font-sans font-semibold mt-3"
+                  style={{ height: 38, borderRadius: 'var(--radius-lg)', background: 'var(--color-bg)', color: 'var(--color-text3)', fontSize: 13, border: '1px solid var(--color-border)' }}
+                >
+                  <Construction size={13} /> İndirme Yakında
+                </div>
               </div>
             )
-          })
+          })}
+
+            {/* Premium şablonlar */}
+            {filtreliSablonlar.filter(s => s.premium).length > 0 && (
+              <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text3)', textTransform: 'uppercase', letterSpacing: '0.06em', padding: '8px 0 2px' }}>
+                Premium · {filtreliSablonlar.filter(s => s.premium).length} şablon
+              </p>
+            )}
+            {filtreliSablonlar.filter(s => s.premium).map(sablon => {
+              const KategoriIkon = KATEGORI_IKON[sablon.kategori as EvrakKategori] ?? FolderOpen
+              const kategoriRenk = KATEGORI_RENK[sablon.kategori as EvrakKategori] ?? '#4F6AF5'
+              return (
+                <div
+                  key={sablon.id}
+                  className="rounded-xl p-4 relative"
+                  style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-xs)', opacity: 0.7 }}
+                >
+                  <span
+                    className="absolute top-3 right-3 font-sans font-bold"
+                    style={{ fontSize: 11, color: '#fff', background: 'var(--color-warning)', padding: '2px 8px', borderRadius: 'var(--radius-pill)' }}
+                  >
+                    Premium
+                  </span>
+                  <div className="flex items-start gap-3">
+                    <div
+                      className="flex items-center justify-center flex-shrink-0 rounded-xl"
+                      style={{ width: 40, height: 40, background: `color-mix(in srgb, ${kategoriRenk} 12%, var(--color-bg))`, color: kategoriRenk }}
+                    >
+                      <KategoriIkon size={18} />
+                    </div>
+                    <div className="flex-1 min-w-0" style={{ paddingRight: 60 }}>
+                      <p className="font-sans font-bold" style={{ fontSize: 14, color: 'var(--color-text1)' }}>{sablon.ad}</p>
+                      <p style={{ fontSize: 12, color: 'var(--color-text2)', marginTop: 2 }}>{sablon.aciklama}</p>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </>
         )}
       </div>
 

@@ -199,18 +199,22 @@ export function AppHomeScreen({
             {brans} branşı{siniflar.length > 0 ? ` • ${siniflar.join(', ')}` : ''}
           </p>
         )}
-        {aktifUniteAdi && (
+        {aktifUniteAdi && mevcutHafta && (
           <div style={{ position: 'relative' }}>
-            <span style={{
-              fontSize: 12, fontWeight: 600,
-              padding: '5px 14px', borderRadius: 100,
-              background: 'rgba(255,255,255,0.15)',
-              border: '1px solid rgba(255,255,255,0.2)',
-              color: 'rgba(255,255,255,0.85)',
-              display: 'inline-block',
-            }}>
-              Şu an: {aktifUniteAdi}
-            </span>
+            <button
+              onClick={() => navigate(`/app/hafta/${mevcutHafta}`)}
+              style={{
+                fontSize: 12, fontWeight: 600,
+                padding: '5px 14px', borderRadius: 100,
+                background: 'rgba(255,255,255,0.15)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                color: 'rgba(255,255,255,0.85)',
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                cursor: 'pointer',
+              }}
+            >
+              Şu an: {aktifUniteAdi} →
+            </button>
           </div>
         )}
 

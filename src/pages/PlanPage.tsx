@@ -257,7 +257,7 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
                         }}>
                           Ünite {gIdx + 1}
                         </span>
-                        <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-text1)' }}>
+                        <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-text1)', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                           {grup.uniteAdi}
                         </span>
                       </div>
@@ -266,7 +266,12 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
                           {grup.haftalar.length} hafta
                         </span>
                         {tamamlananGrup === acikHaftaSayisi && acikHaftaSayisi > 0 && (
-                          <Check size={14} color="#059669" />
+                          <span style={{
+                            fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 100,
+                            background: '#d1fae5', color: '#059669', display: 'flex', alignItems: 'center', gap: 3,
+                          }}>
+                            <Check size={10} /> Tamamlandı
+                          </span>
                         )}
                         <ChevronDown
                           size={16}
