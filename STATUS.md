@@ -217,6 +217,25 @@ Son guncelleme: 2026-04-06 (Onboarding UX + Atla bug düzeltmesi + Sıradaki Kaz
 
 ---
 
+### 2026-04-07 — UX Eleştirisi Uygulaması (Gemini analizi)
+
+Gemini'nin 5 maddelik UX eleştirisi kod üzerinde doğrulandı, geçerli olanlar uygulandı:
+
+- **Fix A:** `DosyamPage` — per-card "Bilgileri Tamamla" butonu kaldırıldı; top banner zaten uyarıyı veriyor (çift sinyal → warning fatigue çözüldü)
+- **Fix B:** `DosyamPage` — "👑 Premium — Yakında" disabled butonu kaldırıldı; top-right badge yeterli (premium karmaşası çözüldü)
+- **Fix C:** `PlanPage` — "X Hafta" chip (border+bg+padding) → plain text; tıklanamaz elemanın tıklanabilir görünmesi (false affordance) düzeltildi
+- **Fix D:** `AppSettingsScreen` — "Düzenle" butonu `6px` → `10px 16px` padding + `minHeight: 44px`; touch target HIG standardına getirildi
+- **Fix E:** `AppHomeScreen` — "Araçlarım" kartları subtitle kontrast `rgba(255,255,255,0.7)` → `0.85`
+- **Haksız bulunan eleştiriler:** Gökkuşağı etkisi (renkler zaten subdued, `color-mix` %10), Kaydet butonu (zaten kaldırılmıştı)
+- **Build:** ✅ Tests: 12/12 ✅
+
+Ek düzeltmeler (aynı oturum, önceki adımlar):
+- `PlanPage` scroll to current week (useEffect + scrollIntoView)
+- `AppHomeScreen` boş plan CTA → dashed border inline card
+- `AppSettingsScreen` `setDegisti` undefined bug fix
+
+---
+
 ## Claude'a Not
 
 Oturum basladiginda:
