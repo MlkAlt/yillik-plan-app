@@ -6,7 +6,6 @@ import {
 import { useNavigate } from 'react-router-dom'
 import { getEvrakSablonlari, isPremiumKategori, tespitEksikAlanlar } from '../lib/evrakService'
 import { StorageKeys } from '../lib/storageKeys'
-import { useToast } from '../lib/toast'
 import type { OgretmenAyarlari } from '../types/ogretmenAyarlari'
 import type { EvrakKategori } from '../types/evrak'
 
@@ -28,7 +27,6 @@ const KATEGORI_RENK: Record<EvrakKategori, string> = {
 
 export function DosyamPage() {
   const navigate = useNavigate()
-  const { goster } = useToast()
   const sablonlar = getEvrakSablonlari()
   const isPremium = false
 
@@ -145,7 +143,6 @@ export function DosyamPage() {
           </div>
         ) : (
           filtreliSablonlar.map(sablon => {
-            const eksik = tespitEksikAlanlar(sablon, ayarlar)
             const premium = isPremiumKategori(sablon.kategori)
             const erisimVar = !premium || isPremium
             const KategoriIkon = KATEGORI_IKON[sablon.kategori as EvrakKategori] ?? FolderOpen
@@ -178,32 +175,14 @@ export function DosyamPage() {
                   </div>
                 </div>
 
-                {erisimVar ? (
-                  eksik.length > 0 ? (
-                    <button
-                      className="w-full flex items-center justify-center gap-2 font-sans font-bold mt-3"
-                      style={{ height: 38, borderRadius: 'var(--radius-lg)', background: 'var(--color-warning-s)', color: 'var(--color-warning)', fontSize: 13, border: '1px solid var(--color-warning-b)', cursor: 'pointer' }}
-                      onClick={() => navigate('/app/profil')}
-                    >
-                      <AlertTriangle size={14} /> Bilgileri Tamamla
-                    </button>
-                  ) : (
-                    /* İndir — geliştirme aşamasında, honest state */
-                    <div
-                      className="w-full flex items-center justify-center gap-2 font-sans font-semibold mt-3"
-                      style={{ height: 38, borderRadius: 'var(--radius-lg)', background: 'var(--color-bg)', color: 'var(--color-text3)', fontSize: 13, border: '1px solid var(--color-border)' }}
-                    >
-                      <Construction size={13} /> İndirme Yakında
-                    </div>
-                  )
-                ) : (
-                  <button
-                    className="w-full flex items-center justify-center gap-2 font-sans font-bold mt-3"
-                    style={{ height: 38, borderRadius: 'var(--radius-lg)', background: 'var(--color-surface)', color: 'var(--color-text3)', fontSize: 13, border: '1px solid var(--color-border)', cursor: 'default' }}
-                    onClick={() => goster('Premium özelliği yakında aktif olacak', 'bilgi')}
+                {erisimVar && (
+                  /* İndir — geliştirme aşamasında, honest state */
+                  <div
+                    className="w-full flex items-center justify-center gap-2 font-sans font-semibold mt-3"
+                    style={{ height: 38, borderRadius: 'var(--radius-lg)', background: 'var(--color-bg)', color: 'var(--color-text3)', fontSize: 13, border: '1px solid var(--color-border)' }}
                   >
-                    👑 Premium — Yakında
-                  </button>
+                    <Construction size={13} /> İndirme Yakında
+                  </div>
                 )}
               </div>
             )

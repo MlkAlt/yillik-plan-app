@@ -178,7 +178,7 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
           <button
             onClick={() => setAktifTab('profil')}
             className="flex items-center gap-1 font-sans font-semibold"
-            style={{ fontSize: 12, color: 'rgba(255,255,255,0.9)', background: 'rgba(255,255,255,0.18)', padding: '6px 12px', borderRadius: 'var(--radius-pill)', border: '1px solid rgba(255,255,255,0.25)', cursor: 'pointer', flexShrink: 0 }}
+            style={{ fontSize: 12, color: 'rgba(255,255,255,0.9)', background: 'rgba(255,255,255,0.18)', padding: '10px 16px', borderRadius: 'var(--radius-pill)', border: '1px solid rgba(255,255,255,0.25)', cursor: 'pointer', flexShrink: 0, minHeight: 44 }}
           >
             ✏ Düzenle
           </button>

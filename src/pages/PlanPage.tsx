@@ -262,12 +262,8 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
                         </span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{
-                          fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 8,
-                          background: 'var(--color-bg)', color: 'var(--color-text3)',
-                          border: '1px solid var(--color-border)',
-                        }}>
-                          {grup.haftalar.length} Hafta
+                        <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--color-text3)' }}>
+                          {grup.haftalar.length} hafta
                         </span>
                         {tamamlananGrup === acikHaftaSayisi && acikHaftaSayisi > 0 && (
                           <Check size={14} color="#059669" />

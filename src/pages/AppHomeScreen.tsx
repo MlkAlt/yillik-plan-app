@@ -460,7 +460,7 @@ export function AppHomeScreen({
             </div>
             <div style={{ marginTop: 'auto', textAlign: 'left' }}>
               <p className="font-display font-bold" style={{ fontSize: 14, color: '#fff', letterSpacing: '-0.02em' }}>Evrak Oluştur</p>
-              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>Tek tıkla hazırla</p>
+              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.85)', fontWeight: 500 }}>Tek tıkla hazırla</p>
             </div>
             <span style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.9)', background: 'rgba(255,255,255,0.18)', padding: '2px 8px', borderRadius: 100 }}>
               {belgeSayisi} şablon
@@ -482,7 +482,7 @@ export function AppHomeScreen({
             </div>
             <div style={{ marginTop: 'auto', textAlign: 'left' }}>
               <p className="font-display font-bold" style={{ fontSize: 14, color: '#fff', letterSpacing: '-0.02em' }}>Üret</p>
-              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>AI ile içerik oluştur</p>
+              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.85)', fontWeight: 500 }}>AI ile içerik oluştur</p>
             </div>
             <span style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.9)', background: 'rgba(255,255,255,0.18)', padding: '2px 8px', borderRadius: 100 }}>
               AI Destekli
