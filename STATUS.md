@@ -217,6 +217,79 @@ Son guncelleme: 2026-04-06 (Onboarding UX + Atla bug düzeltmesi + Sıradaki Kaz
 
 ---
 
+### 2026-04-07 — Kullanıcı Akışı Yeniden Tasarımı: Faz 1+2 (DEVAM EDİYOR)
+
+**Plan dosyası:** `C:\Users\melik\.claude\plans\shimmying-petting-meerkat.md`
+
+**Felsefe:** (1) Tek "Bugün" ekranı, (2) Her CTA bir yere gider — "Yakında" disabled buton yok, (3) Asla iki kez soru sorma.
+
+**Kullanıcı kararları:**
+- DosyamPage → statik şablon + auto-fill yolu (Faz 3 sonraki tur)
+- UretPage → "Yakında" badge ile bırak (form gizlenir, bottom nav korunur)
+- Kapsam → Faz 1+2 bu turda
+
+#### ✅ TAMAMLANAN
+
+**1. OnboardingModal — 3. adım (Okul) eklendi**
+- `src/components/BosdurumuEkrani/OnboardingModal.tsx`
+- Adım yapısı: 0 (branş+sınıf) → 1 (okul, YENİ) → 2 (tebrik)
+- Yeni state: `okulAdi`, `mudurAdi`
+- Yeni fonksiyonlar: `handleDevamSinif`, `kaydetOkulBilgisi`, `handleOkulDevam`
+- Adım 1 ekranı: School ikonu, "Okulunu tanıyalım" başlık, 2 input (okul zorunlu, müdür opsiyonel), Atla buton (eski davranış: okulsuz plan oluştur)
+- Progress dots: 2 → 3 nokta
+- `OGRETMEN_AYARLARI` localStorage'a `okulAdi` + `mudurAdi` merge edilir
+
+**2. AppHomeScreen — Sadeleştirme**
+- `src/pages/AppHomeScreen.tsx`
+- Kaldırılan: "Araçlarım" gradient kartları (Evrak Oluştur + Üret) — bottom nav duplikasyonu
+- Kaldırılan: Kullanılmayan state'ler (`uretimHakki`, `eksikAyarlar`)
+- Kaldırılan: Kullanılmayan import'lar (`FileText`, `Sparkles`, `getEvrakSablonlari`, `tespitEksikAlanlar`)
+- useEffect içindeki kullanılmayan `freeBelgeler`/`belgeSayisi` hesaplaması temizlendi
+- Mevcut yapı korundu: welcome banner + Bugünün Dersleri / Sıradaki Kazanımlar (conditional) + ders programı promptu
+
+#### ⏳ DEVAM EDECEK (sıradaki adımlar)
+
+**3. PlanPage tab bar (IN PROGRESS, başlanmadı)**
+- `src/pages/PlanPage.tsx`
+- Üst başlığın altına 3 tab pill bar: "Üniteler" (default) / "Ders Programı" / "Takvim"
+- Local state `aktifTab: 'uniteler' | 'program' | 'takvim'`
+- Mevcut "Ders Programı" + "Takvim" buton pair'i (line 163-176) kaldırılır
+- Mevcut ünite accordion içeriği `aktifTab === 'uniteler'` koşuluna sarılır
+
+**4. DersProgramiView component'i çıkar**
+- Yeni dosya: `src/components/DersProgramiView.tsx`
+- Kaynak: `src/pages/DersProgramiPage.tsx` line 47-113 (header hariç render)
+- Props: `planlar: PlanEntry[]`, opsiyonel `embedded?: boolean` (header gizlemek için)
+- DersProgramiPage wrap eder (legacy route korunur)
+- PlanPage `aktifTab === 'program'` iken render eder
+
+**5. OnemliTarihlerView component'i çıkar**
+- Yeni dosya: `src/components/OnemliTarihlerView.tsx`
+- Kaynak: `src/pages/OnemliTarihlerPage.tsx` (header hariç)
+- Aynı pattern: embedded prop + wrapper
+
+**6. DosyamPage temizliği**
+- `src/pages/DosyamPage.tsx`
+- Premium upsell kartı (line 224-238 — "Premium'a Geç" 👑 + "Yakında" rozetli) tamamen sil
+- "İndirme Yakında" buton metni → "Yakında hazır" (line 178)
+
+**7. UretPage "Yakında" stub**
+- `src/pages/UretPage.tsx`
+- Mevcut form kodu KORUNUR ama görünmez (return early)
+- Yeni boş state: 🚧 Construction ikonu + "AI İçerik Üretici çok yakında" başlık + açıklama
+
+**8. Build + test**
+- `npm.cmd run build` — 0 hata
+- `npm.cmd run test` — 12/12 geçer
+- Manual smoke: yeni kullanıcı 3-adım onboarding → AppHome → PlanPage 3 tab geçişi
+
+**Kapsam dışı (sonraki turlar):**
+- Faz 3: DosyamPage statik .docx engine + auto-fill (placeholder substitution: okulAdi, mudurAdi, branş)
+- Faz 4: UretPage Claude API entegrasyonu
+- Faz 5: OnemliTarihlerPage Supabase sync
+
+---
+
 ### 2026-04-07 — UX Eleştirisi Uygulaması (Gemini analizi)
 
 Gemini'nin 5 maddelik UX eleştirisi kod üzerinde doğrulandı, geçerli olanlar uygulandı:

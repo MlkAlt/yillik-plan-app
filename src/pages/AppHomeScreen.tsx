@@ -1,13 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  CalendarDays, Check, ChevronRight,
-  Clock, FileText, Sparkles,
+  CalendarDays, Check, ChevronRight, Clock,
 } from 'lucide-react'
 import type { PlanEntry } from '../types/planEntry'
 import { StorageKeys } from '../lib/storageKeys'
 import { BosdurumuEkrani } from '../components/BosdurumuEkrani/BosdurumuEkrani'
-import { getEvrakSablonlari, tespitEksikAlanlar } from '../lib/evrakService'
 import { useDersProgrami } from '../hooks/useDersProgrami'
 import type { OgretmenAyarlari } from '../types/ogretmenAyarlari'
 
@@ -64,8 +62,6 @@ export function AppHomeScreen({
 }: AppHomeScreenProps) {
   const navigate = useNavigate()
   const [ogretmenAd, setOgretmenAd] = useState('')
-  const [, setUretimHakki] = useState(0)
-  const [, setEksikAyarlar] = useState(false)
   const [localTamamlananlar, setLocalTamamlananlar] = useState<Record<string, number[]>>(tamamlananlar)
 
   const [onboardingAcik, setOnboardingAcik] = useState(false)
@@ -75,8 +71,6 @@ export function AppHomeScreen({
   const [tamamlananBugun, setTamamlananBugun] = useState<number[]>(() => {
     try { return JSON.parse(localStorage.getItem(`bugun_tamamlanan_${bugunStr}`) || '[]') } catch { return [] }
   })
-  const freeBelgeler = getEvrakSablonlari().filter(s => !s.premium)
-  const belgeSayisi = freeBelgeler.length
 
   useEffect(() => {
     setLocalTamamlananlar(tamamlananlar)
@@ -88,23 +82,9 @@ export function AppHomeScreen({
       if (item) {
         const parsed: Partial<OgretmenAyarlari> = JSON.parse(item)
         if (parsed.adSoyad) setOgretmenAd(parsed.adSoyad.trim().split(' ')[0])
-        const kritikSablon = freeBelgeler.find(s => !s.premium)
-        if (kritikSablon) {
-          setEksikAyarlar(tespitEksikAlanlar(kritikSablon, parsed).length > 0)
-        }
-      } else {
-        setEksikAyarlar(true)
       }
     } catch { /* ignore */ }
-
-    try {
-      const jeton = localStorage.getItem(StorageKeys.JETON_DURUMU)
-      if (jeton) {
-        const parsed = JSON.parse(jeton)
-        setUretimHakki(typeof parsed === 'number' ? parsed : (parsed.bakiye ?? 0))
-      }
-    } catch { /* ignore */ }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [])
 
   function handleBugunToggle(saat: number) {
     setTamamlananBugun(prev => {
@@ -441,60 +421,6 @@ export function AppHomeScreen({
           </div>
         )
       })()}
-
-      {/* ── ARAÇLARIM — EVRAK & ÜRET ─────────── */}
-      <div style={{ padding: '16px 16px 0' }}>
-        <p className="font-sans font-bold" style={{ fontSize: 11, color: 'var(--color-text3)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-          Araçlarım
-        </p>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-
-          {/* Evrak Oluştur */}
-          <button
-            onClick={() => navigate('/app/dosyam')}
-            style={{
-              background: 'linear-gradient(135deg, #4F6AF5 0%, #6D28D9 100%)',
-              borderRadius: 18, padding: '16px 14px', border: 'none', cursor: 'pointer',
-              display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 6,
-              minHeight: 110, overflow: 'hidden',
-            }}
-          >
-            <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <FileText size={20} color="#fff" />
-            </div>
-            <div style={{ marginTop: 'auto', textAlign: 'left' }}>
-              <p className="font-display font-bold" style={{ fontSize: 14, color: '#fff', letterSpacing: '-0.02em' }}>Evrak Oluştur</p>
-              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.85)', fontWeight: 500 }}>Tek tıkla hazırla</p>
-            </div>
-            <span style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.9)', background: 'rgba(255,255,255,0.18)', padding: '2px 8px', borderRadius: 100 }}>
-              {belgeSayisi} şablon
-            </span>
-          </button>
-
-          {/* Üret */}
-          <button
-            onClick={() => navigate('/app/uret')}
-            style={{
-              background: 'linear-gradient(135deg, #059669 0%, #0EA5E9 100%)',
-              borderRadius: 18, padding: '16px 14px', border: 'none', cursor: 'pointer',
-              display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 6,
-              minHeight: 110, overflow: 'hidden',
-            }}
-          >
-            <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <Sparkles size={20} color="#fff" />
-            </div>
-            <div style={{ marginTop: 'auto', textAlign: 'left' }}>
-              <p className="font-display font-bold" style={{ fontSize: 14, color: '#fff', letterSpacing: '-0.02em' }}>Üret</p>
-              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.85)', fontWeight: 500 }}>AI ile içerik oluştur</p>
-            </div>
-            <span style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.9)', background: 'rgba(255,255,255,0.18)', padding: '2px 8px', borderRadius: 100 }}>
-              AI Destekli
-            </span>
-          </button>
-        </div>
-      </div>
-
 
       {/* Ders programı promptu */}
       {!dersProgramiDolu && (
