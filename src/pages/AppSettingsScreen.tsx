@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from 'react'
+﻿import { useState } from 'react'
 import type { PlanEntry } from '../types/planEntry'
 import { signOut, type User } from '../lib/auth'
 import { AuthModal } from '../components/AuthModal'
@@ -9,14 +9,13 @@ import {
 import { getYilSecenekleri } from '../lib/dersSinifMap'
 import { BottomSheet } from '../components/UI/BottomSheet'
 import { PlanSelector } from '../components/PlanSelector'
-import { useToast } from '../lib/toast'
 import { StorageKeys } from '../lib/storageKeys'
 import { Card } from '../components/UI/Card'
 import { Button } from '../components/Button'
 import { SectionHeader } from '../components/UI/SectionHeader'
 import { EmptyState } from '../components/UI/EmptyState'
 import { ConfirmActionRow } from '../components/UI/ConfirmActionRow'
-import { Bell, BookOpen, ChevronRight, LogOut, Plus, Save, ShieldCheck, UserRound, X, Users2, School } from 'lucide-react'
+import { Bell, BookOpen, ChevronRight, LogOut, Plus, ShieldCheck, UserRound, X, Users2, School } from 'lucide-react'
 
 interface AppSettingsScreenProps {
   onPlanEkle: (entries: PlanEntry[]) => void
@@ -43,7 +42,6 @@ function readAyarlar(): OgretmenAyarlari {
 }
 
 export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planlarProp = [] }: AppSettingsScreenProps) {
-  const { goster } = useToast()
   const ayarlar = readAyarlar()
   const [adSoyad, setAdSoyad] = useState(() => ayarlar.adSoyad || '')
   const [okulAdi, setOkulAdi] = useState(() => ayarlar.okulAdi || '')
@@ -57,21 +55,13 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
     const bt = (ayarlar as Record<string, unknown>).bildirimTercihleri as Record<string, boolean> | undefined
     return bt?.onemliTarihler ?? true
   })
-  const [, setDegisti] = useState(false)
   const [authModalAcik, setAuthModalAcik] = useState(false)
   const [planSelectorAcik, setPlanSelectorAcik] = useState(false)
   const [silOnayBekleyen, setSilOnayBekleyen] = useState<string | null>(null)
   const [bildirimAktif, setBildirimAktifState] = useState(isBildirimAktif)
   const [bildirimIzni, setBildirimIzniState] = useState(getBildirimIzni)
   const [mufredatUyari, setMufredatUyari] = useState('')
-  const isFirst = useRef(true)
-
-  useEffect(() => {
-    if (isFirst.current) { isFirst.current = false; return }
-    setDegisti(true)
-  }, [adSoyad, okulAdi, yil, mudurAdi, mudurYardimcisiAdi, zumreOgretmenleri, ilkkeriyeGrubu, ilkkeriyeYontemi])
-
-  function handleKaydet() {
+  function handleAutoKaydet() {
     const temizZumre = zumreOgretmenleri.map(item => item.trim()).filter(Boolean)
     localStorage.setItem(StorageKeys.OGRETMEN_AYARLARI, JSON.stringify({
       ...readAyarlar(),
@@ -86,8 +76,6 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
       bildirimTercihleri: { onemliTarihler: bildirimOnemliTarihler, haftaBaslangici: true },
     }))
     setZumreOgretmenleri(temizZumre.length ? temizZumre : [''])
-    setDegisti(false)
-    goster('Ayarlar kaydedildi', 'basari')
   }
 
   function handlePlanSilOnayla(sinif: string) {
@@ -149,19 +137,10 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
 
   return (
     <div className="page-shell">
-      {/* Başlık + Kaydet */}
-      <div className="flex items-center justify-between" style={{ padding: '16px 16px 0' }}>
-        <div>
-          <h1 className="font-display font-bold" style={{ fontSize: 22, color: 'var(--color-text1)', letterSpacing: '-0.03em' }}>Ayarlar</h1>
-          <p style={{ fontSize: 12, color: 'var(--color-text2)', marginTop: 2 }}>Profil, okul ve uygulama tercihlerinizi yönetin</p>
-        </div>
-        <button
-          onClick={handleKaydet}
-          className="flex items-center gap-2 font-sans font-bold"
-          style={{ height: 38, padding: '0 14px', borderRadius: 'var(--radius-lg)', background: 'var(--color-primary)', color: '#fff', fontSize: 13, cursor: 'pointer', border: 'none' }}
-        >
-          <Save size={15} /> Kaydet
-        </button>
+      {/* Başlık */}
+      <div style={{ padding: '16px 16px 0' }}>
+        <h1 className="font-display font-bold" style={{ fontSize: 22, color: 'var(--color-text1)', letterSpacing: '-0.03em' }}>Ayarlar</h1>
+        <p style={{ fontSize: 12, color: 'var(--color-text2)', marginTop: 2 }}>Profil, okul ve uygulama tercihlerinizi yönetin</p>
       </div>
 
       {/* Gradient Profil Kartı */}
@@ -248,7 +227,7 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
               <div className="flex flex-col gap-3">
                 <div>
                   <p className="text-[11px] font-bold mb-1" style={{ color: 'var(--color-text2)' }}>Ad Soyad</p>
-                  <input type="text" placeholder="Ad Soyad" value={adSoyad} onChange={e => setAdSoyad(e.target.value)} className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text1)', outline: 'none' }} />
+                  <input type="text" placeholder="Ad Soyad" value={adSoyad} onChange={e => setAdSoyad(e.target.value)} onBlur={handleAutoKaydet} className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text1)', outline: 'none' }} />
                 </div>
               </div>
             </Card>
@@ -302,11 +281,11 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
                 <div className="flex flex-col gap-3">
                   <div>
                     <p className="text-[11px] font-bold mb-1" style={{ color: 'var(--color-text2)' }}>İlkkeriye Grubu</p>
-                    <input value={ilkkeriyeGrubu} onChange={e => setIlkkeriyeGrubu(e.target.value)} placeholder="Örn: Ses Temelli Cümle Yöntemi" className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text1)', outline: 'none' }} />
+                    <input value={ilkkeriyeGrubu} onChange={e => setIlkkeriyeGrubu(e.target.value)} onBlur={handleAutoKaydet} placeholder="Örn: Ses Temelli Cümle Yöntemi" className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text1)', outline: 'none' }} />
                   </div>
                   <div>
                     <p className="text-[11px] font-bold mb-1" style={{ color: 'var(--color-text2)' }}>Öğretim Yöntemi</p>
-                    <input value={ilkkeriyeYontemi} onChange={e => setIlkkeriyeYontemi(e.target.value)} placeholder="Örn: Analitik Sentez" className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text1)', outline: 'none' }} />
+                    <input value={ilkkeriyeYontemi} onChange={e => setIlkkeriyeYontemi(e.target.value)} onBlur={handleAutoKaydet} placeholder="Örn: Analitik Sentez" className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text1)', outline: 'none' }} />
                   </div>
                 </div>
               </Card>
@@ -321,15 +300,15 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
             <div className="flex flex-col gap-3">
               <div>
                 <p className="text-[11px] font-bold mb-1" style={{ color: 'var(--color-text2)' }}>Okul Adı</p>
-                <input type="text" placeholder="Okul adı" value={okulAdi} onChange={e => setOkulAdi(e.target.value)} className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text1)', outline: 'none' }} />
+                <input type="text" placeholder="Okul adı" value={okulAdi} onChange={e => setOkulAdi(e.target.value)} onBlur={handleAutoKaydet} className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text1)', outline: 'none' }} />
               </div>
               <div>
                 <p className="text-[11px] font-bold mb-1" style={{ color: 'var(--color-text2)' }}>Müdür Adı</p>
-                <input type="text" placeholder="Okul müdürü" value={mudurAdi} onChange={e => setMudurAdi(e.target.value)} className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text1)', outline: 'none' }} />
+                <input type="text" placeholder="Okul müdürü" value={mudurAdi} onChange={e => setMudurAdi(e.target.value)} onBlur={handleAutoKaydet} className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text1)', outline: 'none' }} />
               </div>
               <div>
                 <p className="text-[11px] font-bold mb-1" style={{ color: 'var(--color-text2)' }}>Müdür Yardımcısı</p>
-                <input type="text" placeholder="Müdür yardımcısı" value={mudurYardimcisiAdi} onChange={e => setMudurYardimcisiAdi(e.target.value)} className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text1)', outline: 'none' }} />
+                <input type="text" placeholder="Müdür yardımcısı" value={mudurYardimcisiAdi} onChange={e => setMudurYardimcisiAdi(e.target.value)} onBlur={handleAutoKaydet} className="w-full p-3 text-sm" style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text1)', outline: 'none' }} />
               </div>
               <div className="flex items-center justify-between px-3.5 py-3" style={{ borderRadius: 'var(--radius-lg)', backgroundColor: 'var(--color-bg)', border: '1px solid var(--color-border)' }}>
                 <div>
@@ -337,7 +316,7 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
                   <p className="text-xs" style={{ color: 'var(--color-text3)' }}>Varsayılan plan yılı</p>
                 </div>
                 <div className="flex items-center gap-1">
-                  <select value={yil} onChange={e => setYil(e.target.value)} className="text-sm font-bold bg-transparent border-none" style={{ color: 'var(--color-primary)', outline: 'none' }}>
+                  <select value={yil} onChange={e => { setYil(e.target.value); setTimeout(handleAutoKaydet, 0) }} className="text-sm font-bold bg-transparent border-none" style={{ color: 'var(--color-primary)', outline: 'none' }}>
                     {getYilSecenekleri().map(y => <option key={y} value={y}>{y}</option>)}
                   </select>
                   <ChevronRight size={14} style={{ color: 'var(--color-text3)' }} />
@@ -383,7 +362,7 @@ export function AppSettingsScreen({ onPlanEkle, onPlanSil, user, planlar: planla
                   <p className="text-xs" style={{ color: 'var(--color-text3)' }}>ZHA, not girişi, veli toplantısı</p>
                 </div>
                 <button
-                  onClick={() => { setBildirimOnemliTarihler(p => !p); setDegisti(true) }}
+                  onClick={() => setBildirimOnemliTarihler(p => !p)}
                   style={{ width: 44, height: 24, borderRadius: 100, background: bildirimOnemliTarihler ? '#4F6AF5' : 'var(--color-border)', position: 'relative', border: 'none', cursor: 'pointer', transition: 'background 0.2s', flexShrink: 0 }}
                 >
                   <div style={{ width: 18, height: 18, borderRadius: '50%', background: '#fff', position: 'absolute', top: 3, left: bildirimOnemliTarihler ? 23 : 3, transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,.2)' }} />

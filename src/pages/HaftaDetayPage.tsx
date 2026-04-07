@@ -5,7 +5,6 @@ import type { ParsedRow } from '../lib/fileParser'
 import type { PlanEntry } from '../types/planEntry'
 import { getSession } from '../lib/auth'
 import { syncProgressToSupabase } from '../lib/planSync'
-import { useToast } from '../lib/toast'
 import { StorageKeys } from '../lib/storageKeys'
 import { ArrowLeft, Check, Sparkles } from 'lucide-react'
 import { Card } from '../components/UI/Card'
@@ -64,7 +63,6 @@ export function HaftaDetayPage({ entry, onTamamlaToggle }: HaftaDetayPageProps) 
   const [not, setNot] = useState('')
   const [kaydedildi, setKaydedildi] = useState(false)
   const notTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const { goster } = useToast()
 
   useEffect(() => {
     setHafta(null)
@@ -144,7 +142,7 @@ export function HaftaDetayPage({ entry, onTamamlaToggle }: HaftaDetayPageProps) 
       if (notTimerRef.current) clearTimeout(notTimerRef.current)
       notTimerRef.current = setTimeout(() => {
         setKaydedildi(true)
-        goster('Not kaydedildi', 'basari')
+        setTimeout(() => setKaydedildi(false), 2000)
       }, 800)
       getSession().then(session => {
         if (!session) return

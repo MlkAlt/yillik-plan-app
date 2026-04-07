@@ -29,7 +29,6 @@ export function UretPage({ planlar = [] }: UretPageProps) {
   const [soruTuru, setSoruTuru]     = useState('Karma')
   const [zorluk, setZorluk]         = useState('Orta')
   const [bakiye, setBakiye] = useState(0)
-  const [gonderildi, setGonderildi] = useState(false)
 
   const selectedTool = useMemo(() => ARACLAR.find(a => a.id === selectedId) ?? null, [selectedId])
   const zorluklar = [{ id: 'Kolay', emoji: '🌱' }, { id: 'Orta', emoji: '⚡' }, { id: 'Zor', emoji: '🔥' }]
@@ -57,28 +56,6 @@ export function UretPage({ planlar = [] }: UretPageProps) {
       const entry = planlar.find(p => p.sinif === sinifDeger)
       if (entry?.ders && !baglam?.kazanim) setKazanim('')
     }
-  }
-
-  if (gonderildi) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100%', padding: '40px 24px', textAlign: 'center' }}>
-        <div style={{ width: 72, height: 72, borderRadius: 20, background: 'linear-gradient(135deg, #4F6AF5, #6D28D9)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
-          <Construction size={36} color="#fff" />
-        </div>
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 800, color: 'var(--color-text1)', letterSpacing: '-0.03em', marginBottom: 8 }}>
-          Geliştirme Aşamasında
-        </h2>
-        <p style={{ fontSize: 14, color: 'var(--color-text2)', lineHeight: 1.6, maxWidth: 280, marginBottom: 32 }}>
-          AI üretim motoru hazırlanıyor. Hazır olduğunda aynı formla hemen kullanabileceksiniz.
-        </p>
-        <button
-          onClick={() => { setGonderildi(false); setSelectedId(null) }}
-          style={{ height: 48, padding: '0 28px', borderRadius: 100, background: 'var(--color-surface)', border: '1.5px solid var(--color-border)', fontSize: 15, fontWeight: 700, color: 'var(--color-text1)', cursor: 'pointer' }}
-        >
-          ← Geri Dön
-        </button>
-      </div>
-    )
   }
 
   if (selectedTool) {
@@ -200,23 +177,29 @@ export function UretPage({ planlar = [] }: UretPageProps) {
             <p style={{ fontSize: 13, color: 'var(--color-text2)', fontWeight: 500 }}>Bu üretim <strong>1 üretim hakkı</strong> kullanacak. Bakiye: <strong style={{ color: '#4F6AF5' }}>{bakiye}</strong></p>
           </div>
 
-          {/* Üret butonu */}
-          <button
-            onClick={() => {
-              if (!kazanim.trim() || (!sinif && sinifSecenekleri.length > 0)) return
-              setGonderildi(true)
-            }}
-            disabled={!kazanim.trim() || (sinifSecenekleri.length > 0 && !sinif)}
-            style={{
-              width: '100%', height: 52, borderRadius: 100,
-              background: (!kazanim.trim() || (sinifSecenekleri.length > 0 && !sinif)) ? 'var(--color-border)' : '#4F6AF5',
-              color: '#fff', border: 'none',
-              fontSize: 16, fontWeight: 700, cursor: (!kazanim.trim() || (sinifSecenekleri.length > 0 && !sinif)) ? 'not-allowed' : 'pointer',
-              transition: 'background 0.15s',
-            }}
-          >
-            {selectedTool.ad} Üret
-          </button>
+          {/* Geliştirme bildirimi */}
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            background: 'var(--color-surface)',
+            border: '1px solid var(--color-border)',
+            borderRadius: 12, padding: '10px 14px',
+          }}>
+            <Construction size={14} style={{ color: 'var(--color-text3)', flexShrink: 0 }} />
+            <p style={{ fontSize: 12, color: 'var(--color-text2)', lineHeight: 1.5 }}>
+              AI üretim motoru hazırlanıyor — form yapısı hazır, çıktı yakında gelecek.
+            </p>
+          </div>
+
+          {/* Üret butonu — disabled */}
+          <div style={{
+            height: 52, borderRadius: 100,
+            background: 'var(--color-surface)',
+            border: '1.5px solid var(--color-border)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            color: 'var(--color-text3)', fontSize: 15, fontWeight: 700,
+          }}>
+            <Construction size={16} /> Yakında Aktif
+          </div>
         </div>
       </div>
     )

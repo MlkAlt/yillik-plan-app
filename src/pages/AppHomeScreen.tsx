@@ -136,12 +136,19 @@ export function AppHomeScreen({
         <p style={{ fontSize: '14px', color: 'var(--color-text2)', lineHeight: '22px', marginBottom: '32px', maxWidth: '280px', animation: 'stagger-up 0.45s 0.18s ease-out both' }}>
           Branşınızı seçin, yıllık planınız saniyeler içinde hazırlansın.
         </p>
-        <button
+        <div
           onClick={() => setOnboardingAcik(true)}
-          style={{ height: '52px', padding: '0 32px', borderRadius: '100px', background: '#4F6AF5', color: '#fff', border: 'none', fontSize: '16px', fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 20px rgba(79,106,245,.35)', animation: 'stagger-up 0.45s 0.26s ease-out both' }}
+          style={{ background: 'var(--color-surface)', border: '1.5px dashed var(--color-border)', borderRadius: 16, padding: '16px 20px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 16, animation: 'stagger-up 0.45s 0.26s ease-out both', width: '100%', maxWidth: 340 }}
         >
-          Plan Oluştur →
-        </button>
+          <div style={{ width: 44, height: 44, borderRadius: 12, background: '#4F6AF5', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <span style={{ fontSize: 20 }}>📋</span>
+          </div>
+          <div style={{ flex: 1, textAlign: 'left' }}>
+            <p style={{ margin: 0, fontWeight: 700, fontSize: 15, color: 'var(--color-text1)' }}>İlk planını oluştur</p>
+            <p style={{ margin: '2px 0 0', fontSize: 13, color: 'var(--color-text3)' }}>Branş ve sınıflarını seç, plan hazır</p>
+          </div>
+          <span style={{ color: '#4F6AF5', fontSize: 20 }}>→</span>
+        </div>
       </div>
     )
   }

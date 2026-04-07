@@ -63,6 +63,13 @@ export function PlanPage({ entry, planlar, onSinifSec }: PlanPageProps) {
   }, [entry?.sinif])
 
   useEffect(() => {
+    const timer = setTimeout(() => {
+      bugunRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, 400)
+    return () => clearTimeout(timer)
+  }, [])
+
+  useEffect(() => {
     if (!entry) return
     try {
       const item = localStorage.getItem(StorageKeys.TAMAMLANAN_HAFTALAR)
